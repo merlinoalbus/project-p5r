@@ -450,6 +450,9 @@ import { migration354 } from './354_listino_condiviso_tolto.js';
 // 2026-11-09 (lotto L11 «Compendio e fusioni»): Confidente al massimo, carte di Apsaras e livelli del gruppo (380), date delle Persona (382)
 import { migration380 } from './380_compendio_flag_carte_livelli.js';
 import { migration382 } from './382_compendio_date_delle_persona.js';
+// 2026-11-09 (lotto L6 «Diario»): via `voce_giornata.produce_json` con controllo e archivio (362; se la migrazione utente 015 non è ancora passata la toglie la utente 69), vincolo del 1° giugno «Furto consigliato» (386)
+import { migration362 } from './362_produce_json_tolta.js';
+import { migration386 } from './386_vincolo_del_primo_giugno.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -479,4 +482,5 @@ export const migrations: Migration[] = [
   migration344, migration345, migration346,
   migration347, migration348, migration349, migration350, migration351, migration352, migration353, migration354,
   migration380, migration382,
+  migration362, migration386,
 ];

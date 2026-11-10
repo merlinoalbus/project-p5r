@@ -28,6 +28,8 @@ import { notifica } from '../../stores/notificationStore';
 import { NOME_GENERE } from '../../utils/percorso';
 import { SceltaTipoQuale, SpuntandoSuccede } from './EditorAzioneStrutturata';
 import { PostoVoce } from './PostoVoce';
+import { Ripiegabile } from '../shared/Ripiegabile';
+import { TIPI_AZIONE } from '../../../shared/effettiAzione';
 import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { STRUTTURA_VUOTA, campiCompleti, strutturaConProposta, strutturaDi } from '../../utils/azioneStrutturata';
 import { nomiEffettiDa } from '../../utils/effettoAutomatico';
@@ -75,6 +77,7 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   // come nella finestra (`Modal`): il fuoco sul campo apre la tastiera, e su tablet e telefono la tastiera copre metà del foglio;
   // il campo prende il fuoco solo da desktop (≥ 1024 px, la soglia della barra laterale)
   const largo = useMedia('(min-width: 1024px)');
+  const telefono = useMedia('(max-width: 767px)');
   const voce = soggetto.tipo === 'voce' ? soggetto.voce : null;
   const proposta = soggetto.tipo === 'voce' ? soggetto.proposta ?? null : null;
   /** Le altre voci di una fascia, nel loro ordine (senza quella che si modifica). */
@@ -156,20 +159,25 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     let registrata = false;
     // L13 (decisione 19): che cosa hanno fatto gli effetti di stato nelle partite che hanno già spuntato la voce, detto anche se la rilettura fallisce
     let esito: ReturnType<typeof notificaApplicazioni> = null;
+    // L6-03: l'avviso del server su una coppia tipo + collegamento nuova e diversa da quella attesa dal tipo (mai un rifiuto: la voce è salvata)
+    let avvisoCollegamento: string | undefined;
     try {
       let salvata: AzionePercorsoDto | null = null;
       if (voce && proposta) salvata = (await applicaPropostaConversione(proposta.id, { revisionePropostaAttesa: proposta.revisione, voce: dati }, partitaId ?? undefined)).voce;
       else if (voce) salvata = await aggiornaVoceGiornata(voce.uid, dati, partitaId ?? undefined);
-      else await creaVoceGiornata(giorno, dati, partitaId ?? undefined);
+      else salvata = await creaVoceGiornata(giorno, dati, partitaId ?? undefined);
       registrata = true;
+      avvisoCollegamento = salvata?.avvisoCollegamento;
       esito = notificaApplicazioni(salvata?.applicazioniEffetti);
       segnalaMutazioneEffetti(null);
       await onSalvato();
       notifica('success', proposta ? 'Proposta applicata: voce modificata nella guida, per tutte le partite.' : voce ? 'Voce modificata nella guida, per tutte le partite.' : 'Voce aggiunta alla guida, per tutte le partite.');
+      if (avvisoCollegamento) notifica('warning', avvisoCollegamento);
       if (esito) notifica(esito.tipo, esito.testo, esito.durata);
       onChiudi();
     } catch (err) {
       notifica('error', `${registrata ? 'Voce salvata; aggiornamento della pagina non riuscito: ' : ''}${err instanceof Error ? err.message : 'Salvataggio non riuscito.'}`);
+      if (registrata && avvisoCollegamento) notifica('warning', avvisoCollegamento);
       if (registrata && esito) notifica(esito.tipo, esito.testo, esito.durata);
       if (registrata) onChiudi();
     } finally {
@@ -189,30 +197,42 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
         <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus={largo} onChange={(e) => imposta({ testo: e.target.value })}
           placeholder={azione ? 'es. Comprare il Set per retrogaming' : 'es. Domani esami: ripassare la sera prima'} />
       </label>
-      <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Note' : 'Dettagli'}
-        <textarea className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
-      </label>
-      {azione && elenchi && <SceltaTipoQuale valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />}
+      <Segmenti etichetta="Quando" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
+      {azione && elenchi && (telefono
+        // sul telefono la griglia dei 13 tipi (cinque righe di tessere) si ripiega sul tipo scelto; per una voce nuova parte aperta
+        ? <Ripiegabile titolo="Tipo della voce" apertaDiPartenza={!voce} riepilogo={TIPI_AZIONE.find((t) => t.chiave === campi.struttura.tipo)?.nome ?? campi.struttura.tipo}>
+            <SceltaTipoQuale parte="tipo" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />
+          </Ripiegabile>
+        : <SceltaTipoQuale parte="tipo" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />)}
     </div>
   );
 
+  // L6-06: ordine dei campi — che cosa è, testo, quando, tipo (colonna sinistra); poi «Quale», gli effetti che «Quale» compila, le note, le
+  // condizioni e il posto (colonna destra; sotto i 1024 px le due colonne si dispongono una sotto l'altra, nello stesso ordine). «Quale»
+  // si richiude a scelta fatta; effetti, condizioni e posto sono ripiegati con il riepilogo: una riga ciascuno finché non si toccano
+  const nomeFascia = campi.fascia === 'giorno' ? 'di giorno' : 'di sera';
   const colonnaDestra = (
     <div className="voce-colonna">
-      {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} fatta={!!voce?.fatta} />}
+      {azione && elenchi && <SceltaTipoQuale parte="quale" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />}
+      {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} fatta={!!voce?.fatta} apertaDiPartenza={!voce || !!proposta} />}
       {azione && !elenchi && !erroreElenchi && <p className="m-0 testo-12 text-text-muted" role="status">Carico gli elenchi…</p>}
       {azione && erroreElenchi && <p className="m-0 testo-12 text-error-testo" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
+      <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Note' : 'Dettagli'}
+        <textarea className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
+      </label>
       {/* L13 (O9-3, «in tal caso viene meno la consegna»): quando la voce è dovuta, con l'editor unico delle condizioni; senza, si fa sempre.
           Con le condizioni false al giorno della voce, nella partita la voce è «Non dovuta»: non si spunta e non ferma la giornata */}
       {azione && (
-        <section className="flex min-w-0 flex-col gap-1" aria-label="Si fa solo se">
-          <h3 className="m-0 testo-13 font-semibold text-text">Si fa solo se</h3>
+        <Ripiegabile titolo="Si fa solo se"
+          riepilogo={campi.condizioni.length === 0 ? 'Nessuna condizione: la voce si fa sempre.' : `${campi.condizioni.length} ${campi.condizioni.length === 1 ? 'condizione' : 'condizioni'}: la voce è dovuta solo se valgono.`}>
           <span className="testo-12 text-text-muted text-pretty">Senza condizioni la voce si fa sempre. Con condizioni false al giorno della voce, nella partita è «Non dovuta» e non ferma la giornata.</span>
-          <CondizioniEditor condizioni={campi.condizioni} onCambia={(c) => imposta({ condizioni: c })} disabilitato={occupato} massimo={20} />
-        </section>
+          <CondizioniEditor condizioni={campi.condizioni} onCambia={(c) => imposta({ condizioni: c })} disabilitato={occupato} massimo={20} apertoDiPartenza />
+        </Ripiegabile>
       )}
-      <Segmenti etichetta="Quando" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
-      <PostoVoce altre={altre} posto={posto} testo={campi.testo.trim() || (voce ? voce.azione : 'La voce nuova')} fascia={campi.fascia} disabled={occupato}
-        onPosto={(n) => imposta({ posizione: Math.max(0, Math.min(altre.length, n)) })} />
+      <Ripiegabile titolo="Posto nella giornata" riepilogo={`Posto ${posto + 1} di ${altre.length + 1}, ${nomeFascia}.`}>
+        <PostoVoce altre={altre} posto={posto} testo={campi.testo.trim() || (voce ? voce.azione : 'La voce nuova')} fascia={campi.fascia} disabled={occupato}
+          onPosto={(n) => imposta({ posizione: Math.max(0, Math.min(altre.length, n)) })} />
+      </Ripiegabile>
     </div>
   );
 
@@ -228,6 +248,12 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
         {proposta && (
           <p className="m-0 rounded-md border border-primary p-2 testo-13 break-words" role="status">
             <strong>Proposta da completare</strong> ({proposta.certezza === 'certa' ? 'certa' : proposta.certezza === 'probabile' ? 'probabile' : 'da verificare'}): {proposta.motivo} È già applicata qui sotto: rivedila, completa i dati che mancano e salva.
+          </p>
+        )}
+        {/* L6-02: una voce del Diario validato già spuntata in una partita: modificarla tocca spunte già fatte */}
+        {voce?.validataConSpunte && (
+          <p className="m-0 rounded-md border border-warning p-2 testo-13 text-pretty" role="note">
+            <strong>Voce del Diario validato, già spuntata in una partita:</strong> modificarla tocca spunte già fatte.
           </p>
         )}
         <div className={azione ? 'voce-colonne' : 'flex flex-col gap-3'}>

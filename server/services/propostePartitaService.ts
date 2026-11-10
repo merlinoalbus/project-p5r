@@ -613,7 +613,7 @@ export interface PortePropostePartita {
   applicaDote:(partitaId:number,chiave:DoteChiave,delta:number)=>void;
   applicaYen:(partitaId:number,delta:number)=>void;
   applicaPuntiPesca?:(partitaId:number,delta:number)=>void;
-  applicaEffettoStorico?:(partitaId:number,proposta:PropostaPartitaDto,acquisto:NuovaRegistrazioneAcquisto|undefined,revisioneAcquistiAttesa:string|undefined,pesca?:NuovaSessionePesca,revisionePescaAttesa?:string)=>void;
+  applicaEffettoStorico?:(partitaId:number,proposta:PropostaPartitaDto,acquisto:NuovaRegistrazioneAcquisto|undefined,revisioneAcquistiAttesa:string|undefined,pesca?:NuovaSessionePesca,revisionePescaAttesa?:string)=>string[]|void;
 }
 function valore(partita:number,tipo:'dote'|'yen'|'punti-pesca',chiave:string):number {
   if(tipo==='yen')return (prepared('SELECT yen FROM utente.partita WHERE id=?').get(partita) as {yen:number}).yen;
@@ -695,6 +695,7 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     }
     // decisione A1 (2026-10-25): l'avanzamento si valuta una volta sola, alla fine, dopo tutte le riconciliazioni (le chiusure automatiche delle cause
     // riconciliate qui sotto si raccolgono e si valutano insieme alle proposte decise: niente avanzamento a metà con una decisione nuova che sta per aprirsi)
+    const avvisiRaccordo:string[]=[];
     const {valore:esitoDecisione,avanzamento:esplicito}=avanzaUnaVoltaAllaFine(partita,()=>{
     const p=prepara(partita,richiesta);
     if(p.revisioneProposteAttesa!==r.revisioneProposteAttesa)throw httpErrors.conflict('proposte-cambiate','Il gruppo, la causa o i valori sono cambiati: rileggi l’anteprima.');
@@ -725,7 +726,7 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
         else if(r.decisione.tipo==='gia-conteggiata')deltaRiconosciuto=Math.sign(q.delta)*r.decisione.quantita;
         else if(r.decisione.tipo==='applica-effetto'){
           if(!porte?.applicaEffettoStorico)throw httpErrors.conflict('dominio-non-collegato','Il raccordo canonico non è disponibile.');
-          porte.applicaEffettoStorico(partita,item,r.decisione.acquisto,r.decisione.revisioneAcquistiAttesa,r.decisione.pesca,r.decisione.revisionePescaAttesa);
+          avvisiRaccordo.push(...(porte.applicaEffettoStorico(partita,item,r.decisione.acquisto,r.decisione.revisioneAcquistiAttesa,r.decisione.pesca,r.decisione.revisionePescaAttesa)??[]));
         }
         const gruppo=p.movimenti.find((m)=>m.tipo===q.tipo&&m.chiave===q.chiave),k=`${q.tipo}\0${q.chiave}`,prima=cursori.get(k);
         const movimento=gruppo&&prima!==undefined?{tipo:gruppo.tipo,chiave:gruppo.chiave,prima,delta:deltaApplicato,dopo:prima+deltaApplicato}:null;
@@ -763,6 +764,6 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     // giorno dopo) nella stessa transazione, e la risposta lo dice. L'avanzamento non entra nella ricevuta salvata: una ripetizione del gesto la rende com'era (il client, che non trova l'esito, rilegge la partita e si allinea da solo: `giornoAvanzato.ts`).
     // (l'esito ricordato dalla richiesta si preleva comunque, così non resta nel contesto: c'è solo se un percorso non raccolto ha già fatto avanzare la partita)
     const registrato=prelevaAvanzamentoValido(partita),avanzamento=esplicito??registrato;
-    return avanzamento?{...esitoDecisione,...avanzamento}:esitoDecisione;
+    return {...esitoDecisione,...(avanzamento??{}),...(avvisiRaccordo.length?{avvisi:avvisiRaccordo}:{})};
   })();
 }

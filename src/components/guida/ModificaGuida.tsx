@@ -28,6 +28,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { Selettore } from '../shared/Selettore';
+import { TestoCheCresce } from '../shared/Campo';
 import { Blocco, CampoElenco, Griglia } from './moduli/campi';
 import { dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate } from '../../../shared/condizioniSpillo';
 
@@ -227,7 +228,9 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
         return (
           <label key={c.percorso} className="editor-mappa__campo sm:col-span-2">
             {c.etichetta}
-            <textarea className="form-input min-h-[88px]" rows={3} maxLength={c.max ?? 6000} disabled={occupato} value={typeof v === 'string' ? v : ''} onChange={(e) => imposta(c.percorso, e.target.value)} />
+            {/* L6-07 (P §D4): l'area di testo cresce con ciò che contiene, come ogni area di testo dei moduli (`TestoCheCresce`): niente riquadro
+                che scorre da 86 px dentro la finestra (il riassunto di una settimana a 375 px ne misurava 313) */}
+            <TestoCheCresce righe={3} massimo={c.max ?? 6000} disabilitato={occupato} valore={typeof v === 'string' ? v : ''} onCambia={(testo) => imposta(c.percorso, testo)} />
           </label>
         );
       case 'testo':

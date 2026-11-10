@@ -16,7 +16,8 @@
 //       · le Doti (di una Dote, di una lettura, di un turno, dell'incontro) solo per la parte che le proposte «Applica» hanno messo nella
 //         partita (`dotiApplicate`): togliendo la spunta l'applicato torna con la proposta inversa, l'aperta si chiude da sola e non aveva messo
 //         niente, la scartata nemmeno. Stessa regola degli yen rimasti alla proposta (`fraseYenProposti`);
-//       · le letture no: togliendo la spunta non tornano indietro (`annullaEffettiAzione`);
+//       · le letture solo se l'avanzamento della partita vale ancora quello che la spunta aveva scritto (`annullaEffettiAzione`): tornano
+//         com'erano; se è cambiato dopo restano, qui non compaiono e l'annullo lo dice con un avviso;
 //       · la consumazione e la sessione di pesca solo se la voce è l'unica fonte che le tiene (`fonteUnica`): con un'altra fonte restano;
 //   - gli effetti di stato segnati dalla spunta (`effettiDiStatoApplicati`): Persona (con l'esemplare in scorta, se è ancora com'era), trofeo,
 //     sblocco, oggetto, evento di storia, domanda, cruciverba, Richiesta, articolo, invito. Non quelli che c'erano già, né quelli che un'altra
@@ -32,6 +33,7 @@
 import { prepared } from '../db/dbService.js';
 import { HttpError } from '../utils/httpError.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
+import { avanzamentoLettura } from './attivitaService.js';
 import { articoloConNome, nomiFraseEffetto } from './azioniStrutturateService.js';
 import { effettiDiStatoApplicati } from './effettiDiStatoService.js';
 import { fortunaAccesaDallaVoce } from './fortunaService.js';
@@ -83,11 +85,24 @@ function incontroDaDire(p: number, inc: NonNullable<EffettiAzioneDto['incontro']
   return { ...resto, doti: [], ...(s.rango && rango ? { rango } : {}) };
 }
 
-/** Ciò che di una ricevuta di punti (Dote, lettura, turno, «contesto») togliendo la spunta torna com'era. Le letture no (restano); i turni sì,
- *  senza le loro Doti (dette fra le applicate) e senza la paga (gli yen davvero mossi hanno la loro riga). */
+/** Le letture della ricevuta che togliendo la spunta tornano a `prima`: quelle che hanno avanzato (`dopo` > `prima`) e il cui avanzamento nella
+ *  partita vale ancora `dopo` (`annullaEffettiAzione`: altrimenti restano). Senza le loro Doti (dette fra le applicate). */
+function lettureCheTornano(p: number, l: EffettiAzioneDto): NonNullable<EffettiAzioneDto['letture']> {
+  return (l.letture ?? []).filter((x) => {
+    if (x.dopo <= x.prima) return false;
+    try { return avanzamentoLettura(p, x.categoria, x.chiave).avanzamento === x.dopo; }
+    catch (e) { if (e instanceof HttpError && e.status === 404) return false; throw e; }
+  }).map(({ doti: _doti, ...x }) => x);
+}
+
+/** Ciò che di una ricevuta di punti (Dote, lettura, turno, «contesto») togliendo la spunta torna com'era. Le letture solo se l'avanzamento vale
+ *  ancora quello della spunta (`lettureCheTornano`); i turni sì, senza le loro Doti (dette fra le applicate) e senza la paga (gli yen davvero
+ *  mossi hanno la loro riga). */
 function annullabile(p: number, r: ReceiptEffettoVoceDto, l: EffettiAzioneDto): EffettiAzioneDto {
   const incontro = l.incontro ? incontroDaDire(p, l.incontro) : undefined;
+  const letture = lettureCheTornano(p, l);
   return {
+    ...(letture.length ? { letture } : {}),
     doti: dotiDaDire(l, dotiApplicate(p, `${r.voceUid}:${r.effettoUid}`)),
     // i punti del Confidente sono una differenza arrotondata: a zero non hanno messo niente nella partita (niente «+0 punti»)
     confidente: l.confidente && l.confidente.punti > 0 ? l.confidente : null,

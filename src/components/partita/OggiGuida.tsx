@@ -29,7 +29,7 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
   const { giorno: g, indice } = oggi;
   if (!g || !indice) return null;
   const colonna = (
-    <div className={`flex flex-col gap-2 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>
+    <div className={`oggi-guida-colonna flex flex-col gap-2 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>
       {/* L10-02 (schizzo approvato, 2026-11-01): nella scheda «Oggi» della Partita, sotto i 768 px, «Guida completa» è un pulsante-icona da
           44 × 44 (nome accessibile e suggerimento «Guida completa») e la riga dei giorni sta su una linea sola (`.oggi-partita`, tailwind.css) */}
       <div className="fila-giorni-oggi flex flex-wrap items-center shrink-0">
@@ -37,7 +37,10 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
         <span className="font-display testo-20 uppercase">{dataGiocoTesto(g.giorno)}</span>
         <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.successivo} onClick={() => oggi.vaiAlGiorno(g.successivo)} aria-label="Giorno successivo"><IconChevronRight size={16} /></button>
         {g.dataCorrente === g.giorno
-          ? <span className="chip chip--attivo">Oggi nella partita</span>
+          ? (pannello
+            // Home: sotto i 768 px «Oggi» (la riga dei giorni resta su una linea anche con «20 novembre»); il nome intero resta per i lettori di schermo
+            ? <span className="chip chip--attivo" title="Oggi nella partita"><span aria-hidden="true" className="md:hidden">Oggi</span><span className="max-md:sr-only">Oggi nella partita</span></span>
+            : <span className="chip chip--attivo">Oggi nella partita</span>)
           : <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Segna come giorno corrente" disabled={oggi.occupato} onClick={() => void oggi.segnaCorrente()} />}
         {indice.dataCorrente && indice.dataCorrente !== g.giorno && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Vai a oggi" onClick={() => oggi.vaiAlGiorno(indice.dataCorrente)} />}
         <CollegamentoVisivo to={`/guida/percorso/${g.giorno}`} tono="fantasma" compatto className="pulsante-guida-completa ml-auto" icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida completa"
@@ -72,7 +75,7 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
         )}
       </div>
       <div className={riempi ? 'md:min-h-0 md:area-scorrevole md:p-1' : ''}>
-        <GiornoGuida onGiornataModificata={() => oggi.ricarica()} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} richiestaEvidenziata={oggi.mappa.richiesta} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} scorreDentro={!!riempi} />
+        <GiornoGuida onGiornataModificata={() => oggi.ricarica()} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} richiestaEvidenziata={oggi.mappa.richiesta} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} scorreDentro={!!riempi} inAlto={pannello} />
       </div>
     </div>
   );

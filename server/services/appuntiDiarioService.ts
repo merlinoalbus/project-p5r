@@ -43,7 +43,7 @@ import {
 import type { FasciaGioco, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 
 const TIPI_RIF = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave));
-const GENERI = new Set(['azione', 'promemoria', 'evento', 'scadenza']);
+const GENERI = new Set(['azione', 'promemoria']);
 const nuovoId = (): string => randomBytes(16).toString('hex');
 const nomeFascia = (f: FasciaGioco): string => (f === 'sera' ? 'di sera' : 'di giorno');
 /** «giorno 18 aprile»: con «giorno» davanti la preposizione non cambia con il numero («del giorno 11 aprile»). */
@@ -346,7 +346,7 @@ function inserisciCopia(
   fascia: FasciaGioco, ordine: number, opz: { verifica: boolean; operazione: string }
 ): { uid: string; mappaEffetti: Record<string, string> } {
   const uid = nuovoId(), adesso = nowIso();
-  // `produce_json` resta al suo valore predefinito: gli effetti stanno solo in `voce_effetto` (come in `creaVoce`); senza `indice_guida`
+  // gli effetti stanno solo in `voce_effetto` (come in `creaVoce`); senza `indice_guida`
   // (la copia non discende dalla guida di quel giorno) e senza il segno «da rivedere». Il nome del collegamento si copia SEMPRE: la guida
   // ha voci col solo nome, senza collegamento («Cammino del Santo Graal»), e un collegamento che non esiste più lascia il suo nome (il
   // rilievo `riferimento-non-valido` lo dice prima)

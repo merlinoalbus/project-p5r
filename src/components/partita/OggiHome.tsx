@@ -105,7 +105,8 @@ export function OggiHome({ partita, testa }: Props) {
               la riga non va a capo (tre pulsanti da 44 px diventerebbero tre righe e l'intestazione supererebbe il 30%): scorre di lato,
               dal tablet in su `FilaScorrevole` torna a capo come prima. */}
           <FilaScorrevole className="items-center gap-x-3 gap-y-1 shrink-0">
-            <h2 className="m-0 font-display testo-20 uppercase">Oggi</h2>
+            {/* L6-07: il titolo resta per i lettori di schermo (struttura della pagina), ma non occupa più una riga: il nome del giorno e «Oggi nella partita» stanno già nella riga dei giorni */}
+            <h2 className="m-0 sr-only">Oggi</h2>
             {guidaPronta && oggi.giorno && <ScuolaOggi partita={partita} giorno={oggi.giorno.giorno} soloDelGiorno />}
             {/* L13 (ondata 3): le Richieste accettate e quelle in scadenza, sulla stessa riga: l'intestazione non cresce */}
             <RichiesteOggi partita={partita} />

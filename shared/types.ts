@@ -1207,6 +1207,8 @@ export interface DoteDaSegnareDto {
 }
 
 export interface DomandeDto {
+  /** Solo togliendo la spunta dalla Guida: ciò che l'annullo della voce collegata non ha potuto riportare com'era. */
+  avvisiSpunta?: string[];
   /** Solo nella risposta di una spunta: la nota di Conoscenza della risposta giusta, da segnare nelle Doti (assente quando la spunta è passata dalla voce del Diario: lì la Conoscenza è un «Applica»). */
   daSegnare?: DoteDaSegnareDto[];
   /** Solo nella risposta di una spunta dalla Guida che, passando dalla voce del Diario, ha completato la giornata: la partita è passata al giorno dopo. */
@@ -1524,7 +1526,7 @@ export interface StatoAzioneDto {
 export type GenereVoce = 'azione' | 'promemoria';
 
 /**
- * Una voce della giornata (`voce_giornata`, file di gioco, dalla migrazione 092): azione della guida, cosa da fare o evento
+ * Una voce della giornata (`voce_giornata`, file di gioco, dalla migrazione 092): azione della guida, cosa da fare o promemoria
  * aggiunti dall'utente sono la stessa cosa e sono canone, per tutte le partite (richiesta dell'utente, 2026-09-30). Le voci di
  * una fascia arrivano nel loro ordine esatto.
  */
@@ -1542,6 +1544,13 @@ export interface DialogoVoceDto {
 export interface ApplicatoDallaSpuntaDto { id: string; testo: string; applicatoIl: string }
 
 export interface AzionePercorsoDto {
+  /** L6-02: vero solo se la voce è di un giorno del diario validato (fino a `ULTIMO_GIORNO_VALIDATO`) E almeno una partita ha la sua spunta:
+   *  modificarla o eliminarla tocca spunte già fatte, e l'editor e la conferma d'eliminazione lo dicono. Il server la scrive sempre
+   *  (opzionale solo perché le voci costruite a mano, nei test del client, non la portano: assente vale falso). */
+  validataConSpunte?: boolean;
+  /** L6-03: solo nella risposta di creazione e modifica, quando tipo e collegamento formano una coppia nuova diversa da quella attesa dal tipo
+   *  (`RIFERIMENTO_DI_TIPO`): un avviso in italiano, mai un rifiuto; la voce è salvata com'è. Una voce salvata senza cambiare tipo né collegamento non lo porta. */
+  avvisoCollegamento?: string;
   /** Solo riferimenti strutturati già presenti: nessuna riscrittura del testo o classificazione per somiglianza. */
   oggettoRiferimento?: RiferimentoOggettoDto | null;
   oggettiCitati?: RiferimentoOggettoDto[];
@@ -1560,7 +1569,7 @@ export interface AzionePercorsoDto {
   giorno: string;
   fascia: 'giorno' | 'sera';
   genere: GenereVoce;
-  /** Il testo della voce (il titolo, per un evento). */
+  /** Il testo della voce (il titolo, per un promemoria). */
   azione: string;
   tipo: 'confidente' | 'dote' | 'palazzo' | 'richiesta' | 'acquisto' | 'lavoro' | 'libro' | 'dvd' | 'attivita' | 'esame' | 'trama' | 'velluto' | 'altro';
   riferimento: RiferimentoAzioneDto | null;
@@ -1622,7 +1631,7 @@ export interface AzionePercorsoDto {
   scelteEsito?: SceltaEsitoVoceDto[];
   /** Fatta nella partita. */
   fatta: boolean;
-  /** Ciò che la spunta ha applicato (dagli effetti `produce` e dalle note del Confidente): Doti, punti e turni si annullano togliendola, le letture restano. */
+  /** Ciò che la spunta ha applicato (dagli effetti `produce` e dalle note del Confidente): punti, turni e letture si annullano togliendola; le Doti restano a mano. */
   effetti: EffettiAzioneDto | null;
   /** Stato rispetto alla partita (solo con partita): consigliata/bloccata/neutra con motivo. */
   stato: StatoAzioneDto | null;
@@ -1877,7 +1886,7 @@ export interface PercorsoGiornoDto {
   precedente: string | null;
   successivo: string | null;
   dataCorrente: string | null;
-  /** Azioni fatte nella partita (eventi, scadenze e promemoria non si spuntano e non contano). */
+  /** Azioni fatte nella partita (i promemoria non si spuntano e non contano). */
   fatte: number;
   /** Con una partita: il meteo del giorno nella partita, di giorno e di sera (Partita → Oggi). */
   meteoPartita: MeteoGiornoDto | null;
@@ -2020,6 +2029,8 @@ export interface RicercaArticoliDto {
 // ---- Cruciverba di Leblanc (Fase 7.5) ----
 
 export interface CruciverbaDto {
+  /** Solo togliendo la spunta dalla Guida: ciò che l'annullo della voce collegata non ha potuto riportare com'era. */
+  avvisiSpunta?: string[];
   /** Solo nella risposta di una spunta: la nota di Conoscenza del cruciverba, da segnare nelle Doti. */
   daSegnare?: DoteDaSegnareDto[];
   /** 'MM-GG' del calendario di gioco. */

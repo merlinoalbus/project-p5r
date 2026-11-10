@@ -87,9 +87,10 @@ function EditorGiornoReale({ data, onChiudi, onSalvato }: { data: string; onChiu
           </SezioneCampi>
           <SezioneCampi titolo="Il giorno">
             <CampoTesto etichetta="Trama del giorno" tipo="lungo" righe={4} valore={campi.trama} massimo={4000} disabilitato={occupato} onCambia={(v) => imposta({ trama: v })} />
-            <CampoElenco etichetta="Vincoli" voci={campi.vincoli} onCambia={(v) => imposta({ vincoli: v })} disabilitato={occupato} />
+            {/* L6-07: «Vincoli» e «Avvisi» sono due elenchi corti: da 768 px stanno uno accanto all'altro (prima uno sotto l'altro, 112 px ciascuno) */}
+            <CampoElenco affiancabile etichetta="Vincoli" voci={campi.vincoli} onCambia={(v) => imposta({ vincoli: v })} disabilitato={occupato} />
             {/* L8-02: gli avvisi del giorno (le frasi sotto trama e vincoli nella scheda), un solo punto di modifica, come i vincoli */}
-            <CampoElenco etichetta="Avvisi" voci={campi.avvisi} onCambia={(v) => imposta({ avvisi: v })} disabilitato={occupato} />
+            <CampoElenco affiancabile etichetta="Avvisi" voci={campi.avvisi} onCambia={(v) => imposta({ avvisi: v })} disabilitato={occupato} />
           </SezioneCampi>
         </>
       )}

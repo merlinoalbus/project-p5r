@@ -348,7 +348,13 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - La giornata della guida è canone, in ordine esatto; le correzioni alle voci valgono per tutte le partite. Le date dei Palazzi seguono
   il percorso della guida italiana, con nota della differenza dalle date Royal. **(24/10)**
 - La voce è l'unico gesto che produce effetti sulla partita; ciò che una voce ha applicato si toglie togliendo la spunta (letture e
-  visioni comprese). La spunta di una voce di Palazzo non segna i passi (restano Entra/Esci).
+  visioni comprese): una lettura torna al valore di prima solo se vale ancora quello scritto dalla spunta, altrimenti resta e la spunta lo
+  dice; le Doti restano a mano e il loro promemoria se ne va. La spunta di una voce di Palazzo non segna i passi (restano Entra/Esci).
+- Un giorno è «coperto» se ha almeno una voce: si calcola, la colonna `giorno.coperto` non si legge più.
+- Il server non rifiuta una coppia tipo/collegamento fuori dalla regola, avvisa solo se è nuova: le voci-eccezione già salvate restano com'erano.
+- Una voce del Diario validato già spuntata dice, nell'editor e nella conferma d'eliminazione, che modificarla tocca quelle spunte.
+- Nella Home la prima casella del giorno sta entro la piega a ogni formato: trama, vincoli e avvisi si ripiegano dietro la freccia della scheda,
+  che ne dice il numero; il Diario e la pagina Partita mostrano la scheda per intero.
 - Gli effetti di una voce sono un solo elenco, tutti allo stesso livello, con un editor per tipo. Tipi di effetto anche per yen,
   oggetto ricevuto, trofeo, sblocco di una Richiesta o di un lavoro, Persona (solo Compendio o anche scorta), Persona tolta, punti del
   Confidente in note, uscita di un oggetto (restituito o venduto).

@@ -80,6 +80,18 @@ function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]):
   }
 }
 
+/**
+ * L6-08: la migrazione utente 015, registrata e non modificabile, prepara SQL su `main.voce_giornata.produce_json`. Un file delle partite nuovo accanto a
+ * un file di gioco che quella colonna non l'ha più (la 362 l'ha tolta) non partirebbe: la colonna torna vuota solo per quel passaggio, e la utente 69 la
+ * toglie di nuovo subito dopo la 015. Le istanze con le partite già oltre la 15 non passano mai di qui.
+ */
+function rimettiProduceJsonPerLaUtente015(db: AppDatabase, listaUtente: Migration[]): void {
+  if (!listaUtente.some((m) => m.id === 15) || !listaUtente.some((m) => m.id === 69)) return;
+  if ((db.pragma('utente.user_version', { simple: true }) as number) >= 15) return;
+  const colonne = db.pragma('main.table_info(voce_giornata)') as Array<{ name: string }>;
+  if (colonne.length > 0 && !colonne.some((c) => c.name === 'produce_json')) db.exec(`ALTER TABLE main.voce_giornata ADD COLUMN produce_json TEXT NOT NULL DEFAULT '[]'`);
+}
+
 /** Le migrazioni dei dati di gioco (`main`), poi quelle delle partite (`utente`). */
 export function runMigrations(db: AppDatabase, list: Migration[] = allMigrations, listaUtente: Migration[] = allUtente, origine: OrigineContinuita = 'continuita-migrazione'): void {
   const continuita = listaUtente.some(m => m.id === 30 && m.name === 'continuita_acquisti');
@@ -89,6 +101,7 @@ export function runMigrations(db: AppDatabase, list: Migration[] = allMigrations
     if ((db.pragma('utente.user_version', { simple: true }) as number) < 30) preparaContinuitaLegacy(db, origine);
   }
   applica(db, 'main', list);
+  rimettiProduceJsonPerLaUtente015(db, listaUtente);
   applica(db, 'utente', listaUtente);
   // La verifica dell'archivio storico degli acquisti gira solo dentro la migrazione utente 030 che lo crea (`completaContinuitaLegacy`),
   // non a ogni avvio: un archivio che non torna non deve impedire al server di partire (decisione dell'utente: «va bene che giri solo

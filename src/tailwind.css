@@ -1784,6 +1784,8 @@
     color: var(--color-text);
     gap: 5px;
   }
+  /* Nella Home il distintivo ha il testo minimo di 12 px (radice al 93,75%) */
+  .home-griglia .conteggio-pulsante { font-size: 0.8rem; }
   /* Il numero su un pulsante a sola icona (le ricevute della spunta): un distintivo nell'angolo in alto a destra, dentro i 44 px del
      bersaglio (`.btn` è già `position: relative`), che non riceve il tocco; il nome accessibile del pulsante dice già il numero, quindi il
      distintivo è nascosto ai lettori */
@@ -1823,6 +1825,27 @@
     .oggi-partita .pulsante-guida-completa .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     .oggi-partita .sezione-fascia { padding: 8px; }
   }
+  /* L6-07: anche nella Home, sotto i 768 px, «Guida completa» è il pulsante-icona da 44 × 44 (la riga dei giorni sta su una linea sola: 44 px, non 94)
+     e «Aggiungi» di ogni fascia è un'icona (la riga «Di giorno · Adesso · 2 su 5 · Aggiungi» sta su una linea sola: 44 px, non 96); la scritta resta per i
+     lettori di schermo (nome accessibile) */
+  @media (max-width: 767px) {
+    .home-griglia .fila-giorni-oggi { gap: 0; }
+    .home-griglia .fila-giorni-oggi .chip { padding-inline: 8px; }
+    .home-griglia .pulsante-guida-completa, .home-griglia .sezione-fascia .aggiungi-voce { width: 44px; padding: 0; gap: 0; justify-content: center; }
+    .home-griglia .pulsante-guida-completa .btn-visivo__testo, .home-griglia .sezione-fascia .aggiungi-voce .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .home-griglia .sezione-fascia { padding: 8px; }
+  }
+  /* guida e mappa affiancate in una colonna stretta (da 768 a 1279 px; a schede la guida è larga): «Guida completa» è l'icona anche lì, o la riga dei giorni va a capo (94 px) */
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .home-griglia:not(.home-griglia--a-schede) .pulsante-guida-completa { width: 44px; padding: 0; gap: 0; justify-content: center; }
+    .home-griglia:not(.home-griglia--a-schede) .pulsante-guida-completa .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  }
+  /* la scheda del giorno più bassa della Home (`GiornoGuida` con `inAlto`) */
+  .card.scheda-giorno--in-alto { padding: 8px 12px; }
+  .scheda-giorno--in-alto .chip.touch { padding-inline: 6px; }
+  /* «Copia o sposta voci» è un'icona da 44 × 44 su ogni formato (nome accessibile intatto): libera ~150 px alla trama accanto */
+  .scheda-giorno--in-alto .copia-voci { width: 44px; padding: 0; gap: 0; justify-content: center; }
+  .scheda-giorno--in-alto .copia-voci .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .momento-meteo__fascia { justify-content: center; gap: 4px; padding-inline: 8px; font-size: var(--testo-13); white-space: nowrap; flex-shrink: 0; }
   .momento-meteo__separatore { width: 1px; align-self: stretch; margin-block: 6px; background: var(--color-border); }
   .meteo-fascia { display: grid; flex-shrink: 0; grid-template-columns: repeat(4, 44px); gap: 2px; }
@@ -1867,6 +1890,15 @@
   .home-schede { grid-area: schede; display: flex; gap: 6px; min-width: 0; }
   .home-schede > .chip { flex: 1 1 0; justify-content: center; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .home-griglia--a-schede { grid-template-columns: minmax(0, 1fr); grid-template-areas: "carta" "schede" "contenuto"; }
+  /* L6-07: sul telefono gli stacchi fra i pezzi sopra la prima voce del giorno sono più corti (scheda della partita, schede, guida: 8 px invece di 12;
+     righe della guida: 4 invece di 8; sezione dei collegamenti: 4 invece di 6): la prima casella deve stare sopra la barra di navigazione */
+  @media (max-width: 767px) {
+    .home-griglia { gap: 8px; }
+    .home-griglia .home-oggi { gap: 4px; }
+    .home-griglia .oggi-guida-colonna { gap: 4px; }
+    .home-griglia .scheda-giorno--in-alto { padding-block: 6px; }
+    .home-griglia .scheda-giorno--in-alto > div:first-child { row-gap: 2px; }
+  }
   .home-griglia--a-schede .home-oggi, .home-griglia--a-schede .home-mappa { grid-area: contenuto; }
   .home-griglia--a-schede .home-mappa > :last-child { height: min(62dvh, 560px); min-height: 280px; }
   /* la disposizione che riempie la schermata (da 1024 × 1150): la guida del giorno in un'area interna alta almeno 400 px, la mappa fino in fondo */
@@ -1933,13 +1965,18 @@
   .home-carta__riga { display: flex; align-items: center; gap: 14px; }
   .home-carta__corpo { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 auto; }
   .home-carta__testa { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: nowrap; }
-  .home-carta__stella { display: block; flex: 0 0 auto; width: clamp(104px, 16vh, 132px); aspect-ratio: 1 / 1; }
+  .home-carta__stella { display: block; flex: 0 0 auto; width: clamp(88px, 13vh, 120px); aspect-ratio: 1 / 1; }
+  /* L6-07: gli Arcani potenziati stanno sulla riga del titolo della partita (da 768 px), in una fila che scorre */
+  .home-carta__arcani { flex: 1 1 0; min-width: 0; }
+  /* una riga sola, senza la barra sottile sotto (14 px in più): la fila scorre col gesto e la sfumatura sul bordo dice che continua */
+  .home-carta__arcani .fila-scorrevole--sempre { padding-bottom: 0; scrollbar-width: none; }
+  .home-carta__arcani .fila-scorrevole--sempre::-webkit-scrollbar { display: none; }
   /* il rientro lascia dentro il riquadro le targhette dei vertici, che escono dal poligono di circa un 15% della sua larghezza */
   .home-carta__stella-interno { width: 100%; height: 100%; padding: 14%; box-sizing: border-box; }
   /* 2026-10-24 (lotto A): le sei tessere vanno a capo invece di scorrere nascoste — in una colonna da 640 px «Scorta» non si
      vedeva mai, nemmeno a 1440 px con mezza scheda vuota, e niente diceva che ce n'era dell'altro */
   .home-doti { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; max-width: 760px; min-width: 0; }
-  .home-doti .kpi-tile--compatto { padding: 4px 10px; gap: 1px; }
+  .home-doti .kpi-tile--compatto { padding: 4px 8px; gap: 1px; }
   .home-doti .kpi-label { white-space: nowrap; overflow-wrap: normal; hyphens: none; }
   .home-fila { align-items: center; min-width: 0; }
   .home-fila > * { white-space: nowrap; }
@@ -2785,11 +2822,30 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .quale-tessera--attiva { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-tertiary)); font-weight: 700; box-shadow: inset 0 0 0 1px var(--color-primary); }
 .quale-tessera__figura { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; line-height: 0; }
 .quale-tessera__dettaglio { font-size: var(--testo-12); font-weight: 400; color: var(--color-text-muted); }
+.quale-scelta__figura { display: inline-flex; flex: none; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; line-height: 0; }
 .quale-ritratto { display: inline-block; width: 44px; height: 58px; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-sm, 4px); background: var(--color-bg-secondary); }
-/* il riquadro «Spuntando succede» e le file di scelta brevi (note ♪, rango atteso, sessioni) */
-.effetto-riquadro { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 10px; border-radius: var(--radius-md);
-  border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
-.effetto-riquadro__titolo { font-family: var(--font-display); font-size: var(--testo-17); line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary-testo); }
+/* sezione ripiegabile dell'editor della voce (L6-06): titolo-pulsante con la freccia, riepilogo a sezione chiusa */
+.ripiegabile { display: flex; flex-direction: column; min-width: 0; }
+.ripiegabile__corpo { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding-top: 4px; }
+.ripiegabile__interruttore { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 2px 8px; width: 100%; min-width: 0; min-height: 44px; padding: 2px 4px; border: 0; border-radius: var(--radius-sm, 4px);
+  background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ripiegabile__interruttore:disabled { cursor: default; }
+.ripiegabile__interruttore:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.ripiegabile__freccia { display: inline-flex; flex: none; color: var(--color-text-muted); transition-property: transform, color; transition-duration: 150ms; transition-timing-function: ease-out; }
+.ripiegabile__interruttore[aria-expanded="false"] .ripiegabile__freccia { transform: rotate(-90deg); }
+.ripiegabile__interruttore:hover:not(:disabled) .ripiegabile__freccia { color: var(--color-text); }
+.ripiegabile__interruttore:disabled .ripiegabile__freccia { opacity: .4; }
+.ripiegabile__nome { flex: none; font-size: var(--testo-13); font-weight: 600; color: var(--color-text); }
+/* il riepilogo sta accanto al titolo se c'è posto (almeno 14 rem), altrimenti va a capo sotto di lui */
+.ripiegabile__riepilogo { flex: 1 1 14rem; min-width: 0; font-size: var(--testo-12); font-weight: 400; line-height: 1.3; color: var(--color-text-secondary); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.ripiegabile--semplice { border-top: 1px solid var(--color-border-light); padding-top: 2px; }
+.ripiegabile--riquadro { padding: 2px 10px 10px; border-radius: var(--radius-md); border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
+.ripiegabile--riquadro .ripiegabile__interruttore { padding-inline: 0; }
+.ripiegabile--riquadro .ripiegabile__nome { font-family: var(--font-display); font-size: var(--testo-17); font-weight: 400; line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary-testo); }
+@media (prefers-reduced-motion: reduce) { .ripiegabile__freccia { transition: none; } }
+/* le file di scelta brevi (note ♪, rango atteso, sessioni) */
 .fila-scelta { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .fila-scelta__voce { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 10px; border: 1px solid var(--color-border);
   border-radius: var(--radius-sm, 4px); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-14); cursor: pointer; }
@@ -2886,6 +2942,12 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
      larghe della loro colonna, si sovrapponevano l'una all'altra anche al 100% */
   .home-doti .kpi-tile--compatto { padding: 4px 8px; min-width: 0; }
   .home-doti .kpi-label { text-transform: none; letter-spacing: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* L6-07: sul telefono le sei tessere stanno in due file da tre (prima tre file da due: 162 px, ora ~106); al testo ingrandito l'etichetta
+     finisce in «…» con il nome intero nel suggerimento, come sopra */
+  @media (max-width: 767px) {
+    .home-doti { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .home-doti .kpi-tile--compatto { padding-block: 2px; }
+  }
   .home-arcani-vuoto { line-height: 1.35; }
   /* le targhette dei vertici della stella crescono con il testo e al 125% uscivano di ~35 px sopra le tessere accanto: il
      margine laterale cresce con loro (0 al 100%, 32 px al 125%) */
