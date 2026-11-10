@@ -117,7 +117,7 @@ export function NegozioPage() {
             </div>
             <div className="negozio-merce">
               {/* L5: lo stesso listino della pagina del luogo */}
-              <ListinoNegozio negozio={n} partitaId={partitaId} versione={versione} onModifica={apriArticolo} onRipristinato={() => void dati.ricarica()}
+              <ListinoNegozio key={`${n.chiave}|${partitaId ?? ''}`} negozio={n} partitaId={partitaId} versione={versione} onModifica={apriArticolo} onRipristinato={() => void dati.ricarica()}
                 onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, articoliElenco: attuale.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: attuale.articoliElenco.filter((x) => compratoNelCiclo(x.chiave === a.chiave ? a : x)).length }))} />
             </div>
           </div>

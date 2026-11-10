@@ -3,10 +3,10 @@
 // affinità
 // ============================================================
 //
-// L10-04 (schizzo approvato): la piastrella è orizzontale, alta circa 118 px — arte da 64 px a sinistra con il cartiglio rosso del
-// livello, a destra nome, arcano, badge e i segni della partita («In scorta · Liv. N» in oro, «Nel Registro · Liv. N» in rosso), sotto
-// le dieci affinità su una fila (due file di cinque dove la piastrella è stretta). Prima era alta 416 px con l'arte da 150: a 1280×689
-// ne entravano 4 intere, ora 9. Sul telefono resta la riga (`riga`), con gli stessi segni.
+// La piastrella è orizzontale: arte da 96 px a sinistra con il cartiglio rosso del livello, a destra nome, arcano, badge e i segni
+// della partita («In scorta · Liv. N» in oro, «Nel Registro · Liv. N» in rosso), sotto le dieci affinità su una fila (due file di
+// cinque dove la piastrella è stretta). L'arte da 64 px era troppo piccola per riconoscere la Persona (richiesta dell'utente,
+// 2026-11-10). Sul telefono resta la riga (`riga`), con gli stessi segni.
 //
 // Accessibilità (L6): la piastrella è un collegamento con un nome proprio (che dice anche i segni); l'arte è un pulsante e non può stare
 // dentro il collegamento, quindi sta sopra, sorella, alla stessa posizione di una casella vuota; il cartiglio sopra l'arte è solo un
@@ -96,17 +96,17 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
   }
   return (
     <li className="relative min-w-0 piastrella" id={`persona-${p.id}`}>
-      <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella-persona no-underline text-text grid h-full min-h-[118px] grid-cols-[64px_minmax(0,1fr)] items-start gap-x-2.5 p-2.5 ${evidenziata ? 'card--evidenza' : ''}`} aria-label={nome} onClick={apri}>
+      <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella-persona no-underline text-text grid h-full min-h-[118px] grid-cols-[96px_minmax(0,1fr)] items-start gap-x-3 p-2.5 ${evidenziata ? 'card--evidenza' : ''}`} aria-label={nome} onClick={apri}>
         {/* la casella dell'arte: l'immagine (un pulsante) non può stare dentro il collegamento, sta sopra, fratello, alla stessa posizione */}
-        <div className="h-16 w-16" aria-hidden="true" />
+        <div className="h-24 w-24" aria-hidden="true" />
         <div className="flex h-full min-w-0 flex-col gap-1.5">
           <div className="flex min-w-0 items-start gap-1.5">
             {/* il nome è l'identità della piastrella: va a capo invece di finire in «…» (Magatsu-Izanagi Picaro, Amuleto dell'Imperatore) */}
             <div className="min-w-0 flex-1">
-              <div className="font-display uppercase testo-17 leading-none break-words" title={p.nomeIt}>{p.nomeIt}</div>
+              <div className="font-display uppercase testo-20 leading-none break-words" title={p.nomeIt}>{p.nomeIt}</div>
               {p.nomeIt !== p.nome && <div className="testo-12 text-text-muted break-words">{p.nome}</div>}
             </div>
-            <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa dimensione={24} quadrata className="h-6 w-6 shrink-0 object-contain drop-shadow" fallback={null} />
+            <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa dimensione={28} quadrata className="h-7 w-7 shrink-0 object-contain drop-shadow" fallback={null} />
           </div>
           <div className="flex flex-wrap items-center gap-1">
             <span className="chip">{p.arcanaNome}</span>
@@ -118,11 +118,11 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
         </div>
       </Link>
       {/* l'arte sopra la casella vuota del collegamento: bordo 1 px + margine interno 10 px di `p-2.5` = 11 px; il riquadro lascia passare il tocco al collegamento, solo il pulsante dell'immagine lo prende */}
-      <div className="pointer-events-none absolute left-[11px] top-[11px] h-16 w-16">
-        <span className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} forma="quadrata" className="immagine-entita--sotto-cartiglio" /></span>
+      <div className="pointer-events-none absolute left-[11px] top-[11px] h-24 w-24">
+        <span className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={96} forma="quadrata" className="immagine-entita--sotto-cartiglio" /></span>
         {/* il cartiglio sta sopra l'arte, fuori dal collegamento: il livello lo scrive lui stesso e lo dice il nome del collegamento (qui `decorativo`, così non si legge
             due volte). Non è un bersaglio: sotto c'è la fascia dell'arte che lascia passare il tocco, quindi toccarlo apre la scheda come il resto della piastrella;
-            l'ingrandimento sta nei 64×48 px sotto la fascia (`immagine-entita--sotto-cartiglio`) */}
+            l'ingrandimento sta nei 96×80 px sotto la fascia (`immagine-entita--sotto-cartiglio`) */}
         <span className="absolute -left-1.5 -top-2 inline-flex"><LivelloBadge livello={p.livello} decorativo /></span>
         {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute -right-1 -bottom-1 w-7 h-7 object-contain drop-shadow" fallback={null} />}
       </div>

@@ -2,7 +2,7 @@
 // SkillPage — elenco delle 525 skill con ricerca ed elemento (client-side)
 // ============================================================
 
-import { memo, useDeferredValue, useMemo } from 'react';
+import { memo, useDeferredValue, useMemo, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -78,7 +78,9 @@ export function SkillPage() {
             key={el}
             type="button"
             className="chip chip--icona touch"
-            style={elemento === el ? { borderColor: coloreElemento(el), color: coloreTestoElemento(el), background: `color-mix(in srgb, ${coloreElemento(el)} 16%, transparent)` } : undefined}
+            // il colore dell'elemento passa dalle variabili del chip, che ne disegnano fondo e bordo col taglio diagonale: messo sul pulsante
+            // (`background`, `borderColor`) riempiva il suo rettangolo e usciva dalla forma
+            style={elemento === el ? { '--chip-bordo': coloreElemento(el), '--chip-sfondo': `color-mix(in srgb, ${coloreElemento(el)} 16%, var(--color-bg-secondary))`, color: coloreTestoElemento(el) } as CSSProperties : undefined}
             onClick={() => imposta({ elemento: el }, { storia: true })}
             aria-pressed={elemento === el}
           >

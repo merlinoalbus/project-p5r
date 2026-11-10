@@ -2,7 +2,7 @@
 // CompletamentoPage — trofei con spunta per partita, finali con condizioni, DLC, meteo, Nuova Partita+, gestione del tempo (Fase 9.1), con un rimando al Covo dei Ladri
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { opzioniDaNomi } from '../utils/selettore';
@@ -93,7 +93,7 @@ function Trofeo({ t, partitaId, onCambiato, onModificato }: { t: TrofeoDto; part
         )}
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="chip testo-12" style={{ borderColor: colore, color: colore }}>{NOME_TIPO_TROFEO[t.tipo]}</span>
+        <span className="chip testo-12" style={{ '--chip-bordo': colore, color: colore } as CSSProperties}>{NOME_TIPO_TROFEO[t.tipo]}</span>
         {t.mancabile && <span className="chip chip--attivo testo-12" title="Se lo salti, in questa partita non lo prendi più">mancabile</span>}
         {!IN_RILASCIO && !t.verificato && <span className="chip testo-12" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </div>

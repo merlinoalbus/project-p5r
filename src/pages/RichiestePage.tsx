@@ -19,7 +19,7 @@
 
 import { useMemo, useState } from 'react';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
-import { ArticoliTabella } from '../components/guida/ArticoliTabella';
+import { ListinoNegozio } from '../components/negozi/ListinoNegozio';
 import { Selettore } from '../components/shared/Selettore';
 import { Segmenti } from '../components/shared/Segmenti';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
@@ -373,7 +373,8 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
                   {d.jose.listino ? <>
                     <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(d.jose.listino.chiave)}`} icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={`Apri il listino di ${d.jose.listino.nome}`} compatto />
                     <p className="m-0 testo-12 text-text-muted">Le aperture effettive dei dedali si segnano in Partita → Progressi. Costi, requisiti e acquisti sono gli stessi del listino.</p>
-                    <ArticoliTabella articoli={d.jose.listino.articoliElenco} partitaId={partitaId} onCambiato={() => void dati.ricarica()} />
+                    {/* lo stesso listino lungo della pagina del negozio (37 scambi in fila erano cinque schermate), senza le sue parti di modifica */}
+                    <ListinoNegozio key={`${d.jose.listino.chiave}|${partitaId ?? ''}`} soloElenco negozio={d.jose.listino} partitaId={partitaId} versione={0} onCambiato={() => void dati.ricarica()} onRipristinato={() => void dati.ricarica()} />
                   </> : <p className="m-0 testo-13 text-text-muted">Il listino di Jose è stato rimosso o nascosto. Le indicazioni della guida restano conservate.</p>}
                 </SezioneConFregio>
               ) : d.jose.scambi.length > 0 && (

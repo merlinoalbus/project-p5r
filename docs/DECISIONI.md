@@ -276,13 +276,20 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   punti mostrati si leggono dalle regole, mai scritti a mano (anche i fattori della Forca e dell'Isolamento, i punti dell'Allarme dei cicli e
   prezzo e punti dell'Aojiru, L8-10). La scheda dei soli dati di gioco si chiama ovunque «Backup dei dati di gioco».
 - Immagini mai ritagliate (`object-contain`); un tocco apre l'ingrandimento con i comandi di caricamento.
+- **Mappa della Home a scomparsa**: «Nascondi la mappa» chiude il pannello anche col puntatore sopra; la linguetta col nome del posto è
+  una colonna della griglia e resta in vista mentre la pagina scorre; il pannello chiuso non allarga la pagina.
+- **Simbolo dell'app nella Home**: sta in fondo alla barra superiore (da 768 px), non nell'intestazione della pagina, dove occupava
+  una riga e spingeva giù il titolo; sul telefono la barra ha già il simbolo quadrato dell'app a sinistra.
+- **Colore e fuoco di un chip**: il colore passa dalle variabili `--chip-sfondo` e `--chip-bordo`, che disegnano la forma a taglio
+  diagonale; mai `background` o `borderColor` sull'elemento, che ne riempiono il rettangolo. Anche il fuoco da tastiera è un anello
+  con la stessa forma.
 
 ## 6. Compendio, skill e traduzioni
 - Statistiche delle Persona possedute: stima del livello (+3 punti per livello in proporzione alla base) più i valori registrati
   dall'utente; nessuna fonte compatibile dà le curve di crescita.
-- **Compendio a piastrelle orizzontali (L10-04, schizzo approvato)**: arte da 64 px con il cartiglio del livello, nome, arcano e affinità
-  su una fila (su due file di cinque dove la piastrella è stretta, come a 1024); due colonne da 640 px, tre da 1024 (nove piastrelle intere
-  a 1280×689), quattro da 1536; sotto i 640 px la riga del telefono. Con una partita attiva, e solo se veri, i segni «In scorta ·
+- **Compendio a piastrelle orizzontali**: arte da 96 px con il cartiglio del livello (a 64 px l'utente la trovava troppo piccola),
+  nome, arcano e affinità su una fila (su due file di cinque dove la piastrella è stretta, come a 1280 con tre colonne); due colonne
+  da 640 px, tre da 1280, quattro solo oltre i 2200; sotto i 640 px la riga del telefono. Con una partita attiva, e solo se veri, i segni «In scorta ·
   Liv. N» (oro) e «Nel Registro · Liv. N» (rosso), anche nella testa della scheda Persona. La vista «Elenco» non cambia.
 - Aggiunta alla scorta: ogni Persona al più una volta per partita; skill precompilate con le ultime 8 apprese al livello scelto; l'aggiunta registra
   la Persona nel compendio personale col livello più alto raggiunto.
@@ -536,6 +543,34 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   contano più, Kanda/Jinbocho e Roppongi sì.
 
 ## 11. Negozi, oggetti, regali e attività
+- **Listino a gruppi**: un listino con più di 12 articoli non è un elenco solo, e non si pagina: «che cosa sto guardando» si sceglie
+  in un punto solo per livello (uno corto resta l'elenco con i filtri: tessere delle categorie, «Per chi», stato e disponibilità).
+  Lungo o corto lo decide il listino intero, non ciò che resta dopo un filtro. In alto la ricerca e, con una partita, il segmento
+  «Acquistabili adesso | Tutti» (si apre sugli acquistabili, con «51 di 274 acquistabili adesso» sotto); lo stato d'acquisto sta
+  dietro «Filtri». Le **categorie** sono schede a scelta singola con figura e conteggio, una sempre scelta (all'apertura la prima
+  che ha qualcosa di acquistabile; senza partita la prima); un negozio con una categoria sola non le mostra. I **destinatari** sono
+  una fila di chip a scelta singola col conteggio, solo dove la categoria scelta ha più di 7 articoli in vista (4 sul telefono:
+  quanti ne stanno in una schermata) e la divisione distribuisce davvero (nessun destinatario oltre l'80%). Gli **scaffali** sono le
+  **fasi di vendita** della scelta fatta, cioè da quando l'articolo è in negozio (l'arco della storia o la data della sua
+  condizione: «Dall'arco del Palazzo di Madarame», «Dal 22 dicembre»; per mese se le date sono più di 12, come le televendite): uno
+  aperto alla volta, da sé l'ultimo già in vendita, e uno scaffale senza niente di acquistabile porta il lucchetto e «non adesso».
+  Una scelta che sta in una schermata non ha scaffali: solo le righe. Uno scaffale (o una scelta con una fase sola) che non sta
+  ancora in una schermata si divide in parti uguali, nell'ordine in cui il listino mostra gli articoli, e ogni parte porta il nome
+  del suo primo e del suo ultimo articolo («da «Recup-RO: 50 mg» a «IV 100»»): succede dove i dati non hanno una tappa che separi
+  (le dodici cure della Clinica, tutte in vendita dall'inizio) e, sul telefono, per le fasi con più di quattro articoli. La scelta proposta si fissa quando la si apre e non cambia
+  dopo un acquisto; una scelta che non esiste più (filtro, capienza cambiata) torna a una valida. Con la ricerca schede e chip
+  contano i soli risultati, una categoria senza risultati è spenta e, se era la scelta, si passa alla prima che ne ha; se la
+  categoria sta in una schermata i chip non servono e si vedono le sue righe. Senza risultati: «Nessun articolo con questi filtri»
+  con «Azzera i filtri»; niente di acquistabile: il conto dei non acquistabili con «Mostrali». Un articolo è una riga sola da
+  520 px di colonna, alta quanto i suoi comandi (50 px, circa 80 con la disponibilità sotto il nome), con «Dettagli» in fondo e
+  senza la parola «Costo» sopra la cifra; il collegamento del nome prende tutta la cella. Da 520 a 699 px «Modifica» è la sola
+  figura, «Dettagli» non ripete il numero dei requisiti e «Fonte secondaria» sta sotto il nome; lo stesso sotto i 520 px (il
+  telefono), dove l'articolo è una scheda bassa con azioni e «Dettagli» sulla stessa riga. Nel listino lungo la riga non ripete la
+  categoria, né il destinatario quando lo dice il chip scelto (dove i chip non ci sono, «Solo donne» resta sulla riga); da 860 px
+  la disponibilità sta sulla stessa riga. I testi nascosti a vista stanno in un antenato posizionato, perché non allunghino il
+  documento. Lo stesso listino mostra gli scambi di Jose nelle Richieste (senza le parti di modifica). Chi lo ospita gli dà una
+  `key` con negozio e partita: filtro e scelte non passano da un negozio all'altro.
+  Untouchable, 274 articoli, in fila era lungo una cinquantina di schermate.
 - Il «dove» di un negozio o di un'attività è uno solo: la sede (`sede_chiave`, un luogo). Il quartiere si ricava dal luogo della sede e
   non si salva; il testo libero «Come trovarlo» non esiste più (se portava un'informazione in più sta nella nota del negozio). Senza
   sede non c'è quartiere (oggi solo il negozio del Palazzo di Niijima). Un pin di città punta al punto vendita o al luogo, mai a

@@ -298,8 +298,9 @@ export function CompendioPage() {
         {filtrate.length === 0 ? (
           <EmptyState title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello, a cambiare arcano o a togliere i filtri di affinità e immagine." />
         ) : vista === 'piastrelle' ? (
-          // L10-04: piastrelle orizzontali, tre colonne da 1024 (nove intere a 1280×689), due da 640, quattro dai 1536
-          <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4" aria-label="Persona">
+          // piastrelle orizzontali: due colonne da 640, tre da 1280 (a 1024 con tre colonne accanto all'arte restavano 117 px e le piastrelle
+          // arrivavano a 258 px d'altezza); quattro solo oltre i 2200 px, perché prima restino larghe e leggibili
+          <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 sm:gap-3 sm:grid-cols-2 xl:grid-cols-3 min-[2200px]:grid-cols-4" aria-label="Persona">
             {filtrate.map((p) => <PiastrellaPersona key={p.id} persona={p} riga={telefono} evidenziata={evidenziata === p.id} onApri={ricordaUltimaPersona} segni={segni?.get(p.id)} />)}
           </ul>
         ) : (

@@ -7,6 +7,10 @@
 // conteggio; «Per chi» è un elenco chiuso; con una partita compaiono i due segmenti
 // Acquistati/Da acquistare e Disponibili/Bloccati. Il filtro è un valore (`utils/articoli.ts`):
 // chi lo tiene nell'indirizzo o nello stato lo passa qui e riceve il nuovo.
+//
+// Nel listino lungo di un negozio (`listino`) categoria e destinatario si scelgono una volta sola, nelle schede e nei chip di
+// `ListinoNegozio`: qui restano la ricerca e, con una partita, «Acquistabili adesso | Tutti» sulla stessa riga; lo stato d'acquisto
+// sta dietro «Filtri», così all'apertura non occupa una riga.
 // ============================================================
 
 import { useId, useState } from 'react';
@@ -32,19 +36,52 @@ interface Props {
   /** Lotto C: «Per chi», categorie e segmenti in un pannello aperto dal pulsante «Filtri» (come nel Compendio), riassunti da
    *  chip rimovibili; la ricerca resta in vista. Serve dove l'elenco va visto subito (i Negozi: 19 tessere prima della lista). */
   comprimibili?: boolean;
+  /** Il listino lungo di un negozio: solo ricerca, «Acquistabili adesso | Tutti» e, dietro «Filtri», lo stato d'acquisto. Categorie e
+   *  destinatari li offre il listino stesso (schede e chip): qui non compaiono, e `categorie` e `per` del filtro non si toccano. */
+  listino?: boolean;
 }
+
+/** Le due voci del listino lungo: gli articoli che si possono comprare adesso, oppure tutti. */
+const VISTE_LISTINO: ReadonlyArray<{ chiave: 'disponibili' | 'tutti'; nome: string }> = [
+  { chiave: 'disponibili', nome: 'Acquistabili adesso' }, { chiave: 'tutti', nome: 'Tutti' },
+];
 
 /**
  * Il pannello dei filtri: ricerca, «Per chi» (se ci sono destinatari), «Azzera i filtri» quando qualcosa è attivo,
  * categorie a tessere col conteggio (solo se ce n'è più d'una) e, con una partita, i segmenti di stato d'acquisto e
- * di disponibilità. Ogni cambio passa al genitore il filtro intero aggiornato.
+ * di disponibilità. Ogni cambio passa al genitore il filtro intero aggiornato. Con `listino` restano la ricerca, le due voci
+ * «Acquistabili adesso | Tutti» e lo stato d'acquisto dietro «Filtri».
  */
-export function FiltriArticoli({ filtro, onCambia, categorie, destinatari, conPartita, segnaposto = 'Cerca un articolo (nome, effetto)…', comprimibili }: Props) {
+export function FiltriArticoli({ filtro, onCambia, categorie, destinatari, conPartita, segnaposto = 'Cerca un articolo (nome, effetto)…', comprimibili, listino }: Props) {
   const voci = (categorie ?? Object.keys(NOME_CATEGORIA_ARTICOLO).map((chiave) => ({ chiave, n: undefined as number | undefined }))).map((c) => ({ chiave: c.chiave, nome: NOME_CATEGORIA_ARTICOLO[c.chiave] ?? c.chiave, conteggio: c.n }));
   const per = destinatari ?? [...PERSONAGGI];
   const idPannello = useId();
-  // il pannello parte aperto se l'indirizzo porta già un filtro diverso dalla ricerca (chi torna lo ritrova com'era)
-  const [aperto, setAperto] = useState(() => filtroAttivo({ ...filtro, q: '' }));
+  // il pannello parte aperto se l'indirizzo porta già un filtro diverso dalla ricerca (chi torna lo ritrova com'era); nel listino
+  // lungo dietro «Filtri» c'è solo lo stato d'acquisto
+  const [aperto, setAperto] = useState(() => (listino ? filtro.stato !== 'tutti' : filtroAttivo({ ...filtro, q: '' })));
+  if (listino) {
+    const statoScelto = conPartita && filtro.stato !== 'tutti';
+    return (
+      <div className="filtri-articoli" role="search" aria-label="Filtri degli articoli">
+        <div className="filtri-articoli__riga filtri-articoli__riga--listino">
+          <CampoRicerca valore={filtro.q} onCambia={(q) => onCambia({ ...filtro, q })} segnaposto={segnaposto} />
+          {conPartita && (
+            <PulsanteVisivo attivo={aperto} compatto icona={<IconaAzione chiave="filtri" dimensione={20} />} titolo="Filtri" dettaglio={statoScelto ? '(1)' : undefined}
+              onClick={() => setAperto((v) => !v)} aria-expanded={aperto} aria-controls={aperto ? idPannello : undefined} />
+          )}
+          {conPartita && (
+            <Segmenti etichetta="Articoli da mostrare" valore={filtro.disponibilita === 'disponibili' ? 'disponibili' : 'tutti'} opzioni={VISTE_LISTINO}
+              onCambia={(disponibilita) => onCambia({ ...filtro, disponibilita })} />
+          )}
+        </div>
+        {conPartita && aperto && (
+          <div id={idPannello} className="card filtri-articoli__riga" role="group" aria-label="Altri filtri">
+            <Segmenti etichetta="Stato d'acquisto" valore={filtro.stato} opzioni={STATI_ACQUISTO} onCambia={(stato) => onCambia({ ...filtro, stato })} />
+          </div>
+        )}
+      </div>
+    );
+  }
   const selettorePer = per.length > 0 && <Selettore compatto etichetta="Per chi" valore={filtro.per} vuoto="Per chiunque" opzioni={per.map((p) => ({ chiave: p, nome: p }))} onCambia={(v) => onCambia({ ...filtro, per: v })} />;
   const tessere = voci.length > 1 && <SelettoreIcone multiplo compatto etichetta="Categorie" valore={filtro.categorie} opzioni={voci} onCambia={(c) => onCambia({ ...filtro, categorie: c })} />;
   const segmenti = conPartita && (
@@ -66,7 +103,7 @@ export function FiltriArticoli({ filtro, onCambia, categorie, destinatari, conPa
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
           <CampoRicerca className="max-sm:basis-full" valore={filtro.q} onCambia={(q) => onCambia({ ...filtro, q })} segnaposto={segnaposto} />
           <PulsanteVisivo attivo={aperto} compatto icona={<IconaAzione chiave="filtri" dimensione={20} />} titolo="Filtri" dettaglio={attivi.length > 0 ? `(${attivi.length})` : undefined}
-            onClick={() => setAperto((v) => !v)} aria-expanded={aperto} aria-controls={idPannello} />
+            onClick={() => setAperto((v) => !v)} aria-expanded={aperto} aria-controls={aperto ? idPannello : undefined} />
           {azzera}
         </div>
         {attivi.length > 0 && (
