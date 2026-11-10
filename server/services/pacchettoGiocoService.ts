@@ -33,12 +33,8 @@ import { colonnaTolta, tabellaTolta } from '../db/fontiTolte.js';
 import { etichettaTabella } from './cestinoService.js';
 import { avvisiImportazioneTanaka, statoTanakaDi } from './tanakaStatoListino.js';
 import { migrations } from '../db/migrations/index.js';
-import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
-import { proponiStatiMancanti } from './statiMancantiService.js';
-import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
-import { riallineaStati } from './mappe/statiGuida.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
-import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
+import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriDopoSostituzione, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, ScartoPacchettoDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
 import { ESTENSIONI_PACCHETTO, copiaDalDeposito, elencaDeposito as elencaCartella, percorsoNelDeposito } from './depositoService.js';
 import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
@@ -507,27 +503,9 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     avanza('sostituzione');
     await installaDatabase(file, resolveDbPath(), 'sposta');
     avanza('riapertura');
-    riapriIstanza();
-    condizioniConvertite = convertiCondizioniDatabaseImportato(getDb());
-    // le stesse regole dell'avvio sui dati nuovi (l'assorbimento delle immagini su disco, già fatto da riapriIstanza, qui non trova nulla)
-    regoleAllAvvio(getDb(), 'rigido'); // un errore qui riporta alla copia di sicurezza (solo all'avvio le regole sono tolleranti)
-    // L13 (decisione 19): gli effetti di stato del gioco nuovo sulle voci già spuntate e mai applicati entrano nell'elenco da approvare delle partite
-    // (mai applicati da soli). È un servizio accessorio, tollerante come all'avvio: il censimento è una transazione sola (o tutto o niente), e un suo
-    // errore non annulla l'importazione; il log lo dice (solo conteggi), e il prossimo avvio lo rifà
-    try {
-      const { partite } = proponiStatiMancanti();
-      const daDire = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0 || p.chiuseNullaDaTogliere > 0);
-      if (daDire.length) logger.info({ partite: daDire }, 'effetti di stato mai applicati dopo l\'importazione: nuove proposte nell\'elenco da approvare');
-      const conErrori = partite.filter((p) => p.errori > 0);
-      if (conErrori.length) logger.warn({ partite: conErrori }, 'censimento dopo l\'importazione: alcune voci non si sono potute esaminare (le altre sì; il prossimo avvio le riprova)');
-    } catch (err) {
-      logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'censimento degli effetti di stato mai applicati non riuscito dopo l\'importazione (l\'importazione resta)');
-    }
-    // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica sui legami nuovi (il segno dei pin, per uid, resta)
-    getDb().transaction(() => riallineaStati(getDb(), null, nowIso()))();
-    // L7-TANAKA-IMPORT: il registro delle decisioni arriva integro, o si torna alla copia di sicurezza (un registro rotto non si installa)
-    const tanaka = statoTanakaDi(getDb());
-    if (!tanaka.registroIntegro) throw httpErrors.conflict('registro-tanaka-non-integro', `Il registro delle decisioni Tanaka del pacchetto non è integro: ${tanaka.problemi.join(' ')}`);
+    // L13-01: la via unica di riapertura, la stessa del ripristino dell'istanza (`impostazioniService.riapriDopoSostituzione`): migrazioni,
+    // condizioni `manuale` convertite, regole dell'avvio rigide, effetti di stato mai applicati fra le proposte, specchio dei pin, registro Tanaka
+    condizioniConvertite = riapriDopoSostituzione({ origine: 'continuita-migrazione', gioco: true, operazione: 'importazione' });
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'importazione-fallita', 'Importazione del pacchetto');
   }

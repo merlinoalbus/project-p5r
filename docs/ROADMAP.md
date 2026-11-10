@@ -40,7 +40,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Voci con condizione «Si fa solo se», effetti con condizione «Vale solo se», voci con alternative (televendite), esiti scelti alla
   spunta, ricevute della spunta.
 - Modifica completa delle voci; copia, taglio e incolla (anche fra giorni) e appunti fissi nella preparazione, raggruppati in categorie
-  apribili e riordinati trascinando.
+  apribili e riordinati trascinando. Nella finestra della voce la griglia di «Quale» e l'editor «Si fa solo se» si aprono in finestre
+  loro, e il corpo della voce resta sotto gli 800 px a 1280.
 - Calendario degli eventi (`/guida/calendario`) collegato alle voci.
 - Dopo il 1° giugno le voci e le Doti della guida dell'elenco approvato il 10/11 (385): gli otto giorni prima scoperti, i passaggi di rango
   mancanti (le Gemelle con una voce per rango), Aojiru, letture, scambi di Sakai, l'avanzamento dei videogiochi, Sae e il suo trofeo al 20/11,
@@ -85,7 +86,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Ricerca globale su 29 tipi di cose (personaggi, tratti, cruciverba e glossario compresi), dalla barra in alto; ogni risultato porta
   all'elemento nella sua pagina. Tutte le ricerche dell'app, anche quelle dentro le pagine e nei selettori, cercano parola per parola.
 - Impostazioni: partite, traduzioni, correzioni, Cestino, caratteri, grafica predefinita, backup dei dati di gioco («Importa»), copia
-  dell'istanza, documentazione delle API, «Prepara edizione» del rilascio; «Informazioni» con le fonti dei dati, l'unico punto che le cita.
+  e ripristino dell'istanza (con la stessa riapertura di «Importa»), documentazione delle API, «Prepara edizione» del rilascio; «Informazioni» con le fonti dei dati, l'unico punto che le cita.
 - Interfaccia per desktop, tablet e telefono; installabile come web app a schermo intero, con l'invito la prima volta che la Home si apre da telefono o tablet.
 
 ## Punti aperti

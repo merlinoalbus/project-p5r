@@ -383,7 +383,10 @@ Effetto «Persona registrata», solo nel Compendio o anche nella scorta: `{tipo:
   Le voci del cestino di gioco (aree, voci, planimetrie, per id) stanno sotto `/api/impostazioni/cestino`, solo in preparazione; le voci
   personali (partite, fonti d'acquisto, pesca, Persone della scorta, per uid) hanno una sola serie di rotte, `/api/partite/cestino…`, in
   preparazione e in rilascio, tutte filtrate per proprietario nello stesso servizio. L'elenco unificato `/api/impostazioni/cestino?partite=1`
-  somma le due famiglie, ma le voci personali si rimettono e si tolgono dalle rotte `/api/partite/cestino/:uid`.
+  somma le due famiglie, ma le voci personali si rimettono e si tolgono dalle rotte `/api/partite/cestino/:uid`. Le due famiglie hanno un
+  solo motore di ripristino (`ripristinaRegistro`; `ripristinaDalCestino` per id e `ripristinaCestinoPrivato` per uid leggono soltanto la
+  riga). Le righe di una tabella tolta e dichiarata in `fontiTolte.ts` si saltano col motivo; le etichette delle tabelle tolte restano per
+  le voci di prima e per l'anteprima di «Importa» (`scartiDelPacchetto`).
 - L'id di una partita nuova (`partiteService.creaPartita`) è oltre il massimo delle partite, del Cestino delle partite, del vecchio cestino
   di gioco (tipo `partita`) e del contatore di `partita` (`sqlite_sequence`, AUTOINCREMENT dalla utente 064): non torna mai quello di una
   partita eliminata, nemmeno svuotato il Cestino, quindi né il ripristino né l'archivio senza chiave esterna (`acquisto_legacy_valutazione`)
@@ -415,6 +418,7 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
 
 ### Pacchetto, import ed export
 - Il pacchetto di gioco è `gioco.db` (`pacchettoGiocoService.ts`). «Importa» passa dall'anteprima, fa una **copia di sicurezza** (`prima-del-ripristino-<timbro>` in `data/backups`, conservate le ultime `COPIE_DI_RIPRISTINO = 3` in `impostazioniService.ts`), **sostituisce** `gioco.db` e riapre l'istanza (le migrazioni portano avanti un file più vecchio); non unisce e non tocca `partite.db`. I file passano dalla cartella d'appoggio (`depositoService.ts`, `DEPOSITO_DIR`); una sola sostituzione alla volta (`lucchettoIstanza.ts`); le cache di gioco si svuotano insieme (`cacheDiGioco.ts`).
+- **Una via di riapertura** (`impostazioniService.riapriDopoSostituzione`), usata da «Importa» (`pacchettoGiocoService.sostituisciDatiDiGioco`) e dal ripristino dell'istanza (`impostazioniService.ripristinaDaFileDiLavoro`, con un solo ingresso `ripristinaDaCopia` per il file locale e per quello della cartella d'appoggio): `riapriIstanza` (migrazioni, collegamenti, immagini su disco, cache); se è cambiato il file di gioco `convertiCondizioniDatabaseImportato` e `regoleAllAvvio(…, 'rigido')`; `proponiStatiMancanti` (tollerante); `riallineaStati`; registro Tanaka integro. Un errore riporta alla copia di sicurezza (`tornaAllaCopiaDiSicurezza`).
 - Gli orfani dell'anteprima vengono da `RIFERIMENTI_PARTITE` (`pacchettoGiocoService.ts`): ogni colonna delle partite che cita una riga di
   gioco, con il filtro sul tipo per le chiavi polimorfe. Il censimento (`censimentoPartite.ts`, `CENSIMENTO_PARTITE`) classifica ogni
   tabella dello schema `utente` e ogni colonna dal nome di riferimento (`…_chiave`, `…_uid`, `…_id`, `chiave`, `data`, `dote`, `da_voce`,
@@ -454,7 +458,7 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
 | `negozio.luogo` | 346 | la sede e, dove portava un'informazione in più, la nota del negozio; testo originale in `archivio-frasi-l11` |
 | `negozio.condizioni_json` | 346 | `negozio.sblocco_json` (Lotteria di Shibuya dal 18 aprile, Chihaya dal 23 giugno; Mantra Ganda era già sul luogo della sede); valore originale in `archivio-frasi-l11` |
 | `articolo.effetto`, `articolo.statistiche`, `articolo.effetto_json` | 346 | l'oggetto del catalogo (`catalogo_oggetto`); erano vuote in tutte le offerte |
-| `negozio.listino_condiviso`, `articolo.articolo_condiviso`, tabelle `negozio_luogo_extra`, `negozio_sede_spillo`, `negozio_sede_foto` | 354 | ogni macchina è un punto vendita con le sue offerte; contenuto in archivio, voci in `FONTI_TOLTE` |
+| `negozio.listino_condiviso`, `articolo.articolo_condiviso`, tabelle `negozio_luogo_extra`, `negozio_sede_spillo`, `negozio_sede_foto` | 354 | ogni macchina è un punto vendita con le sue offerte; contenuto in archivio, voci in `FONTI_TOLTE`; i nomi delle tre tabelle restano solo in `fontiTolte.ts`, fra le etichette del Cestino (`cestinoService.ts`, per le voci di prima e l'anteprima di «Importa») e nelle migrazioni registrate (DECISIONI §11) |
 | `negozio.orari_json` | 373 | gli orari del luogo della sede e, per chi non ha sede (Niijima), `negozio.eccezione_orari_json`; valori di prima in `archivio-frasi-l11` |
 | `utente.registro_acquisti.sede_chiave` | utente 068 | l'offerta (`articolo_chiave`), che ha una sola sede; i valori eventuali (la sede principale, scritta di default dagli acquisti in negozio) restano nella copia di avvio e non li legge nessuno |
 | `confidente_disponibilita.giorni_json`, `.fasce_json`, `.luogo`, `.sblocco_data`, `.sblocco_requisiti` | 358 | la disponibilità strutturata e i requisiti di rango; i fatti che dicevano in più stanno nella nota; archivio `dati_guida` |

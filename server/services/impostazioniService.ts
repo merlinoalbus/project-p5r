@@ -8,7 +8,9 @@
 // Reimportazione: il file SOSTITUISCE l'istanza. Prima si valida (intestazione SQLite, integrity_check, schema riconoscibile),
 // poi si salva una copia di sicurezza di ciò che c'è ora, si chiude la connessione, si mettono al loro posto i file, si riapre e si
 // rieseguono le migrazioni (e si assorbono le immagini rimaste su disco dai backup di prima della 079). Se qualcosa fallisce
-// dopo la chiusura, la copia di sicurezza viene ripristinata e l'app resta utilizzabile.
+// dopo la chiusura, la copia di sicurezza viene ripristinata e l'app resta utilizzabile. Da L13-01 la riapertura è la stessa di «Importa»
+// (`riapriDopoSostituzione`): conversione delle condizioni `manuale` e regole dell'avvio se cambia il file di gioco, effetti di stato mai
+// applicati fra le proposte, specchio dei pin, registro Tanaka.
 //
 // **Tutto passa da file, mai da buffer interi** (rilievi F19/P3' della verifica completa, 2026-10-03). Prima un ripristino teneva in
 // memoria il file letto, poi ogni voce dello ZIP, e riscriveva il database due volte (una copia per verificarlo, una per installarlo):
@@ -24,7 +26,7 @@ import Database from 'better-sqlite3';
 import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
-import { closeDb, copiaSchema, getDb, initDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
+import { closeDb, copiaSchema, getDb, initDb, nowIso, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { haTabella } from '../db/colonne.js';
 import { runMigrations, type Migration } from '../db/migrationRunner.js';
 import { verificaArchivioLegacy, type OrigineContinuita } from '../db/acquistiLegacy.js';
@@ -35,7 +37,10 @@ import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfiden
 import { verificaCollegamentiPescaImportati } from './vincoliAttivitaPesca.js';
 import { migrations } from '../db/migrations/index.js';
 import { migrazioniUtente } from '../db/migrazioniUtente/index.js';
-import { assorbiImmaginiSuDisco } from './pacchetto/pacchettoGioco.js';
+import { assorbiImmaginiSuDisco, regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
+import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
+import { proponiStatiMancanti } from './statiMancantiService.js';
+import { riallineaStati } from './mappe/statiGuida.js';
 import { ESTENSIONI_BACKUP, copiaDalDeposito, elencaDeposito as elencaCartella } from './depositoService.js';
 import type { DepositoFileDto } from '../../shared/types.js';
 import { estraiVoce, leggiIndiceZip, scriviZip, type VoceIndiceZip, type VoceZip } from '../utils/zip.js';
@@ -337,6 +342,43 @@ export function riapriIstanza(origine: OrigineContinuita = 'continuita-migrazion
 }
 
 /**
+ * L13-01: la via unica con cui un file di gioco o di partite messo al posto di quello di prima entra in servizio, per «Importa» (solo il file
+ * di gioco, `pacchettoGiocoService`) e per il ripristino dell'istanza da un backup (qui sotto). Prima il ripristino si fermava alla riapertura
+ * e al controllo del registro Tanaka: un backup vecchio teneva le condizioni `manuale` non convertite, e regole dell'avvio, effetti di stato
+ * mai applicati e specchio dei pin aspettavano il riavvio successivo.
+ *  - riapertura con le migrazioni (`riapriIstanza`);
+ *  - se è cambiato il file di gioco: le condizioni `manuale` rimaste nei backup convertite in avvisi e le regole dell'avvio, rigide (un errore
+ *    riporta alla copia di sicurezza, come all'importazione; solo all'avvio sono tolleranti);
+ *  - gli effetti di stato mai applicati fra le proposte delle partite, tollerante come all'avvio (il prossimo avvio li riprova);
+ *  - lo specchio delle voci con pin rifatto con la funzione unica;
+ *  - il registro delle decisioni Tanaka integro, o errore (e chi chiama torna alla copia di sicurezza).
+ * Restituisce le condizioni convertite. Chiamata a connessione chiusa, con il lucchetto dell'istanza in mano.
+ */
+export function riapriDopoSostituzione({ origine, gioco, operazione }: { origine: OrigineContinuita; gioco: boolean; operazione: 'importazione' | 'ripristino' }): string[] {
+  riapriIstanza(origine);
+  const db = getDb();
+  const condizioniConvertite = gioco ? convertiCondizioniDatabaseImportato(db) : [];
+  if (gioco) regoleAllAvvio(db, 'rigido');
+  // L13 (decisione 19): gli effetti di stato del gioco sulle voci già spuntate e mai applicati entrano nell'elenco da approvare delle partite (mai
+  // applicati da soli). Servizio accessorio: il censimento è una transazione sola, e un suo errore non annulla la sostituzione; il log lo dice
+  try {
+    const { partite } = proponiStatiMancanti();
+    const daDire = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0 || p.chiuseNullaDaTogliere > 0);
+    if (daDire.length) logger.info({ operazione, partite: daDire }, 'effetti di stato mai applicati dopo la sostituzione dei dati: nuove proposte nell\'elenco da approvare');
+    const conErrori = partite.filter((p) => p.errori > 0);
+    if (conErrori.length) logger.warn({ operazione, partite: conErrori }, 'censimento dopo la sostituzione dei dati: alcune voci non si sono potute esaminare (le altre sì; il prossimo avvio le riprova)');
+  } catch (err) {
+    logger.warn({ operazione, err: err instanceof Error ? err.message : String(err) }, 'censimento degli effetti di stato mai applicati non riuscito dopo la sostituzione dei dati (la sostituzione resta)');
+  }
+  // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica sui legami nuovi (il segno dei pin, per uid, resta)
+  db.transaction(() => riallineaStati(db, null, nowIso()))();
+  // L7-TANAKA-IMPORT: il registro delle decisioni arriva integro, o si torna alla copia di sicurezza (un registro rotto non si installa)
+  const tanaka = statoTanakaDi(db);
+  if (!tanaka.registroIntegro) throw httpErrors.conflict('registro-tanaka-non-integro', `Il registro delle decisioni Tanaka ${operazione === 'importazione' ? 'del pacchetto' : 'del backup'} non è integro: ${tanaka.problemi.join(' ')}`);
+  return condizioniConvertite;
+}
+
+/**
  * Destinazione di una voce dello ZIP dentro la cartella dati, oppure null se il nome porta fuori.
  * Il controllo è sul percorso RISOLTO, non sul nome: su Windows anche «\» separa, quindi «immagini/..\..\fuori» uscirebbe.
  */
@@ -392,28 +434,25 @@ function richiediIstanzaSuDisco(): void {
  * resta com'è: se ne lavora una copia.
  */
 export async function ripristinaIstanza(sorgente: string): Promise<EsitoRipristinoDto> {
-  // lo stesso lucchetto dell'importazione del pacchetto: due sostituzioni dei file non si intrecciano (409 alla seconda)
-  const rilascia = occupaIstanza("Un ripristino dell'istanza");
-  try {
-    richiediIstanzaSuDisco();
-    return await conCartellaDiLavoro('ripristino', async (lavoro) => {
-      const file = path.join(lavoro, 'sorgente');
-      await fsp.copyFile(sorgente, file);
-      return ripristinaDaFileDiLavoro(file, lavoro);
-    });
-  } finally {
-    rilascia();
-  }
+  return ripristinaDaCopia((file) => fsp.copyFile(sorgente, file));
 }
 
 /** Ripristina l'istanza da un file depositato sul NAS: lo copia il server in locale, il browser non trasporta niente. */
 export async function ripristinaIstanzaDaDeposito(nome: string): Promise<EsitoRipristinoDto> {
+  return ripristinaDaCopia((file) => copiaDalDeposito(nome, file));
+}
+
+/**
+ * L13-01: l'unico ingresso del ripristino dell'istanza, qualunque sia la provenienza del file (`copia` lo mette nella cartella di lavoro):
+ * lo stesso lucchetto dell'importazione del pacchetto (due sostituzioni dei file non si intrecciano: 409 alla seconda), poi il lavoro vero.
+ */
+async function ripristinaDaCopia(copia: (destinazione: string) => Promise<void>): Promise<EsitoRipristinoDto> {
   const rilascia = occupaIstanza("Un ripristino dell'istanza");
   try {
     richiediIstanzaSuDisco();
     return await conCartellaDiLavoro('ripristino', async (lavoro) => {
       const file = path.join(lavoro, 'sorgente');
-      await copiaDalDeposito(nome, file);
+      await copia(file);
       return ripristinaDaFileDiLavoro(file, lavoro);
     });
   } finally {
@@ -519,10 +558,9 @@ async function ripristinaDaFileDiLavoro(file: string, lavoro: string): Promise<E
         }
       }
     }
-    riapriIstanza('continuita-importazione');
-    // L7-TANAKA-IMPORT: il registro delle decisioni Tanaka del backup arriva integro, o si torna alla copia di sicurezza
-    const tanaka = statoTanakaDi(getDb());
-    if (!tanaka.registroIntegro) throw httpErrors.conflict('registro-tanaka-non-integro', `Il registro delle decisioni Tanaka del backup non è integro: ${tanaka.problemi.join(' ')}`);
+    // L13-01: la stessa riapertura dell'importazione (migrazioni, conversione e regole se cambia il file di gioco, proposte, specchio dei pin, Tanaka)
+    const condizioniConvertite = riapriDopoSostituzione({ origine: 'continuita-importazione', gioco: !!(gioco || unico), operazione: 'ripristino' });
+    if (condizioniConvertite.length) logger.info({ condizioniConvertite: condizioniConvertite.length }, 'ripristino: condizioni «manuale» del backup convertite in avvisi');
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'ripristino-fallito', 'Ripristino');
   }

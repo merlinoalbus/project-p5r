@@ -112,6 +112,8 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   catalogo_oggetto: ['oggetto', 'oggetti'], voce_oggetto: ['contenuto collegato', 'contenuti collegati'],
   ricompensa_oggetto: ['ricompensa collegata', 'ricompense collegate'], ricetta_materiale: ['materiale collegato', 'materiali collegati'],
   proposta_abbinamento: ['proposta di abbinamento', 'proposte di abbinamento'],
+  // tabelle tolte dalla 354 (DECISIONI, eccezione di L2-08): i nomi servono ancora alle voci del Cestino registrate prima e all'anteprima di
+  // «Importa» di un backup vecchio, che le porta con le loro righe (`scartiDelPacchetto`)
   negozio_luogo_extra: ['sede del listino', 'sedi del listino'], negozio_sede_spillo: ['sede confermata di un pin', 'sedi confermate dei pin'],
   negozio_sede_foto: ['copia di partenza delle sedi di un listino', 'copie di partenza delle sedi dei listini'],
   dungeon_area: ['infiltrazione', 'infiltrazioni'], punto_interesse: ['voce della guida', 'voci della guida'],
