@@ -158,7 +158,8 @@ export function gruppoConteggioSpillo(tipo: string): GruppoConteggioSpillo {
 export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
   return TIPI_SPILLO.filter((t) => CATEGORIA_PER_TIPO[t] === categoria);
 }
-/** A che cosa può collegarsi uno spillo di quella categoria (`null` è sempre ammesso).
+/** A che cosa può collegarsi uno spillo di quella categoria (`null` è sempre ammesso). NON usarla nel codice vivo: serve solo alla migrazione 065
+ *  (registrata, quindi invariata); il codice vivo legge `RIFERIMENTI_AMMESSI_PER_CATEGORIA`.
  *
  * Uno spostamento **porta** a una mappa (la destinazione), ma può anche **essere** un luogo o un
  * punto della Guida — la stazione è un luogo di tipo `trasporto`, la scorciatoia un punto — ed è
@@ -169,6 +170,14 @@ export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRif
   citta: ['negozio', 'attivita', 'luogo', 'confidente'],
   consumabile: ['punto'],
   informativo: ['punto'],
+};
+
+/** I riferimenti che un pin può avere OGGI, per categoria: come `RIFERIMENTI_PER_CATEGORIA` ma senza `attivita` (un'attività sta in un luogo,
+ *  `attivita.sede_chiave`, e il pin punta al luogo; un pin vecchio che ancora cita `attivita` si legge, `TIPI_RIFERIMENTO`, ma non si scrive più).
+ *  È la lista del codice vivo: `RIFERIMENTI_PER_CATEGORIA` qui sopra resta invariata perché serve solo alla migrazione 065, che è registrata. */
+export const RIFERIMENTI_AMMESSI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRiferimento[]> = {
+  ...RIFERIMENTI_PER_CATEGORIA,
+  citta: ['negozio', 'luogo', 'confidente'],
 };
 
 /** Gli elementi fissi del mondo: l'arredo — una porta, una scala, un forziere, un passaggio, una stanza sicura.
@@ -214,13 +223,13 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   negozio: { nome: 'Negozio', colore: '#22c55e', collezionabile: false, riferimento: 'negozio' },
   ristorante: { nome: 'Ristorante', colore: '#a16207', collezionabile: false, riferimento: 'luogo' },
   /** Distributore automatico di bevande: etichetta «Bevande» sulla mappa del gioco (SP e cure a poco prezzo). */
-  distributore: { nome: 'Bevande', colore: '#06b6d4', collezionabile: false, riferimento: 'luogo' },
+  distributore: { nome: 'Bevande', colore: '#06b6d4', collezionabile: false, riferimento: 'negozio' },
   /** Distributore di sigarette o tabaccaio: etichetta «Sigarette» sulla mappa del gioco (punto di riferimento, non si compra nulla). */
   sigarette: { nome: 'Sigarette', colore: '#78716c', collezionabile: false, riferimento: 'luogo' },
   /** Espositore delle riviste di annunci di lavoro (Sottopasso di Shibuya, konbini): etichetta «Cercalavoro». */
   cercalavoro: { nome: 'Cercalavoro', colore: '#d97706', collezionabile: false, riferimento: 'luogo' },
   /** Posto dove si fa un lavoro part-time (fioraio, Ore no Beko, konbini, Bar Crossroads…). */
-  lavoro: { nome: 'Lavoro part-time', colore: '#0d9488', collezionabile: false, riferimento: 'attivita' },
+  lavoro: { nome: 'Lavoro part-time', colore: '#0d9488', collezionabile: false, riferimento: 'luogo' },
   terme: { nome: 'Bagno pubblico', colore: '#67e8f9', collezionabile: false, riferimento: 'luogo' },
   lavanderia: { nome: 'Lavanderia', colore: '#c4b5fd', collezionabile: false, riferimento: 'luogo' },
   cinema: { nome: 'Cinema', colore: '#1e3a8a', collezionabile: false, riferimento: 'luogo' },

@@ -1,7 +1,7 @@
 // L5: creazione esplicita di un luogo usando un pin personale già presente.
 import type { OrariNegozio } from './orariNegozio.js';
 import type { TipoLuogo } from './tipiLuogo.js';
-import { categoriaSpillo, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, type TipoSpillo } from './spilli.js';
+import { categoriaSpillo, RIFERIMENTI_AMMESSI_PER_CATEGORIA, TIPI_SPILLO, type TipoSpillo } from './spilli.js';
 
 export interface LuogoNuovoDaPin {
   nome: string;
@@ -40,5 +40,5 @@ export function pinCompatibileConNuovoLuogo(pin: {
   return pin.origine === 'utente' && !pin.collezionabile && pin.riferimento === null
     && !pin.destinazione && !pin.destinazioneNonDisponibile
     && (TIPI_SPILLO as readonly string[]).includes(pin.tipo)
-    && RIFERIMENTI_PER_CATEGORIA[categoriaSpillo(pin.tipo)].includes('luogo');
+    && RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoriaSpillo(pin.tipo)].includes('luogo');
 }

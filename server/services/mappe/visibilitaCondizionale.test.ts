@@ -238,8 +238,8 @@ describe.skip('visibilità condizionale dei pin', () => {
     // toccare lo spillo: se il pin non se ne accorgesse resterebbe aperto su una porta chiusa.
     const db = getDb();
     const partita = db.prepare("INSERT INTO partita (nome, data_gioco, fascia_gioco, created_at, updated_at) VALUES ('Deriva', '04-20', 'giorno', '', '') RETURNING id").get() as { id: number };
-    // I pin dei negozi puntano a un **luogo**, non al negozio: il negozio è agganciato al luogo.
-    // È l'errore che avevo fatto io scrivendo la funzione, e la prova serve anche a questo.
+    // Un pin può puntare al luogo della sede o al negozio stesso: in tutti e due i casi il negozio è agganciato al pin da
+    // `dettaglioRiferimento`. La prova serve anche a non cercarlo per tipo di riferimento.
     // Serve poi un pin che al 20 aprile **non** sia già bloccato dalle sue condizioni: se
     // partisse bloccato, il test non distinguerebbe la copia dalla verità.
     const candidati = db.prepare(`SELECT s.id, s.mappa_chiave, n.chiave AS riferimento_chiave FROM spillo s

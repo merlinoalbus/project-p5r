@@ -76,18 +76,15 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
         // i negozi che hanno qui la loro sede (072)
         for (const n of prepared('SELECT chiave FROM negozio WHERE sede_chiave = ? AND nascosto = 0 ORDER BY ordine').all(chiave) as Array<{ chiave: string }>) riferimenti.push({ tipo: 'negozio', chiave: n.chiave });
       }
-      // Un'attività si svolge in un luogo, e la scheda ne registra il quartiere. Dentro quel
-      // quartiere il luogo è quello che porta il suo stesso nome — quando ce n'è esattamente uno:
-      // altrimenti resta il quartiere, che è comunque un posto sulla mappa.
+      // Un'attività si svolge in un luogo: la sua sede. Il quartiere si ricava dal luogo (più sotto, se
+      // le associazioni dirette non portano da nessuna parte): non è un campo dell'attività.
       if (tipo === 'attivita') {
         // Un'attività dichiara dove si svolge, e quel campo è l'unica associazione registrata che
         // abbia: si usa quella. Cercare il luogo per somiglianza del nome — «Freccette» dentro
         // «Penguin Sniper (Freccette e Biliardo)» — porterebbe al posto giusto per caso e a quello
         // sbagliato al primo nome che cambia, e contraddirebbe il contratto di questa funzione.
-        const a = prepared('SELECT luogo_chiave, sede_chiave FROM attivita WHERE chiave = ?').get(chiave) as { luogo_chiave: string | null; sede_chiave: string | null } | undefined;
-        // la sede (072) è il posto esatto; il quartiere resta il ripiego per chi non ne ha una
+        const a = prepared('SELECT sede_chiave FROM attivita WHERE chiave = ?').get(chiave) as { sede_chiave: string | null } | undefined;
         if (a?.sede_chiave && prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(a.sede_chiave)) riferimenti.push({ tipo: 'luogo', chiave: a.sede_chiave });
-        else if (a?.luogo_chiave && prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(a.luogo_chiave)) riferimenti.push({ tipo: 'quartiere', chiave: a.luogo_chiave });
       }
       // Un confidente si incontra in luoghi precisi, e il catalogo li elenca: sono quelli, non
       // una somiglianza di nome.
@@ -169,14 +166,12 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
             riferimenti.push({ tipo: 'dungeon', chiave: d.dungeon_chiave });
           }
         }
-        // Un negozio dichiara dove sta, e in quarantatré casi su quarantasette quel campo è un
-        // quartiere del catalogo: nove negozi non hanno un luogo che li ospiti — un venditore
-        // ambulante, uno dentro un Palazzo, uno online — e senza questo resterebbero irraggiungibili.
+        // Un negozio sta nel quartiere del luogo che è la sua sede. Chi non ha una sede — un venditore
+        // ambulante, uno dentro un Palazzo, uno online — non ha un quartiere e resta com'è.
         for (const n of [...riferimenti].filter(r => r.tipo === 'negozio')) {
-          const d = prepared('SELECT luogo_chiave FROM negozio WHERE chiave = ?').get(n.chiave) as { luogo_chiave: string | null } | undefined;
-          if (d?.luogo_chiave && prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(d.luogo_chiave)
-              && !riferimenti.some(r => r.tipo === 'quartiere' && r.chiave === d.luogo_chiave)) {
-            riferimenti.push({ tipo: 'quartiere', chiave: d.luogo_chiave });
+          const d = prepared('SELECT l.quartiere_chiave FROM negozio n JOIN luogo l ON l.chiave = n.sede_chiave JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE n.chiave = ?').get(n.chiave) as { quartiere_chiave: string } | undefined;
+          if (d && !riferimenti.some(r => r.tipo === 'quartiere' && r.chiave === d.quartiere_chiave)) {
+            riferimenti.push({ tipo: 'quartiere', chiave: d.quartiere_chiave });
           }
         }
         // Un luogo sta in un quartiere, e il quartiere una mappa ce l'ha sempre.

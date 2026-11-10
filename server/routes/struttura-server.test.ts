@@ -78,7 +78,6 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     const shibuya = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
     const untouchable = shibuya.luoghi.find((l) => l.chiave === 'shibuya/untouchable')!;
     expect(untouchable.negozi).toEqual([{ chiave: 'untouchable', nome: 'Untouchable' }]);
-    expect(untouchable.negozio).toBe('untouchable');
     expect(untouchable.origine).toBe('seed');
     expect(shibuya.luoghi.find((l) => l.chiave === 'shibuya/diner')?.attivita).toEqual([{ chiave: 'studio-diner-shibuya', nome: expect.any(String) }]);
     // un luogo nuovo dell'utente, nascosto e riportato in elenco dei rimossi
@@ -90,13 +89,13 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     const modificato = (await request(app).put(`/api/catalogo/luogo/${encodeURIComponent('shibuya/untouchable')}`).send({ orari_json: { giorni: ['lunedi'] } })).body.data as ElementoCatalogoDto;
     expect(modificato.origine).toBe('utente');
     const dopo = ((await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto).luoghi.find((l) => l.chiave === 'shibuya/untouchable')!;
-    expect(dopo.giorni).toEqual(['lunedi']);
+    expect(dopo.orari?.giorni).toEqual(['lunedi']);
     expect(dopo.giorniTesto).toBe('solo il lunedì');
     // il ripristino rimette gli orari della guida (il luogo non ne ha: i giorni tornano vuoti)
     expect((await request(app).delete(`/api/catalogo/luogo/${encodeURIComponent('shibuya/untouchable')}`)).body.data.esito).toBe('ripristinata');
     const ripristinato = ((await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto).luoghi.find((l) => l.chiave === 'shibuya/untouchable')!;
     expect(ripristinato.origine).toBe('seed');
-    expect(ripristinato.giorni).toEqual([]);
+    expect(ripristinato.orari?.giorni).toEqual([]);
     expect(((await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto).luoghi.some((l) => l.chiave === creato.chiave && l.origine === 'utente')).toBe(true);
     expect((await request(app).post('/api/catalogo/luogo').send({ nome: 'Altrove', tipo: 'negozio', quartiere_chiave: 'atlantide' })).status).toBe(400);
     await request(app).put(`/api/catalogo/luogo/${encodeURIComponent('shibuya/diner')}/nascosta`).send({ nascosta: true });
@@ -113,14 +112,15 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
 
   it('scrivendo la sede il quartiere segue; gli orari e il programma punti si salvano come valori', async () => {
     const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Bottega di prova', tipo: 'misto', sede_chiave: 'kichijoji/jazz-jin', orari_json: { giorni: ['domenica'], fasce: ['sera'] }, programma_punti_json: { nome: 'Punti', unita: 'punti', calcolo: 'manuale' } })).body.data as ElementoCatalogoDto;
-    expect(n.dati).toMatchObject({ luogo_chiave: 'kichijoji', sede_chiave: 'kichijoji/jazz-jin' });
+    expect(n.dati).toMatchObject({ sede_chiave: 'kichijoji/jazz-jin' });
     const scheda = (await request(app).get(`/api/compendio/negozi/${n.chiave}`)).body.data as NegozioDettaglioDto;
+    expect(scheda.quartiereChiave).toBe('kichijoji');
     expect(scheda.orariStrutturati).toEqual({ giorni: ['domenica'], fasce: ['sera'], chiusoConPioggia: false, nota: null });
     expect(scheda.orariTesto).toBe('Solo di sera, solo la domenica');
     expect(scheda.programmaPunti).toEqual({ nome: 'Punti', unita: 'punti', calcolo: 'manuale' });
     expect((await request(app).post('/api/catalogo/negozio').send({ nome: 'Altrove', sede_chiave: 'nessun/luogo' })).status).toBe(400);
     const a = (await request(app).post('/api/catalogo/attivita').send({ nome: 'Prova al jazz', tipo: 'lavoro', sede_chiave: 'kichijoji/jazz-jin', paga_yen: 3000 })).body.data as ElementoCatalogoDto;
-    expect(a.dati).toMatchObject({ luogo_chiave: 'kichijoji', tracciamento: 'svolta', paga_yen: 3000 });
+    expect(a.dati).toMatchObject({ sede_chiave: 'kichijoji/jazz-jin', tracciamento: 'svolta', paga_yen: 3000 });
     expect((await request(app).post('/api/catalogo/attivita').send({ nome: 'Studio pagato', tipo: 'studio', paga_yen: 100 })).status).toBe(400);
     expect((await request(app).post('/api/catalogo/film').send({ nome: 'Al cinema due volte', dove: 'cinema', sessioni: 2 })).status).toBe(400);
   });

@@ -1,11 +1,9 @@
 // ============================================================
-// SceltaLuogo — la sede di un negozio o di un'attività: un luogo della città, o solo il quartiere
+// SceltaLuogo — la sede di un negozio o di un'attività: un luogo della città
 // ============================================================
 //
-// I luoghi sono raggruppati per quartiere con il tipo come dettaglio; in testa a ogni gruppo c'è
-// «solo il quartiere», per chi sta in un quartiere senza un posto preciso. Scegliere un luogo
-// imposta anche il quartiere (è l'invariante del server: il quartiere è quello della sede). La
-// voce vuota è per chi non ha una sede in città (online, ambulante, dentro un Palazzo).
+// I luoghi sono raggruppati per quartiere con il tipo come dettaglio. La sede è l'unico «dove» (`sede_chiave`): il quartiere se ne
+// deriva (luogo → quartiere) e non si scrive più. La voce vuota è per chi non ha una sede in città (online, ambulante, dentro un Palazzo).
 // ============================================================
 
 import { useCarica } from '../../hooks/useCarica';
@@ -15,41 +13,31 @@ import { definizioneTipoLuogo } from '../../../shared/tipiLuogo';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
-export interface SedeScelta { sede: string | null; quartiere: string | null }
-
 interface Props {
-  valore: SedeScelta;
-  onCambia: (v: SedeScelta) => void;
+  /** La chiave del luogo scelto (`sede_chiave`), o null senza sede. */
+  valore: string | null;
+  onCambia: (sede: string | null) => void;
   etichetta?: string;
   disabilitato?: boolean;
 }
 
-const SOLO_QUARTIERE = 'q:';
-
 /**
- * Il selettore della sede: carica quartieri e luoghi e costruisce le voci per quartiere («solo il quartiere» in testa,
- * poi i luoghi col loro tipo). La voce vuota azzera sede e quartiere; «solo il quartiere» lascia la sede vuota; un
- * luogo imposta anche il suo quartiere. Un valore salvato che l'elenco non conosce resta come prima voce.
+ * Il selettore della sede: carica quartieri e luoghi e costruisce le voci per quartiere (i luoghi col loro tipo). La voce vuota
+ * azzera la sede. Un valore salvato che l'elenco non conosce resta come prima voce.
  */
 export function SceltaLuogo({ valore, onCambia, etichetta = 'Sede', disabilitato }: Props) {
   const dati = useCarica(async () => { const [quartieri, luoghi] = await Promise.all([getQuartieri(), getLuoghi()]); return { quartieri, luoghi }; }, []);
   const opzioni: OpzioneSelettore[] = [];
   for (const q of dati.dati?.quartieri ?? []) {
-    opzioni.push({ chiave: `${SOLO_QUARTIERE}${q.chiave}`, nome: `${q.nome} (solo il quartiere)`, gruppo: q.nome });
     for (const l of (dati.dati?.luoghi ?? []).filter((x) => x.quartiere === q.chiave)) opzioni.push({ chiave: l.chiave, nome: l.nome, dettaglio: definizioneTipoLuogo(l.tipo).nome, gruppo: q.nome });
   }
   // un valore che l'elenco non conosce (dati vecchi) resta visibile, non sparisce
-  const attuale = valore.sede ?? (valore.quartiere ? `${SOLO_QUARTIERE}${valore.quartiere}` : '');
-  if (attuale && !opzioni.some((o) => o.chiave === attuale)) opzioni.unshift({ chiave: attuale, nome: valore.sede ?? valore.quartiere ?? attuale });
+  const attuale = valore ?? '';
+  if (attuale && !opzioni.some((o) => o.chiave === attuale)) opzioni.unshift({ chiave: attuale, nome: attuale });
   return (
     <div className="editor-mappa__campo">
       <Selettore etichetta={etichetta} valore={attuale} disabilitato={disabilitato || dati.caricamento} ricerca="sempre" vuoto="Nessuna sede (online, ambulante o da assegnare)" opzioni={opzioni}
-        onCambia={(k) => {
-          if (!k) return onCambia({ sede: null, quartiere: null });
-          if (k.startsWith(SOLO_QUARTIERE)) return onCambia({ sede: null, quartiere: k.slice(SOLO_QUARTIERE.length) });
-          const luogo = dati.dati?.luoghi.find((l) => l.chiave === k);
-          onCambia({ sede: k, quartiere: luogo?.quartiere ?? valore.quartiere });
-        }} />
+        onCambia={(k) => onCambia(k || null)} />
       {dati.errore && <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i luoghi. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></span>}
     </div>
   );

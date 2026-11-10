@@ -168,8 +168,8 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
           {confidente && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Usa le fasce del Confidente" disabled={disabilitato} onClick={() => imposta({ fascia: null })} />}
           {pesca && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Usa giorno e sera con i profili pesca" disabled={disabilitato} onClick={() => imposta({ fascia: 'entrambe' })} />}
         </Blocco>}
-        <SceltaLuogo etichetta="Dove si svolge" valore={{ sede: (dati.sede_chiave as string | null) ?? null, quartiere: (dati.luogo_chiave as string | null) ?? null }} disabilitato={disabilitato}
-          onCambia={(v) => imposta({ sede_chiave: v.sede, luogo_chiave: v.quartiere })} />
+        <SceltaLuogo etichetta="Dove si svolge" valore={(dati.sede_chiave as string | null) ?? null} disabilitato={disabilitato}
+          onCambia={(sede) => imposta({ sede_chiave: sede })} />
         {campiPropri && <Campo nome="sessioni" etichetta={videogioco ? 'Round per finirlo' : 'Sessioni'} tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto={videogioco ? 'Quanti round servono per completarlo' : 'Se si completa in più volte'} />}
         {campiPropri && !videogioco && (
           <Blocco>

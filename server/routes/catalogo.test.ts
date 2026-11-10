@@ -22,7 +22,7 @@ describe('API catalogo (Fase 16.1)', () => {
 
   it('crea un negozio e un suo articolo: compaiono nelle pagine della Guida e sopravvivono a un nuovo caricamento del seed', async () => {
     const creato = await request(app).post('/api/catalogo/negozio').send({
-      nome: 'Negozio di retrogaming Super Baron', luogo: 'Akihabara', luogo_chiave: 'akihabara', tipo: 'oggetti',
+      nome: 'Negozio di retrogaming Super Baron', sede_chiave: 'akihabara/akiba-electronics', tipo: 'oggetti',
       sblocco: 'dal 1 settembre', fonte: 'https://www.allgamestaff.it/persona-5-royal/videogiochi/',
     });
     expect(creato.status).toBe(201);
@@ -74,7 +74,7 @@ describe('API catalogo (Fase 16.1)', () => {
   });
 
   it('rifiuta riferimenti inesistenti e riporta il riepilogo per tipo', async () => {
-    expect((await request(app).post('/api/catalogo/negozio').send({ nome: 'Fantasma', luogo_chiave: 'quartiere-che-non-esiste' })).status).toBe(400);
+    expect((await request(app).post('/api/catalogo/negozio').send({ nome: 'Fantasma', sede_chiave: 'quartiere/luogo-che-non-esiste' })).status).toBe(400);
     expect((await request(app).post('/api/catalogo/articolo').send({ negozio_chiave: 'negozio-che-non-esiste', nome: 'Nulla' })).status).toBe(400);
     expect((await request(app).post('/api/catalogo/negozio').send({ nome: '' })).status).toBe(400);
     const riepilogo = (await request(app).get('/api/catalogo')).body.data as RiepilogoCatalogoDto;

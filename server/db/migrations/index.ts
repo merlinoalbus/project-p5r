@@ -435,6 +435,10 @@ import { migration341 } from './341_voci_akechi_igor_e_impeto_superiore.js';
 import { migration342 } from './342_date_di_kaneshiro_medjed_niijima_e_lettera.js';
 // 2026-11-01 (decisioni dell'utente: «Sì, toglile», «Togli l'avviso» e i doppioni dopo l'allineamento): avvisi del giorno decisi
 import { migration343 } from './343_avvisi_del_giorno_decisi.js';
+// 2026-11-09 (lotto L1 «Un solo dove»): pin «attività» portati al luogo (344), note d'archivio dei negozi riga per riga (345), via le sette colonne che ripetevano il «dove» (346)
+import { migration344 } from './344_pin_attivita_su_luogo.js';
+import { migration345 } from './345_note_darchivio_dei_negozi.js';
+import { migration346 } from './346_un_solo_dove_colonne_tolte.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -461,4 +465,5 @@ export const migrations: Migration[] = [
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
+  migration344, migration345, migration346,
 ];

@@ -51,7 +51,7 @@ import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.j
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
 import {
-  ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_PER_CATEGORIA,
+  ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_AMMESSI_PER_CATEGORIA,
   TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo
 } from '../../../shared/spilli.js';
 import type {
@@ -327,7 +327,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const negozio = sedi[0] ? negozioDettaglio(sedi[0].chiave, ctx, chiave) : null;
       const riga = luoghi.righe.get(l.chiave);
       const orari = orariDelLuogo(riga?.orari_json ?? null);
-      return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: orari.fasce.length === 1 ? orari.fasce[0] : 'entrambe',
+      return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre,
         orariTesto: descriviOrariDelLuogo(orari), presenza: presenzaDelLuogo(riga ? condizioniDiSblocco(riga, luoghi.inviti) : [], orari, luoghi.st), casa,
         negozi: sedi.map((n) => ({ chiave: n.chiave, nome: n.nome, casa: `${casa}#negozio-${encodeURIComponent(n.chiave)}` })) }, negozio };
     }
@@ -522,10 +522,11 @@ function identitaSpillo(s: { tipo: string; nome: string; x: number; y: number; r
  * non l'ultima che ha vinto.
  */
 function conNegozioVivo(esito: DisponibilitaDto | undefined, dettaglio: DettaglioSpilloDto | null): DisponibilitaDto | undefined {
-  // Non si guarda `dettaglio.tipo`, e non è un dettaglio: **nessun pin punta a un negozio**. I
-  // trentasei pin dei negozi puntano a un `luogo`, e il negozio è agganciato lì da
-  // `dettaglioRiferimento`. Cercandolo per tipo, questa funzione non avrebbe fatto niente su
-  // nessuno spillo dell'atlante — e sarebbe passata verde, perché non rompere non è funzionare.
+  // Non si guarda `dettaglio.tipo`: il pin può puntare al punto vendita (`riferimento_tipo = 'negozio'`, come i distributori e alcuni
+  // negozi) oppure al luogo della sede (`'luogo'`), e in entrambi i casi `dettaglioRiferimento` mette il punto vendita in
+  // `dettaglio.negozio`: per un pin di negozio quello citato (con la sede del pin), per un pin di luogo il primo negozio che ha lì la
+  // sede. Cercandolo per tipo, la funzione non farebbe niente sui pin dell'altro genere — e passerebbe verde, perché non rompere non
+  // è funzionare.
   const negozio = dettaglio?.negozio?.disponibilita;
   return conDisponibilitaNegozio(esito, negozio);
 }
@@ -1225,22 +1226,32 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
   }
 }
 
+/**
+ * Vero se la categoria ammette il riferimento. Un riferimento `attivita` (un'attività sta in un luogo: il pin punta al luogo) non si
+ * offre più né si scrive, ma uno già sul pin (un backup di prima della migrazione 344 portato con «Importa») si tollera finché la
+ * migrazione non lo riallinea: lo si riconosce solo se è identico a quello che il pin ha adesso.
+ */
+function riferimentoAmmesso(categoria: ReturnType<typeof categoriaSpillo>, rif: { tipo: string; chiave: string }, attuale?: { tipo: string | null; chiave: string | null }): boolean {
+  if (RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoria].includes(rif.tipo as TipoRiferimento)) return true;
+  return categoria === 'citta' && rif.tipo === 'attivita' && attuale?.tipo === 'attivita' && (attuale.chiave ?? '') === rif.chiave;
+}
+
 /** La categoria del tipo decide il resto dello spillo (richiesta dell'utente, 2026-09-11).
  *
  * - **consumabile** è collezionabile per definizione, gli altri no: il campo non si sceglie;
  * - **città** non è condizionato: la disponibilità è del negozio che mostra, non del segnalino; il **Confidente** sì
  *   (`ammetteCondizioni`, scelta dell'utente del 2026-10-04: dal Confidente il pin non eredita nessuna disponibilità);
  * - il **riferimento** deve essere di un tipo ammesso dalla categoria (uno spostamento porta a una
- *   mappa, uno spillo di città a un negozio, un'attività, un luogo o un Confidente…): un tipo
+ *   mappa, uno spillo di città a un negozio, un luogo o un Confidente…): un tipo
  *   estraneo è un errore, non un dato da tenere;
  * - la **destinazione** vale solo per gli spostamenti.
  */
-function applicaRegoleCategoria<T extends DatiSpillo>(tipo: TipoSpillo, dati: T): T {
+function applicaRegoleCategoria<T extends DatiSpillo>(tipo: TipoSpillo, dati: T, attuale?: { tipo: string | null; chiave: string | null }): T {
   const categoria = categoriaSpillo(tipo);
   const out: DatiSpillo = { ...dati, collezionabile: categoria === 'consumabile' };
   if (!ammetteCondizioni(tipo)) out.condizioni = [];
   if (categoria !== 'spostamento') out.destinazione = null;
-  if (out.riferimento && !RIFERIMENTI_PER_CATEGORIA[categoria].includes(out.riferimento.tipo)) {
+  if (out.riferimento && !riferimentoAmmesso(categoria, out.riferimento, attuale)) {
     throw httpErrors.badRequest('riferimento-non-ammesso', `Uno spillo «${DEFINIZIONI_SPILLO[tipo].nome}» (${categoria}) non può collegarsi a «${out.riferimento.tipo}».`);
   }
   return out as T;
@@ -1337,8 +1348,9 @@ export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto 
   // tocca **non si ri-verifica** (le schede della Guida hanno riferimenti a mappe che non esistono
   // più, e un salvataggio del nome non deve fallire per questo); se non è più della categoria, cade.
   const tipoFinale = dati.tipo ?? r.tipo;
-  if (dati.riferimento === undefined && r.riferimento_tipo && !RIFERIMENTI_PER_CATEGORIA[categoriaSpillo(tipoFinale)].includes(r.riferimento_tipo)) dati = { ...dati, riferimento: null };
-  dati = applicaRegoleCategoria(tipoFinale, dati);
+  const attuale = { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave };
+  if (dati.riferimento === undefined && r.riferimento_tipo && !riferimentoAmmesso(categoriaSpillo(tipoFinale), { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave ?? '' }, attuale)) dati = { ...dati, riferimento: null };
+  dati = applicaRegoleCategoria(tipoFinale, dati, attuale);
   if (dati.mappa) dati={...dati,mappa:rigaMappa(dati.mappa).chiave};
   if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
   verificaRiferimento(dati.riferimento, { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave });
@@ -1689,7 +1701,13 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
 /** Il riferimento proprio di un pin del pacchetto, con le regole della sua categoria: un «punto» (pacchetti di prima della 094)
  *  non è un riferimento ma una voce della guida del pin (`vociDichiarate`). */
 function riferimentoDelPacchetto(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined, categoria: ReturnType<typeof categoriaSpillo>): { tipo: TipoRiferimento; chiave: string } | null {
-  return rif && rif.tipo !== 'punto' && RIFERIMENTI_PER_CATEGORIA[categoria].includes(rif.tipo) ? rif : null;
+  // un pacchetto di prima della migrazione 344 cita ancora `attivita`: la chiave è quella di un luogo (la sede dell'attività) e il pin
+  // la importa come pin di quel luogo, come ha fatto la migrazione sui pin esistenti; senza un luogo con quella chiave (la migrazione 344
+  // lascia sull'attività i pin che la citano davvero) il pin non porta un riferimento che non punta a niente
+  const r = rif?.tipo === 'attivita' && categoria === 'citta'
+    ? (prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(rif.chiave) ? { tipo: 'luogo' as const, chiave: rif.chiave } : null)
+    : rif;
+  return r && r.tipo !== 'punto' && RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoria].includes(r.tipo) ? r : null;
 }
 
 /** Le voci della guida che un pin del pacchetto dichiara: il campo `voci` (098), o `voce` di un pacchetto della 094-097, o il

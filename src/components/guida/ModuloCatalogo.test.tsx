@@ -4,7 +4,7 @@
 // ============================================================
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { scegliVoce, vociSelettore } from '../../../test/selettore';
+import { scegliVoce } from '../../../test/selettore';
 import { ModuloCatalogo } from './ModuloCatalogo';
 import type { ElementoCatalogoDto } from '../../types';
 
@@ -31,7 +31,7 @@ const { oggetti } = vi.hoisted(() => ({ oggetti: [
 
 const negozioSeed: ElementoCatalogoDto = {
   tipo: 'negozio', chiave: 'untouchable', nome: 'Untouchable', origine: 'seed', modificata: false, nascosta: false, aggiornata: null,
-  dati: { nome: 'Untouchable', tipo: 'armi', luogo: 'Shibuya, retro', luogo_chiave: 'shibuya', sede_chiave: 'shibuya/untouchable', gestore: 'Munehisa Iwai', confidente_chiave: 'iwai', orari_json: '{"giorni":[],"fasce":["sera"],"chiusoConPioggia":false,"nota":null}', programma_punti_json: null, note: null },
+  dati: { nome: 'Untouchable', tipo: 'armi', sede_chiave: 'shibuya/untouchable', gestore: 'Munehisa Iwai', confidente_chiave: 'iwai', orari_json: '{"giorni":[],"fasce":["sera"],"chiusoConPioggia":false,"nota":null}', programma_punti_json: null, note: null },
 };
 
 /** La tessera (radio) con il nome dato dentro il gruppo di scelta con l'etichetta `gruppo`. */
@@ -124,7 +124,7 @@ describe('ModuloCatalogo', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: /Chiuso nei giorni di pioggia/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
     await waitFor(() => expect(api.aggiornaElementoCatalogo).toHaveBeenCalledWith('negozio', 'untouchable', expect.objectContaining({
-      nome: 'Untouchable', sede_chiave: 'shibuya/untouchable', luogo_chiave: 'shibuya', confidente_chiave: 'iwai',
+      nome: 'Untouchable', sede_chiave: 'shibuya/untouchable', confidente_chiave: 'iwai',
       orari_json: { giorni: ['domenica'], fasce: ['sera'], chiusoConPioggia: true, nota: null },
     })));
     const [, , dati] = api.aggiornaElementoCatalogo.mock.calls[0];
@@ -157,19 +157,17 @@ describe('ModuloCatalogo', () => {
   });
 });
 
-/** La sede è un luogo della città e porta con sé il quartiere; «solo il quartiere» lascia la sede vuota. */
-it('la sede scelta imposta il quartiere; «solo il quartiere» lascia la sede vuota', async () => {
+/** L1: la sede è l'unico «dove» di un negozio (il quartiere se ne deriva): si scrive solo `sede_chiave`. */
+it('la sede scelta scrive solo la sede, senza quartiere né testo', async () => {
   api.creaElementoCatalogo.mockResolvedValue({ nome: 'Chiosco' });
   render(<ModuloCatalogo tipo="negozio" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
-  await waitFor(() => expect(vociSelettore('Sede')).toContain('Shibuya (solo il quartiere)'));
   fireEvent.change(screen.getByLabelText('Nome del negozio'), { target: { value: 'Chiosco' } });
   scegliVoce('Sede', /^Untouchable/);
   fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
-  await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('negozio', expect.objectContaining({ sede_chiave: 'shibuya/untouchable', luogo_chiave: 'shibuya' })));
-
-  scegliVoce('Sede', 'Shinjuku (solo il quartiere)');
-  fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
-  await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('negozio', expect.objectContaining({ sede_chiave: null, luogo_chiave: 'shinjuku' })));
+  await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('negozio', expect.objectContaining({ sede_chiave: 'shibuya/untouchable' })));
+  const [, dati] = api.creaElementoCatalogo.mock.calls.at(-1)!;
+  expect(dati).not.toHaveProperty('luogo_chiave');
+  expect(dati).not.toHaveProperty('luogo');
 });
 
 // ============================================================

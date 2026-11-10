@@ -46,16 +46,16 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   // L5: `orari_json` conta solo per un negozio senza sede (online, televisione); con la sede valgono gli orari del luogo, salvo
   // `eccezione_orari_json` quando la guida distingue il negozio (R5-12b)
   // chiusura dell'ondata 5: `sconto_json`, lo sconto legato al rango di un Confidente (migrazione 254), il suo unico punto
-  negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'sconto_json', 'note'],
-  // Ondata 5, lotto F (decisione 21): `effetto_json`, `effetto` e `statistiche` non sono più dell'offerta — il testo dell'effetto e le
-  // statistiche vivono in un punto solo, l'oggetto del catalogo (`catalogo_oggetto.effetto`, `statistiche_json`). Restano scrivibili solo
-  // senza il catalogo (pacchetti di prima di M7, `campiDisponibili`), dove la riga è l'unico punto.
+  // La posizione è solo `sede_chiave` (luogo → quartiere): il quartiere si deriva sempre, non si scrive.
+  negozio: ['nome', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'sconto_json', 'note'],
+  // `effetto_json`, `effetto` e `statistiche` non sono più dell'offerta (colonne tolte): il testo dell'effetto e le statistiche vivono
+  // in un punto solo, l'oggetto del catalogo (`catalogo_oggetto.effetto`, `statistiche_json`).
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'nota', 'verificato'],
   // L13 (ondata 7, O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca`, `effetto_json` dei libri e `dote`, `note`, `note_successive` dei
   // film non si scrivono più: che cosa dà la lettura sono gli effetti, dove si ottiene sono articoli, posizioni e ricompense
   libro: ['condizioni_json', 'nome', 'prezzo', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
-  attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia',
+  attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'sede_chiave', 'fascia',
     'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
   // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` non è più una
   // colonna (L11, migrazione 193: si ricava dagli orari) e i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
@@ -76,7 +76,8 @@ const TABELLA: Record<TipoCatalogo, string> = { negozio: 'negozio', articolo: 'a
  * - `haVerificato`: la colonna che distingue il dato della guida da quello di fonte secondaria.
  *   Una riga aggiunta a mano parte da «non verificata», che è la verità;
  * - `padre`: il riferimento che deve esistere davvero — un articolo senza il suo negozio, o
- *   un'attività in un quartiere inventato, sparirebbe dalle pagine senza dire perché;
+ *   un luogo in un quartiere inventato, sparirebbe dalle pagine senza dire perché (la sede di un
+ *   negozio o di un'attività è il luogo, verificato a parte: il loro quartiere si deriva da lì);
  * - `raggruppaOrdinePer`: dove l'ordine è relativo al genitore invece che globale;
  * - `campoNome`: la colonna che fa da titolo. Quasi ovunque è `nome`; una domanda in classe si
  *   chiama con **la domanda** e una riga del cruciverba col suo **indizio**, perché quelle tabelle
@@ -98,7 +99,7 @@ const PROFILO: Record<TipoCatalogo, {
   // `periodo` non è più nello schema (voce 11): resta qui solo per `eliminaElemento`, che ripristina istantanee
   // (`seed_json`) di prima, dove la frase c'era ancora e va convertita in condizioni come allora.
   film: { condizioniDa: (d) => [d.periodo as string | null], haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il film' },
-  attivita: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: true, padre: { campo: 'luogo_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' }, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: "L'attività" },
+  attivita: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: "L'attività" },
   luogo: { haVerificato: true, padre: { campo: 'quartiere_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' }, raggruppaOrdinePer: 'quartiere_chiave', campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il luogo' },
   domanda: { haVerificato: false, campoNome: 'domanda', etichettaCampoNome: 'Il testo della domanda', nomeTipo: 'La domanda' },
   cruciverba: { haVerificato: false, campoNome: 'indizio', etichettaCampoNome: "L'indizio", nomeTipo: 'La riga del cruciverba' },
@@ -159,8 +160,7 @@ function assicuraIdentitaLettura(tipo: TipoCatalogo, chiave: string, nome: strin
 function campiDisponibili(tipo: TipoCatalogo): readonly string[] {
   // un file di gioco di prima della 254 non ha lo sconto del negozio: non si legge né si scrive
   if (tipo === 'negozio' && !prepared("SELECT 1 FROM pragma_table_info('negozio', 'main') WHERE name = 'sconto_json'").get()) return CAMPI.negozio.filter((c) => c !== 'sconto_json');
-  return tipo === 'articolo' && !catalogoOggettiDisponibile()
-    ? [...CAMPI[tipo].filter((c) => c !== 'catalogo_chiave' && c !== 'costo_json'), 'effetto_json', 'effetto', 'statistiche'] : CAMPI[tipo];
+  return tipo === 'articolo' && !catalogoOggettiDisponibile() ? CAMPI[tipo].filter((c) => c !== 'catalogo_chiave' && c !== 'costo_json') : CAMPI[tipo];
 }
 
 function legameStoricoCambiato(d: Record<string, unknown>, r: Riga | null): boolean {
@@ -206,7 +206,6 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   // la sede di un negozio o di un'attività è un luogo della città, e deve esistere
   if ((tipo === 'negozio' || tipo === 'attivita') && dati.sede_chiave != null && !esiste('luogo', dati.sede_chiave)) throw httpErrors.badRequest('luogo-sconosciuto', `Il luogo '${String(dati.sede_chiave)}' non esiste.`);
   if (tipo === 'negozio') {
-    if (dati.luogo_chiave != null && !esiste('quartiere', dati.luogo_chiave)) throw httpErrors.badRequest('quartiere-sconosciuto', `Il quartiere '${String(dati.luogo_chiave)}' non esiste.`);
     if (dati.confidente_chiave != null && !esiste('confidente', dati.confidente_chiave)) throw httpErrors.badRequest('confidente-sconosciuto', `Il Confidente '${String(dati.confidente_chiave)}' non esiste.`);
     // revisione della chiusura dell'ondata 5 (N3): il Confidente dello sconto esiste (con una chiave inesistente lo sconto non varrebbe mai)
     const sconto = typeof dati.sconto_json === 'string' ? normalizzaSconto(dati.sconto_json) : null;
@@ -259,7 +258,6 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
 
 /** Le regole che valgono su ogni scrittura, prima di toccare la tabella.
  *
- * - **Invariante della sede** (072): con una sede, `luogo_chiave` è il quartiere della sede;
  * - **effetti dal modulo vecchio**: finché il modulo scrive `doti_json` (attività) senza `effetti_json`, la dichiarazione
  *   strutturata si ricava da lì come ha fatto la migrazione 074 — ma **solo se quel campo cambia
  *   davvero** rispetto alla riga, e conservando le voci che non vengono da lì (una voce «descrittivo», le voci con
@@ -286,7 +284,7 @@ function vociDaiCampiVecchi(tipo: TipoCatalogo, d: Record<string, unknown>): Voc
 /** Vero se una voce viene dai campi vecchi (una Dote semplice, senza condizioni): è quella che si può ricostruire. */
 const eVoceDerivabile = (v: VoceEffetto) => v.effetto.famiglia === 'dote' && !(v.condizioni && v.condizioni.length);
 
-/** Applica ai dati in arrivo le regole descritte sopra `CAMPI_EFFETTI`: quartiere ricavato dalla sede, `effetti_json`
+/** Applica ai dati in arrivo le regole descritte sopra `CAMPI_EFFETTI`: `effetti_json`
  *  ricostruito dai campi vecchi solo se cambiano (tenendo le voci non derivabili della riga), tracciamento dal tipo su
  *  un'attività nuova, e `effetti_json` sempre normalizzato (illeggibile → lista vuota). Non tocca l'oggetto ricevuto. */
 function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, esistente: Riga | null): Record<string, unknown> {
@@ -301,12 +299,11 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   }
   if (tipo === 'articolo') {
     const conCatalogo = catalogoOggettiDisponibile();
-    // Ondata 5, lotto F (decisione 21): con il catalogo il testo dell'effetto e le statistiche vivono solo nell'oggetto. Un valore mandato
-    // per l'offerta non si accetta in silenzio (prima si scartava con un 200): si rifiuta e si dice dove si scrive. `null` o vuoto passano.
-    if (conCatalogo) {
-      const mandati = (['effetto', 'statistiche', 'effetto_json'] as const).filter((c) => d[c] != null && (typeof d[c] !== 'string' || (d[c] as string).trim() !== ''));
-      if (mandati.length) throw httpErrors.badRequest('effetto-nell-oggetto', `L’effetto e le statistiche si scrivono nell’oggetto del catalogo, non nell’offerta (campi: ${mandati.join(', ')}).`);
-    }
+    // Ondata 5, lotto F (decisione 21): il testo dell'effetto e le statistiche vivono solo nell'oggetto del catalogo (l'offerta non ha più le
+    // colonne). Un valore mandato per l'offerta non si accetta in silenzio: si rifiuta e si dice dove si scrive. `null` o vuoto passano.
+    const mandati = (['effetto', 'statistiche', 'effetto_json'] as const).filter((c) => d[c] != null && (typeof d[c] !== 'string' || (d[c] as string).trim() !== ''));
+    if (mandati.length) throw httpErrors.badRequest('effetto-nell-oggetto', `L’effetto e le statistiche si scrivono nell’oggetto del catalogo, non nell’offerta (campi: ${mandati.join(', ')}).`);
+    for (const c of ['effetto_json', 'effetto', 'statistiche']) delete d[c];
     if (!conCatalogo) { delete d.catalogo_chiave; delete d.costo_json; }
     else if (!('catalogo_chiave' in d) && legameStoricoCambiato(d, esistente)) d.catalogo_chiave = chiaveDaLegameStorico(d, esistente);
     const chiave = 'catalogo_chiave' in d ? d.catalogo_chiave : esistente?.catalogo_chiave;
@@ -314,7 +311,7 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
     if (d.costo_json != null) { d.prezzo = null; d.prezzo_per_fascia_json = null; }
     if (conCatalogo && typeof chiave === 'string') {
       // Questi campi sono solo residui storici: non si copiano né si corregge l'identità dal listino.
-      for (const c of ['nome', 'categoria', 'per', 'effetto_json', 'effetto', 'statistiche']) delete d[c];
+      for (const c of ['nome', 'categoria', 'per']) delete d[c];
       // I vecchi NOT NULL restano fino a L11; valori vuoti/non classificati, mai una copia del nome.
       if (!esistente) { d.nome = ''; d.categoria = 'altro'; }
       if ('catalogo_chiave' in dati && dati.catalogo_chiave !== esistente?.catalogo_chiave) { d.oggetto_fonte = null; d.oggetto_chiave = null; }
@@ -323,10 +320,6 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
       const nome = typeof d.nome === 'string' ? d.nome.trim() : esistente?.nome;
       if (!nome) throw httpErrors.badRequest('nome-mancante', 'Per un’offerta senza oggetto collegato indica il nome.');
     }
-  }
-  if ((tipo === 'negozio' || tipo === 'attivita') && typeof d.sede_chiave === 'string') {
-    const q = prepared('SELECT quartiere_chiave FROM luogo WHERE chiave = ?').get(d.sede_chiave) as { quartiere_chiave: string } | undefined;
-    if (q) d.luogo_chiave = q.quartiere_chiave;
   }
   const campi = collegata || pesca ? [] : CAMPI_EFFETTI[tipo] ?? [];
   if (campi.length && d.effetti_json === undefined && campi.some((c) => c in d)) {

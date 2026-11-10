@@ -104,7 +104,8 @@ it('distingue il punto preciso dal posto dichiarato, l’entità inesistente e i
 
 it('un’attività porta al posto che dichiara, e non a uno scelto per somiglianza del nome', async () => {
   const db = getDb();
-  const attivita = db.prepare("SELECT chiave, nome, luogo_chiave FROM attivita WHERE luogo_chiave IS NOT NULL LIMIT 1").get() as { chiave: string; nome: string; luogo_chiave: string };
+  // il quartiere dell'attività è quello del luogo-sede
+  const attivita = db.prepare("SELECT a.chiave, a.nome, l.quartiere_chiave AS luogo_chiave FROM attivita a JOIN luogo l ON l.chiave = a.sede_chiave LIMIT 1").get() as { chiave: string; nome: string; luogo_chiave: string };
   expect(attivita).toBeTruthy();
   // un luogo che *contiene* il nome dell'attività ma che nessuno ha dichiarato: non deve essere scelto
   const esca = `${attivita.luogo_chiave}/esca-${attivita.chiave}`;

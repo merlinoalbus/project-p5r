@@ -61,7 +61,7 @@ function datiCatalogoLettura(oggetto: CatalogoOggettoDto | undefined, prezzoGuid
 }
 
 interface RigaAttivita {
-  chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null;
+  chiave: string; ordine: number; nome: string; tipo: string; luogo: string; sede_chiave: string | null; fascia: string | null;
   costo: number | null; sessioni: number | null; doti_json: string; paga_yen: number | null; paga_massima: number | null; dettagli: string | null;
   effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null;
   /** L13 (migrazione 233): gli esiti dichiarati; assente su uno schema di prima. */
@@ -138,6 +138,7 @@ function provenienzaDelLibro(chiave: string): string {
  *  illeggibile) e la disponibilità valutata se c'è lo stato della partita. */
 const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): AttivitaDto => {
   const oggetto = r.tipo === 'videogioco' ? catalogo.get(r.chiave) : undefined;
+  const sede = r.sede_chiave ? sedi.luoghi.get(r.sede_chiave) : undefined;
   const { prezzo, ...identita } = datiCatalogoLettura(oggetto, r.costo);
   const fonteConfidente = fonteConfidenteAttivita({ ...r }, st);
   const tracciamento = eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo);
@@ -152,11 +153,13 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
     ...(st && !fonteConfidente && tracciamento === 'svolta' ? { volteSvolte: st.attivitaSvolte.get(r.chiave) ?? 0 } : {}),
     pesca: r.pesca_regola_chiave && r.pesca_ruolo ? { regola: leggiRegolaPesca(r.pesca_regola_chiave), ruolo: r.pesca_ruolo } : null,
     confidenteChiave: r.confidente_chiave ?? null, fonteConfidente,
-    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: null, sessioni: r.sessioni,
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo,
+    // il quartiere dell'attività è quello del luogo-sede (un solo «dove»); senza sede resta senza quartiere
+    quartiereChiave: sede?.quartiere_chiave ?? null, quartiereNome: sede?.quartiere_nome ?? null, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: null, sessioni: r.sessioni,
     doti: fonteConfidente ? [] : JSON.parse(r.doti_json) as AttivitaDto['doti'],
     pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(fonteConfidente ? null : r.effetti_json),
     tracciamento, quiz: leggiQuiz(r.quiz_json),
-    sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.luoghi.get(r.sede_chiave)?.nome ?? null) : null,
+    sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sede?.nome ?? null) : null,
     verificato: r.verificato === 1,
     ...(fonteConfidente ? { fascia: null, sblocco: null, doti: [], effetti: [], effettiTesto: [], tracciamento: 'nessuno' as const,
       quiz: null, condizioni: null, disponibilita: null } : disponibilitaAttivita(r, st, sedi)),

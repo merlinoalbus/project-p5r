@@ -541,7 +541,7 @@ function condizioneCita(nodo: unknown, chiave: string, nome: string): boolean {
 
 /** Le tabelle del file di gioco che hanno condizioni, con che cosa sono e le colonne delle condizioni (L13: anche le altre Richieste, sblocco e proroga). */
 const TABELLE_CON_CONDIZIONI: ReadonlyArray<{ tabella: string; cosa: string; colonne?: readonly string[] }> = [
-  { tabella: 'spillo', cosa: 'Pin' }, { tabella: 'negozio', cosa: 'Negozio' }, { tabella: 'articolo', cosa: 'Articolo' }, { tabella: 'libro', cosa: 'Libro' },
+  { tabella: 'spillo', cosa: 'Pin' }, { tabella: 'negozio', cosa: 'Negozio', colonne: ['sblocco_json'] }, { tabella: 'articolo', cosa: 'Articolo' }, { tabella: 'libro', cosa: 'Libro' },
   { tabella: 'film', cosa: 'Film' }, { tabella: 'attivita', cosa: 'Attività' }, { tabella: 'luogo', cosa: 'Luogo' },
   { tabella: 'richiesta', cosa: 'Richiesta', colonne: ['condizioni_json', 'proroga_condizioni_json', 'completamento_condizioni_json'] },
 ];

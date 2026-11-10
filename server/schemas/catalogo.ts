@@ -68,17 +68,15 @@ export const paramsTipoCatalogo = z.object({ tipo: z.enum(TIPI_CATALOGO) });
 export const paramsElementoCatalogo = paramsTipoCatalogo.extend({ chiave: z.string().min(1).max(200) });
 
 /** Campi di un negozio scrivibili dall'utente (le colonne della tabella, in snake_case come nel servizio). */
-// Le condizioni storiche del negozio furono trasferite agli articoli (070). Lo sblocco proprio di L6 usa il campo nuovo sblocco_json.
+// Le condizioni del negozio stanno in `sblocco_json` (le storiche passarono agli articoli, 070).
 export const datiNegozio = z.object({
-  /** Condizioni proprie aggiuntive alla sede; il vecchio condizioni_json resta storico (070). */
+  /** Le condizioni proprie del negozio, aggiuntive a quelle della sede. */
   sblocco_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
-  luogo: testo(200).default(''),
-  luogo_chiave: z.string().max(80).nullable().optional(),
   tipo: z.enum(['armi', 'protezioni', 'accessori', 'oggetti', 'regali', 'abiti', 'cibo', 'online', 'ambulante', 'distributore', 'materiali', 'misto', 'altro']).default('altro'),
   gestore: testo(160).nullable().optional(),
   confidente_chiave: z.string().max(80).nullable().optional(),
-  /** La sede: un luogo della città (migrazione 072). */
+  /** La sede: un luogo della città (migrazione 072). È l'unico «dove» del negozio: il quartiere si deriva dal luogo. */
   sede_chiave: z.string().max(200).nullable().optional(),
   orari_json: orariNegozio.transform((v) => JSON.stringify(v)).optional(),
   /** L5 (R5-12b): l'orario del solo negozio quando la guida lo distingue dal luogo; null = vale quello della sede. */
@@ -125,9 +123,9 @@ export const datiArticolo = z.object({
   prezzo_per_fascia_json: z.unknown().superRefine((v, ctx) => {
     if (v !== null && normalizzaPrezzoPerFascia(v) === null) ctx.addIssue({ code: 'custom', message: 'Prezzo per fascia non valido: un prezzo intero per «giorno» o «sera».' });
   }).transform((v) => (v === null ? null : JSON.stringify(normalizzaPrezzoPerFascia(v)))).optional(),
-  // Ondata 5, lotto F (decisione 21): il testo dell'effetto e le statistiche vivono solo nell'oggetto del catalogo.
-  // Con il catalogo un valore non vuoto di questi tre campi si rifiuta (400 `effetto-nell-oggetto`, `catalogoService.normalizzaScrittura`):
-  // restano nello schema solo per un pacchetto senza catalogo, dove la riga è l'unico punto.
+  // Ondata 5, lotto F (decisione 21): il testo dell'effetto e le statistiche vivono solo nell'oggetto del catalogo (l'offerta non ha più le
+  // colonne). Un valore non vuoto di questi tre campi si rifiuta (400 `effetto-nell-oggetto`, `catalogoService.normalizzaScrittura`)
+  // invece di essere scartato in silenzio: restano nello schema solo per dare quell'errore.
   effetto_json: effettoJson,
   effetto: testo(600).nullable().optional(),
   statistiche: testo(400).nullable().optional(),
@@ -194,8 +192,7 @@ const datiAttivitaBase = z.object({
   nome: testo(160).min(1),
   tipo: z.enum(chiaviDi(TIPI_ATTIVITA)).default('altro'),
   luogo: testo(300).default(''),
-  luogo_chiave: z.string().min(1).max(200).nullable().optional(),
-  /** La sede: un luogo della città (migrazione 072). */
+  /** La sede: un luogo della città (migrazione 072). È l'unico «dove» dell'attività: il quartiere si deriva dal luogo. */
   sede_chiave: z.string().max(200).nullable().optional(),
   fascia: z.enum(chiaviDi(FASCE_ATTIVITA)).nullable().optional(),
   costo: z.number().int().min(0).max(9_999_999).nullable().optional(),

@@ -425,6 +425,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   pannello dell'Area né «Schermate di riferimento» nell'editor.
 
 ## 11. Negozi, oggetti, regali e attività
+- Il «dove» di un negozio o di un'attività è uno solo: la sede (`sede_chiave`, un luogo). Il quartiere si ricava dal luogo della sede e
+  non si salva; il testo libero «Come trovarlo» non esiste più (se portava un'informazione in più sta nella nota del negozio). Senza
+  sede non c'è quartiere (oggi solo il negozio del Palazzo di Niijima). Un pin di città punta al punto vendita o al luogo, mai a
+  un'«attività». Effetto e statistiche di un'offerta sono quelli del suo oggetto nel catalogo.
 - La disponibilità di negozi e articoli «a un dato momento» è l'insieme delle condizioni della guida italiana Royal; il «disponibile
   dal» mostrato si ricava dalla condizione strutturata.
 - Il catalogo degli oggetti è separato dall'equipaggiamento con statistiche; un oggetto ha una sola identità e un solo testo

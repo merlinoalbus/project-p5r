@@ -17,11 +17,12 @@ it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizion
   expect(luogo).toBeTruthy();
   await request(app).post('/api/mappe').send({chiave:'attivita-narrative',nome:'Attività narrative',tipo:'luogo'}).expect(201);
   const partita=(await request(app).post('/api/partite').send({nome:'Verifica attività',fasciaGioco:'giorno'})).body.data.id as number;
-  for(const tipo of ['attivita','luogo'] as const){
+  // L1-02: un pin non si scrive più con il riferimento `attivita` (un'attività sta in un luogo: il pin punta al luogo); resta il solo `luogo`
+  for(const tipo of ['luogo'] as const){
     const response=await request(app).post('/api/mappe/attivita-narrative/spilli').send({tipo:'attivita',nome:'Interazione '+tipo,x:20,y:30,riferimento:{tipo,chiave:luogo.chiave},condizioni:[{tipo:'fascia',fascia:'sera'}]});
     expect(response.status).toBe(201);
     const s=response.body.data as SpilloDto;
-    expect(s.dettaglio).toMatchObject({tipo,luogo:{chiave:luogo.chiave,quartiere:luogo.quartiere_chiave,cosaOffre:luogo.cosa_offre,quando:expect.stringMatching(/^(giorno|sera|entrambe)$/)}});
+    expect(s.dettaglio).toMatchObject({tipo,luogo:{chiave:luogo.chiave,quartiere:luogo.quartiere_chiave,cosaOffre:luogo.cosa_offre,orariTesto:expect.any(String)}});
   }
   /** Rilegge la mappa «attivita-narrative» con la partita di prova e ne restituisce gli spilli (con disponibilità calcolata). */
   const spilli=async()=>((await request(app).get(`/api/mappe/attivita-narrative?partita=${partita}`)).body.data as MappaDto).spilli;
@@ -30,10 +31,10 @@ it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizion
   await request(app).put(`/api/partite/${partita}`).send({fasciaGioco:'sera'}).expect(200);
   expect((await spilli()).every(s=>s.disponibilita?.stato!=='bloccato')).toBe(true);
   const pacchetto=(await request(app).get('/api/mappe/esporta?radice=attivita-narrative')).body.data;
-  expect(pacchetto.mappe[0].spilli.map((s:SpilloDto)=>s.riferimento?.tipo)).toEqual(['attivita','luogo']);
+  expect(pacchetto.mappe[0].spilli.map((s:SpilloDto)=>s.riferimento?.tipo)).toEqual(['luogo']);
   await request(app).delete('/api/mappe/attivita-narrative').expect(204);
   const imported=await request(app).post('/api/mappe/importa').send({pacchetto});
   expect(imported.status).toBe(200);
-  expect(imported.body.data).toMatchObject({mappe:1,spilli:2,saltate:[],condizioniScartate:0});
-  expect((await spilli()).map(s=>s.dettaglio?.tipo)).toEqual(['attivita','luogo']);
+  expect(imported.body.data).toMatchObject({mappe:1,spilli:1,saltate:[],condizioniScartate:0});
+  expect((await spilli()).map(s=>s.dettaglio?.tipo)).toEqual(['luogo']);
 });

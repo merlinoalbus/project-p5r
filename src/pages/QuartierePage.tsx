@@ -23,6 +23,7 @@ import { FinestraAggiungiArea } from '../components/mappe/FinestraAggiungiArea';
 import { FinestraColloca } from '../components/mappe/FinestraColloca';
 import { Modal } from '../components/shared/Modal';
 import { urlCasa } from '../utils/navigazioneMappa';
+import { testoFasciaDelLuogo } from '../utils/fasciaLuogo';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { aggiornaSbloccoQuartiere, getQuartiere, ripristinaSbloccoQuartiere } from '../services/api';
@@ -107,6 +108,8 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
   // a vuoto — ma qui si sta leggendo, non camminando.
   const nonAncora = l.disponibilita != null && l.disponibilita.stato !== 'disponibile';
   const perche = l.disponibilita?.requisiti.filter((r) => r.stato === 'rosso').map((r) => r.dettaglio || r.testo).join(' · ');
+  const fasciaTesto = testoFasciaDelLuogo(l.orari);
+  const primoNegozio = l.negozi[0]?.chiave ?? null;
   return (
     <li id={ancoraLuogo(l.chiave)} className={`card flex flex-col gap-1 testo-13 scroll-mt-20 ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
       <div className="flex flex-wrap items-center gap-2">
@@ -118,7 +121,7 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
         {sugg.evidenziato('luoghi', l.chiave) && <TargaSuggerito motivo={sugg.motivo('luoghi', l.chiave)} compatta />}
         {nonAncora && <span className="chip chip--attivo testo-12" title={perche || undefined}>Non ancora nel mondo</span>}
         {!nonAncora && l.condizioni && l.disponibilita && <span className="chip testo-12" title="La condizione scritta dalla guida risulta soddisfatta in questa partita">sbloccato</span>}
-        {l.quando && <span className="chip">{l.quando === 'entrambe' ? 'giorno e sera' : l.quando}</span>}
+        {fasciaTesto && <span className="chip">{fasciaTesto}</span>}
         {!IN_RILASCIO && !l.verificato && <span className="chip testo-12" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
       </div>
       <p className="m-0">{l.cosaOffre}</p>
@@ -141,7 +144,7 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
           </table>
         </div>
       )}
-      {l.negozio && <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Articoli in vendita" to={l.casa ? urlLuogo(l.chiave, l.negozio) : `/guida/negozi/${l.negozio}`} />}
+      {primoNegozio && <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Articoli in vendita" to={l.casa ? urlLuogo(l.chiave, primoNegozio) : `/guida/negozi/${primoNegozio}`} />}
       {l.note && <p className="m-0 testo-12 text-text-muted">{l.note}</p>}
     </li>
   );

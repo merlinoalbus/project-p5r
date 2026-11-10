@@ -55,8 +55,8 @@ export interface LettureLuoghi {
   pin: Map<string, PinDelLuogo[]>;
   /** Tutti i luoghi (anche nascosti: un pin può citarne uno), per chiave. */
   righe: Map<string, RigaLuogo>;
-  /** Sede, eccezione d'orario e quartiere (`luogo_chiave`) di ogni negozio. */
-  sediNegozi: Map<string, { sede: string | null; eccezione: string | null; quartiere: string | null; nome: string; sblocco: string | null }>;
+  /** Sede ed eccezione d'orario di ogni negozio (il quartiere è quello del luogo-sede: `righe.get(sede)`). */
+  sediNegozi: Map<string, { sede: string | null; eccezione: string | null; nome: string; sblocco: string | null }>;
 }
 
 /** Raggruppa le righe per sede, conservandone l'ordine. */
@@ -105,9 +105,9 @@ export function lettureLuoghi(partitaId?: number, luogo?: string, stDato?: Stato
     listini,
     st: stDato !== undefined ? stDato : partitaId === undefined ? null : statoDisponibilitaPartita(partitaId),
     righe: new Map((prepared('SELECT * FROM luogo').all() as RigaLuogo[]).map((r) => [r.chiave, r])),
-    sediNegozi: new Map((prepared(`SELECT chiave, nome, sede_chiave, luogo_chiave, sblocco_json, ${conEccezione ? 'eccezione_orari_json' : 'NULL AS eccezione_orari_json'} FROM negozio`).all() as
-      Array<{ chiave: string; nome: string; sede_chiave: string | null; luogo_chiave: string | null; eccezione_orari_json: string | null; sblocco_json: string | null }>)
-      .map((n) => [n.chiave, { sede: n.sede_chiave, eccezione: n.eccezione_orari_json, quartiere: n.luogo_chiave, nome: n.nome, sblocco: n.sblocco_json }])),
+    sediNegozi: new Map((prepared(`SELECT chiave, nome, sede_chiave, sblocco_json, ${conEccezione ? 'eccezione_orari_json' : 'NULL AS eccezione_orari_json'} FROM negozio`).all() as
+      Array<{ chiave: string; nome: string; sede_chiave: string | null; eccezione_orari_json: string | null; sblocco_json: string | null }>)
+      .map((n) => [n.chiave, { sede: n.sede_chiave, eccezione: n.eccezione_orari_json, nome: n.nome, sblocco: n.sblocco_json }])),
     nomiConfidenti: new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome])),
     nomiQuartieri: aree.nomiQuartieri.size ? aree.nomiQuartieri : new Map((prepared('SELECT chiave, nome FROM quartiere').all() as Array<{ chiave: string; nome: string }>).map((q) => [q.chiave, q.nome])),
     negozi: perSede(sedi),
@@ -144,7 +144,8 @@ export function presenzaDelNegozio(sede: RigaLuogo, eccezioneJson: string | null
 }
 
 /** Il luogo come DTO (§3.1): negozi e attività dalle sedi, Confidenti con il nome, condizioni con il testo, area, orari e presenza dal luogo,
- *  la sua pagina e il primo pin (con quanti altri ne ha). `giorni`/`giorniTesto`/`quando` restano, derivati dagli orari (una fonte). */
+ *  la sua pagina e il primo pin (con quanti altri ne ha). Gli orari sono `orari` (una fonte): chi vuole «giorno e sera» lo calcola da lì;
+ *  `giorniTesto` è la frase dei giorni generata dagli orari. */
 export function luogoDto(r: RigaLuogo, l: LettureLuoghi): LuogoDto {
   const confidenti = (JSON.parse(r.confidenti_json) as string[]).map((c) => ({ chiave: c, nome: l.nomiConfidenti.get(c) ?? c }));
   const nomi = nomiCondizioniMemo();
@@ -152,14 +153,11 @@ export function luogoDto(r: RigaLuogo, l: LettureLuoghi): LuogoDto {
   const condizioni = grezze.length ? grezze.map((c) => condizioneConTesto(c, nomi)) : null;
   const negozi = l.negozi.get(r.chiave) ?? [];
   const orari = orariDelLuogo(r.orari_json ?? null);
-  // `quando` e `giorni` per compatibilità: dagli orari del luogo (l'unica fonte; i `giorni_json` del luogo non ci sono più, L11 migrazione 184)
-  const giorni = orari.giorni;
-  const quando = orari.fasce.length === 1 ? orari.fasce[0] : 'entrambe';
   const area = r.area_chiave ? l.aree.aree.get(r.area_chiave) : undefined;
   const pin = l.pin.get(r.chiave) ?? [];
   return {
-    chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando, giorni, giorniTesto: descriviGiorni(giorni), sblocco: fraseDelleCondizioni(condizioni),
-    confidenti, attivita: l.attivita.get(r.chiave) ?? [], negozi, negozio: negozi[0]?.chiave ?? null, origine: r.origine === 'utente' ? 'utente' : 'seed',
+    chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, giorniTesto: descriviGiorni(orari.giorni), sblocco: fraseDelleCondizioni(condizioni),
+    confidenti, attivita: l.attivita.get(r.chiave) ?? [], negozi, origine: r.origine === 'utente' ? 'utente' : 'seed',
     piatti: r.piatti_json ? (JSON.parse(r.piatti_json) as LuogoDto['piatti']) : null, note: r.note, verificato: r.verificato === 1,
     condizioni,
     disponibilita: condizioni && l.st ? valutaRequisiti(condizioni as RequisitoDisponibilita[], l.st) : null,

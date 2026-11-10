@@ -40,10 +40,11 @@ import type { ArticoloDto, CatalogoOggettoDto, DisponibilitaDto, NegozioDettagli
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
 interface PresenzaRiga { sblocco_json?: string | null; orari_json: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
 interface RigaNegozio extends PresenzaRiga {
-  condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null;
-  sconto_json?: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null;
+  orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null;
+  sconto_json?: string | null; chiave: string; ordine: number; nome: string; tipo: string; gestore: string | null;
   confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null;
-  quartiere_nome?: string | null; articoli?: number; verificati?: number
+  /** Il quartiere si deriva sempre dalla sede (luogo → quartiere): senza sede (Niijima) sono entrambi null. */
+  quartiere_chiave?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number
 }
 interface RigaArticolo {
   prezzo_per_fascia_json?: string | null; rifornimento_json?: string | null; catalogo_chiave?: string | null; costo_json?: string | null;
@@ -51,14 +52,15 @@ interface RigaArticolo {
   negozio_confidente?: string | null; negozio_orari?: string | null;
   /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
   negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null;
-  sede_condizioni_json?: string | null; ordine: number; nome: string; categoria: string; per: string | null; prezzo: number | null; effetto: string | null;
-  statistiche: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string
+  sede_condizioni_json?: string | null; ordine: number; nome: string; categoria: string; per: string | null; prezzo: number | null;
+  nota: string | null; fonte: string; verificato: number; negozio_nome?: string
 }
 
 // L5: con la sede vengono anche i suoi orari e il suo sblocco (`l.orari_json`, `l.condizioni_json`): sono la presenza del negozio
-const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome, l.nome AS sede_nome, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json,
+// Il quartiere del negozio è quello del luogo-sede (un solo «dove»: `sede_chiave`): senza sede resta null.
+const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.chiave AS quartiere_chiave, q.nome AS quartiere_nome, l.nome AS sede_nome, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json,
   (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.nascosto = 0) AS articoli, (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.verificato = 1 AND a.nascosto = 0) AS verificati
-  FROM negozio n LEFT JOIN confidente c ON c.chiave = n.confidente_chiave LEFT JOIN quartiere q ON q.chiave = n.luogo_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave`;
+  FROM negozio n LEFT JOIN confidente c ON c.chiave = n.confidente_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave LEFT JOIN quartiere q ON q.chiave = l.quartiere_chiave`;
 const SQL_ARTICOLO = `SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS negozio_confidente, n.orari_json AS negozio_orari, n.eccezione_orari_json AS negozio_eccezione,
   n.sblocco_json AS negozio_sblocco, n.sede_chiave AS negozio_sede, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json
   FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave`;
@@ -118,7 +120,7 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
   const condizioni = condizioniPresenza(r, orari);
   return {
     condizioni, ...(st ? { disponibilita: valutaRequisiti(condizioni, st) } : {}),
-    chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore,
+    chiave: r.chiave, nome: r.nome, quartiereChiave: r.quartiere_chiave ?? null, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore,
     confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null,
     orariStrutturati: orari, orariTesto: testo,
     sedeCasa: sedeCasa(r.chiave, r.sede_chiave), eccezioneOrari: r.eccezione_orari_json ? leggiOrari(r.eccezione_orari_json) : null,
@@ -229,9 +231,9 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     prezzoPerFascia: r.costo_json == null ? normalizzaPrezzoPerFascia(r.prezzo_per_fascia_json ?? null) : null,
     // chiusura dell'ondata 5: con la partita, lo sconto del negozio che vale adesso (Clinica di Takemi dal rango indicato), l'importo che si scala
     ...(st?.partitaId !== undefined && r.costo_json == null && r.prezzo !== null ? scontatoNellaPartita(r, letture?.partitaId === st.partitaId ? letture : nuoveLettureSconti(st.partitaId)) : {}),
-    // Ondata 5, lotto F (decisione 21): effetto e statistiche in un punto solo, l'oggetto del catalogo; la riga conta solo senza un oggetto
-    // collegato (senza catalogo, senza `catalogo_chiave` o con un collegamento che non trova la scheda): allora vale quel che ha di suo
-    effetto: oggetto ? (oggetto.effetto || null) : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
+    // Ondata 5, lotto F (decisione 21): effetto e statistiche in un punto solo, l'oggetto del catalogo; la riga dell'offerta non li ha
+    // più (colonne tolte): senza un oggetto collegato (offerta da collegare) restano null
+    effetto: oggetto ? (oggetto.effetto || null) : null, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : null,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
     disponibileDal: tempisticaDelleCondizioni(condizioniArticolo), nota: r.nota, verificato: r.verificato === 1,
     // F6: la nota storica della fonte è un dato (migrazione 139), legato all'offerta
@@ -321,7 +323,7 @@ function negozioNellaSede(n: RigaNegozio, sede: string | undefined, listini: Let
     FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.chiave = ? AND l.nascosto = 0`).get(sede) as
     { chiave: string; nome: string; quartiere_chiave: string; orari_json: string | null; condizioni_json: string | null; quartiere_nome: string } | undefined;
   if (!l) throw httpErrors.notFound('luogo-non-trovato', 'La sede del listino non è disponibile.');
-  return { ...n, sede_chiave: l.chiave, sede_nome: l.nome, luogo_chiave: l.quartiere_chiave, quartiere_nome: l.quartiere_nome,
+  return { ...n, sede_chiave: l.chiave, sede_nome: l.nome, quartiere_chiave: l.quartiere_chiave, quartiere_nome: l.quartiere_nome,
     sede_orari_json: l.orari_json, sede_condizioni_json: l.condizioni_json };
 }
 

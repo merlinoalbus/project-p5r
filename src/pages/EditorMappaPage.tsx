@@ -39,7 +39,7 @@ import { copiePosate, nomeCopia, posizioneNuovaCopia, type CopiaPosata } from '.
 
 import { condizioniSenzaTesto, ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
-import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
+import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_AMMESSI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { ritornoMappe } from '../utils/ritornoMappe';
 import { NEL_CESTINO } from '../utils/cestino';
 import { haCasaPropria, paginaPerAggiungere } from '../utils/aree';
@@ -594,7 +594,7 @@ function PannelloEditor(p: PropsPannello) {
 
 interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onCreaLuogoDaPin: () => void; onChiudi: () => void; onVai: (chiave: string) => void; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
 
-const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'attivita', nome: 'Attività' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
+const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
 
 /** «Porta a»: la mappa d'arrivo e, se si vuole, uno spillo di quella mappa. Elenchi con ricerca, mai un punto da cliccare a mano. */
 function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, onCambia }: { valore: DestinazioneSpillo | null; mappaCorrente: string; albero: MappaRiassuntoDto[]; disabilitato: boolean; onCambia: (d: DestinazioneSpillo | null) => void }) {
@@ -613,7 +613,7 @@ function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, 
   );
 }
 
-/** «Collegato a»: un negozio, un'attività, un luogo o un Confidente, scelto da un elenco con ricerca. */
+/** «Collegato a»: un negozio, un luogo o un Confidente, scelto da un elenco con ricerca. Un pin già salvato con un'attività si legge ancora. */
 function CollegamentoCitta({ valore, disabilitato, onCambia }: { valore: { tipo: TipoRiferimento; chiave: string } | null; disabilitato: boolean; onCambia: (r: { tipo: TipoRiferimento; chiave: string } | null) => void }) {
   const [tipo, setTipo] = useState<TipoRiferimento>(valore?.tipo ?? 'negozio');
   const voci = useCarica(() => cercaRiferimenti(tipo, '', 100), [tipo]);
@@ -717,7 +717,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   const cambiaTipo = (t: TipoSpillo) => {
     setTipo(t);
     const c = categoriaSpillo(t);
-    if (riferimento && !RIFERIMENTI_PER_CATEGORIA[c].includes(riferimento.tipo)) setRiferimento(null);
+    if (riferimento && !RIFERIMENTI_AMMESSI_PER_CATEGORIA[c].includes(riferimento.tipo)) setRiferimento(null);
     if (c !== 'spostamento') setDestinazione(null);
     if (!ammetteCondizioni(t)) setCondizioni([]);
   };

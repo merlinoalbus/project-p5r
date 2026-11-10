@@ -34,7 +34,7 @@ vi.mock('../components/mappe/DoveSiTrova', () => ({
 /** Un articolo dell'Untouchable (disponibile dal 6 giugno, verificato, non acquistato) con chiave, nome, categoria,
  *  destinatario e prezzo dati. */
 const art = (chiave: string, nome: string, categoria: ArticoloDto['categoria'], per: string | null, prezzo: number | null): ArticoloDto => ({ chiave, negozioChiave: 'untouchable', negozioNome: 'Untouchable', nome, categoria, per, prezzo, effetto: 'Effetto', statistiche: 'Attacco 50', quantita: null, oggettoFonte: null, oggettoChiave: null, disponibileDal: 'dal 6 giugno', condizione: null, nota: null, verificato: true, acquistato: false });
-const negozio: NegozioDettaglioDto = { chiave: 'untouchable', nome: 'Untouchable', luogo: 'Shibuya, Central Street', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', tipo: 'misto', gestore: 'Munehisa Iwai', confidente: { chiave: 'iwai', nome: 'Munehisa Iwai' }, orariStrutturati: { giorni: [], fasce: ['sera'], chiusoConPioggia: false, nota: null }, orariTesto: 'Solo di sera', sedeChiave: 'shibuya/untouchable', sedeNome: 'Untouchable', programmaPunti: null, note: null, articoli: 3, verificati: 3, articoliElenco: [art('untouchable/kogatana-nera', 'Kogatana nera', 'arma', 'Joker', 1000), art('untouchable/frusta', 'Frusta', 'arma', 'Ann', 1200), art('untouchable/giubbotto', 'Giubbotto', 'protezione', 'tutti', 3000)], acquistati: 0, quiz: [] };
+const negozio: NegozioDettaglioDto = { chiave: 'untouchable', nome: 'Untouchable', quartiereChiave: 'shibuya', quartiereNome: 'Shibuya', tipo: 'misto', gestore: 'Munehisa Iwai', confidente: { chiave: 'iwai', nome: 'Munehisa Iwai' }, orariStrutturati: { giorni: [], fasce: ['sera'], chiusoConPioggia: false, nota: null }, orariTesto: 'Solo di sera', sedeChiave: 'shibuya/untouchable', sedeNome: 'Untouchable', programmaPunti: null, note: null, articoli: 3, verificati: 3, articoliElenco: [art('untouchable/kogatana-nera', 'Kogatana nera', 'arma', 'Joker', 1000), art('untouchable/frusta', 'Frusta', 'arma', 'Ann', 1200), art('untouchable/giubbotto', 'Giubbotto', 'protezione', 'tutti', 3000)], acquistati: 0, quiz: [] };
 
 describe('NegozioPage', () => {
   beforeEach(() => {
@@ -170,10 +170,10 @@ it('un articolo nascosto compare nel blocco «Rimossi» del negozio e si rimette
   await waitFor(() => expect(getNegozio.mock.calls.length).toBeGreaterThan(1));
 });
 
-/** Un negozio senza sede né quartiere (online, TV, dentro un Palazzo) dice comunque dove si compra. */
-it('senza sede né quartiere mostra l’indicazione testuale di dove si compra', async () => {
+/** L1: il «dove» è la sola sede; il testo libero «Come trovarlo» non esiste più, quindi senza sede la pagina non scrive niente. Test saltato: la sua tesi è superata. */
+it.skip('senza sede né quartiere mostra l’indicazione testuale di dove si compra', async () => {
   usePartitaStore.setState({ attiva: null });
-  getNegozio.mockResolvedValue({ ...negozio, chiave: 'tanaka', nome: 'Tanaka', luogoChiave: null, quartiereNome: null, sedeChiave: null, sedeNome: null, luogo: 'Online, dal laptop di Leblanc', articoliElenco: [] });
+  getNegozio.mockResolvedValue({ ...negozio, chiave: 'tanaka', nome: 'Tanaka', quartiereChiave: null, quartiereNome: null, sedeChiave: null, sedeNome: null, articoliElenco: [] });
   render(<MemoryRouter initialEntries={['/guida/negozi/tanaka']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
   expect(await screen.findByRole('heading', { name: 'Tanaka' })).toBeInTheDocument();
   expect(screen.getByText(/Online, dal laptop di Leblanc/)).toBeInTheDocument();
