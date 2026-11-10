@@ -105,7 +105,6 @@ export const ROTTE_DEL_GIOCATORE: readonly string[] = [
 
   // ---- catalogo e oggetti: letture ----
   'GET /api/catalogo',
-  'GET /api/catalogo/oggetti',
   'GET /api/catalogo/:tipo',
   'GET /api/catalogo/:tipo/:chiave',
   'GET /api/catalogo-oggetti',
@@ -125,7 +124,7 @@ export const ROTTE_DEL_GIOCATORE: readonly string[] = [
   'PUT /api/condizioni/partite/:partita/punti-negozio/:chiave',
 ];
 
-/** Le rotte della partita: tutto `/api/partite…` (comprese `/api/partite/:id/pesca` e, con il passo 3, `/api/partite/:id/cestino`)
+/** Le rotte della partita: tutto `/api/partite…` (comprese `/api/partite/:id/pesca` e `/api/partite/cestino…`)
  *  salvo gli acquisti legacy, che toccano il vecchio schema. Una famiglia e non un elenco: le scrive la partita, mai i contenuti. */
 function eDellaPartita(percorso: string): boolean {
   if (percorso !== '/api/partite' && !percorso.startsWith('/api/partite/')) return false;

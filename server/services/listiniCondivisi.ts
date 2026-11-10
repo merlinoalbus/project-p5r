@@ -1,6 +1,7 @@
 // I vecchi identificativi restano validi; il listino condiviso ha una sola fonte modificabile.
 // Non dipende dai servizi negozi/luoghi, così acquisti, condizioni e mappe usano gli stessi legami senza cicli.
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 
 export interface LettureListiniCondivisi {
@@ -23,7 +24,7 @@ function destinazione(chiave: string, legami: Map<string, string>): string {
 /** Anche durante la preparazione locale di M7 si possono leggere i servizi già esistenti sullo schema precedente. */
 export function lettureListiniCondivisi(): LettureListiniCondivisi {
   const vuote: LettureListiniCondivisi = { negozi: new Map(), articoli: new Map(), sedi: [], pin: new Map() };
-  if (!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'negozio_sede_spillo'").get()) return vuote;
+  if (!haTabellaMain(getDb(), 'negozio_sede_spillo')) return vuote;
   const negozi = new Map((prepared('SELECT chiave,listino_condiviso FROM negozio WHERE listino_condiviso IS NOT NULL').all() as Array<{ chiave: string; listino_condiviso: string }>).map((r) => [r.chiave, r.listino_condiviso]));
   const articoli = new Map((prepared('SELECT chiave,articolo_condiviso FROM articolo WHERE articolo_condiviso IS NOT NULL').all() as Array<{ chiave: string; articolo_condiviso: string }>).map((r) => [r.chiave, r.articolo_condiviso]));
   for (const k of negozi.keys()) negozi.set(k, destinazione(k, negozi));

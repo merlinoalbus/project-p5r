@@ -59,7 +59,8 @@ import { avvisaCensimentoPartite } from './censimentoPartite.js';
 import { conCartellaDiLavoro, copiaDatabase, timbro } from './impostazioniService.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { svuotaProposteConversione } from '../db/proposteConversioneDb.js';
-import { RaccoltaProblemi, controllaContenuti, haColonna, haTabella, unisciCorrezioniGuida } from './edizioneContenuti.js';
+import { haColonna, haTabella } from '../db/colonne.js';
+import { RaccoltaProblemi, controllaContenuti, unisciCorrezioniGuida } from './edizioneContenuti.js';
 import type {
   ChiaviRimosseEdizioneDto, CompatibilitaEdizioneDto, EsitoEdizioneDto, FaseEdizione, FileEdizioneDto, JsonMalformatoEdizioneDto, StatoEdizioneDto,
   UnioneCorrezioniEdizioneDto,

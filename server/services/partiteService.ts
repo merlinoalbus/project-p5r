@@ -3,6 +3,8 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabella } from '../db/colonne.js';
+import { haColonnaMain, haColonnaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { getProprietario, getProprietarioEmail, PROPRIETARIO_UNICO } from '../middleware/requestContext.js';
 import { partitaNonTrovata } from './verificaPartita.js';
@@ -41,7 +43,7 @@ interface RigaPartita {
 }
 
 /** La colonna del salvataggio di Persona 5 c'è (migrazione utente 061)? Su uno schema di prima il dato non si scrive e vale «no». */
-const conSalvataggioP5 = (): boolean => !!prepared("SELECT 1 FROM pragma_table_info('partita', 'utente') WHERE name = 'salvataggio_p5'").get();
+const conSalvataggioP5 = (): boolean => haColonnaUtente(getDb(), 'partita', 'salvataggio_p5');
 
 /** Una riga della tabella `partita` per l'API: flag booleani, DLC posseduti dal JSON, fascia («sera» o «giorno») e meteo del momento. */
 function partitaDto(r: RigaPartita): PartitaDto {
@@ -128,7 +130,7 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     const maxPartita = (prepared('SELECT COALESCE(MAX(id), 0) AS m FROM partita').get() as { m: number }).m;
     const maxCestino = (prepared("SELECT COALESCE(MAX(partita_id), 0) AS m FROM utente.cestino_partite WHERE partita_id IS NOT NULL").get() as { m: number }).m;
     const maxCestinoGioco = (prepared("SELECT COALESCE(MAX(CAST(chiave AS INTEGER)), 0) AS m FROM main.cestino WHERE tipo = 'partita'").get() as { m: number }).m;
-    const conContatore = !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'sqlite_sequence'").get();
+    const conContatore = haTabella(getDb(), 'sqlite_sequence', 'utente');
     const contatore = conContatore ? (prepared("SELECT COALESCE(MAX(seq), 0) AS m FROM utente.sqlite_sequence WHERE name = 'partita'").get() as { m: number }).m : 0;
     const idNuovo = Math.max(maxPartita, maxCestino, maxCestinoGioco, contatore) + 1;
     const info = prepared(`INSERT INTO partita (id, nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at, proprietario, proprietario_email)
@@ -350,7 +352,7 @@ export function ranghiConfidenti(partitaId: number): Map<string, number> {
 
 /** Ondata 5 (RG-11): le chiavi dei Confidenti che ricevono regali; senza la colonna della 255 quelli con un elenco di regali. */
 export function confidentiRegalabili(): string[] {
-  if ((prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((c) => c.name === 'regalabile')) {
+  if (haColonnaMain(getDb(), 'confidente', 'regalabile')) {
     return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
   }
   return prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo').pluck().all() as string[];

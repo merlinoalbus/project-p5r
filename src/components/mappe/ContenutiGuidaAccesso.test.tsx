@@ -5,11 +5,14 @@
 
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { ContenutiGuidaMappa } from './ContenutiGuidaMappa';
+import type { FC } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
 import type { PartitaDto } from '../../types';
 import type { ContenutiMappaDto, SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 
+// Saltati (L12-04, Q20): `ContenutiGuidaMappa` e `SchedaContenutoGuida` sono stati tolti, nessuna pagina li montava. Segnaposto locale tipizzato,
+// SOLO perché il file compili: i casi sono `it.skip` e non si eseguono; i corpi originali sono conservati qui sotto (zero test).
+const ContenutiGuidaMappa: FC<{ mappa: string; area?: string | null; dungeon?: string }> = () => null;
 const api = vi.hoisted(() => ({
   getContenutiMappa: vi.fn(), aggiornaSpillo: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(),
   aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
@@ -53,7 +56,7 @@ beforeEach(()=>{
 });
 afterEach(()=>usePartitaStore.setState({attiva:null}));
 
-it('apre lo stesso ID migrato e conserva immagini, condizioni e stato senza controlli geografici',async()=>{
+it.skip('apre lo stesso ID migrato e conserva immagini, condizioni e stato senza controlli geografici',async()=>{
   monta();const regione=await apri();const s=within(regione);
   expect(api.getContenutiMappa).toHaveBeenCalledWith('palazzo-castello',7);
   expect(s.getByText('Descrizione originale del punto')).toBeInTheDocument();
@@ -70,7 +73,7 @@ it('apre lo stesso ID migrato e conserva immagini, condizioni e stato senza cont
   expect(scheda(7)).not.toHaveProperty('x');expect(scheda(7)).not.toHaveProperty('mappaChiave');
 });
 
-it('salva la descrizione sullo stesso ID e ricarica la scheda senza cancellare le altre proprietà',async()=>{
+it.skip('salva la descrizione sullo stesso ID e ricarica la scheda senza cancellare le altre proprietà',async()=>{
   api.aggiornaSpillo.mockImplementation(async (_id:number,dati:{descrizione:string})=>{descrizione=dati.descrizione;return scheda(7);});
   monta();await apri();
   fireEvent.click(screen.getByRole('button',{name:'Modifica contenuto'}));
@@ -85,7 +88,7 @@ it('salva la descrizione sullo stesso ID e ricarica la scheda senza cancellare l
   expect(api.aggiornaSpillo.mock.calls[0][1]).not.toHaveProperty('x');expect(api.aggiornaSpillo.mock.calls[0][1]).not.toHaveProperty('mappa');
 });
 
-it('cambiando partita ricarica stato e condizioni del contenuto mantenendo la selezione',async()=>{
+it.skip('cambiando partita ricarica stato e condizioni del contenuto mantenendo la selezione',async()=>{
   monta();await apri();
   // un forziere si «apre» e si «richiude» (scelte dell'utente, 2026-10-03)
   expect(screen.getByRole('button',{name:'Aperto'})).toBeInTheDocument();
@@ -98,7 +101,7 @@ it('cambiando partita ricarica stato e condizioni del contenuto mantenendo la se
   expect(api.impostaSpilloRaccolto).not.toHaveBeenCalled();
 });
 
-it('aggiorna lo stato del medesimo ID nella partita e ricarica il contenuto',async()=>{
+it.skip('aggiorna lo stato del medesimo ID nella partita e ricarica il contenuto',async()=>{
   api.impostaSpilloRaccolto.mockImplementation(async(id:number,spilloId:number,valore:boolean)=>{expect(spilloId).toBe(ID);if(valore)raccolti.add(id);else raccolti.delete(id);return scheda(id);});
   monta();await apri();fireEvent.click(screen.getByRole('button',{name:'Aperto'}));
   await waitFor(()=>expect(api.impostaSpilloRaccolto).toHaveBeenCalledWith(7,ID,true));
@@ -106,7 +109,7 @@ it('aggiorna lo stato del medesimo ID nella partita e ricarica il contenuto',asy
   expect(api.getContenutiMappa).toHaveBeenCalledTimes(2);
 });
 
-it('senza partita conserva la consultazione senza offrire modifiche allo stato di una partita',async()=>{
+it.skip('senza partita conserva la consultazione senza offrire modifiche allo stato di una partita',async()=>{
   usePartitaStore.setState({attiva:null});monta();const s=within(await apri());
   expect(api.getContenutiMappa).toHaveBeenCalledWith('palazzo-castello',undefined);
   expect(s.getByText('Solo la sera')).toBeInTheDocument();
@@ -115,14 +118,14 @@ it('senza partita conserva la consultazione senza offrire modifiche allo stato d
 });
 
 // L0 (2026-10-20): il pannello serve anche la mappa dei Memento, dove le sezioni sono dedali; nei Palazzi sono infiltrazioni
-it('nei Memento dice «dedalo» e «scheda dei Memento», nei Palazzi «infiltrazione» e «scheda del Palazzo»',async()=>{
+it.skip('nei Memento dice «dedalo» e «scheda dei Memento», nei Palazzi «infiltrazione» e «scheda del Palazzo»',async()=>{
   api.getContenutiMappa.mockResolvedValue({...contenuti(),aree:[{...contenuti().aree[0],collegamenti:[scheda()]}]});
   render(<MemoryRouter><ContenutiGuidaMappa mappa="dungeon-mementos" dungeon="mementos" area="altro-dedalo"/></MemoryRouter>);
   expect(await screen.findByText('Il dedalo richiesto non appartiene a questa mappa.')).toBeInTheDocument();
   expect(screen.getByRole('link',{name:'Apri la scheda dei Memento'})).toHaveAttribute('href','/guida/dungeon/mementos');
   expect(screen.getByText('Dettagli del dedalo')).toBeInTheDocument();
 });
-it('in un Palazzo dice «infiltrazione» e «scheda del Palazzo»',async()=>{
+it.skip('in un Palazzo dice «infiltrazione» e «scheda del Palazzo»',async()=>{
   api.getContenutiMappa.mockResolvedValue({...contenuti(),aree:[{...contenuti().aree[0],collegamenti:[scheda()]}]});
   render(<MemoryRouter><ContenutiGuidaMappa mappa="dungeon-kamoshida" dungeon="kamoshida" area="altra-infiltrazione"/></MemoryRouter>);
   expect(await screen.findByText('L’infiltrazione richiesta non appartiene a questa mappa.')).toBeInTheDocument();
@@ -130,7 +133,7 @@ it('in un Palazzo dice «infiltrazione» e «scheda del Palazzo»',async()=>{
   expect(screen.getByText('Dettagli dell’infiltrazione')).toBeInTheDocument();
 });
 // L3 (§4.1): con l'infiltrazione chiesta che sta sulla mappa, la scheda del Palazzo si apre su di lei
-it('in un Palazzo la scheda si apre sull’infiltrazione chiesta, se appartiene alla mappa',async()=>{
+it.skip('in un Palazzo la scheda si apre sull’infiltrazione chiesta, se appartiene alla mappa',async()=>{
   monta();
   expect(await screen.findByRole('link',{name:'Apri la scheda del Palazzo'})).toHaveAttribute('href','/guida/dungeon/castello?infiltrazione=castello-biblioteca');
 });

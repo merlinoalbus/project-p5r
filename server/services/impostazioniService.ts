@@ -25,6 +25,7 @@ import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { closeDb, copiaSchema, getDb, initDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
+import { haTabella } from '../db/colonne.js';
 import { runMigrations, type Migration } from '../db/migrationRunner.js';
 import { verificaArchivioLegacy, type OrigineContinuita } from '../db/acquistiLegacy.js';
 import { statoTanakaDi } from './tanakaStatoListino.js';
@@ -213,9 +214,8 @@ function esaminaDatabase(percorso: string): { tipo: ContenutoDatabase; versione:
     try {
       const esito = db.pragma('integrity_check', { simple: true }) as string;
       if (esito !== 'ok') throw httpErrors.badRequest('database-danneggiato', `Il database caricato non supera il controllo di integrità: ${esito}.`);
-      const tabelle = (db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name);
-      const gioco = tabelle.includes('persona');
-      const partite = tabelle.includes('partita');
+      const gioco = haTabella(db, 'persona');
+      const partite = haTabella(db, 'partita');
       if (!gioco && !partite) {
         throw httpErrors.badRequest('database-estraneo', 'Il database caricato non è un\'istanza di project-p5r: mancano le tabelle di base.');
       }

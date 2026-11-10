@@ -11,11 +11,10 @@
 // ============================================================
 
 import type Database from 'better-sqlite3';
+import { haTabella } from '../db/colonne.js';
 import manifest from '../../shared/tanakaConfronto.json' with { type: 'json' };
 import type { StatoTanakaFileDto } from '../../shared/tanakaDecisione.js';
 
-const haTabella = (db: Database.Database, schema: string, nome: string): boolean =>
-  !!db.prepare(`SELECT 1 FROM ${schema}.sqlite_master WHERE type = 'table' AND name = ?`).get(nome);
 /** Vero se il testo è un JSON con un oggetto `offerte`. */
 const fotografiaLeggibile = (raw: unknown): boolean => {
   if (typeof raw !== 'string') return false;
@@ -23,10 +22,10 @@ const fotografiaLeggibile = (raw: unknown): boolean => {
 };
 
 /** Lo stato del listino di Tanaka e del registro delle decisioni nel file aperto su `db` (schema `schema`). */
-export function statoTanakaDi(db: Database.Database, schema = 'main'): StatoTanakaFileDto {
+export function statoTanakaDi(db: Database.Database, schema: 'main' | 'utente' = 'main'): StatoTanakaFileDto {
   const problemi: string[] = [];
   let listino: StatoTanakaFileDto['listino'] = 'assente';
-  if (haTabella(db, schema, 'negozio') && haTabella(db, schema, 'articolo') && db.prepare(`SELECT 1 FROM ${schema}.negozio WHERE chiave = ?`).get(manifest.negozio)) {
+  if (haTabella(db, 'negozio', schema) && haTabella(db, 'articolo', schema) && db.prepare(`SELECT 1 FROM ${schema}.negozio WHERE chiave = ?`).get(manifest.negozio)) {
     const attive = db.prepare(`SELECT chiave, prezzo FROM ${schema}.articolo WHERE negozio_chiave = ? AND nascosto = 0 ORDER BY chiave`).all(manifest.negozio) as Array<{ chiave: string; prezzo: number | null }>;
     const chiavi = attive.map((a) => a.chiave).join('\n');
     const royal = new Map(manifest.royal.map((r) => [r.chiave, r.prezzo]));
@@ -36,10 +35,10 @@ export function statoTanakaDi(db: Database.Database, schema = 'main'): StatoTana
   }
   let decisioni = 0;
   let attiva: string | null = null;
-  const registro = haTabella(db, schema, 'decisione_tanaka');
+  const registro = haTabella(db, 'decisione_tanaka', schema);
   if (registro) {
     const righe = db.prepare(`SELECT operazione_id, versione, prima_json, dopo_json FROM ${schema}.decisione_tanaka`).all() as Array<{ operazione_id: string; versione: number; prima_json: string; dopo_json: string }>;
-    const ripristinate = new Set((haTabella(db, schema, 'decisione_tanaka_ripristino')
+    const ripristinate = new Set((haTabella(db, 'decisione_tanaka_ripristino', schema)
       ? db.prepare(`SELECT decisione_id FROM ${schema}.decisione_tanaka_ripristino`).all() as Array<{ decisione_id: string }> : []).map((r) => r.decisione_id));
     decisioni = righe.length;
     for (const r of righe) {
@@ -52,7 +51,7 @@ export function statoTanakaDi(db: Database.Database, schema = 'main'): StatoTana
     attiva = attive[0]?.operazione_id ?? null;
     if (attiva && listino !== 'royal') problemi.push('La decisione risulta attiva ma il listino non è quello Royal: verifica le correzioni fatte dopo (il ripristino unitario non sarà possibile).');
   }
-  const note = haTabella(db, schema, 'nota_storica') ? (db.prepare(`SELECT COUNT(*) AS n FROM ${schema}.nota_storica`).get() as { n: number }).n : 0;
+  const note = haTabella(db, 'nota_storica', schema) ? (db.prepare(`SELECT COUNT(*) AS n FROM ${schema}.nota_storica`).get() as { n: number }).n : 0;
   // solo i problemi strutturali rendono il registro non integro; un listino corretto a mano dopo la decisione è un avviso
   const strutturali = problemi.filter((p) => !p.startsWith('La decisione risulta attiva'));
   return { registro, decisioni, attiva, listino, noteStoriche: note, registroIntegro: strutturali.length === 0, problemi };

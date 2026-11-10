@@ -15,7 +15,7 @@ import { Selettore } from '../components/shared/Selettore';
 import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 
-import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -666,6 +666,7 @@ function VociDelPin({ spillo: s, disabilitato, onCollega }: { spillo: SpilloDto;
 
 /** Proprietà dello spillo selezionato: nome, tipo e descrizione, poi quel che la categoria del tipo richiede. */
 function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onCreaLuogoDaPin, onChiudi, onVai, onCollegaVoce }: PropsFormSpillo) {
+  const idModulo = useId();
   const [nome, setNome] = useState(s.nome);
   const [tipo, setTipo] = useState<TipoSpillo>(s.tipo);
   // L5 (F3): un pin di luogo mostra nome e descrizione del luogo (fonte unica); qui la descrizione è la **nota del pin** (`notaPin`), così
@@ -742,6 +743,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     void onSalva(dati);
   };
   return (
+    <>
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
       <div className="flex items-start gap-2">
         <PuntoSpillo tipo={tipo} colore={DEFINIZIONI_SPILLO[tipo].colore} grande />
@@ -755,7 +757,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
       {categoria === 'spostamento' && destinazione && (
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri l’arrivo" dettaglio={s.destinazioneNomi?.mappa ?? undefined} onClick={() => onVai(destinazione.mappa)} />
       )}
-      <form className="flex flex-col gap-2" onSubmit={salva}>
+      <form id={idModulo} className="flex flex-col gap-2" onSubmit={salva}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.spillo.nome} readOnly={!!luogo} aria-describedby={luogo ? 'spillo-dal-luogo' : undefined} /></label>
         {luogo && <p id="spillo-dal-luogo" className="m-0 flex flex-wrap items-center gap-1.5 testo-12 text-text-muted">Nome e descrizione vengono dal luogo «{luogo.nome}»: qui si scrive solo la nota del pin.
           <Link to={luogo.casa!} className="touch inline-flex items-center text-primary-testo">Modifica il luogo</Link></p>}
@@ -789,18 +791,24 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         {categoria === 'consumabile' && <p className="m-0 testo-12 text-text-muted">Si segna nella partita («{statoDelTipo(tipo)}»); non porta da nessuna parte.</p>}
         {ammetteCondizioni(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo pinCorrente={s.uid} />}
 
+        {/* le azioni sul pin (non il salvataggio) stanno nel corpo; «Salva» ed «Elimina» nel piè fermo del pannello (AD10) */}
         <div className="flex flex-wrap gap-1.5">
-          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: dati.nome, descrizione, riferimento: dati.riferimento, condizioni: dati.condizioni, destinazione: dati.destinazione })} />
           {categoria === 'spostamento' && !destinazione && !aggiunta && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
           {categoria !== 'citta' && azioneLuogo}
-          <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
         </div>
         {/* nel mondo la mappa di destinazione non nasce dallo spillo: si aggiunge come area o planimetria e poi si sceglie qui sopra (L2, R2-27) */}
         {categoria === 'spostamento' && !destinazione && aggiunta && <Link to={aggiunta.href} className="visore-mappa__azione-testo touch inline-flex items-center">{aggiunta.testo}</Link>}
         {modificato && categoria === 'spostamento' && !destinazione && !aggiunta && <span className="editor-mappa__avviso">Salva le modifiche prima di creare la mappa collegata.</span>}
       </form>
     </section>
+    {/* il piè sta fuori dalla scheda, accanto: sticky nel contenuto del pannello (non nel modulo, che comincia sotto gli strumenti) e
+        quindi sul bordo basso del pannello anche quando il modulo è ancora fuori vista; «Salva» è del modulo (`form`) */}
+    <div className="editor-mappa__piede">
+      <PulsanteVisivo type="submit" form={idModulo} tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
+      <PulsanteVisivo tono="pericolo" compatto className="ml-auto" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
+    </div>
+    </>
   );
 }
 
@@ -808,6 +816,7 @@ interface PropsFormMappa { mappa: MappaDto; albero: MappaRiassuntoDto[]; occupat
 
 /** Proprietà della mappa (nome, tipo, genitore, ordine, note); il nome dedotto da confermare si segnala sotto il campo Nome. */
 function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMappa) {
+  const idModulo = useId();
   const [nome, setNome] = useState(mappa.nome);
   const [tipo, setTipo] = useState<TipoMappa>(mappa.tipo);
   const [genitore, setGenitore] = useState<string>(mappa.genitore ?? '');
@@ -829,9 +838,10 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
   const titoloMostrato = nomePresentazioneMappa(mappa);
   const nomeDaConfermare = !mappa.nomeRivisto && titoloMostrato !== mappa.nome;
   return (
+    <>
     <section className="visore-mappa__sezione" aria-label="Proprietà della mappa">
       <h3 className="visore-mappa__intestazione">Mappa</h3>
-      <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, ...(dellArea ? {} : { tipo, genitore: genitore || null }), ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
+      <form id={idModulo} className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, ...(dellArea ? {} : { tipo, genitore: genitore || null }), ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.mappa.nome} /></label>
         {nomeDaConfermare && <p className="editor-mappa__avviso" role="status">In alto si legge «{titoloMostrato}»: è il nome ricavato dai dati dell’estrazione. Salva per usare «{mappa.nome}» dappertutto.</p>}
         <div className="grid grid-cols-2 gap-2">
@@ -843,18 +853,20 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
           <label className="editor-mappa__campo">Ordine<input className="form-input" type="number" min={0} value={ordine} onChange={(e) => setOrdine(e.target.value)} /></label>
         </div>
         {dellArea && mappa.area
-          ? <p className="m-0 testo-12 text-text-muted">Planimetria dell’area «{mappa.area.nome}» ({mappa.area.contenitore.nome}){mappa.area.versioneEtichetta ? `, versione «${mappa.area.versioneEtichetta}»` : ''}: l’area e le sue versioni si cambiano dalla <Link to={mappa.area.casa}>pagina dell’area</Link>.</p>
+          ? <p className="m-0 testo-12 text-text-muted">Planimetria dell’area «{mappa.area.nome}» ({mappa.area.contenitore.nome}){mappa.area.versioneEtichetta ? `, versione «${mappa.area.versioneEtichetta}»` : ''}: l’area e le sue versioni si cambiano dalla <Link to={mappa.area.casa} className="link-in-riga">pagina dell’area</Link>.</p>
           : (
             <div className="editor-mappa__campo">
               <Selettore etichetta="Mappa genitore" valore={genitore} vuoto="— nessuna (radice) —" opzioni={albero.filter((m) => !discendenti.has(m.chiave)).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), dettaglio: NOME_TIPO_MAPPA[m.tipo] }))} onCambia={setGenitore} />
             </div>
           )}
         <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={LIMITI_GUIDA.mappa.note} /></label>
-        <div className="flex flex-wrap gap-1.5">
-          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" dettaglio={!modificata && nomeDaConfermare ? 'conferma il nome' : undefined} disabled={occupato || (!modificata && !nomeDaConfermare)} />
-          <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina mappa" disabled={occupato} onClick={onElimina} />
-        </div>
       </form>
     </section>
+    {/* piè fermo sul bordo basso del pannello (AD10): «Salva mappa» è sempre in vista; «Salva» è del modulo (`form`) */}
+    <div className="editor-mappa__piede">
+      <PulsanteVisivo type="submit" form={idModulo} tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" dettaglio={!modificata && nomeDaConfermare ? 'conferma il nome' : undefined} disabled={occupato || (!modificata && !nomeDaConfermare)} />
+      <PulsanteVisivo tono="pericolo" compatto className="ml-auto" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina mappa" disabled={occupato} onClick={onElimina} />
+    </div>
+    </>
   );
 }

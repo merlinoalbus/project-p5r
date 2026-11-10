@@ -1950,12 +1950,12 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     const arriviDaRicollegare: Array<{ spilloId: number; mappa: string; uid: string }> = [];
     /** Le regole d'atterraggio dei Palazzi (097) il cui pin d'arrivo sta per essere tolto e reinserito: stesso motivo, stesso rimedio. */
     const atterraggiDaRicollegare: Array<{ id: number; uid: string }> = [];
-    const conAtterraggi = !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'dungeon_atterraggio'").get();
+    const conAtterraggi = haTabellaMain(getDb(), 'dungeon_atterraggio');
     const conUid = colonnaSpillo('uid');
     const areeDaLegare: Array<{ mappa: string; aree: string[] }> = [];
     // le voci della guida dei pin (098; prima della 098 la sola colonna della 094, che ne tiene una): da scrivere a genitori risolti;
     // quelle dei pin tolti, per uid, per chi torna con lo stesso
-    const conTabellaVoci = !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'spillo_voce'").get();
+    const conTabellaVoci = haTabellaMain(getDb(), 'spillo_voce');
     const conColonnaVoce = !conTabellaVoci && colonnaSpillo('voce_chiave');
     const conVoce = conTabellaVoci || conColonnaVoce;
     const vociDaScrivere: Array<{ id: number; nome: string; mappa: string; voci: string[] }> = [];
@@ -1975,10 +1975,10 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     const adesso = nowIso();
     // Lo schema non cambia durante l'importazione: colonne e tabelle si controllano una volta, non per ogni mappa e ogni pin
     // (rilievo P5 della verifica, 2026-10-03; nei test lo schema può essere indietro, per questo si controllano).
-    const conRuolo = (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === 'ruolo_immagine');
+    const conRuolo = haColonnaMain(getDb(), 'mappa', 'ruolo_immagine');
     // L3: i legami infiltrazione ↔ area (110)
     const legamiNuovi = conLegami();
-    const conPresentazione = !!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get();
+    const conPresentazione = haTabellaMain(getDb(), 'mappa_presentazione');
     const conNativo = colonnaNativoJson();
     const conSeedIdentita = colonnaSpillo('seed_identita_json');
     /** I pin tolti per essere reinseriti, per uid: id e colonne che il pacchetto può non portare (L3, andata e ritorno identica). */
@@ -2265,7 +2265,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       }
     }
     sincronizzaPercorsiMappe(getDb());
-    if(pacchetto.ingressi?.length && prepared("SELECT 1 FROM sqlite_master WHERE name='quartiere_ingresso'").get()) {
+    if(pacchetto.ingressi?.length && haTabellaMain(getDb(), 'quartiere_ingresso')) {
       const ingressi=z.array(z.object({quartiere:z.string().min(1).max(80),mappa:z.string().min(1).max(200),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6)})).max(1000).safeParse(pacchetto.ingressi);
       if(!ingressi.success)throw httpErrors.badRequest('ingressi-non-validi','Ingressi dei quartieri non validi nel pacchetto.');
       for(const i of ingressi.data){

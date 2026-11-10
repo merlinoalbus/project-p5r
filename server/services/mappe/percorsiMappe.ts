@@ -10,6 +10,7 @@
 import type Database from 'better-sqlite3';
 import type { AppDatabase } from '../../db/dbService.js';
 import { getDb } from '../../db/dbService.js';
+import { haColonna, haTabella } from '../../db/colonne.js';
 import { slug } from '../../../shared/slug.js';
 import { httpErrors } from '../../utils/httpError.js';
 
@@ -38,7 +39,7 @@ function stmt(db: AppDatabase, sql: string): Database.Statement {
 /** Vero se la connessione ha la tabella `mappa_percorso`; il sì si ricorda, il no si ricontrolla (la tabella può arrivare dopo). */
 function haPercorsi(db: AppDatabase): boolean {
   if (conPercorsi.has(db)) return true;
-  if (!stmt(db, "SELECT 1 FROM sqlite_master WHERE name='mappa_percorso'").get()) return false;
+  if (!haTabella(db, 'mappa_percorso')) return false;
   conPercorsi.add(db);
   return true;
 }
@@ -68,8 +69,8 @@ export function nomePercorso(identita:string,db:AppDatabase=getDb()):string {
 }
 /** Controlla tutto il piano prima di scrivere. Nessun cambio di identità, FK o stato del giocatore. */
 export function sincronizzaPercorsiMappe(db:AppDatabase):void {
-  if(!db.prepare("SELECT 1 FROM sqlite_master WHERE name='mappa_percorso'").get())return;
-  const conFisso=(db.prepare('PRAGMA table_info(mappa)').all() as Array<{name:string}>).some(c=>c.name==='percorso_fisso');
+  if(!haTabella(db,'mappa_percorso'))return;
+  const conFisso=haColonna(db,'mappa','percorso_fisso');
   const nodi=db.prepare(`SELECT chiave,nome,tipo,genitore_chiave${conFisso?',percorso_fisso':''} FROM mappa`).all() as Nodo[];
   const indice=new Map(nodi.map(n=>[n.chiave,n]));
   const usati=new Map<string,string>();

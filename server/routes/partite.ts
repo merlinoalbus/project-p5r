@@ -13,7 +13,7 @@ import {
   bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura,
   bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, bodyAnnullaUltimoConfidente, paramsPartitaDomanda, bodyAggiornaPianoSalvato,
   bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita,
-  paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto,
+  paramsCestinoPersonale, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto,
   paramsPartitaConsumo, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
   bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
@@ -111,11 +111,9 @@ router.post('/:id/da-applicare/decisioni', validate({ params: paramsPartita, bod
 
 // ---- Il cestino personale (L12, passo 3) ----
 // Le voci eliminate dal giocatore (partite, fonti di acquisto, pesca, Persone della scorta) sono SUE: ogni funzione filtra per il
-// proprietario della richiesta. Due famiglie di rotte sullo stesso servizio:
-//   - `/cestino…`: tutte le voci del proprietario, comprese le partite eliminate (che non hanno più un id sotto cui cercarle);
-//   - `/:id/cestino…`: le sole voci di quella partita (l'id passa dal controllo centrale di appartenenza).
-// Le rotte di `/api/impostazioni/cestino/partite/:uid` della preparazione restano com'erano (stesso servizio, stesso filtro): il
-// frontend della preparazione le usa ancora, e la loro migrazione non è necessaria al rilascio, che non monta `/api/impostazioni`.
+// proprietario della richiesta. Una sola serie di rotte, `/cestino…`: tutte le voci del proprietario, comprese le partite eliminate (che
+// non hanno più un id sotto cui cercarle). La usano la preparazione e il rilascio, che non monta `/api/impostazioni`; la preparazione
+// ci arriva anche dall'elenco unificato di `/api/impostazioni/cestino?partite=1`, che somma le voci di gioco.
 // Vengono PRIMA di `/:id`: «cestino» non è l'id di una partita.
 router.get('/cestino', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -129,20 +127,6 @@ router.post('/cestino/:uid/ripristina', validate({ params: paramsCestinoPersonal
 });
 router.delete('/cestino/:uid', validate({ params: paramsCestinoPersonale }), (req, res) => {
   eliminaCestinoPrivato(String(req.params.uid));
-  res.status(204).end();
-});
-router.get('/:id/cestino', validate({ params: paramsPartita }), (req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  res.json(elencoCestinoPersonale(Number(req.params.id)));
-});
-router.delete('/:id/cestino', validate({ params: paramsPartita }), (req, res) => {
-  res.json(svuotaCestinoPersonale(Number(req.params.id)));
-});
-router.post('/:id/cestino/:uid/ripristina', validate({ params: paramsPartitaCestino }), (req, res) => {
-  res.json(ripristinaCestinoPrivato(String(req.params.uid), Number(req.params.id)));
-});
-router.delete('/:id/cestino/:uid', validate({ params: paramsPartitaCestino }), (req, res) => {
-  eliminaCestinoPrivato(String(req.params.uid), Number(req.params.id));
   res.status(204).end();
 });
 

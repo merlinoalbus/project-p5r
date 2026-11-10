@@ -1,5 +1,6 @@
 // L7: scheda aggregata. L'identità è il catalogo; disponibilità e avanzamento restano ai servizi esistenti.
 import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { casaOggetto } from '../../shared/catalogo.js';
 import type { OggettoDettaglioDto, OffertaOggettoDto, RicompensaOggettoDto } from '../../shared/types.js';
 import { costoOggetto, dtoOggetto, rigaOggetto, ricompensePerFonte } from './catalogoOggettiLetture.js';
@@ -113,7 +114,7 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   const regalati = new Set(consegneOggetto.map((r) => r.confidente));
   // ondata 5 (decisioni 13 e 21): a chi piace lo dice l'elenco dei regali, con la reazione (+3/+2/+1); un Confidente compare una volta, con la
   // reazione più alta (su un file di gioco di prima della 256 «sconsigliato» vale +1, il resto +3)
-  const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
+  const conReazione = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
   // revisione dei lotti D e D2: anche la nota della riga, perché la scheda dell'oggetto decida chi lo gradisce con lo stesso criterio della
   // scheda del Confidente (`fraIGraditi`); le note diverse delle righe dello stesso Confidente si uniscono, nessuna si perde
   const righeRegalo = prepared(`SELECT g.confidente_chiave,c.nome,${conReazione ? 'g.reazione' : 'CASE WHEN g.sconsigliato = 1 THEN 1 ELSE 3 END AS reazione'},g.nota FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave

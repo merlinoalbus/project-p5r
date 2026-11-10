@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Separata da `VisoreMappa` (L11-01): il visore decide dove e quando la scheda e il popup si aprono, qui sta che cosa dicono. La scheda è
-// anche quella dei contenuti della guida senza mappa (`SchedaContenutoGuida`), per questo accetta `SpilloDto | SchedaContenutoGuidaDto`.
+// anche quella degli elementi della guida senza mappa (spilli con `area_guida_chiave`, ancora nei dati), per questo accetta `SpilloDto | SchedaContenutoGuidaDto`.
 // ============================================================
 
 import { useState, type Ref } from 'react';

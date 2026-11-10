@@ -575,12 +575,6 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`DungeonDettaglioDto`; dopo M7 ogni voce aggiunge contenuto (identità, quantità, nota e casa), letto in blocco. È distinto da dettagli.contenuto e dallo stato L4. Nessuna modifica a pin, testo o avanzamento durante la lettura.',
     errori: [[404, 'dungeon-non-trovato'], PARTITA_NON_TROVATA],
   },
-  'GET /api/compendio/dungeon/:chiave/copie': {
-    sommario: 'Le copie di una voce di un Palazzo secondo la regola dell\'utente (L4, sola lettura)',
-    descrizione: 'I gruppi di voci identiche secondo la regola dell\'utente (R4-15, 2026-10-20): stessa infiltrazione, stesso tipo, nome, descrizione, dettagli ed Enigma, **stesso insieme di pin** (non vuoto). Sola lettura: in L4 non c\'è fusione (decisione dell\'utente); oggi l\'elenco è vuoto.',
-    risposta: '`GruppoCopieDto[]`',
-    errori: [[404, 'dungeon-non-trovato']],
-  },
   'POST /api/compendio/schede/:id/voce': {
     sommario: '«Crea la voce» da una scheda della guida da sistemare (L4)',
     descrizione: 'Una scheda senza mappa né voce (le «Schede da sistemare» della scheda del Palazzo) diventa una voce nuova, in fondo alla sua infiltrazione, con il suo nome e la sua descrizione e il `tipo` dato; la voce la assorbe (la posizione della scheda è la sua posizione da collocare). Nessuno stato si trasferisce.',
@@ -606,12 +600,6 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
     senzaCorpo: true,
     errori: [[404, 'dungeon-non-trovato'], [409, 'niente-da-ripristinare']],
-  },
-  'PUT /api/compendio/dungeon/:chiave/finestra': {
-    sommario: 'Cambia la finestra in cui il Palazzo compare sulla mappa di Tokyo',
-    descrizione: 'Scrive la voce del Palazzo in `finestre-dungeon` (dati della guida), creandola se manca: `dal` e `al` sono giorni MM-GG del calendario di gioco (aprile → marzo), `al: null` vuol dire senza fine. La stessa finestra decide anche l\'arco corrente delle condizioni. Le altre voci del blocco restano come sono.',
-    risposta: 'La finestra salvata, `{ dal, al }`',
-    errori: [[404, 'dungeon-non-trovato'], [400, 'data-non-valida'], [400, 'fine-prima-di-inizio']],
   },
   'PUT /api/compendio/dungeon/:chiave/atterraggi': {
     sommario: 'Sostituisce le regole di atterraggio dalla mappa di Tokyo',

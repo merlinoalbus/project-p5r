@@ -11,6 +11,7 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { condizioneDelRequisito } from './semaforiService.js';
@@ -62,7 +63,7 @@ function verificaConfidente(chiave: string): void {
 
 /** Vero se la copia della guida c'è (uno schema di prima della 119 non ce l'ha). */
 function conGuida(): boolean {
-  return !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'confidente_requisito_guida'").get();
+  return haTabellaMain(getDb(), 'confidente_requisito_guida');
 }
 
 /** Le righe di un rango (o di tutti i ranghi) in una delle due tabelle, in ordine. */

@@ -3,6 +3,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
@@ -97,7 +98,6 @@ function unitaDelConteggio(c: ConteggioSfidaCovo): { una: string; tante: string;
 const nomeDelNegozio = (chiave: string): string => (prepared('SELECT nome FROM negozio WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave;
 
 /** Vero se la tabella delle partite c'è (uno schema di prima non ce l'ha: il conteggio allora non si dice). */
-const tabellaUtente = (nome: string): boolean => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 
 /**
  * L8-03: a che punto è la partita in quello che la sfida conta, e l'obiettivo. I totali «tutti» si contano nel DB a ogni lettura, mai scritti:
@@ -140,7 +140,7 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
     case 'timbri-raccolti': return { fatti: [...timbriPartita(partitaId).values()].reduce((n, x) => n + x, 0), obiettivo: c.obiettivo };
     case 'spesa-negozio': return { fatti: st.spesaPerNegozio.get(c.negozio) ?? 0, obiettivo: c.obiettivo };
     case 'persona-livello': {
-      const fatti = !tabellaUtente('persona_posseduta') ? 0 : prepared('SELECT COALESCE(MAX(livello), 0) FROM utente.persona_posseduta WHERE partita_id = ?').pluck().get(partitaId) as number;
+      const fatti = !haTabellaUtente(getDb(), 'persona_posseduta') ? 0 : prepared('SELECT COALESCE(MAX(livello), 0) FROM utente.persona_posseduta WHERE partita_id = ?').pluck().get(partitaId) as number;
       return { fatti, obiettivo: c.obiettivo };
     }
   }
@@ -149,7 +149,7 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
 /** I regali della partita, tutti: la guida dice «almeno 10 regali totali ai Confidenti» e non esclude nessun regalo, quindi conta anche la
  *  Cartolina spedita (revisione dei lotti D e D2: escluderla era una regola senza fonte). */
 function regaliConsegnati(partitaId: number): number {
-  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'regalo_partita'").get()) return 0;
+  if (!haTabellaUtente(getDb(), 'regalo_partita')) return 0;
   return prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ?').pluck().get(partitaId) as number;
 }
 

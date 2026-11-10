@@ -333,13 +333,13 @@ export function ConfidenteDettaglioPage() {
 
           {/* D10 (L7-01): le fonti servono a chi prepara i dati; nel rilascio stanno solo in Impostazioni → Informazioni */}
           {!IN_RILASCIO && c.fonti.length > 0 && (
-            <p className="m-0 testo-12 text-text-muted">Fonti:{' '}{c.fonti.map((f, i) => {
+            // una fila di collegamenti, ognuno una riga da 44 px (era un testo con le virgole: righe da 15 px, bersagli da 15)
+            <p className="m-0 flex flex-wrap items-center gap-x-3 testo-12 text-text-muted"><span>Fonti:</span>{c.fonti.map((f, i) => {
               const href = urlHttp(f);
               const sito = sitoDellaFonte(f);
-              const separatore = i < c.fonti.length - 1 ? ', ' : '';
               return href && sito
-                ? <a key={i} href={href} target="_blank" rel="noreferrer" className="credito">{sito}{separatore}</a>
-                : <span key={i}>{f}{separatore}</span>;
+                ? <a key={i} href={href} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">{sito}</a>
+                : <span key={i}>{f}</span>;
             })}</p>
           )}
         </div>

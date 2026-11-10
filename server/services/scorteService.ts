@@ -14,7 +14,8 @@
 // (`sede_chiave`, NULL = la principale): la scorta è della sede che si guarda, perché le sedi di un listino condiviso sono distributori diversi.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaUtente, haTabellaUtente } from '../db/schemaMemo.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import { descriviRifornimento, descriviStatoScorta, normalizzaRifornimento, numeroGiorno, statoScorta, type RegolaRifornimento } from '../../shared/rifornimento.js';
 import type { ScortaArticoloDto } from '../../shared/types.js';
@@ -45,7 +46,7 @@ const stessaSede = (a: string | null | undefined, b: string | null | undefined):
 
 /** Il registro esiste (partite.db già migrato alla 051): prima della migrazione nessuna scorta, tutto come prima. */
 function conRegistro(): boolean {
-  return !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get();
+  return haTabellaUtente(getDb(), 'registro_acquisti');
 }
 
 /** La regola dell'articolo, o null se non ne ha (né la colonna c'è ancora). */
@@ -193,7 +194,7 @@ export function scriviRiga(partitaId: number, articolo: string, r: NuovaRiga): n
 
 /** Il registro ha la colonna della sede (utente 051). */
 function conColonnaSede(): boolean {
-  return !!prepared("SELECT 1 FROM pragma_table_info('registro_acquisti', 'utente') WHERE name = 'sede_chiave'").get();
+  return haColonnaUtente(getDb(), 'registro_acquisti', 'sede_chiave');
 }
 
 /**

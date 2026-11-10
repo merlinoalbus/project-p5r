@@ -26,7 +26,7 @@
 // ============================================================
 
 import { Link } from 'react-router-dom';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
 import { dataConArticolo } from '../../../shared/condizioniSpillo';
 import { dataGiocoConArticolo } from '../../utils/dateGioco';
@@ -42,6 +42,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { contornoSagoma } from '../../utils/contornoSagoma';
+import { raggruppaCartellini } from '../../utils/raggruppaCartellini';
 
 /** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
  *
@@ -52,6 +53,8 @@ const CONTORNO = contornoSagoma('#fff', 1, true);
 const CONTORNO_ORO = contornoSagoma('#ffd23f', 2, true) + ' brightness(1.05)';
 
 interface Props {
+  /** Unisce in un «+n» i cartellini troppo vicini. Spento sulla mappa piccola della pagina Partita, che non cambia disposizione (DECISIONI). */
+  raggruppaVicini?: boolean;
   quartieri: QuartiereRiassuntoDto[];
   dungeon?: DungeonRiassuntoDto[];
   /** Data della partita in MM-GG. Senza, si mostra il mondo intero. */
@@ -281,7 +284,7 @@ interface Vista { zoom: number; pan: Spostamento }
  * o, con `riempi`, come conteggio con una finestra di dettaglio; senza `dataGioco` si mostra tutto e
  * lo si dice. `evidenziato`/`onEvidenzia` condividono la selezione con le schede dell'ospite e
  * `onApri` può intercettare il clic sui cartellini. */
-export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenziato, onEvidenzia, onApri, className = '', riempi = false }: Props) {
+export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenziato, onEvidenzia, onApri, className = '', riempi = false, raggruppaVicini = true }: Props) {
   // «Nessuna partita attiva» solo quando l'elenco delle partite è arrivato (L1-07): mentre arriva non è vero
   const partiteCaricate = usePartitaStore((s) => s.caricata);
   // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
@@ -490,6 +493,32 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
     return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente), nomiFermate: nomi };
   }, [quartieri, dungeon, covo, risolvi]);
   const [elencoAssenti, setElencoAssenti] = useState(false);
+  // Cartellini troppo vicini alla misura di adesso: diventano un gruppo «+n» con l'elenco dei nomi (regola dei bersagli, vedi
+  // `raggruppaCartellini`). La misura della tela (non ingrandita) si legge dal riquadro e si segue quando cambia; senza motore di
+  // layout (prove) resta zero e nessuno si raggruppa.
+  const [misura, setMisura] = useState({ w: 0, h: 0 });
+  useLayoutEffect(() => {
+    const el = cornice.current;
+    if (!el) return;
+    const leggi = () => setMisura((m) => (m.w === el.clientWidth && m.h === el.clientHeight ? m : { w: el.clientWidth, h: el.clientHeight }));
+    leggi();
+    if (typeof ResizeObserver === 'undefined') return;
+    const oss = new ResizeObserver(leggi);
+    oss.observe(el);
+    return () => oss.disconnect();
+  }, []);
+  const { singoli, gruppi } = useMemo(
+    () => raggruppaCartellini(presenti.map((s) => ({ chiave: s.chiave, x: s.dove.x, y: s.dove.y })), raggruppaVicini ? misura.w * zoom : 0, raggruppaVicini ? misura.h * zoom : 0),
+    [presenti, misura, zoom, raggruppaVicini],
+  );
+  const [gruppoAperto, setGruppoAperto] = useState<string | null>(null);
+  const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
+  const perChiave = useMemo(() => new Map(presenti.map((s) => [s.chiave, s])), [presenti]);
+  /** Il clic su un collegamento verso un cartellino: stessa regola del cartellino singolo (l'ospite può gestirlo senza cambiare pagina). */
+  const alClic = (s: Segno) => (e: ReactMouseEvent) => {
+    setGruppoAperto(null);
+    if (onApri && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0 && onApri(s.href, s.destinazione)) e.preventDefault();
+  };
   const { blocco, mappa } = useLarghezzaCheSta(riempi, `${presenti.length}/${assenti.length}/${dataGioco ?? ''}`);
 
   // Il tetto di larghezza sta **sul blocco**, non sulla sola cornice: sotto la mappa c'è la riga
@@ -517,7 +546,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
     >
       <div
         className="mappa-tokyo__tela"
-        style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+        style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, '--zoom-tokyo': zoom } as CSSProperties}
         // `group`, non `img`: dentro ci sono i cartellini da toccare, e un `img` li renderebbe invisibili ai lettori di schermo
         role="group"
         aria-label={`Mappa di Tokyo con ${presenti.length} mete raggiungibili`}
@@ -530,7 +559,23 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
         </svg>
         <Rete nomi={nomiFermate} />
         {/* Fra i presenti c'è anche il Covo dei Ladri, quando la sua Area è nel mondo (dal 5 maggio, dai dati: vedi sopra). */}
-        {presenti.map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} onApri={onApri} />)}
+        {presenti.filter((s) => singoli.includes(s.chiave)).map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} onApri={onApri} />)}
+        {/* Cartellini che alla misura di adesso si toccano: una pastiglia «+n» per gruppo, che apre l'elenco dei nomi. Resta della
+            grandezza del tocco (34 px più l'imbottitura) a ogni ingrandimento: nella tela che scala la si riporta a misura. */}
+        {gruppi.map((g) => {
+          const nomi = g.chiavi.map((k) => perChiave.get(k)?.nome ?? k);
+          const acceso = evidenziato != null && g.chiavi.includes(evidenziato);
+          return (
+            <button key={g.chiave} type="button"
+              className={`spillo-tokyo-gruppo absolute z-20 ${acceso ? 'spillo-tokyo-gruppo--acceso' : ''}`}
+              style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `translate(-50%, -50%) scale(${1 / zoom})` }}
+              aria-label={`${g.chiavi.length} mete vicine: ${nomi.join(', ')}`} aria-haspopup="dialog" aria-expanded={gruppoAperto === g.chiave}
+              title={nomi.join(', ')}
+              onClick={() => setGruppoAperto(g.chiave)}>
+              <span className="spillo-mappa__gruppo">+{g.chiavi.length}</span>
+            </button>
+          );
+        })}
       </div>
       {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}
       <div className="visore-mappa__controlli">
@@ -585,6 +630,22 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
               <span className="testo-12 text-text-muted">{s.quando ?? 'condizione non indicata'}</span>
             </li>
           ))}
+        </ul>
+      </Modal>
+    )}
+    {gruppoScelto && (
+      <Modal aperta titolo={`${gruppoScelto.chiavi.length} mete vicine`} onChiudi={() => setGruppoAperto(null)}>
+        <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
+          {gruppoScelto.chiavi.map((k) => {
+            const s = perChiave.get(k);
+            if (!s) return null;
+            return (
+              <li key={k}>
+                <Link to={s.href} className="chip chip--icona touch no-underline" onClick={alClic(s)}
+                  onMouseEnter={() => onEvidenzia?.(s.chiave)} onMouseLeave={() => onEvidenzia?.(null)}>{s.nome}</Link>
+              </li>
+            );
+          })}
         </ul>
       </Modal>
     )}

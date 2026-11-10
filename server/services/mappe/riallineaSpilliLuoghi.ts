@@ -9,6 +9,7 @@
 // ============================================================
 
 import { nowIso } from '../../db/dbService.js';
+import { haTabella } from '../../db/colonne.js';
 import type { AppDatabase } from '../../db/dbService.js';
 import { spilloPerLuogo } from '../../../shared/tipiLuogo.js';
 
@@ -18,8 +19,7 @@ const VECCHIA_CORRISPONDENZA: Record<string, string> = { scuola: 'attivita' };
 
 /** Riallinea i pin di seed dei luoghi al catalogo dei tipi; restituisce quanti ne ha cambiati. Senza le tabelle `spillo` e `luogo` non fa niente. */
 export function riallineaSpilliLuoghi(db: AppDatabase): number {
-  const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((r) => r.name));
-  if (!tabelle.has('spillo') || !tabelle.has('luogo')) return 0;
+  if (!haTabella(db, 'spillo') || !haTabella(db, 'luogo')) return 0;
   const agg = db.prepare(`UPDATE spillo SET tipo = ?, updated_at = ? WHERE origine = 'seed' AND riferimento_tipo = 'luogo' AND tipo = ?
     AND riferimento_chiave IN (SELECT chiave FROM luogo WHERE tipo = ?)`);
   const t = nowIso();

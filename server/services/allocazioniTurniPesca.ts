@@ -1,4 +1,5 @@
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
+import { haTabella } from '../db/colonne.js';
 import { ATTIVITA_PESCA, SFIDA_PESCA } from '../../shared/pesca.js';
 import { httpErrors } from '../utils/httpError.js';
 import { canonicoPesca, firmaPesca, jsonPesca } from './registroPesca.js';
@@ -76,7 +77,7 @@ export function provaUidTurnoPesca(p:number,attivita:unknown,ordine:unknown,prim
 /** Vecchi file senza la famiglia pesca restano importabili; un journal presente non viene ignorato. */
 export function verificaAllocazioniTurniPescaImportate(db:AppDatabase):void {
   const database=db.pragma('database_list') as Array<{name:string}>;
-  if(!database.some(d=>d.name==='utente')||!db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type='table' AND name='pesca_operazione'").get())return;
+  if(!database.some(d=>d.name==='utente')||!haTabella(db,'pesca_operazione','utente'))return;
   const partite=db.prepare('SELECT DISTINCT partita_id FROM utente.pesca_operazione WHERE azione=? ORDER BY partita_id').all(AZIONE_ALLOCAZIONE_TURNO_PESCA) as Array<{partita_id:number}>;
   for(const p of partite)leggiAllocazioniTurniPesca(p.partita_id,db);
 }

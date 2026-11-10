@@ -12,6 +12,7 @@
 
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { datiGuidaCorretti } from './datiGuida.js';
@@ -189,7 +190,7 @@ function postiApertiDaiLibri(): Map<string, NonNullable<LibroDto['apre']>> {
     const libri = libriCheSbloccano(effettive);
     for (const l of libri) { const v = out.get(l) ?? []; v.push(posto); out.set(l, v); }
   };
-  const conQuartieri = (prepared("SELECT name FROM pragma_table_info('quartiere')").all() as Array<{ name: string }>).some((c) => c.name === 'condizioni_json');
+  const conQuartieri = haColonnaMain(getDb(), 'quartiere', 'condizioni_json');
   if (conQuartieri) {
     for (const q of prepared('SELECT chiave, nome, condizioni_json FROM quartiere WHERE condizioni_json IS NOT NULL ORDER BY ordine').all() as Array<{ chiave: string; nome: string; condizioni_json: string }>) {
       aggiungi(q.condizioni_json, { tipo: 'quartiere', chiave: q.chiave, nome: q.nome, casa: `/guida/citta/${encodeURIComponent(q.chiave)}` });

@@ -893,6 +893,11 @@
      la finestra — la stessa mappa sta in una card piena sul telefono e in una colonna stretta
      accanto alla guida sul monitor. */
   .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; }
+  /* Da 1280 px il blocco è agganciato (`sticky`) alla colonna della pagina Città: mappa, legenda e fermate (circa 95 px) più la barra in
+     alto (68 px) e i margini devono stare nell'altezza della finestra, altrimenti il fondo resta fuori vista mentre è fermo */
+  @media (min-width: 1280px) {
+    .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 100dvh - 180px, 760px) * 10 / 7)); }
+  }
   /* Il contenitore di misura è la coppia mappa + legenda: fuori dalla schermata piena è largo quanto il
      blocco (la stessa misura di prima), dentro è largo quanto la mappa. */
   .blocco-mappa-tokyo__mappa { width: 100%; margin-inline: auto; container: mappaTokyo / inline-size; }
@@ -1175,7 +1180,7 @@
   .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 120px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: var(--testo-15); color: var(--color-text-muted); }
   .posto-libero--aggiungi { background: none; cursor: pointer; color: var(--color-text); font-weight: 600; }
   .posto-libero--aggiungi:hover { border-color: var(--color-primary); color: var(--color-primary-testo); }
-  /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra il level up
+  /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra l'avanzamento
      («Verso il rango N»: requisiti e moltiplicatori; poi Risposta ♪, regalo, uscita), a destra le risposte migliori; in una colonna sola
      (telefono) le risposte stanno fra i requisiti e le note ♪: prima si legge la risposta, poi si registra */
   .dettaglio-confidente { display: flex; flex-direction: column; gap: 12px; min-width: 0; flex-shrink: 0; container-type: inline-size; }
@@ -1556,6 +1561,12 @@
     text-underline-offset: 2px;
   }
   .credito:hover { color: var(--color-text-secondary); }
+  /* Un collegamento isolato dentro una frase («Denaro e squadra» in «Si segna in …») non può diventare un riquadro da 44 px senza far
+     saltare le righe: resta della sua altezza e il tocco gli arriva da un'area trasparente di 44 px centrata sulla riga, che non
+     occupa spazio. Vale solo dove le righe vicine non portano altri collegamenti (l'area li coprirebbe): una fila di crediti sta su
+     righe da 44 px (`credito touch`), non qui. */
+  .link-in-riga { position: relative; }
+  .link-in-riga::after { content: ""; position: absolute; left: -4px; right: -4px; top: 50%; height: 44px; transform: translateY(-50%); }
 
   /* ---- Card ---- */
   .card {
@@ -1783,7 +1794,7 @@
   }
   /* Il numero su un pulsante a sola icona (le ricevute della spunta): un distintivo nell'angolo in alto a destra, dentro i 44 px del
      bersaglio (`.btn` è già `position: relative`), che non riceve il tocco; il nome accessibile del pulsante dice già il numero, quindi il
-     distintivo è nascosto ai lettori */
+     distintivo è nascosto ai lettori. Il testo è a 12 px come ogni testo informativo: non è fra i quattro segni ammessi a 11 px. */
   .conteggio-pulsante {
     position: absolute;
     top: 3px;
@@ -1794,7 +1805,7 @@
     border-radius: 8px;
     background: var(--color-primary-fondo);
     color: var(--color-text-on-primary);
-    font-size: var(--testo-micro);
+    font-size: var(--testo-12);
     font-weight: 700;
     line-height: 16px;
     text-align: center;
@@ -2616,6 +2627,11 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .editor-mappa__sezioni button:focus-visible { outline:2px solid white; outline-offset:2px; }
 .editor-mappa__contenuto { display:flex; flex-direction:column; gap:12px; min-width:0; }
 .editor-mappa__contenuto[hidden] { display:none; }
+/* Il piè dei moduli del pannello (spillo, mappa): «Salva» e «Elimina» restano sul bordo basso del pannello, che è l'unico scroller (AD10).
+   Sticky nel pannello e non una finestra: la mappa accanto resta visibile e toccabile. Sta accanto alla scheda, nel contenuto della
+   sezione (non dentro il modulo, che comincia sotto gli strumenti): così si ferma sul bordo anche se il modulo è ancora fuori vista.
+   `bottom:-10px` annulla il padding del pannello. */
+.editor-mappa__piede { position:sticky; bottom:-10px; z-index:4; display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 0; border-top:1px solid var(--color-border); background:#131419; }
 .editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:var(--testo-14); line-height:1.5; color:var(--color-text-secondary); }
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; }
 @media (max-width: 860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:var(--testo-12); padding:4px 2px; } }
@@ -2719,6 +2735,14 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    invisibile dentro un contenitore che ritaglia non riceve niente. */
 .spillo-tokyo, .spillo-esteso { position: absolute; }
 .spillo-tokyo::after, .spillo-esteso::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+/* La tela di Tokyo scala con l'ingrandimento (`--zoom-tokyo`, scritto da `MappaTokyo`): l'area di tocco, che sta dentro, scalava con lei
+   e due cartellini vicini restavano sovrapposti a qualunque ingrandimento. Divisa per lo zoom resta di 44 px sullo schermo, e i centri,
+   che invece si allontanano, la lasciano libera. Quelli che a questa misura si toccano sono già un gruppo (`raggruppaCartellini`). */
+.mappa-tokyo__tela .spillo-tokyo::after { width: calc(44px / var(--zoom-tokyo, 1)); height: calc(44px / var(--zoom-tokyo, 1)); }
+/* La pastiglia dei cartellini vicini: stesso aspetto del gruppo di spilli («+n»), 44×44 di tocco (34 più 5 per parte), oro quando uno
+   dei suoi cartellini è quello acceso */
+.spillo-tokyo-gruppo { padding: 5px; background: none; border: 0; cursor: pointer; }
+.spillo-tokyo-gruppo--acceso .spillo-mappa__gruppo { border-color: var(--color-mappa-oro); }
 }
 
 /* ---- Aree che scorrono dentro la pagina (richiesta dell'utente, 2026-09-29) ----
@@ -2850,8 +2874,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
     .tabella-oggetti tbody tr:hover { background: transparent; }
     .tabella-oggetti td { display: block; padding: 0; border-bottom: 0; min-width: 0; }
     .tabella-oggetti td.tabella-oggetti__nome { grid-column: 1 / 3; grid-row: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; overflow: hidden; }
-    .tabella-oggetti__nome > a { flex: 0 1 auto; min-width: 0; }
-    /* tutta la riga apre l'oggetto (il link del nome si estende sulla riga): il nome da solo era un bersaglio da 14–23 px */
+    .tabella-oggetti__nome > a { flex: 0 1 auto; min-width: 44px; }
+    /* tutta la riga apre l'oggetto (il link del nome si estende sulla riga): il nome da solo era un bersaglio da 14–23 px; il link ha
+       comunque almeno 44 px di larghezza (`.touch`), anche per i nomi corti («31», «1UP»), perché anche il suo riquadro sia un bersaglio */
     .tabella-oggetti tbody tr { position: relative; }
     .tabella-oggetti__nome > a::after { content: ""; position: absolute; inset: 0; }
     /* il nome originale e il destinatario vanno a capo sotto il nome quando non ci stanno accanto (L13: prima finivano in «…» e a 375 px

@@ -1,6 +1,7 @@
 import type { AppDatabase } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { colonneCompatibili } from '../../db/fontiTolte.js';
+import { haTabella } from '../../db/colonne.js';
 
 interface PassoPin { schema: 'main' | 'utente'; tabella: string; op: 'D' | 'U' | 'I'; prima?: Record<string, unknown>; dopo?: Record<string, unknown> }
 const errore = () => httpErrors.conflict('cestino-pin-registro-incoerente', 'Il registro non descrive la sola rimozione recuperabile del pin e dei suoi stati: transazione annullata, dati conservati.');
@@ -25,7 +26,7 @@ export function verificaRegistroCestinoPin(db: AppDatabase, passi: readonly Pass
   for (const p of passi) {
     // La nuova famiglia non ripristina proiezioni parziali o colonne eliminate
     // dopo la cattura: anche immagini, metadati e stati devono restare integrali.
-    if (!db.prepare(`SELECT 1 FROM ${p.schema}.sqlite_master WHERE type='table' AND name=?`).get(p.tabella)) throw errore();
+    if (!haTabella(db, p.tabella, p.schema)) throw errore();
     const campi = (db.prepare('SELECT name FROM pragma_table_info(?,?) ORDER BY cid').all(p.tabella, p.schema) as Array<{ name: string }>).map(c => c.name);
     if (!campi.length || [p.prima, p.dopo].some(r => r && !colonneCompatibili(p.schema, p.tabella, Object.keys(r), campi))) throw errore();
     if (p.schema === 'utente') {

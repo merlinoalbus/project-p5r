@@ -19,7 +19,8 @@
 // (`statoPartitaEssenziale`), non su quello completo con Palazzi, scorta, pesca e meteo; il valutatore resta quello unico.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { valutaInsieme } from './condizioni/valutatore.js';
@@ -29,7 +30,7 @@ import { statoDisponibilitaPartita } from './disponibilitaService.js';
 
 export interface DonoConfidenteOttenuto { catalogo: string; quantita: number; confidente: string; nota: string | null }
 
-const haColonnaCondizioni = (): boolean => !!prepared("SELECT 1 FROM pragma_table_info('ricompensa_oggetto') WHERE name = 'condizioni_json'").get();
+const haColonnaCondizioni = (): boolean => haColonnaMain(getDb(), 'ricompensa_oggetto', 'condizioni_json');
 
 /** Vero se una condizione (anche dentro `gruppo` e `non`) legge le Doti: solo allora lo stato essenziale le legge (sono la lettura più costosa). */
 function usaLeDoti(condizioni: readonly RequisitoSpillo[]): boolean {

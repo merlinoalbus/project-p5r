@@ -12,6 +12,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaUtente, haTabellaUtente } from '../db/schemaMemo.js';
 // quando un Palazzo è concluso lo decide `palazziService` (Tesoro e boss finale: mai la data)
 import { statoPalazzi } from './palazziService.js';
 import { EVENTI_STORIA, condizioneConTesto, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
@@ -95,7 +96,7 @@ export interface ContenutiPartita {
  * salvataggio (prima della 061) il salvataggio vale «no»; un JSON dei set che non si legge vale «nessuno», mai un errore.
  */
 export function contenutiDellaPartita(partitaId: number): ContenutiPartita {
-  const conSalvataggio = !!prepared("SELECT 1 FROM pragma_table_info('partita', 'utente') WHERE name = 'salvataggio_p5'").get();
+  const conSalvataggio = haColonnaUtente(getDb(), 'partita', 'salvataggio_p5');
   const r = prepared(`SELECT dlc_posseduti_json, nuova_partita_plus${conSalvataggio ? ', salvataggio_p5' : ''} FROM partita WHERE id = ?`).get(partitaId) as { dlc_posseduti_json: string; nuova_partita_plus: number; salvataggio_p5?: number } | undefined;
   let set: unknown;
   try { set = JSON.parse(r?.dlc_posseduti_json ?? '[]'); } catch { set = []; }
@@ -121,7 +122,7 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const dataGioco = partita?.data_gioco ?? null;
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
   // L6: gli inviti registrati (la tabella nasce con la migrazione utente 025: su uno schema di prima nessun invito)
-  const conInviti = !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'invito_partita'").get();
+  const conInviti = haTabellaUtente(getDb(), 'invito_partita');
   const invitiRegistrati = new Set(conInviti ? (prepared('SELECT invito_chiave FROM invito_partita WHERE partita_id = ?').all(partitaId) as Array<{ invito_chiave: string }>).map((r) => r.invito_chiave) : []);
   // L13: gli sblocchi (la tabella nasce con la migrazione utente 046: su uno schema di prima nessuno sblocco)
   const sblocchiRicevuti = new Set(sblocchiDellaPartita(partitaId));
@@ -170,7 +171,7 @@ export function statoPartitaEssenziale(partitaId: number, ranghiConfidenti: Map<
 
 /** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»); vuoto se lo schema non ha ancora la tabella. */
 export function sblocchiDellaPartita(partitaId: number): string[] {
-  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'sblocco_partita'").get()) return [];
+  if (!haTabellaUtente(getDb(), 'sblocco_partita')) return [];
   return (prepared("SELECT bersaglio_tipo || ':' || bersaglio_chiave AS k FROM utente.sblocco_partita WHERE partita_id = ?").all(partitaId) as Array<{ k: string }>).map((r) => r.k);
 }
 

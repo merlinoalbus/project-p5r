@@ -14,6 +14,7 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaUtente, haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { idMappa } from './mappe/percorsiMappe.js';
 import { entitaDellaRadice } from './mappe/alberoMappe.js';
@@ -142,7 +143,7 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
       prepared('UPDATE negozio SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       prepared('UPDATE attivita SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       // Ondata 5: gli acquisti registrati in questa sede restano, della sede principale del loro negozio (nello stesso cestino)
-      if (prepared("SELECT 1 FROM pragma_table_info('registro_acquisti', 'utente') WHERE name = 'sede_chiave'").get()) prepared('UPDATE utente.registro_acquisti SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
+      if (haColonnaUtente(getDb(), 'registro_acquisti', 'sede_chiave')) prepared('UPDATE utente.registro_acquisti SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       prepared('DELETE FROM luogo WHERE chiave = ?').run(chiave);
     } else {
       const articoli = negozi.flatMap(k => (prepared('SELECT chiave FROM main.articolo WHERE negozio_chiave=?').all(k) as Array<{ chiave: string }>).map(a => a.chiave));
@@ -151,7 +152,7 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
       for (const k of negozi) {
         prepared('DELETE FROM utente.acquisto_partita WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
         // Ondata 5: le copie del registro degli acquisti vanno nello stesso cestino del loro segno «ottenuto»
-        if (prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()) prepared('DELETE FROM utente.registro_acquisti WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
+        if (haTabellaUtente(getDb(), 'registro_acquisti')) prepared('DELETE FROM utente.registro_acquisti WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
         prepared('DELETE FROM utente.punti_negozio_partita WHERE negozio_chiave = ?').run(k);
         prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?").run(k);
         prepared('DELETE FROM articolo WHERE negozio_chiave = ?').run(k);

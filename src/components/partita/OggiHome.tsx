@@ -135,7 +135,7 @@ export function OggiHome({ partita, testa }: Props) {
                 : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nascondi la mappa" onClick={() => impostaMappaChiusa(true)} />}
             </div>
           )}
-          <OggiMappa oggi={oggiHome} riempi />
+          <OggiMappa oggi={oggiHome} riempi raggruppaVicini />
         </div>
       )}
     </div>
