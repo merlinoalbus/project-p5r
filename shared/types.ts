@@ -2707,6 +2707,9 @@ export interface StatoCalcolatoRichiestaDto {
   giorniAllaScadenza: number | null;
   /** Vero se si può accettare adesso (da disponibile). */
   accettabile: boolean;
+  /** Vero se la Richiesta è sbloccata nella partita: le sue condizioni di sblocco non hanno un rosso, oppure è già segnata accettata o
+   *  completata. Non dipende dalla scadenza: una scaduta mai sbloccata resta `false`. */
+  sbloccata: boolean;
   /**
    * L13 (ondata 7, O7-1): vero se si può segnare completata adesso: il Dedalo del bersaglio è aperto nella partita (quello della proroga, se il
    * bersaglio si è spostato) e nessuna condizione propria di completamento è falsa. Accettarla non lo chiede: la guida fa ricevere Richieste
