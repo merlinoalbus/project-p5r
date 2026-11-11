@@ -128,7 +128,8 @@ function completamento(r: RigaRichiesta, st: StatoDisponibilita, nomi: ReturnTyp
  * dallo stato segnato; poi la scadenza: passata la data (e la proroga, se c'è e le sue condizioni sono vere), è scaduta, salvo che sia già
  * completata; altrimenti le condizioni di sblocco: un rosso la blocca con quel che manca, il resto è disponibile (un grigio si dice fra i
  * motivi). L8-09: lo sblocco e la scadenza scritti solo come testo della guida non ci sono più (vuoti in tutte le righe, colonne tolte dalla
- * 337): lo stato «da verificare» non nasce più da loro.
+ * 337): lo stato «da verificare» non nasce più da loro. `sbloccata` dice a parte se le condizioni di sblocco valgono (o se è già segnata
+ * accettata o completata), anche per una scaduta: è il dato del filtro «Sblocco» della pagina.
  */
 function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: StatoDisponibilita, nomi: ReturnType<typeof nomiCondizioniMemo>): StatoCalcolatoRichiestaDto {
   const oggi = st.dataGioco;
@@ -138,12 +139,15 @@ function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: St
   const passata = !!oggi && !!scadenzaEffettiva && ordineGioco(oggi) > ordineGioco(scadenzaEffettiva);
   const giorni = oggi && scadenzaEffettiva && !passata ? giornoDellAnno(scadenzaEffettiva) - giornoDellAnno(oggi) : null;
   const c = completamento(r, st, nomi, prorogaVale);
-  const base = { scadenzaEffettiva, giorniAllaScadenza: giorni, accettabile: false, completabile: c.completabile, motiviCompletamento: c.motivi, doveOggi: c.doveOggi };
+  const condizioni = leggiCondizioniSalvate(r.condizioni_json).map((c) => condizioneConTesto(c, nomi));
+  const v = valutaInsieme(condizioni, st);
+  // lo sblocco non dipende dalla scadenza: una Richiesta scaduta senza essere mai stata sbloccata resta «non sbloccata»; una segnata
+  // accettata o completata è stata ricevuta nel gioco, quindi è sbloccata comunque
+  const sbloccata = segnato !== null || v.stato !== 'bloccato';
+  const base = { scadenzaEffettiva, giorniAllaScadenza: giorni, accettabile: false, sbloccata, completabile: c.completabile, motiviCompletamento: c.motivi, doveOggi: c.doveOggi };
   if (segnato === 'completata') return { ...base, completabile: true, motiviCompletamento: [], stato: 'completata', motivi: [] };
   if (passata) return { ...base, stato: 'scaduta', motivi: [`Scaduta ${dataConArticolo(scadenzaEffettiva!)}${r.proroga_data && !prorogaVale ? ` (la proroga ${dataConArticolo(r.proroga_data, 'a')} vale solo con: ${proroga.map((c) => descriviRequisitoSpillo(c, nomi)).join(', ')})` : ''}`] };
   if (segnato === 'accettata') return { ...base, stato: 'accettata', motivi: [] };
-  const condizioni = leggiCondizioniSalvate(r.condizioni_json).map((c) => condizioneConTesto(c, nomi));
-  const v = valutaInsieme(condizioni, st);
   if (v.stato === 'bloccato') return { ...base, stato: 'bloccata', motivi: v.requisiti.filter((q) => q.stato === 'rosso' && q.bloccante !== false).map((q) => q.dettaglio) };
   const grigi = v.requisiti.filter((q) => q.stato === 'grigio' && q.bloccante !== false).map((q) => `Da verificare nel gioco: ${q.dettaglio}`);
   return { ...base, stato: 'disponibile', accettabile: true, motivi: grigi };

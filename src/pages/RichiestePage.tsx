@@ -7,7 +7,7 @@
 // loro elemento e la posizione in cima. Il resto — committente, date, note — sta dietro «Dettagli».
 //
 // I filtri sono valori: la ricerca (nome, bersaglio, forma demoniaca, Confidente, dedalo,
-// committente), due segmenti indipendenti — accettazione e completamento — e il dedalo scelto
+// committente), tre segmenti indipendenti — accettazione, completamento e sblocco — e il dedalo scelto
 // fra quelli che hanno richieste, nell'ordine di percorrenza, tenuto nell'indirizzo (`?dedalo=`)
 // così dalla scheda del dedalo si arriva già filtrati.
 //
@@ -66,6 +66,10 @@ type Accettazione = 'tutte' | 'accettate' | 'non-accettate';
 type Completamento = 'tutte' | 'completate' | 'da-completare';
 const ACCETTAZIONE: ReadonlyArray<{ chiave: Accettazione; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'accettate', nome: 'Accettate' }, { chiave: 'non-accettate', nome: 'Non accettate' }];
 const COMPLETAMENTO: ReadonlyArray<{ chiave: Completamento; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'completate', nome: 'Completate' }, { chiave: 'da-completare', nome: 'Da completare' }];
+/** Sblocco nella partita, dal campo `sbloccata` che il server calcola: «bloccate» sono quelle a cui manca ancora una condizione di
+ *  sblocco, anche se intanto sono scadute; «sbloccate» le altre, comprese quelle già segnate accettate o completate. */
+type Sblocco = 'tutte' | 'sbloccate' | 'bloccate';
+const SBLOCCO: ReadonlyArray<{ chiave: Sblocco; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'sbloccate', nome: 'Sbloccate' }, { chiave: 'bloccate', nome: 'Bloccate' }];
 /** I due fogli della pagina: le Richieste, e la bottega di Jose. */
 type Foglio = 'richieste' | 'jose';
 /** I fogli della pagina: chiave, nome e icona. */
@@ -227,8 +231,8 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
 /**
  * Pagina delle Richieste dei Mementos: carica le Richieste per la partita attiva e legge dall'URL
  * il foglio (Richieste o Jose, offerto solo se i dati di Jose ci sono) e il dedalo scelto. Nel
- * foglio delle Richieste mostra i conteggi, i filtri (testo, dedalo, accettazione e
- * completamento) e le carte con le completate in fondo; il cambio di stato aggiorna la riga nei
+ * foglio delle Richieste mostra i conteggi, i filtri (testo, dedalo, accettazione,
+ * completamento e sblocco) e le carte con le completate in fondo; il cambio di stato aggiorna la riga nei
  * dati correnti e ricalcola le completate in tutto e per dedalo. Il foglio di Jose mostra fiori,
  * timbri, boss segreto e la tabella degli scambi.
  */
@@ -241,6 +245,7 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
   const [ricerca, setRicerca] = useState('');
   const [accettazione, setAccettazione] = useState<Accettazione>('tutte');
   const [completamento, setCompletamento] = useState<Completamento>('tutte');
+  const [sblocco, setSblocco] = useState<Sblocco>('tutte');
   /** La Richiesta aperta nel modulo (null = una nuova), o nessun modulo. */
   const [modulo, setModulo] = useState<{ chiave: string | null } | null>(null);
   // Il foglio e il dedalo stanno nell'indirizzo: un collegamento a Jose porta a Jose, uno dal dedalo arriva già filtrato.
@@ -259,18 +264,20 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
       if (accettazione === 'non-accettate' && r.stato !== null) return false;
       if (completamento === 'completate' && r.stato !== 'completata') return false;
       if (completamento === 'da-completare' && r.stato === 'completata') return false;
+      // lo sblocco è lo stato calcolato nella partita: senza partita il segmento non c'è e il filtro non agisce
+      if (sblocco !== 'tutte' && r.statoPartita && r.statoPartita.sbloccata !== (sblocco === 'sbloccate')) return false;
       if (!trova(r.nome, r.bersaglio.nome, r.bersaglio.formaDemoniaca, r.confidente?.nome, r.areaNome, r.committente)) return false;
       return true;
     })
     // Le completate in fondo: restano consultabili, ma non davanti a quelle da fare.
-    .sort((a, b) => Number(a.stato === 'completata') - Number(b.stato === 'completata')), [d, dedalo, accettazione, completamento, trova]);
+    .sort((a, b) => Number(a.stato === 'completata') - Number(b.stato === 'completata')), [d, dedalo, accettazione, completamento, sblocco, trova]);
   const accettate = useMemo(() => (d?.richieste ?? []).filter((r) => r.stato === 'accettata').length, [d]);
   // dai dati correnti: la riga arriva dopo un `await`, e due cambi di stato ravvicinati non devono annullarsi
   const aggiorna = (r: RichiestaDto) => dati.imposta((attuale) => {
     const richieste = attuale.richieste.map((x) => (x.chiave === r.chiave ? r : x));
     return { ...attuale, richieste, completate: richieste.filter((x) => x.stato === 'completata').length, dedali: attuale.dedali.map((x) => ({ ...x, completate: richieste.filter((y) => y.areaChiave === x.chiave && y.stato === 'completata').length })) };
   });
-  const filtriAttivi = cercando || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte';
+  const filtriAttivi = cercando || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte' || sblocco !== 'tutte';
   const fogli = useSchede<Foglio>({ chiavi: FOGLI.map(([k]) => k), attiva: foglio,
     onScegli: (k) => setParams((p) => { const n = new URLSearchParams(p); if (k === 'richieste') n.delete('foglio'); else n.set('foglio', k); return n; }, { replace: true }) });
 
@@ -328,11 +335,12 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
               <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca richiesta, bersaglio, Confidente, dedalo…" />
               {/* I dedali nell'ordine in cui si percorrono, con quante richieste hanno. */}
               <Selettore compatto etichetta="Dedalo" valore={dedalo} vuoto="Tutti i Dedali" opzioni={d.dedali.map((x) => ({ chiave: x.chiave, nome: x.nome, dettaglio: partitaId ? `${x.completate} completate su ${x.totale}` : `${x.totale} richieste` }))} onCambia={impostaDedalo} />
-              {filtriAttivi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i filtri" onClick={() => { setRicerca(''); setAccettazione('tutte'); setCompletamento('tutte'); impostaDedalo(''); }} />}
+              {filtriAttivi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i filtri" onClick={() => { setRicerca(''); setAccettazione('tutte'); setCompletamento('tutte'); setSblocco('tutte'); impostaDedalo(''); }} />}
             </div>
             {partitaId && <div className="filtri-articoli__riga">
               <Segmenti etichetta="Accettazione" valore={accettazione} opzioni={ACCETTAZIONE} onCambia={setAccettazione} />
               <Segmenti etichetta="Completamento" valore={completamento} opzioni={COMPLETAMENTO} onCambia={setCompletamento} />
+              <Segmenti etichetta="Sblocco" valore={sblocco} opzioni={SBLOCCO} onCambia={setSblocco} />
             </div>}
           </section>
 

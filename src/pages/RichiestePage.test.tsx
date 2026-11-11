@@ -131,12 +131,12 @@ describe('RichiestePage', () => {
     usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova' } as PartitaDto });
     const dove = { dedalo: 'mementos-02-aiyatsbus', dedaloNome: 'Dedalo di Aiyatsbus', areaDedalo: null, areaDedaloNome: null, spostato: false };
     const chiusa = ric('b', 'Bullismo sui bulli', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { stato: 'accettata', statoPartita: { stato: 'accettata', motivi: [], scadenzaEffettiva: '12-23', giorniAllaScadenza: null,
-      accettabile: false, completabile: false, motiviCompletamento: ['Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame'], doveOggi: dove } });
+      accettabile: false, sbloccata: true, completabile: false, motiviCompletamento: ['Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame'], doveOggi: dove } });
     const spostata = ric('c', 'Il sadismo è un gesto d’amore', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { statoPartita: { stato: 'disponibile', motivi: [], scadenzaEffettiva: '02-01', giorniAllaScadenza: 7,
-      accettabile: true, completabile: true, motiviCompletamento: [], doveOggi: { dedalo: 'mementos-09-daat', dedaloNome: 'Dedalo di Da’at', areaDedalo: 'd-1', areaDedaloNome: 'Piano 1', spostato: true } } });
+      accettabile: true, sbloccata: true, completabile: true, motiviCompletamento: [], doveOggi: { dedalo: 'mementos-09-daat', dedaloNome: 'Dedalo di Da’at', areaDedalo: 'd-1', areaDedaloNome: 'Piano 1', spostato: true } } });
     // scaduta col Dedalo chiuso: dice solo che è scaduta, non anche «Si completa dopo» (i due messaggi si contraddirebbero)
     const scaduta = ric('d', 'Il netturbino', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { statoPartita: { stato: 'scaduta', motivi: ['Scaduta il 23 dicembre'], scadenzaEffettiva: '12-23', giorniAllaScadenza: null,
-      accettabile: false, completabile: false, motiviCompletamento: ['Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame'], doveOggi: dove } });
+      accettabile: false, sbloccata: true, completabile: false, motiviCompletamento: ['Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame'], doveOggi: dove } });
     getRichieste.mockReset().mockResolvedValue({ ...dati, richieste: [chiusa, spostata, scaduta], totale: 3 });
     render(<MemoryRouter><RichiestePage /></MemoryRouter>);
     const carta = within((await screen.findByText('Bullismo sui bulli')).closest('li')!);
