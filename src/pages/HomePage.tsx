@@ -150,7 +150,7 @@ export function HomePage() {
       <InvitoInstallazione />
       {/* L6-07: con una partita attiva il cruscotto è la partita stessa e il sottotitolo (che dice che cos'è l'app) non serve più: sul telefono
           erano tre righe sopra la prima voce del giorno. Senza partita resta, perché lì spiega a che cosa serve la pagina */}
-      <IntestazionePagina titolo="Compagno di gioco" sottotitolo={attiva ? undefined : 'Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita.'} illustrazione="identita/logo-senza-testo" compatta />
+      <IntestazionePagina titolo="Compagno di gioco" sottotitolo={attiva ? undefined : 'Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita.'} compatta />
       {attiva ? (
         <HomeConPartita key={attiva.id} partita={attiva} />
       ) : errore ? (

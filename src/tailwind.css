@@ -713,13 +713,12 @@
   .griglia-affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); container-type: inline-size; }
   @container (min-width: 760px) { .griglia-affinita { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
 
-  /* ---- L10-04: piastrella orizzontale del Compendio (arte 64 px, nome, arcano e segni, affinità). Le dieci affinità stanno su una fila
-     quando l'interno della piastrella (senza bordo e margine) è largo almeno 300 px: a 1280 e 1366 con tre colonne, a 768 con due
-     (caselle da 21 px e più); più stretta (1024 con tre colonne, 640–767 con due, quattro colonne dai 1536) vanno su due file di cinque,
-     perché le sigle a 12 px non si tocchino ---- */
+  /* ---- Piastrella orizzontale del Compendio (arte 96 px, nome, arcano e segni, affinità). Le dieci affinità stanno su una fila quando
+     accanto all'arte restano almeno 210 px (caselle da 21 px): interno della piastrella da 340 px in su; più stretta vanno su due file
+     di cinque, perché le sigle a 12 px non si tocchino ---- */
   .piastrella-persona { container: piastrella-persona / inline-size; }
   .piastrella-persona__affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
-  @container piastrella-persona (min-width: 300px) { .piastrella-persona__affinita { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
+  @container piastrella-persona (min-width: 340px) { .piastrella-persona__affinita { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
 
   /* ---- Tassello di una Persona con miniatura (Fusione) ---- */
   /* ---- Tasselli Persona (ricette, piani, cicli): miniatura incorniciata, nome P5, tessera del livello, arcano ---- */
@@ -1086,7 +1085,7 @@
   }
   /* Schermi bassi (tablet in orizzontale, portatili 768-860 px): la Home si comprime per restare in una schermata */
   @media (min-width: 768px) and (max-height: 900px) {
-    .home > .intestazione p, .home > .intestazione .intestazione__illustrazione { display: none; }
+    .home > .intestazione p { display: none; }
     .home > .intestazione { padding-bottom: 0; }
     /* accessi rapidi più bassi: la colonna destra lascia spazio alla mappa */
     .home .accessi-rapidi .card { padding: 7px 10px; }
@@ -1749,12 +1748,21 @@
   }
   .chip::before { inset: 0; background: var(--chip-bordo); }
   .chip::after { inset: 1px; background: var(--chip-sfondo); }
-  .chip:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  /* Il fuoco da tastiera segue la forma del chip: un anello di 2 px col taglio diagonale, al posto del contorno rettangolare. L'anello
+     sta dentro il bordo del chip, così nessun contenitore lo taglia (le file che scorrono, le schede «Guida | Mappa» con i tre puntini,
+     gli elenchi con `overflow: hidden`). Con i colori forzati del sistema i fondi non si disegnano: lì resta il contorno. */
+  .chip:focus-visible { outline: none; }
+  .chip:focus-visible::before { background: var(--color-primary-testo); }
+  .chip:focus-visible::after { inset: 2px; }
+  /* Un chip attivo ha già il bordo rosso: lì l'anello del fuoco è chiaro, sempre dentro il bordo del chip (la regola sta dopo
+     `.chip--attivo`, più sotto, con la stessa forma) */
+  @media (forced-colors: active) { .chip:focus-visible { outline: 2px solid; outline-offset: 2px; } }
   .chip--attivo {
     --chip-sfondo: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-secondary));
     --chip-bordo: var(--color-primary);
     color: var(--color-primary-testo);
   }
+  .chip--attivo:focus-visible::before { background: var(--color-text); }
   /* L3: un'area del Palazzo toccata dall'infiltrazione aperta (evidenziata, ma non scelta) */
   .chip--toccata { --chip-bordo: color-mix(in srgb, var(--color-primary) 60%, transparent); }
   /* 2026-10-27: l'interruttore «Bonus» della spunta (sì/no): una pista con il pomello dentro il chip; lo stato si legge anche dal testo («sì»/«no»),
@@ -1947,24 +1955,26 @@
   }
 
   /* ---- Mappa della Home a scomparsa (richiesta dell'utente, 2026-09-30) ----
-     «Nascondi la mappa» la chiude in una linguetta sul bordo destro e la sua parte di pagina va a carta e guida: da 1024 px
-     la carta a sinistra e la guida del giorno a destra, alta quanto la pagina (a 1366×657 la guida passava da pochi pixel
-     a tutta la colonna). Il tocco sulla linguetta la riapre; col mouse (puntatore vero) passarci sopra la fa uscire da
+     «Nascondi la mappa» la chiude in una linguetta sul bordo destro e la sua parte di pagina va alla guida del giorno, larga come
+     la carta sopra di lei. Il tocco sulla linguetta la riapre; col mouse (puntatore vero) passarci sopra la fa uscire da
      destra **sopra** il contenuto, e resta finché il puntatore ci sta sopra; «Tieni aperta» la rimette al suo posto.
      La mappa resta montata anche chiusa (nascosta con `visibility`): uscendo non si ricarica e ha già le sue misure. */
   .home-griglia { position: relative; }
   .home-mappa { display: flex; flex-direction: column; gap: 6px; }
   .home-mappa__barra { display: flex; justify-content: flex-end; flex-shrink: 0; }
-  .home-griglia--mappa-chiusa { grid-template-areas: "carta" "oggi"; }
   .home-griglia--mappa-chiusa .home-mappa--a-scomparsa {
     position: absolute; top: 0; right: 0; bottom: 0; width: min(62%, 860px); z-index: 30;
     padding: 8px; background: var(--color-bg-secondary); border-left: 1px solid var(--color-border);
     box-shadow: -10px 0 28px rgb(0 0 0 / .5);
-    transform: translateX(calc(100% + 16px)); visibility: hidden;
-    transition: transform .2s ease, visibility 0s linear .2s;
+    /* Chiuso resta al suo posto, ritagliato fino al bordo destro: spostato fuori (`translateX`) allargava la pagina e dava una barra
+       orizzontale. Il ritaglio si apre da destra, con 40 px a sinistra per l'ombra. */
+    clip-path: inset(0 0 0 100%); visibility: hidden;
+    transition: clip-path .2s ease, visibility 0s linear .2s;
   }
+  /* La linguetta è una colonna della griglia e resta in vista mentre la pagina scorre (`sticky`): ancorata a metà dell'altezza della griglia
+     finiva sotto la piega appena la guida del giorno era più alta della schermata, e la mappa chiusa non si poteva più riaprire. */
   .home-linguetta {
-    position: absolute; top: 50%; right: 0; z-index: 20; transform: translateY(-50%);
+    grid-area: linguetta; position: sticky; top: 8px; z-index: 20; align-self: start;
     display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px;
     background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-right: 0; border-radius: 8px 0 0 8px;
     color: var(--color-text-secondary); font-family: var(--font-display); text-transform: uppercase; letter-spacing: .06em; font-size: var(--testo-13);
@@ -1972,14 +1982,19 @@
   .home-linguetta:hover, .home-linguetta:focus-visible { color: var(--color-primary-testo); }
   .home-linguetta__testo { writing-mode: vertical-rl; transform: rotate(180deg); }
   @media (hover: hover) and (pointer: fine) {
-    .home-linguetta:hover ~ .home-mappa--a-scomparsa, .home-griglia--mappa-chiusa .home-mappa--a-scomparsa:hover {
-      transform: none; visibility: visible; transition: transform .2s ease, visibility 0s;
+    /* `--ferma`: appena premuto «Nascondi la mappa» il puntatore è ancora sul pannello, che deve chiudersi lo stesso (`OggiHome`) */
+    .home-linguetta:hover ~ .home-mappa--a-scomparsa, .home-griglia--mappa-chiusa .home-mappa--a-scomparsa:not(.home-mappa--ferma):hover {
+      clip-path: inset(0 0 0 -40px); visibility: visible; transition: clip-path .2s ease, visibility 0s;
     }
   }
   /* R10-24/3: la scheda della partita è compatta e a tutta larghezza in ogni disposizione a colonne, quindi a mappa chiusa la guida
      sta sotto la scheda, larga come la pagina (la linguetta non compare dove guida e mappa sono schede) */
   @media (min-width: 768px) {
-    .home-griglia--mappa-chiusa { grid-template-columns: minmax(0, 1fr); grid-template-areas: "carta" "oggi"; padding-right: 40px; }
+    .home-griglia--mappa-chiusa { grid-template-columns: minmax(0, 1fr) 44px; grid-template-areas: "carta linguetta" "oggi linguetta"; column-gap: 8px; }
+    /* il pannello è alto quanto la griglia: barra e mappa restano in vista anche a pagina scorsa (la mappa ha un'altezza sua, 413 px a
+       1280×689, quindi `sticky` ha corsa; senza, a pagina scorsa il pannello usciva con la mappa fuori dallo schermo) */
+    .home-griglia--mappa-chiusa .home-mappa--a-scomparsa > .home-mappa__barra { position: sticky; top: 8px; }
+    .home-griglia--mappa-chiusa .home-mappa--a-scomparsa > :last-child { position: sticky; top: 58px; }
   }
   @media (prefers-reduced-motion: reduce) { .home-griglia--mappa-chiusa .home-mappa--a-scomparsa { transition: none; } }
 
@@ -2218,7 +2233,6 @@
   }
   .intestazione__illustrazione { max-height: 120px; width: auto; max-width: 40vw; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)); }
   @media (max-width: 639px) { .intestazione__illustrazione { max-height: 64px; max-width: 26vw; } }
-
   /* ---- Sfondo a tema della sezione (asset «sfondi/*»): livello sotto il contenuto con velo scuro per la leggibilità ---- */
   .sfondo-sezione {
     position: absolute;
@@ -2441,10 +2455,9 @@
  * (#131419, #3c3d46, #bfc1cc…) vicini ma non uguali ai token: in mezzo alle altre schede
  * dell'app, la lista dei prodotti di un negozio si vedeva che era di un altro grigio.
  *
- * Su desktop e' una **tabella**: quattro colonne allineate — cosa, quanto costa, se si puo'
- * comprare, e la spunta — con la riga che si accende al passaggio. Prima ogni riga era un
- * riquadro con quattro riquadri dentro, e duecentodiciotto riquadri in fila si leggono come un
- * muro. Sotto i 1050 px torna a schede, che su un telefono e' la forma giusta. */
+ * Da 1050 px di colonna e' una **tabella**: cosa, quanto costa, se si puo' comprare, la spunta e
+ * «Dettagli», con la riga che si accende al passaggio. Da 520 a 1049 px resta una riga per
+ * articolo, piu' stretta; sotto i 520 px sono schede, che su un telefono e' la forma giusta. */
 .catalogo-prodotti { container-type: inline-size; min-width: 0; }
 .catalogo-prodotti > ul { margin:0; padding:0; list-style:none; display:grid; gap:10px; }
 .catalogo-prodotto { background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:12px 14px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; font-size:var(--testo-14); line-height:1.45; }
@@ -2470,14 +2483,122 @@
 }
 @container (min-width:1050px) {
   .catalogo-prodotti > ul { grid-template-columns:1fr; gap:0; border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
-  .catalogo-prodotto { grid-template-columns:minmax(250px,2.2fr) minmax(100px,.6fr) minmax(180px,1.2fr) minmax(0,auto); align-items:center; border:0; border-bottom:1px solid var(--color-border-light); border-radius:0; padding:8px 14px; }
+  .catalogo-prodotto { align-items:center; border:0; border-bottom:1px solid var(--color-border-light); border-radius:0; padding:8px 14px; }
   .catalogo-prodotto:last-child { border-bottom:0; }
   .catalogo-prodotto:hover { background:color-mix(in oklab, var(--color-primary) 7%, var(--color-surface)); }
   .catalogo-prodotto--acquistato { border-left:3px solid var(--color-success); }
   .catalogo-prodotto__disponibilita, .catalogo-prodotto__azioni { grid-column:auto; }
   .catalogo-prodotto__azioni { justify-content:flex-end; }
   .catalogo-prodotto__dettagli dl { grid-template-columns:150px minmax(0,1fr); }
+  /* «Dettagli» chiuso sta in fondo alla riga, non su una riga sua (ogni articolo occupava due righe); aperto prende tutta la larghezza */
+  .catalogo-prodotto { grid-template-columns:minmax(250px,2.2fr) minmax(100px,.6fr) minmax(160px,1.2fr) minmax(0,auto) auto; }
+  .catalogo-prodotto__dettagli { grid-column:auto; border-top:0; }
+  .catalogo-prodotto__dettagli[open] { grid-column:1/-1; border-top:1px solid var(--color-border-light); }
 }
+/* Da 520 a 1049 px (la colonna della merce accanto alla mappa, il tablet): una riga per articolo, come la tabella ma senza la colonna
+   della disponibilità, che quando c'è («Non ancora») va sotto il nome. Le schede affiancate erano alte 213 px l'una. */
+@container (min-width:520px) and (max-width:1049px) {
+  .catalogo-prodotti > ul { grid-template-columns:1fr; gap:0; border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
+  .catalogo-prodotto { grid-template-columns:minmax(0,1fr) auto auto auto; align-items:center; border:0; border-bottom:1px solid var(--color-border-light); border-radius:0; padding:8px 14px; }
+  .catalogo-prodotto:last-child { border-bottom:0; }
+  .catalogo-prodotto--acquistato { border-left:3px solid var(--color-success); }
+  .catalogo-prodotto__nome { grid-area:1 / 1; }
+  .catalogo-prodotto__prezzo { grid-area:1 / 2; }
+  .catalogo-prodotto__azioni { grid-area:1 / 3; justify-content:flex-end; flex-wrap:nowrap; }
+  .catalogo-prodotto__dettagli { grid-area:1 / 4; border-top:0; }
+  .catalogo-prodotto__dettagli[open] { grid-area:3 / 1 / auto / -1; border-top:1px solid var(--color-border-light); }
+  .catalogo-prodotto__disponibilita { grid-area:2 / 1 / auto / -1; }
+  .catalogo-prodotto__dettagli dl { grid-template-columns:150px minmax(0,1fr); }
+}
+/* La riga, la testata di uno scaffale e la scheda di una categoria contengono testi nascosti a vista (`position:absolute`, per chi usa
+   un lettore di schermo): devono avere un antenato posizionato dentro l'area che scorre, altrimenti restano agganciati al documento,
+   lo allungano oltre la finestra e compare una seconda barra di scorrimento accanto a quella della pagina. */
+.catalogo-prodotto, .listino-gruppo__testata, .listino-categorie .selettore-icone__tessera { position:relative; }
+/* Da 860 px di colonna c'è posto anche per la disponibilità sulla stessa riga (fra nome e costo), come nella tabella: una riga
+   «Non ancora» non è più alta il doppio delle altre. */
+@container (min-width:860px) and (max-width:1049px) {
+  .catalogo-prodotto { grid-template-columns:minmax(0,1fr) auto auto auto auto; }
+  .catalogo-prodotto__disponibilita { grid-area:1 / 2; justify-content:flex-end; }
+  .catalogo-prodotto__prezzo { grid-area:1 / 3; }
+  .catalogo-prodotto__azioni { grid-area:1 / 4; }
+  .catalogo-prodotto__dettagli { grid-area:1 / 5; }
+  .catalogo-prodotto__dettagli[open] { grid-area:2 / 1 / auto / -1; }
+}
+/* Il contenuto di un'offerta: per intero sulla riga negli elenchi corti; nel listino a gruppi la riga dice quanti oggetti sono e
+   l'elenco sta in «Dettagli». Delle tre forme se ne vede sempre una sola. */
+.catalogo-prodotto__ricevuti { display:flex; flex-direction:column; gap:4px; min-width:0; }
+.catalogo-prodotto__ricevuti-breve, .catalogo-prodotto__ricevuti-dettagli { display:none; }
+.listino-gruppi .catalogo-prodotto__ricevuti { display:none; }
+.listino-gruppi .catalogo-prodotto__ricevuti-breve { display:inline; color:var(--color-text-secondary); font-size:var(--testo-12); }
+.listino-gruppi .catalogo-prodotto__ricevuti-dettagli { display:revert; }
+.catalogo-prodotto__fonte { display:none; color:var(--color-text-muted); font-size:var(--testo-12); }
+/* Da 520 a 699 px (la colonna della merce a 1280, il tablet in verticale) la riga è la stessa, più stretta: «Modifica» resta la sua
+   figura (il nome lo dice `aria-label`), così un articolo sta su una riga anche qui. */
+@container (min-width:520px) and (max-width:699px) {
+  .catalogo-prodotto { gap:8px 10px; }
+  .catalogo-prodotto__azioni { gap:4px; }
+  .catalogo-prodotto__azioni > .btn-ghost .btn-visivo__testo { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  /* qui «Dettagli» è la sola parola: il numero dei requisiti si legge aprendolo, e «fonte secondaria» passa sotto il nome */
+  .catalogo-prodotto__dettagli-conteggio, .catalogo-prodotto__dettagli-fonte { display:none; }
+  .catalogo-prodotto__fonte { display:block; }
+}
+/* Righe basse (da 520 px di colonna): una riga è alta quanto i suoi comandi da 44 px più 3 px sopra e sotto (50 px; circa 80 con la
+   disponibilità sotto il nome, il caso su cui `ListinoNegozio` conta sette righe per schermata a 1280×689). Il nome non è più alto 44 px da solo: il suo collegamento prende tutta la cella (che è alta
+   almeno 44 px) con un'area stesa sopra; categoria, statistiche e fonte stanno sulla riga sotto il nome, una accanto all'altra. */
+@container (min-width:520px) {
+  .catalogo-prodotto { padding-block:3px; row-gap:0; }
+  .catalogo-prodotto__nome { position:relative; min-height:44px; flex-direction:row; flex-wrap:wrap; align-content:center; column-gap:8px; line-height:1.3; }
+  .catalogo-prodotto__nome > strong, .catalogo-prodotto__nome > a, .catalogo-prodotto__nome > div { flex:0 0 100%; }
+  .catalogo-prodotto__nome > strong a.touch { display:inline; min-height:0; }
+  .catalogo-prodotto__nome > strong a.touch::after { content:""; position:absolute; inset:0; }
+  .catalogo-prodotto__nome > :is(a, button), .catalogo-prodotto__nome > :not(strong) :is(a, button) { position:relative; z-index:1; }
+  .catalogo-prodotto__prezzo { line-height:1.2; }
+  /* la parola «Costo» sopra ogni cifra in yen non aggiunge nulla e costa una riga: resta per chi non vede */
+  .catalogo-prodotto__etichetta { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+}
+/* Sul telefono (sotto i 520 px): nome e costo, poi azioni e «Dettagli» sulla stessa riga; aperto, «Dettagli» scende sotto. Come nella
+   colonna stretta «Modifica» è la sola figura e «Fonte secondaria» sta sotto il nome (`ListinoNegozio` conta quattro schede per
+   schermata a 375×812, nel caso peggiore). */
+@container (max-width:519px) {
+  .catalogo-prodotto { padding:6px 12px; gap:2px 10px; }
+  .catalogo-prodotto__nome { grid-area:1 / 1; position:relative; min-height:44px; justify-content:center; line-height:1.3; }
+  .catalogo-prodotto__nome > strong a.touch { display:inline; min-height:0; }
+  .catalogo-prodotto__nome > strong a.touch::after { content:""; position:absolute; inset:0; }
+  .catalogo-prodotto__nome > :is(a, button), .catalogo-prodotto__nome > :not(strong) :is(a, button) { position:relative; z-index:1; }
+  .catalogo-prodotto__prezzo { grid-area:1 / 2; justify-content:center; line-height:1.2; }
+  .catalogo-prodotto__disponibilita { grid-area:2 / 1 / auto / -1; }
+  /* azioni e «Dettagli» chiuso occupano la stessa riga a tutta larghezza: le azioni a sinistra, «Dettagli» a destra nello spazio che
+     le azioni gli lasciano (la colonna del costo può essere larga, e in una colonna sola «Compra» andava a capo) */
+  .catalogo-prodotto__azioni { grid-area:3 / 1 / auto / -1; justify-content:flex-start; gap:4px; padding-right:96px; }
+  .catalogo-prodotto__azioni .btn-visivo__titolo { white-space:nowrap; }
+  .catalogo-prodotto__azioni > .btn-ghost .btn-visivo__testo { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  .catalogo-prodotto__dettagli { grid-area:3 / 1 / auto / -1; border-top:0; justify-self:end; align-self:start; }
+  .catalogo-prodotto__dettagli[open] { grid-area:4 / 1 / auto / -1; justify-self:stretch; border-top:1px solid var(--color-border-light); }
+  .catalogo-prodotto__dettagli-conteggio, .catalogo-prodotto__dettagli-fonte { display:none; }
+  .catalogo-prodotto__fonte { display:block; }
+}
+/* La disponibilità vuota (articolo acquistabile, niente da dire) non tiene una riga */
+@container (max-width:1049px) { .catalogo-prodotto__disponibilita:empty { display:none; } }
+/* Nel listino lungo la categoria è la scheda scelta: sulla riga resta solo il destinatario */
+.listino-gruppi .catalogo-prodotto__meta-categoria { display:none; }
+/* …e col destinatario scelto da un chip la riga non lo ripete. Dove i chip non ci sono (Protezione: «Solo donne», «Solo Morgana»)
+   il destinatario sulla riga è informazione e resta. */
+.listino-gruppi--destinatario .catalogo-prodotto__meta { display:none; }
+
+/* ---- Listino lungo (`ListinoNegozio`): categorie a schede, destinatari a chip, scaffali per fase di vendita (uno aperto alla volta) ---- */
+.listino-gruppi { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.listino-gruppo { display:flex; flex-direction:column; gap:6px; min-width:0; }
+/* il numero accanto a una scheda, a un chip, a uno scaffale: le cifre non spostano il testo quando cambiano */
+.listino-conteggio { font-variant-numeric:tabular-nums; font-weight:600; }
+.listino-gruppo__testata { display:flex; align-items:center; gap:10px; width:100%; padding:8px 12px; text-align:left; cursor:pointer; color:var(--color-text); font-size:var(--testo-14); font-weight:600; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); }
+.listino-gruppo__testata:hover { border-color:var(--color-primary); }
+.listino-gruppo__testata:focus-visible { outline:2px solid var(--color-primary-testo); outline-offset:2px; }
+.listino-gruppo__testata[aria-expanded="true"] { border-color:var(--color-primary); }
+.listino-gruppo__nota { flex:none; display:inline-flex; align-items:center; gap:4px; font-size:var(--testo-12); color:var(--color-text-muted); }
+.listino-gruppo__freccia { flex:none; width:1em; color:var(--color-text-muted); }
+.listino-gruppo__nome { flex:1 1 auto; min-width:0; overflow-wrap:anywhere; text-wrap:pretty; }
+.listino-gruppo__conteggio { flex:none; font-size:var(--testo-13); color:var(--color-text-secondary); }
+.listino-gruppo__corpo { display:flex; flex-direction:column; gap:8px; min-width:0; }
 
 /* Fieldset del modulo del catalogo (oggetto collegato, effetto, statistiche). */
 .regole-editor { border:1px solid #3c3d46; padding:12px; min-width:0; background:#131419; }
@@ -2723,12 +2844,23 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .selettore-icone__icona { display:inline-flex; line-height:0; }
 .selettore-icone__nome { text-align:center; overflow-wrap:normal; word-break:normal; hyphens:auto; }
 @media (max-width: 767px) { .selettore-icone__tessera, .selettore-icone--compatto .selettore-icone__tessera { max-width:none; min-width:0; flex:0 1 calc(33.333% - 4px); } }
+/* Le categorie del listino lungo (`ListinoNegozio`): le stesse tessere, a scelta singola, dentro una `FilaScorrevole`. Dal tablet in su
+   vanno a capo come le altre; sul telefono stanno su una riga sola che scorre, con la figura accanto al nome e alte 44 px, così i
+   comandi sopra l'elenco restano entro il 30% della schermata. Il fuoco sta dentro la tessera: la fila taglia ciò che esce. */
+.listino-categorie .selettore-icone__tessera { min-height:52px; min-width:88px; padding-block:4px; flex:1 1 auto; max-width:none; }
+.listino-categorie .selettore-icone__tessera:focus-visible { outline-offset:-3px; }
+/* I destinatari stanno su una riga sola a ogni formato (quindici chip a capo erano tre righe): la fila scorre con le sue frecce e
+   col fuoco, senza la barra che le toglierebbe altezza. */
+.listino-destinatari.fila-scorrevole.fila-scorrevole--sempre { padding-bottom:0; scrollbar-width:none; }
+.listino-destinatari.fila-scorrevole.fila-scorrevole--sempre::-webkit-scrollbar { display:none; }
+@media (max-width: 767px) { .listino-categorie .selettore-icone__tessera { flex:0 0 auto; flex-direction:row; gap:6px; min-height:44px; min-width:0; padding:4px 10px; } }
 
 /* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
    sovrascrivere come per tutte le altre componenti */
 @layer components {
 
-/* Filtri degli articoli: una riga con ricerca, «Per chi» e azzera; sotto le categorie a tessere e i segmenti. */
+/* Filtri degli articoli: una riga con ricerca, «Per chi» e azzera; sotto le categorie a tessere e i segmenti. Nel listino lungo di un
+   negozio la riga è una sola: ricerca, «Filtri» e «Acquistabili adesso | Tutti» (`filtri-articoli__riga--listino`). */
 .filtri-articoli { display:flex; flex-direction:column; gap:8px; min-width:0; }
 .filtri-articoli__riga { display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; }
 .segmenti { display:inline-flex; flex-wrap:wrap; border:1px solid var(--color-border-input); }
@@ -3102,6 +3234,8 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* Fuori da ogni @layer di proposito (lotto C): deve vincere sull'utility `min-w-[180px]` di `CampoRicerca`, che nella riga dei filtri
    lascerebbe la ricerca a 180 px e allargherebbe il selettore accanto (misurato su Domande, Libri e Richieste a 390 px). */
 .filtri-articoli__riga > .relative { flex:1 1 240px; min-width:0; }
+/* Nel listino lungo ricerca, «Filtri» e «Acquistabili adesso | Tutti» stanno su una riga sola anche nella colonna da 540 px. */
+.filtri-articoli__riga--listino > .relative { flex-basis:150px; }
 
 /* ============================================================
    Appunti fissi del Diario (C7, 2026-10-31) — la finestra fluttuante e la sua icona

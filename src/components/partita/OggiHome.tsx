@@ -67,6 +67,10 @@ export function OggiHome({ partita, testa }: Props) {
   const mappaChiusa = usePreferenzeStore((s) => s.mappaHomeChiusa);
   const impostaMappaChiusa = usePreferenzeStore((s) => s.impostaMappaHomeChiusa);
   const [schedaMappa, impostaSchedaMappa] = useState(false);
+  // «Nascondi la mappa» si preme col puntatore sopra il pannello: finché il puntatore non ne esce il passaggio del mouse non lo tiene fuori,
+  // altrimenti il pannello resterebbe in vista e il pulsante sembrerebbe non fare nulla. Uscito il puntatore (o toccata la linguetta) torna
+  // a valere «col mouse basta passarci sopra».
+  const [fermaAlPassaggio, impostaFermaAlPassaggio] = useState(false);
   const oggiHome = useMemo(() => ({
     ...oggi,
     sullaMappa: (m: Parameters<typeof oggi.sullaMappa>[0], voce: string | null) => { impostaMappaChiusa(false); impostaSchedaMappa(true); oggi.sullaMappa(m, voce); },
@@ -123,17 +127,18 @@ export function OggiHome({ partita, testa }: Props) {
       )}
 
       {guidaPronta && mappaChiusa && !aSchede && (
-        <button type="button" className="home-linguetta touch" onClick={() => impostaMappaChiusa(false)} aria-label={nomePosto ? `Mostra ${nomePosto}` : 'Mostra la mappa'} title={`Mostra ${nomePosto ?? 'la mappa'} (col mouse basta passarci sopra)`}>
+        <button type="button" className="home-linguetta touch" onClick={() => { impostaFermaAlPassaggio(false); impostaMappaChiusa(false); }} onPointerEnter={() => impostaFermaAlPassaggio(false)} aria-label={nomePosto ? `Mostra ${nomePosto}` : 'Mostra la mappa'} title={`Mostra ${nomePosto ?? 'la mappa'} (col mouse basta passarci sopra)`}>
           <IconaAzione chiave="mappa" dimensione={20} /><span className="home-linguetta__testo">{nomePosto ?? '…'}</span>
         </button>
       )}
       {guidaPronta && (!aSchede || schedaMappa) && (
-        <div className={`home-mappa ${chiusa ? 'home-mappa--a-scomparsa' : ''}`} {...(conSchede ? schede.pannello('mappa') : {})}>
+        <div className={`home-mappa ${chiusa ? 'home-mappa--a-scomparsa' : ''} ${chiusa && fermaAlPassaggio ? 'home-mappa--ferma' : ''}`}
+          onPointerLeave={() => impostaFermaAlPassaggio(false)} {...(conSchede ? schede.pannello('mappa') : {})}>
           {!aSchede && (
             <div className="home-mappa__barra">
               {mappaChiusa
-                ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Tieni aperta" onClick={() => impostaMappaChiusa(false)} />
-                : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nascondi la mappa" onClick={() => impostaMappaChiusa(true)} />}
+                ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Tieni aperta" onClick={() => { impostaFermaAlPassaggio(false); impostaMappaChiusa(false); }} />
+                : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nascondi la mappa" onClick={() => { impostaFermaAlPassaggio(true); impostaMappaChiusa(true); }} />}
             </div>
           )}
           <OggiMappa oggi={oggiHome} riempi raggruppaVicini />

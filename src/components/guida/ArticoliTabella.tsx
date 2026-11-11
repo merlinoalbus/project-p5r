@@ -76,9 +76,15 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
     <div className="catalogo-prodotto__nome">
       {/* D15: pezzo unico acquistato = spunta rossa a sinistra e nome barrato in grigio (il bordo verde e la casella «Acquistato» lo dicono a parole) */}
       <strong><SegnoStato stato={a.acquistato && !ripetibile ? 'fatto' : null} className="mr-1.5 align-text-bottom" /><span className={a.acquistato && !ripetibile ? 'stato-fatto' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className={`touch inline-flex items-center ${a.acquistato && !ripetibile ? 'stato-fatto' : ''}`}>{nome}</Link> : nome}</span></strong>
-      <span className="catalogo-prodotto__meta">{NOME_CATEGORIA_ARTICOLO[a.categoria] ?? a.categoria}{a.per && <> · <span>{a.per}</span></>}</span>
+      {/* la categoria sta in un elemento a sé: nel listino lungo di un negozio la dice già la scheda scelta (tailwind.css) */}
+      <span className="catalogo-prodotto__meta"><span className="catalogo-prodotto__meta-categoria">{NOME_CATEGORIA_ARTICOLO[a.categoria] ?? a.categoria}{a.per && ' · '}</span>{a.per && <span>{a.per}</span>}</span>
       {a.statistiche && <span className="text-text-secondary"><TestoNote testo={a.statistiche} daParole="conteggi" /></span>}
-      {!!a.ricevuti?.length && <div className="flex min-w-0 flex-col gap-1"><span>Si riceve:</span><OggettiCollegati oggetti={a.ricevuti} /></div>}
+      {!IN_RILASCIO && !a.verificato && <span className="catalogo-prodotto__fonte">Fonte secondaria</span>}
+      {/* Il contenuto di un'offerta (un set delle televendite ne ha quattro o cinque) sta per intero sulla riga negli elenchi corti; nel
+          listino a gruppi la riga ne dice quanti sono e l'elenco si legge in «Dettagli» (tailwind.css), perché una riga non diventi alta
+          quanto quattro */}
+      {!!a.ricevuti?.length && <div className="catalogo-prodotto__ricevuti"><span>Si riceve:</span><OggettiCollegati oggetti={a.ricevuti} /></div>}
+      {!!a.ricevuti?.length && <span className="catalogo-prodotto__ricevuti-breve">Si riceve: {a.ricevuti.length} {a.ricevuti.length === 1 ? 'oggetto' : 'oggetti'}</span>}
       {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`} className="touch inline-flex items-center">{a.negozioNome}</Link>}
     </div>
     <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Costo</span><strong><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></strong>
@@ -103,11 +109,14 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
       {!IN_RILASCIO && onModifica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => onModifica(a)} aria-label={`Modifica ${nome}`} />}
     </div>
     <details className="catalogo-prodotto__dettagli">
-      <summary className="touch">Dettagli{a.condizioni?.length ? ` · ${a.condizioni.length} ${a.condizioni.length === 1 ? 'requisito' : 'requisiti'}` : ''}{!IN_RILASCIO && !a.verificato ? ' · fonte secondaria' : ''}</summary>
+      {/* il conteggio dei requisiti e la fonte stanno in elementi a sé: dove la riga è stretta (da 520 a 699 px di colonna) resta solo
+          «Dettagli», e «Fonte secondaria» si legge sotto il nome (`catalogo-prodotto__fonte`, tailwind.css) */}
+      <summary className="touch">Dettagli{!!a.condizioni?.length && <span className="catalogo-prodotto__dettagli-conteggio"> · {a.condizioni.length} {a.condizioni.length === 1 ? 'requisito' : 'requisiti'}</span>}{!IN_RILASCIO && !a.verificato && <span className="catalogo-prodotto__dettagli-fonte"> · fonte secondaria</span>}</summary>
       <dl>
         {a.nomeOriginale && <><dt>Nome originale</dt><dd>{a.nomeOriginale}</dd></>}
         <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.tipo === 'avviso' ? descriviRequisitoSpillo(r) : r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>
         {a.rifornimento?.regola.origine === 'guida' && <><dt>Rifornimento</dt><dd className="text-pretty">{a.rifornimento.testo}</dd></>}
+        {!!a.ricevuti?.length && <><dt className="catalogo-prodotto__ricevuti-dettagli">Si riceve</dt><dd className="catalogo-prodotto__ricevuti-dettagli"><OggettiCollegati oggetti={a.ricevuti} /></dd></>}
         <dt>Effetto</dt><dd>{a.effetto ? <TestoNote testo={a.effetto} daParole="conteggi" /> : 'Non indicato'}</dd>
         {a.nota && <><dt>Nota</dt><dd>{a.nota}</dd></>}
         {!!a.noteStoriche?.length && <><dt>Nota storica della fonte</dt><dd><NoteStoricheOfferta note={a.noteStoriche} onLegamiCambiati={onContenutoCambiato} /></dd></>}

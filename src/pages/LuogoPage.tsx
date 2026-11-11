@@ -194,7 +194,7 @@ export function LuogoPage() {
                       {!IN_RILASCIO && <div className="flex flex-wrap gap-1.5">
                         <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il listino" aria-label={`Modifica il listino di ${n.nome}`} onClick={() => setPosto({ apri: n.chiave })} />
                       </div>}
-                      <ListinoNegozio negozio={n} partitaId={partitaId} versione={versione} onModifica={() => setPosto({ apri: n.chiave })} onRipristinato={() => void dati.ricarica()}
+                      <ListinoNegozio key={`${n.chiave}|${partitaId ?? ''}`} negozio={n} partitaId={partitaId} versione={versione} onModifica={() => setPosto({ apri: n.chiave })} onRipristinato={() => void dati.ricarica()}
                         onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, listini: attuale.listini.map((x) => (x.chiave !== n.chiave ? x : { ...x, articoliElenco: x.articoliElenco.map((y) => (y.chiave === a.chiave ? a : y)), acquistati: x.articoliElenco.filter((y) => compratoNelCiclo(y.chiave === a.chiave ? a : y)).length })) }))} />
                     </section>
                     );

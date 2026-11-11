@@ -9,7 +9,7 @@
 // La selezione sta nell'indirizzo (`umore`, `ombra`, `q`): cambiare Ombra la aggiorna, il ritorno dalla pagina Ombra la ritrova.
 // ============================================================
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getNegoziazioneCompatta, getNegoziazioneDomanda, getOmbre } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
@@ -192,7 +192,7 @@ export function NegoziazionePerUmore() {
         <div className="flex flex-wrap gap-1.5">
           {TRATTI_OMBRA.map((t) => (
             <button key={t.chiave} type="button" className={`chip touch testo-13 ${umore === t.chiave && !ombra ? 'chip--attivo' : ''}`} aria-pressed={umore === t.chiave && !ombra}
-              style={{ borderColor: umore === t.chiave ? t.colore : undefined }} onClick={() => imposta({ umore: t.chiave, ombra: null })}>
+              style={umore === t.chiave ? { '--chip-bordo': t.colore } as CSSProperties : undefined} onClick={() => imposta({ umore: t.chiave, ombra: null })}>
               <span aria-hidden className="inline-block size-2.5 rounded-full" style={{ background: t.colore }} />{t.nome}
             </button>
           ))}

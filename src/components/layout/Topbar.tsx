@@ -96,6 +96,10 @@ export function Topbar() {
       >
         <IconGear size={22} />
       </Link>
+      {/* Il simbolo dell'app nella Home sta qui, in fondo alla barra (richiesta dell'utente, 2026-11-10): nell'intestazione della pagina
+          occupava una riga sua e spingeva giù il titolo. Da 768 px, dove la barra ha posto; sul telefono la barra ha già a sinistra il
+          simbolo quadrato dell'app e il posto serve al nome della partita. È un disegno, senza nome. */}
+      {location.pathname === '/home' && <AssetImg nome="identita/logo-senza-testo" alt="" decorativa className="hidden md:block h-10 lg:h-12 w-auto shrink-0 object-contain" fallback={null} />}
     </header>
   );
 }
