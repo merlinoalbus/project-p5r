@@ -1414,13 +1414,13 @@ export function eliminaSpillo(id: number, dati?: RichiestaRimozionePin | Record<
 
 /**
  * Stato «raccolto» di uno spillo per partita. Da L4 (§3.2, rivisto dal §8.11 «NR4-1») dipende dalle voci del pin:
- * - con voci che contano (permanenti, rigenerabili): il gesto segna o toglie **solo quel pin** (`segnaIlPin`; un pin condiviso dai
+ * - con voci che ne leggono il segno (permanenti, rigenerabili e, dal 2026-11-13, di racconto): il gesto segna o toglie **solo quel pin** (`segnaIlPin`; un pin condiviso dai
  *   rigenerabili di più infiltrazioni nell'infiltrazione di contesto, `infiltrazione` o quella in corso), e le sue voci si ricalcolano
  *   (k/N): fatte quando lo sono tutti i loro pin; togliere il segno toglie «fatta» a ogni voce che lo contiene, «esaurito» compreso
  *   (scelta dell'utente del 2026-10-09). Su un pin «da verificare» togliere il segno è anche «Togli il fatto al pin». La risposta porta
  *   le voci segnate o riaperte dal gesto (`effetti`);
  * - con le sole voci senza carattere (dedali dei Memento, R4-30): la regola di prima, il segno del pin e le sue voci;
- * - senza voci, o con sole voci di racconto: il suo stato (`spillo_partita`), come prima.
+ * - senza voci, o con sole voci senza stato: il suo stato (`spillo_partita`), come prima.
  */
 export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: boolean, infiltrazione: string | null = null): SpilloDto | SchedaContenutoGuidaDto {
   assegnaUidMancanti(getDb());
@@ -1452,7 +1452,9 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
     })();
     return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo, contestoSpilli(partitaId, infiltrazione));
   }
-  if (vociDelModello && vociDelModello.contano.length > 0 && r.uid) {
+  // 2026-11-13: anche un pin con sole voci di racconto («Storia») passa di qui: il segno resta il suo, e le voci di racconto che lo
+  // leggono si ricalcolano (lette quando tutti i loro pin sono raccolti, riaperte togliendone uno), come le voci che contano
+  if (vociDelModello && (vociDelModello.contano.length > 0 || vociDelModello.racconto.length > 0) && r.uid) {
     const uid = r.uid;
     const effetti = getDb().transaction(() => {
       const e = segnaIlPin(getDb(), partitaId, { id: r.id, uid }, raccolto, infiltrazione, adesso);
@@ -1465,8 +1467,8 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
   getDb().transaction(() => {
     prepared(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
       ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, r.uid, raccolto ? 1 : 0, adesso);
-    // L4: un pin di sole voci di racconto ha il suo stato e non le segna (le voci di racconto si segnano dalla guida); restano qui
-    // sotto i pin delle sole voci senza carattere (dedali dei Memento), con la regola di prima
+    // un pin senza voci, o con sole voci senza stato, ha il suo stato e basta; restano qui sotto i pin delle sole voci senza carattere
+    // (dedali dei Memento), con la regola di prima
     if (!vociDelModello || vociDelModello.altre.length === 0) { prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId); return; }
     // le voci del pin che si segnano (una o più, 098): una voce descrittiva della guida non ha stato (2026-10-01), il raccolto del
     // pin non la segna

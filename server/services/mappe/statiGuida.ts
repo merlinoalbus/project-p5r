@@ -26,8 +26,12 @@ import { VOCI_GESTITE_SQL } from './voceDelPin.js';
 // k/N» se una parte, da fare se nessuno (una rigenerabile legge i pin condivisi nella **sua** infiltrazione). La sua riga in
 // `punto_partita` resta come **specchio**, scritta nello stesso gesto (`rifaiSpecchio`: c'è se e solo se la voce è fatta, con il tipo
 // di stato scelto — «esaurito» — o «ottenuto»), così diario, Enigmi, condizioni, pacchetto ed export restano coerenti.
-// Le voci senza pin, le «Storia» (che tengono il segno e non contano) e le voci dei dedali dei Memento (senza carattere, R4-30) hanno
-// il loro stato in `punto_partita`, come prima; i pin delle sole voci senza carattere seguono la regola di prima.
+// Una voce di **racconto con pin** («Storia», o un carattere «Racconto» scelto a mano su una voce con uno stato) calcola il suo stato dai
+// suoi pin come le altre (2026-11-13, richiesta dell'utente: una voce di racconto agganciata al pin di un oggetto chiave lo deve segnare
+// raccolto, e raccoglierlo la deve segnare letta): continua a non contare nel completamento (non è un oggetto permanente), ma il segno
+// è uno solo, quello del pin.
+// Le voci senza pin e le voci dei dedali dei Memento (senza carattere, R4-30) hanno il loro stato in `punto_partita`, come prima; i pin
+// delle sole voci senza carattere seguono la regola di prima.
 // L'**oggetto** permanente (le voci permanenti unite da pin in comune, §1.3) resta l'unità di conteggio (R4-24): è fatto quando lo
 // sono tutte le sue voci; non propaga più lo stato, perché lo fa il pin condiviso.
 // Le divergenze conservate dalla migrazione utente 022 (`divergenza_partita`) tengono il chip «Da verificare» sul pin fatto e sulla
@@ -46,7 +50,9 @@ export interface VociDelPinModello {
   contano: string[];
   /** Senza carattere ma con uno stato (dedali dei Memento, Persona): la regola di prima, se il pin non ne ha che contano. */
   altre: string[];
-  /** Racconto (anche «Altro»): non decidono niente. */
+  /** Racconto con uno stato («Storia»): non contano nel completamento, ma leggono il segno del pin come le voci che contano. */
+  racconto: string[];
+  /** Senza stato («Altro» descrittivo, rimasto da prima): non decidono niente. */
   descrittive: string[];
 }
 /** Un'infiltrazione nel modello. */
@@ -157,9 +163,11 @@ function costruisciModello(db: AppDatabase): ModelloAvanzamento {
   for (const l of legami) {
     const v = voci.get(l.voce);
     if (!v) continue;
-    const p = pin.get(l.id) ?? { contano: [], altre: [], descrittive: [] };
+    const p = pin.get(l.id) ?? { contano: [], altre: [], racconto: [], descrittive: [] };
     if (v.carattere === 'permanente' || v.carattere === 'rigenerabile') p.contano.push(l.voce);
     else if (v.carattere === null && !v.senzaStato) p.altre.push(l.voce);
+    // solo i pin delle planimetrie (con uid) hanno un segno che una voce di racconto può leggere (`pinDellaVoce`)
+    else if (v.carattere === 'descrittiva' && !v.senzaStato && l.mappa && l.uid) p.racconto.push(l.voce);
     else p.descrittive.push(l.voce);
     pin.set(l.id, p);
     if (v.carattere === 'permanente') unisci(`v:${l.voce}`, `p:${v.palazzo}:${l.id}`);
@@ -183,10 +191,17 @@ function costruisciModello(db: AppDatabase): ModelloAvanzamento {
   return { voci, oggetto, vociOggetto, pin, idDelPin, infiltrazioni, infiltrazioniDelPalazzo, pinDellaVoce, condivisi };
 }
 
-/** §8.11: la voce calcola il suo stato dai suoi pin? Sì per una permanente o rigenerabile con almeno un pin sulle planimetrie. */
+/** §8.11: la voce calcola il suo stato dai suoi pin? Sì per una voce dei Palazzi con uno stato (permanente, rigenerabile e, dal
+ *  2026-11-13, di racconto) con almeno un pin sulle planimetrie. Le voci senza carattere (dedali dei Memento, Persona) no. */
 export function voceDaiPin(m: ModelloAvanzamento, voce: string): boolean {
   const v = m.voci.get(voce);
-  return !!v && !v.senzaStato && (v.carattere === 'permanente' || v.carattere === 'rigenerabile') && (m.pinDellaVoce.get(voce)?.length ?? 0) > 0;
+  return !!v && !v.senzaStato && v.carattere !== null && (m.pinDellaVoce.get(voce)?.length ?? 0) > 0;
+}
+
+/** Le voci che leggono il segno di un pin: quelle che contano e quelle di racconto con uno stato. */
+export function vociCheLeggonoIlPin(m: ModelloAvanzamento, pinId: number): string[] {
+  const voci = m.pin.get(pinId);
+  return voci ? [...voci.contano, ...voci.racconto] : [];
 }
 
 /** Lo stato di una voce nella partita (§8.11): fatta o no, con quale tipo di stato, e quanti dei suoi pin sono fatti (`totale` 0 =
@@ -291,7 +306,7 @@ function statoLetto(v: VoceDelModello, stato: StatoPunto): StatoPunto {
 /**
  * Lo stato di una voce (§8.11, funzione unica): una permanente o rigenerabile con pin è **fatta** se tutti i suoi pin sono fatti (una
  * rigenerabile legge i pin condivisi nella sua infiltrazione), **in corso k/N** se una parte, **da fare** se nessuno; fatta, ha il tipo
- * di stato del suo specchio (`punto_partita`), o «ottenuto». Le altre voci (senza pin, «Storia», dedali dei Memento) hanno il loro
+ * di stato del suo specchio (`punto_partita`), o «ottenuto»; lo stesso una voce di racconto con pin. Le altre voci (senza pin, dedali dei Memento) hanno il loro
  * stato in `punto_partita`. Una voce senza stato («Altro» fuori dai dedali) non è mai fatta.
  */
 export function statoVoce(m: ModelloAvanzamento, s: Pick<StatiDellaPartita, 'segnate' | 'raccolti' | 'raccoltiPerInfiltrazione'>, voce: string): StatoVoce {
@@ -411,13 +426,12 @@ export function infiltrazioneDelPin(m: ModelloAvanzamento, s: StatiDellaPartita 
   return sue[0];
 }
 
-/** Le voci che leggono il segno di un pin (§8.11): tutte quelle che contano; di un pin condiviso, nell'infiltrazione data, le
- *  permanenti e le rigenerabili di quell'infiltrazione. */
+/** Le voci che leggono il segno di un pin (§8.11): tutte quelle che contano e quelle di racconto; di un pin condiviso, nell'infiltrazione
+ *  data, le rigenerabili di quell'infiltrazione e le altre (permanenti, racconto) che lo leggono lì. */
 export function vociDelPinNellInfiltrazione(m: ModelloAvanzamento, pinId: number, infiltrazione: string | null): string[] {
-  const voci = m.pin.get(pinId);
-  if (!voci) return [];
-  if (!m.condivisi.has(pinId) || infiltrazione === null) return [...voci.contano];
-  return voci.contano.filter((v) => infiltrazioneDelPinPerLaVoce(m, pinId, m.voci.get(v)!.infiltrazione) === infiltrazione);
+  const voci = vociCheLeggonoIlPin(m, pinId);
+  if (!m.condivisi.has(pinId) || infiltrazione === null) return voci;
+  return voci.filter((v) => infiltrazioneDelPinPerLaVoce(m, pinId, m.voci.get(v)!.infiltrazione) === infiltrazione);
 }
 
 /** Le altre voci che condividono un pin con la voce (§8.11): quelle che un suo gesto può segnare o riaprire («Segnate anche: …»,
@@ -559,7 +573,7 @@ export function rifaiSpecchio(db: AppDatabase, partita: number, voci: Iterable<s
  * Scrive lo stato di una voce in una partita (§8.11 punto 4, gesto **sulla voce**):
  * - con pin: «Segna» (o «Esaurito») segna **tutti i suoi pin** (i condivisi nella sua infiltrazione), «Riapri» toglie il segno a tutti;
  *   lo specchio della voce e quello delle altre voci di quei pin si rifanno (le altre possono diventare fatte, o riaprirsi: `effetti`);
- * - senza pin (e le «Storia», i dedali dei Memento): la sua riga, come prima; i pin delle sole voci senza carattere seguono (R4-30).
+ * - senza pin (e i dedali dei Memento): la sua riga, come prima; i pin delle sole voci senza carattere seguono (R4-30).
  * Le divergenze conservate che il gesto risolve se ne vanno.
  */
 export function scriviStatoVoce(db: AppDatabase, partita: number, voce: string, stato: StatoPunto | null, adesso: string): EffettiDelGesto {
@@ -642,8 +656,8 @@ export function riallineaStati(db: AppDatabase, mPrima: ModelloAvanzamento | nul
     // le letture di prima, per tutte le partite, prima di scrivere
     const prima = new Map(partite.map((p) => [p, statiDellaPartita(db, mPrima, p)]));
     if (conStatoPerInfiltrazione(db)) riportaLaFormaDeiPin(db, mPrima, mDopo, partite, prima, adesso);
-    // i pin nuovi delle voci che erano fatte; per una voce che prima non leggeva i pin (senza carattere che conta: il carattere cambiato
-    // a mano, «Racconto» → «Permanente») tutti i suoi pin sono nuovi, così il cambio di carattere non perde il segno (§6.3)
+    // i pin nuovi delle voci che erano fatte; per una voce che prima non leggeva i pin (era senza stato o senza carattere: un «Altro»
+    // rimasto con dei pin a cui si dà «Permanente») tutti i suoi pin sono nuovi, così il cambio di carattere non perde il segno (§6.3)
     for (const [voce, pin] of mDopo.pinDellaVoce) {
       if (!voceDaiPin(mDopo, voce)) continue;
       // per uid: un pin reimportato con lo stesso uid (e un id nuovo) è lo stesso pin
@@ -718,7 +732,7 @@ export function togliIlFattoAlPin(db: AppDatabase, partita: number, uid: string,
     + (conStatoPerInfiltrazione(db) ? db.prepare('DELETE FROM spillo_partita_infiltrazione WHERE partita_id = ? AND spillo_uid = ?').run(partita, uid).changes : 0);
   const m = modelloAvanzamento(db);
   const id = m.idDelPin.get(uid);
-  if (id !== undefined) rifaiSpecchio(db, partita, m.pin.get(id)?.contano ?? [], adesso);
+  if (id !== undefined) rifaiSpecchio(db, partita, vociCheLeggonoIlPin(m, id), adesso);
   return divergenze + segno > 0;
 }
 

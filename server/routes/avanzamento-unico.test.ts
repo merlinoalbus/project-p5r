@@ -1,7 +1,7 @@
 // ============================================================
 // L4 «Avanzamento unico» (2026-10-20) — dal §8.11 (NR4-1) ogni pin tiene il suo segno e la voce lo calcola dai suoi pin (k/N); oggetti
 // permanenti come unità di conteggio, rigenerabili per infiltrazione,
-// racconti col loro segno, divergenze «da verificare», completamento con la funzione unica, schede senza mappa assorbite, copie
+// racconti con il segno dei loro pin (dal 2026-11-13), divergenze «da verificare», completamento con la funzione unica, schede senza mappa assorbite, copie
 // (lotti/L4/modifiche.md §0-§3, piano dei test §6.1)
 // ============================================================
 
@@ -97,11 +97,14 @@ describe('L4 — avanzamento unico', () => {
     await scollega(o4.chiave, pin[2].id);
   });
 
-  it('§0, §1.6 — un pin di sole voci di racconto ha il suo stato; «esaurito» solo se esauribile, e togliere il segno dal pin lo riapre', async () => {
+  // 2026-11-13: una voce di racconto con pin ha lo stato dei suoi pin (segnarla letta li raccoglie, togliere il segno al pin la riapre)
+  it('§0, §1.6 — una voce di racconto e il suo pin hanno un segno solo; «esaurito» solo se esauribile, e togliere il segno dal pin lo riapre', async () => {
     const st = await nuova(inf[1], 'Racconto', 'storia');
     await collega(st.chiave, pin[3].id);
     await stato(st.chiave, 'ottenuto').expect(200);
-    expect(await sullaMappa(pin[3])).toMatchObject({ raccolto: false, statoProprio: true });
+    expect(await sullaMappa(pin[3])).toMatchObject({ raccolto: true, statoProprio: true });
+    await segnaPin(pin[3].id, false);
+    expect([(await sullaMappa(pin[3])).raccolto, riga(st.chiave)]).toEqual([false, null]);
     await segnaPin(pin[3].id, true);
     expect([(await sullaMappa(pin[3])).raccolto, riga(st.chiave)]).toEqual([true, 'ottenuto']);
     await segnaPin(pin[3].id, false);

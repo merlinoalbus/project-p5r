@@ -3424,7 +3424,7 @@ export interface SpilloDto {
   contestoInfiltrazione?: { chiave: string; nome: string } | null;
   /** L4: il pin risulta fatto ma una sua voce no, da prima dell'aggiornamento (divergenza conservata): «Da verificare». */
   daVerificare?: boolean;
-  /** L4: il pin ha uno stato suo (nessuna voce che conta). */
+  /** L4: il pin ha uno stato suo (nessuna voce che conta nel completamento); le sue voci di racconto, se ne ha, lo leggono. */
   statoProprio?: boolean;
   /** Il riferimento del pin (dove porta, il luogo, il Confidente…) risolto. Non dice le voci della guida: quelle sono `voci`. */
   dettaglio: DettaglioSpilloDto | null;
