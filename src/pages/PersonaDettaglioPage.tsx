@@ -257,11 +257,12 @@ function SchedaPersona() {
                 didascalia={livelloScelto > p.livello ? `Stima al livello ${livelloScelto}: +3 punti per livello ripartiti in proporzione alle statistiche base (livello ${p.livello}); in gioco la ripartizione varia.` : `Statistiche base al livello ${p.livello}.`}
               />
               </div>
-              {attiva && !p.rara && !p.delParty && (
+              {/* un Demone del Tesoro entra in scorta come ogni Persona; non è un obiettivo di fusione, perché non si ottiene fondendo */}
+              {attiva && !p.delParty && (
                 <div className="flex items-center gap-2 flex-wrap mt-1">
                   <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi alla scorta" dettaglio={`al livello ${livelloScelto}`}
                     disabled={occupato} onClick={() => void aggiungi()} />
-                  <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="obiettivo" dimensione={22} />} titolo="Aggiungi agli obiettivi" onClick={() => setObiettivoAperto(true)} />
+                  {!p.rara && <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="obiettivo" dimensione={22} />} titolo="Aggiungi agli obiettivi" onClick={() => setObiettivoAperto(true)} />}
                 </div>
               )}
               {attiva && obiettivoAperto && (

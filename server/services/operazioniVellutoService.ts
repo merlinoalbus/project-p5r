@@ -194,6 +194,8 @@ export function eseguiForca(partitaId: number, dati: DatiForca): EsitoForcaDto {
   if (dati.riceventeId === dati.sacrificioId) throw httpErrors.badRequest('forca-stesso-esemplare', 'Il sacrificio deve essere un esemplare diverso dal ricevente.');
   const ric = possedutaOErrore(partitaId, dati.riceventeId);
   const sac = possedutaOErrore(partitaId, dati.sacrificioId);
+  // un Demone del Tesoro non si potenzia con la Forca (docs/riferimenti/bonus-velluto.md): può solo essere il sacrificio
+  if (ric.rara === 1) throw httpErrors.badRequest('forca-ricevente-tesoro', 'Un Demone del Tesoro non si potenzia con la Forca: può solo essere il sacrificio.');
   const rango = rangoArcana(partitaId, ric.arcana);
   const igorMax = rangoArcana(partitaId, 'Fool') >= RANGO_MASSIMO_CONFIDENTE;
   const esito = moltiplicatoreForca({ rangoConfidente: rango, igorMax, stessaArcana: sac.arcana === ric.arcana, tesoro: sac.rara === 1, allarme: info.allarme, penalitaLivello: sac.livello > ric.livello });

@@ -383,7 +383,7 @@ function DettaglioPersona({ p, stato, inSalita, inRegistrazione, onSali, onRegis
 
 /**
  * Finestra «Aggiungi Persona alla scorta»: carica il compendio solo quando è aperta, filtra per nome, nome italiano o arcano
- * (escluse le rare, al più 40 risultati) e aggiunge con un tocco; una Persona già posseduta diventa un avviso, non un errore.
+ * (al più 40 risultati, Demoni del Tesoro compresi) e aggiunge con un tocco; una Persona già posseduta diventa un avviso, non un errore.
  */
 function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { aperta: boolean; onChiudi: () => void; onAggiunta: (p: PersonaPossedutaDto) => void; partitaId: number }) {
   const { dati } = useCarica(() => (aperta ? getPersone() : Promise.resolve([])), [aperta]);
@@ -391,7 +391,8 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
   const [occupato, setOccupato] = useState<number | null>(null);
   const filtrate = useMemo(() => {
     const trova = filtroRicerca(q);
-    return (dati ?? []).filter((p) => !p.rara && trova(p.nome, p.nomeIt, p.arcanaNome)).slice(0, 40);
+    // anche i Demoni del Tesoro: si ottengono nei Palazzi e nei Memento, e in scorta servono da materiale di fusione e da sacrificio alla Forca
+    return (dati ?? []).filter((p) => trova(p.nome, p.nomeIt, p.arcanaNome)).slice(0, 40);
   }, [dati, q]);
 
   /** Aggiunge la Persona alla scorta e la passa a `onAggiunta`; se è già posseduta lo segnala come avviso. */
