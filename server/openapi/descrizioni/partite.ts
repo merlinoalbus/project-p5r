@@ -517,7 +517,7 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     sommario: 'Esegue la Forca: sacrifica un esemplare per un altro',
     descrizione: 'Toglie il sacrificio dalla scorta e aggiorna il ricevente: livello raggiunto (osservato nel gioco, mai più basso; predefinito invariato), skill trasferite dal sacrificio (una, fino a tre con l\'Allarme) e dimenticate, punti statistica sommati ai bonus. Con l\'incidente dell\'Allarme niente skill né livelli. Gli 8 slot non si superano (400). L\'evento `forca` registra il moltiplicatore di EXP e i suoi fattori; poi si riverifica l\'obiettivo del ricevente.',
     risposta: '`EsitoForcaDto`',
-    errori: [PARTITA, [400, 'forca-stesso-esemplare'], [404, 'posseduta-non-trovata'], [400, 'incidente-senza-skill'], [400, 'troppe-skill'], [400, 'skill-non-del-sacrificio'], [400, 'skill-non-del-ricevente'], [400, 'incidente-senza-livelli']],
+    errori: [PARTITA, [400, 'forca-stesso-esemplare'], [400, 'forca-ricevente-tesoro'], [404, 'posseduta-non-trovata'], [400, 'incidente-senza-skill'], [400, 'troppe-skill'], [400, 'skill-non-del-sacrificio'], [400, 'skill-non-del-ricevente'], [400, 'incidente-senza-livelli']],
   },
   'POST /api/partite/:id/velluto/isolamento': {
     sommario: 'Registra un ciclo di isolamento di una Persona',

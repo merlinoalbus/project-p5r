@@ -316,6 +316,11 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 
 ## 7. Fusione
 - Motore fedele alle regole di chinhodado, compresi i casi non ovvi (due Demoni del Tesoro fra loro seguono la fusione normale).
+- **Demoni del Tesoro in scorta**: un Demone del Tesoro si aggiunge alla scorta come ogni Persona (dalla scheda Scorta, dalla scheda della
+  Persona, da una voce del Diario con «Compendio e scorta»): si ottiene nei Palazzi e nei Memento, e in scorta serve da materiale di
+  fusione e da sacrificio alla Forca. Non è il ricevente della Forca (non si potenzia: `forca-ricevente-tesoro`) e resta fuori dagli
+  obiettivi di fusione, perché non si ottiene fondendo. Come ogni esemplare nuovo entra «in squadra», cioè non in deposito. La regola
+  della cattura delle Ombre (§ sopra: «esclusa per documento») non cambia. **(14/11)**
 - Il costo di un piano è la somma dei prezzi di evocazione dal Registro; una Persona in scorta vale 0 ma si usa una volta sola. Anche
   nella fusione diretta e nelle ricette il costo si chiama «evocazione dal Registro» e un ingrediente in scorta vale 0.
 - Il filtro «fino al livello del protagonista» è attivabile, non imposto: spento di partenza in tutte le viste (Ricette, Cerca per skill,

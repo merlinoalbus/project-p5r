@@ -94,11 +94,10 @@ export function verificaEffettoDiStato(e: EffettoDiStatoVoce): void {
     if (eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogo_chiave })) throw httpErrors.conflict('articolo-aojiru', 'L’Aojiru ha i suoi consumi: usa l’effetto «Acquisto Aojiru».');
   }
   if (e.tipo === 'persona') {
-    const p = prepared('SELECT rara, livello FROM persona WHERE id = ?').get(e.persona) as { rara: number; livello: number } | undefined;
+    const p = prepared('SELECT livello FROM persona WHERE id = ?').get(e.persona) as { livello: number } | undefined;
     if (!p) throw httpErrors.notFound('persona-non-trovata', `La Persona ${e.persona} non esiste.`);
     assicuraNonDelGruppo(e.persona);
-    // come la scelta della scorta (`ScortaPersona`): un Demone del Tesoro non si aggiunge alla scorta da qui
-    if (e.scorta && p.rara === 1) throw httpErrors.badRequest('persona-rara-scorta', 'Un Demone del Tesoro non si aggiunge alla scorta da una voce: scegli «Solo nel Compendio».');
+    // un Demone del Tesoro entra in scorta come ogni Persona (DECISIONI, 14/11)
     // la stessa regola del campo dell'editor (`min` = livello base): una Persona non entra in scorta sotto il suo livello base
     if (e.livello !== undefined && e.livello < p.livello) throw httpErrors.badRequest('livello-sotto-base', `Il livello in scorta non può essere sotto il livello base della Persona (${p.livello}).`);
   }

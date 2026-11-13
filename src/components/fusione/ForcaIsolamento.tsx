@@ -31,7 +31,9 @@ interface Props {
 function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scorta: PersonaPossedutaDto[]; persone: PersonaRiassuntoDto[]; velluto: VellutoDto | null; partitaId: number; onScortaCambiata: () => void }) {
   const [riceventeId, setRiceventeId] = useState<number | null>(null);
   const [sacrificioId, setSacrificioId] = useState<number | null>(null);
-  const ricevente = scorta.find((p) => p.id === riceventeId) ?? null;
+  // un Demone del Tesoro non si potenzia con la Forca (docs/riferimenti/bonus-velluto.md): in scorta può solo essere il sacrificio
+  const riceventi = useMemo(() => scorta.filter((p) => !persone.find((x) => x.id === p.personaId)?.rara), [scorta, persone]);
+  const ricevente = riceventi.find((p) => p.id === riceventeId) ?? null;
   /** Rango del Confidente dell'arcano indicato secondo i dati del Velluto della partita (0 se assenti). */
   const rangoDi = (arcana: string) => velluto?.arcani.find((a) => a.arcana === arcana)?.rango ?? 0;
   const igorMax = rangoDi('Fool') >= RANGO_MASSIMO_CONFIDENTE;
@@ -61,9 +63,11 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
       <p className="m-0 testo-13 text-text-secondary">Sacrifica una Persona per dare EXP a un'altra. L'EXP di base dipende dal livello del sacrificio; qui vedi i moltiplicatori: rango del Confidente dell'arcano del ricevente (Igor al massimo aumenta), stesso arcano {testoMoltiplicatore(FORCA_STESSO_ARCANO)}, Demone del Tesoro {testoMoltiplicatore(FORCA_TESORO.arcanoDiverso)}/{testoMoltiplicatore(FORCA_TESORO.stessoArcano)}, Allarme {FORCA_ALLARME.normaleArcanoDiverso}/{FORCA_ALLARME.normaleStessoArcano}/{FORCA_ALLARME.tesoroArcanoDiverso}/{FORCA_ALLARME.tesoroStessoArcano}, sacrificio di livello superiore {testoMoltiplicatore(FORCA_PENALITA_LIVELLO)}. {FORCA_SKILL_TRASFERITE.normale === 1 ? 'Una skill trasferita' : `${FORCA_SKILL_TRASFERITE.normale} skill trasferite`} a caso ({FORCA_SKILL_TRASFERITE.allarmeMin}–{FORCA_SKILL_TRASFERITE.allarmeMax} con l'Allarme); un uso al giorno per Persona (nessun limite con l'Allarme).</p>
       {scorta.length < 2 ? (
         <p className="m-0 testo-13 text-text-muted">Servono almeno due Persona nella scorta della partita attiva.</p>
+      ) : riceventi.length === 0 ? (
+        <p className="m-0 testo-13 text-text-muted">Nella scorta ci sono solo Demoni del Tesoro: possono essere il sacrificio, non il ricevente.</p>
       ) : (
         <>
-          <SelettorePosseduta etichetta="Persona ricevente" persone={scorta} sceltaId={riceventeId} onScegli={setRiceventeId} />
+          <SelettorePosseduta etichetta="Persona ricevente" persone={riceventi} sceltaId={riceventeId} onScegli={setRiceventeId} />
           {ricevente && (
             <>
               <div className="testo-12 text-text-muted">Confidente {ricevente.arcanaNome}: rango {rangoDi(ricevente.arcana)}{igorMax ? ' · Igor al massimo' : ''}{allarme ? ' · Allarme attivo' : ''}</div>

@@ -1729,8 +1729,8 @@ export interface ElenchiEffettiVoceDto {
   cruciverba: Array<{ data: string; indizio: string }>;
   /** Inviti dei Confidenti: `chiave` è «confidente/MM-GG». */
   inviti: Array<{ chiave: string; confidente: string; confidenteNome: string; data: string | null; nota: string }>;
-  /** Le Persona dell'effetto «Persona registrata»: non quelle del gruppo; `rara` (Demone del Tesoro) non si aggiunge alla scorta da una voce. */
-  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number; rara?: boolean }>;
+  /** Le Persona dell'effetto «Persona registrata»: non quelle del gruppo (i Demoni del Tesoro sì, e entrano in scorta come le altre). */
+  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number }>;
   /** L13 (ondata 3): gli oggetti del catalogo (effetto «oggetto ricevuto», ricompense delle Richieste) e i trofei (effetto «trofeo»). */
   /** 2026-10-28: `prestito` = un'offerta lo dà in prestito (regola «restituzione»: Biblioteca, DVD a noleggio), per l'effetto «Restituito». */
   oggetti?: Array<{ chiave: string; nome: string; categoria: string; prestito?: true }>;

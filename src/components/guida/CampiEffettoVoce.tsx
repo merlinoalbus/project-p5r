@@ -146,17 +146,15 @@ const SCELTE_SCORTA = [{ chiave: 'compendio', nome: 'Solo nel Compendio' }, { ch
 /**
  * 2026-10-26 (richiesta dell'utente: «devo poter scegliere se l'effetto si fermi solo al Compendio o se quella persona viene anche aggiunta alla
  * scorta»): la scelta a due tasti e, con la scorta, il livello con cui entra (proposto il livello base della Persona, scritto solo se diverso).
- * Un Demone del Tesoro resta solo nel Compendio, come nella scelta della scorta della partita. `persona` null: la Persona scelta non è più
+ * Un Demone del Tesoro ha la stessa scelta delle altre Persona. `persona` null: la Persona scelta non è più
  * nell'elenco (per esempio è diventata del gruppo); la scelta resta modificabile, il livello no (il livello base non si conosce: resta quello
  * salvato, e il server lo verifica).
  */
-export function CampiScortaPersona({ effetto: e, persona, onCambia }: { effetto: EffettoPersona; persona: { livello: number; rara?: boolean } | null; onCambia: (e: EffettoPersona) => void }) {
+export function CampiScortaPersona({ effetto: e, persona, onCambia }: { effetto: EffettoPersona; persona: { livello: number } | null; onCambia: (e: EffettoPersona) => void }) {
   const base = persona?.livello ?? 1;
   // il testo mentre si scrive: «3» verso «35» con il livello base 20 non deve diventare subito 20; il valore valido si scrive appena c'è
   const [testo, setTesto] = useState<string | null>(null);
   const scriviLivello = (livello: number) => onCambia(livello === base ? { tipo: 'persona', persona: e.persona, scorta: true } : { tipo: 'persona', persona: e.persona, scorta: true, livello });
-  // un Demone del Tesoro non ha scelta: al posto dei due tasti spenti, la nota che lo dice (un'etichetta visibile solo se ha senso)
-  if (persona?.rara) return <p className="m-0 testo-12 text-text-secondary text-pretty">Demone del Tesoro: si registra solo nel Compendio, non va nella scorta da una voce.</p>;
   return (
     <div className="flex flex-col gap-2">
       <FilaScelta etichetta="Dove va la Persona" valore={e.scorta ? 'scorta' : 'compendio'} opzioni={SCELTE_SCORTA}
@@ -365,8 +363,8 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
             {p && <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={44} />}
             <Selettore className="min-w-[12rem] flex-1" etichetta="Persona del compendio" valore={String(e.persona)}
               opzioni={conCorrente(effetti.persone.map((x) => ({ chiave: String(x.id), nome: x.nome, dettaglio: `${x.arcana} · Liv. ${x.livello}` })), e.persona >= 1 ? String(e.persona) : '', 'Persona non più nell’elenco')}
-              // cambiando Persona la scelta della scorta resta (se la nuova può entrarci); il livello no: era della Persona di prima
-              onCambia={(v) => { const n = effetti.persone.find((x) => x.id === Number(v)); onCambia(e.scorta && n && !n.rara ? { tipo: 'persona', persona: Number(v), scorta: true } : { tipo: 'persona', persona: Number(v) }); }} />
+              // cambiando Persona la scelta della scorta resta (se la nuova è nell'elenco); il livello no: era della Persona di prima
+              onCambia={(v) => { const n = effetti.persone.find((x) => x.id === Number(v)); onCambia(e.scorta && n ? { tipo: 'persona', persona: Number(v), scorta: true } : { tipo: 'persona', persona: Number(v) }); }} />
           </div>
           {/* anche per una Persona non più nell'elenco la scelta resta modificabile (revisione UX): senza il livello, che non si conosce */}
           {e.persona >= 1 && <CampiScortaPersona key={e.persona} effetto={e} persona={p ?? null} onCambia={onCambia} />}
