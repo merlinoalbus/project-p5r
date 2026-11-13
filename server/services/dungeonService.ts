@@ -1186,9 +1186,11 @@ function copiaSchedeDellaVoce(voce: string, areaPrima: string, copia: string, ar
 /**
  * Collega la copia di una voce agli stessi pin delle planimetrie dell'originale (`spillo_voce`; segnalazione dell'utente, 2026-10-18:
  * «ha copiato le voci ma non i pin delle voci»). Il pin diventa di tutte e due le voci — si può, sono dello stesso Palazzo
- * (`erroreVoceDelPin`) — e valgono le «voci indipendenti» del 2026-10-09 (`allineaStatiPunto`, come il collegamento a mano): la copia
- * ha il suo stato e parte da fare, l'originale tiene il suo, e il pin è fatto solo quando lo sono tutte le sue voci («se un oggetto è
- * stato raccolto nell'area 3 e poi copiata la voce nell'area 4 deve valere la regola attuale sugli stati del pin», 2026-10-18).
+ * (`erroreVoceDelPin`) — e vale la regola degli stati del pin («se un oggetto è stato raccolto nell'area 3 e poi copiata la voce
+ * nell'area 4 deve valere la regola attuale sugli stati del pin», 2026-10-18). Una voce dei Palazzi con uno stato legge il segno dei suoi
+ * pin (`voceDaiPin`: §8.11 di L4; dal 2026-11-13 anche il racconto), quindi la copia risulta fatta quando lo sono i pin dove lei li legge.
+ * Per le voci senza carattere (dedali dei Memento) valgono le «voci indipendenti» del 2026-10-09 (`allineaStatiPunto`): la copia ha il suo
+ * stato e parte da fare, e il pin è fatto solo quando lo sono tutte le sue voci.
  */
 function copiaPinDellaVoce(voce: string, copia: string, adesso: string): number {
   const pin = prepared('SELECT spillo_id FROM spillo_voce WHERE voce_chiave = ? ORDER BY spillo_id').pluck().all(voce) as number[];

@@ -782,7 +782,7 @@ describe('§4.1: il carattere della voce', () => {
     fireEvent.click(screen.getByRole('button', { name: /Bottiglia a terra/ }));
     expect(screen.getByText('Si ripropone: il suo stato vale in quest’infiltrazione.')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Il quadro parla/ }));
-    expect(screen.getByText('Racconto: si segna come letto e non conta nel completamento.')).toBeInTheDocument();
+    expect(screen.getByText('Racconto: si segna come letto e non conta nel completamento; con dei pin collegati ha il loro stato.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Ottenuto' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Letto' }));
     await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'p3' }), 'ottenuto'));

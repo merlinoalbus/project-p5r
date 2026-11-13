@@ -496,6 +496,12 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   pin, e conta negli oggetti dell'infiltrazione. Senza carattere, o con «Racconto», resta descrittiva. La regola è una sola per server e
   interfaccia (`puntoDescrittivo` / `sqlVoceDescrittiva` in `shared/spilli.ts`); togliere quel carattere a un «Altro» con dei pin si
   rifiuta come farne una voce descrittiva (409). **(31/10)**
+- **Voci di racconto con pin**: una voce «Storia» (o con il carattere «Racconto» su un tipo che ha uno stato) collegata a dei pin ha lo stato
+  dei suoi pin, come le voci permanenti e quelle che si ripropongono: segnarla letta li raccoglie, raccoglierli tutti la segna letta,
+  riaprire l'una riapre gli altri. Continua a non contare nel completamento. Il segno è uno solo, quello del pin (`voceDaiPin` in
+  `server/services/mappe/statiGuida.ts`). Dove i due stati erano in disaccordo (utente 074) la voce letta ha segnato raccolti i suoi pin, e
+  la voce con i pin già tutti raccolti è risultata letta; una voce non letta con solo una parte dei pin raccolti resta «in corso». Dopo
+  un'importazione o un ripristino delle partite vale il segno dei pin, come per le altre voci con pin. **(13/11)**
 - **Una sola guida nel visore**: ogni visore (a schermo intero e incorporato) ha la stessa guida da usare, dal pulsante «Guida», su ogni
   mappa che può avere voci della guida: casella ottenuto/riapri con la conferma della scheda del Palazzo, dettagli e pin centrabili nella
   voce, voci fatte nascoste, le Persona da catturare con la piastrella della scheda, finestra spostabile da 1024 px, foglio dal basso su

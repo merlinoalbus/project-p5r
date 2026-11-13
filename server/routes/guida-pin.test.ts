@@ -470,7 +470,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     return righe.find((r) => palazzi.get(r.mappa_chiave) === 'kamoshida')!;
   };
 
-  it('una «Storia» si collega a un pin con destinazione: il riferimento resta; da L4 la Storia (racconto) tiene il suo segno e il pin il suo; scollegando la destinazione non si tocca', async () => {
+  it('una «Storia» si collega a un pin con destinazione: il riferimento resta; la Storia (racconto) e il suo pin hanno un segno solo (2026-11-13); scollegando la destinazione non si tocca', async () => {
     const pin = pinConDestinazione();
     expect(pin).toBeTruthy();
     const storia = await nuovoPunto('Si apre il passaggio', 'storia');
@@ -478,19 +478,21 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect(dopo.pin.map((x) => x.id)).toEqual([pin.id]);
     expect(prepared('SELECT riferimento_tipo, riferimento_chiave FROM spillo WHERE id = ?').get(pin.id)).toEqual({ riferimento_tipo: 'mappa', riferimento_chiave: pin.riferimento_chiave });
     expect(vociDi(pin.id)).toEqual([storia.chiave]);
-    // il pin sulla mappa porta altrove e insieme è della voce; la Storia segnata («letta») non fa fatto il pin, che ha il suo stato
-    // (L4: un pin di sole voci di racconto si comporta come un pin senza voci, decisione dell'utente del 2026-10-20)
+    // il pin sulla mappa porta altrove e insieme è della voce; la Storia segnata («letta») segna raccolto il suo pin
+    // (2026-11-13, richiesta dell'utente: supera la decisione del 2026-10-20 per cui il pin di sole voci di racconto teneva un segno suo)
     await statoPunto(storia.chiave, 'ottenuto');
-    expect(raccolto(pin.uid)).toBe(0);
+    expect(raccolto(pin.uid)).toBe(1);
     const sullaMappa = ((await request(app).get(`/api/mappe/${pin.mappa_chiave}?partita=${partita}`).expect(200)).body.data as MappaDto).spilli.find((s) => s.id === pin.id)!;
     expect(sullaMappa.riferimento?.tipo).toBe('mappa');
     expect(sullaMappa.voci).toEqual([expect.objectContaining({ chiave: storia.chiave, tipo: 'storia', stato: 'ottenuto', carattere: 'descrittiva' })]);
-    expect(sullaMappa).toMatchObject({ raccolto: false, statoProprio: true });
-    // dalla mappa il pin si segna da sé, e la Storia resta com'è
+    expect(sullaMappa).toMatchObject({ raccolto: true, statoProprio: true });
+    // dalla mappa: togliere il segno al pin riapre la Storia, rimetterlo la segna letta
+    await raccogli(pin.id, false);
+    expect([raccolto(pin.uid), segnato(storia.chiave)]).toEqual([0, null]);
     await raccogli(pin.id, true);
     expect([raccolto(pin.uid), segnato(storia.chiave)]).toEqual([1, 'ottenuto']);
     await raccogli(pin.id, false);
-    expect([raccolto(pin.uid), segnato(storia.chiave)]).toEqual([0, 'ottenuto']);
+    expect([raccolto(pin.uid), segnato(storia.chiave)]).toEqual([0, null]);
     await statoPunto(storia.chiave, null);
     // un'altra voce lo prende anche lei (098: prima si rifiutava finché era di questa)
     const altra = await nuovoPunto('Altra storia', 'storia');

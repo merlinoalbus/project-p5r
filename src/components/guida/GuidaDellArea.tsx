@@ -63,8 +63,10 @@ const CLASSE_CARATTERE: Record<CarattereVoce, string> = { permanente: 'chip--toc
 const SPIEGAZIONE_CARATTERE: Record<CarattereVoce, string> = {
   permanente: 'Permanente: si fa una volta per sempre.',
   rigenerabile: 'Si ripropone: il suo stato vale in quest’infiltrazione.',
-  descrittiva: 'Racconto: si segna come letto e non conta nel completamento.',
+  descrittiva: 'Racconto: si segna come letto e non conta nel completamento; con dei pin collegati ha il loro stato.',
 };
+/** Una voce descrittiva (un «Altro» senza un carattere con uno stato): una frase sola, nella voce aperta e nel titolo del suo chip. */
+const SPIEGAZIONE_DESCRITTIVA = 'Voce descrittiva: si legge, non si segna e non ha pin.';
 /** L'icona del carattere: il lucchetto aperto per una permanente da fare, chiuso quando è fatta; il ciclo per chi si ripropone; il libro per il racconto. */
 const iconaCarattere = (c: CarattereVoce, fatta: boolean): ChiaveAzione => (c === 'permanente' ? (fatta ? 'bloccato' : 'sbloccato') : c === 'rigenerabile' ? 'ricalcola' : 'libro');
 
@@ -371,7 +373,8 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
             <span className={`font-semibold ${chiuso === 'esaurito' ? 'stato-esaurito' : chiuso === 'fatto' ? 'stato-fatto' : ''}`}>{p.nome}</span>
             <span className="testo-12 text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{statoTesto ? ` · ${statoTesto}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
             {/* L4 §4.1: il carattere accanto al tipo (assente per le voci dei dedali e per le Persona); nel testo, così va a capo con lui */}
-            {p.carattere && <span className={`chip chip--icona ml-1.5 align-middle testo-12 ${CLASSE_CARATTERE[p.carattere]}`} title={SPIEGAZIONE_CARATTERE[p.carattere]}>
+            {/* un «Altro» descrittivo ha il carattere «Racconto» ma non si segna e non ha pin: la sua spiegazione è quella della voce descrittiva */}
+            {p.carattere && <span className={`chip chip--icona ml-1.5 align-middle testo-12 ${CLASSE_CARATTERE[p.carattere]}`} title={voceDescrittiva(p) ? SPIEGAZIONE_DESCRITTIVA : SPIEGAZIONE_CARATTERE[p.carattere]}>
               <IconaAzione chiave={iconaCarattere(p.carattere, !!p.stato)} dimensione={14} />{NOME_CARATTERE[p.carattere]}
             </span>}
             {p.stato === 'esaurito' && <span className="chip chip--icona chip--bloccata ml-1.5 align-middle testo-12"><IconaAzione chiave="esaurito" dimensione={14} />Esaurito</span>}
@@ -405,7 +408,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
             <DettagliPunto d={p.dettagli} contenuto={p.contenuto} senzaAffinita={p.tipo === 'persona' && !!p.persona} />
             <ContenutoDellaVoce key={p.chiave} voce={p.chiave} contenuto={p.contenuto ?? []} onCambiato={onRicarica} disabilitato={occupato} />
-            {p.carattere && <p className="m-0 testo-12 text-text-muted">{SPIEGAZIONE_CARATTERE[p.carattere]}</p>}
+            {p.carattere && !voceDescrittiva(p) && <p className="m-0 testo-12 text-text-muted">{SPIEGAZIONE_CARATTERE[p.carattere]}</p>}
             {conPassi && <p className="m-0 testo-12 text-text-muted">Risolto quando i suoi passi sono fatti: segnarlo li segna tutti, riaprirlo li riapre. I pin stanno sui passi.</p>}
             {p.daVerificare && partitaId && (() => {
               const div = divergenze?.find((x) => x.voce === p.chiave);
@@ -427,7 +430,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
             )}
             {/* una voce descrittiva (solo «Altro») si legge e basta: niente stato, niente pin (scelta dell'utente) */}
             {voceDescrittiva(p)
-              ? <p className="m-0 testo-12 text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
+              ? <p className="m-0 testo-12 text-text-muted">{SPIEGAZIONE_DESCRITTIVA}</p>
               : <div className="flex flex-wrap items-center gap-1.5">
                 {partitaId && p.stato !== 'ottenuto' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={racconto ? 'Letto' : 'Ottenuto'} onClick={() => void segnaEPassaOltre(p, 'ottenuto', pl)} />}
                 {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void segnaEPassaOltre(p, 'esaurito', pl)} />}
