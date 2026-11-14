@@ -270,7 +270,8 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
             <PannelloEditor
               mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti} elenchi={elenchi.dati ?? ELENCHI_VUOTI}
               condizioniNuovi={condizioniNuovi} onCondizioniNuovi={(c) => setPredefinite({ mappa: chiave, condizioni: c })}
-              onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={seleziona} sezione={sezione} onSezione={setSezione} onCopia={copia}
+              // entrando in «Aggiungi» il pin aperto si chiude: mentre si aggiunge c'è un solo blocco di condizioni, quello dei pin nuovi
+              onStrumento={(s) => { if (s === 'aggiungi') setSelezionatoId(null); setStrumento(s); }} onTipoNuovo={setTipoNuovo} onSeleziona={seleziona} sezione={sezione} onSezione={setSezione} onCopia={copia}
               onSalvaSpillo={(id, d) => esegui(() => aggiornaSpillo(id, d), 'Spillo salvato.')}
               onEliminaSpillo={async (id) => { const spillo = dati.spilli.find(s => s.id === id); if (spillo) setPinDaRimuovere({ spillo, contesto: contestoEditor }); }}
               onCollegaVoce={(id, voce, collega) => esegui(() => collegaPinAlPunto(voce, id, collega), collega ? 'Voce della guida collegata.' : 'Voce della guida scollegata.')}
@@ -502,6 +503,12 @@ function PannelloEditor(p: PropsPannello) {
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'aggiungi'} icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi" dettaglio="tocca la mappa" onClick={() => p.onStrumento('aggiungi')} />
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'incolla'} icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Incolla" dettaglio={appunti ? `«${appunti.nome}»` : 'copia prima uno spillo'} disabled={!appunti} onClick={() => p.onStrumento('incolla')} />
         </div>
+        {/* le condizioni con cui nasce ogni pin nuovo (2026-11-14): subito sotto gli strumenti, prima della tavolozza dei tipi, così si
+            vedono senza scorrere anche sul telefono; vuote occupano una riga */}
+        {strumento === 'aggiungi' && (
+          <CondizioniEditor titolo="Condizioni dei pin nuovi" testoVuoto="nessuna: i pin nascono senza condizioni" condizioni={p.condizioniNuovi} onCambia={p.onCondizioniNuovi}
+            elenchi={p.elenchi} disabilitato={occupato} perSpillo contesto={{ mappa: mappa.chiave, palazzo: mappa.palazzo ?? null }} />
+        )}
         {strumento === 'aggiungi' && (
           <div className="flex flex-col gap-1.5" role="group" aria-label="Tipo del nuovo spillo">
             {CATEGORIE_SPILLO.map((c) => (
@@ -519,22 +526,17 @@ function PannelloEditor(p: PropsPannello) {
             ))}
           </div>
         )}
-        {/* le condizioni con cui nasce ogni pin nuovo (2026-11-14): si scelgono mentre si aggiunge; con un altro strumento resta il segno
-            che sono attive, e un tocco riporta qui */}
-        {strumento === 'aggiungi' && (
-          <CondizioniEditor titolo="Condizioni dei pin nuovi" testoVuoto="nessuna: i pin nascono senza condizioni" condizioni={p.condizioniNuovi} onCambia={p.onCondizioniNuovi}
-            elenchi={p.elenchi} disabilitato={occupato} perSpillo contesto={{ mappa: mappa.chiave, palazzo: mappa.palazzo ?? null }} />
-        )}
         {strumento === 'aggiungi' && p.condizioniNuovi.length > 0 && !ammetteCondizioni(tipoNuovo) && (
           <p className="m-0 testo-12 text-warning" role="note">Il tipo «{DEFINIZIONI_SPILLO[tipoNuovo].nome}» non ammette condizioni: questo pin nasce senza.</p>
         )}
+        {/* con un altro strumento resta il segno che le condizioni dei pin nuovi sono attive: un tocco riporta ad «Aggiungi» */}
         {strumento !== 'aggiungi' && p.condizioniNuovi.length > 0 && (
           <button type="button" className="chip chip--attivo chip--icona touch self-start testo-12" onClick={() => p.onStrumento('aggiungi')}
             title="Ogni pin nuovo di questa mappa nasce con queste condizioni, finché resti in questo editor">
             <IconaAzione chiave="bloccato" dimensione={14} />Pin nuovi con {p.condizioniNuovi.length === 1 ? '1 condizione' : `${p.condizioniNuovi.length} condizioni`}
           </button>
         )}
-        {strumento !== 'seleziona' && <p className="m-0 testo-12 text-text-muted">{strumento === 'aggiungi' ?'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.`}</p>}
+        {strumento !== 'seleziona' && <p className="m-0 testo-12 text-text-muted">{strumento === 'aggiungi' ? (p.condizioniNuovi.length > 0 && ammetteCondizioni(tipoNuovo) ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto e le condizioni dei pin nuovi.' : 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.') : `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.`}</p>}
       </section>
 
       {selezionato && (

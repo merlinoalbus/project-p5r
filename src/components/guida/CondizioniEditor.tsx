@@ -208,10 +208,10 @@ function Riga({ condizione, negata, onCambia, onRimuovi, elenchi, nomi, disabili
   );
 }
 
-interface PropsBlocco { condizioni: RequisitoSpillo[]; modo: 'tutte' | 'almeno-una'; onCambia: (c: RequisitoSpillo[]) => void; onCambiaModo?: (m: 'tutte' | 'almeno-una') => void; negato?: boolean; onNega?: () => void; onRimuovi?: () => void; profondita: number; elenchi: Elenchi; nomi: NomiCondizioni; disabilitato?: boolean; perSpillo?: boolean; massimo?: number }
+interface PropsBlocco { condizioni: RequisitoSpillo[]; modo: 'tutte' | 'almeno-una'; onCambia: (c: RequisitoSpillo[]) => void; onCambiaModo?: (m: 'tutte' | 'almeno-una') => void; negato?: boolean; onNega?: () => void; onRimuovi?: () => void; profondita: number; elenchi: Elenchi; nomi: NomiCondizioni; disabilitato?: boolean; perSpillo?: boolean; massimo?: number; /** La frase del blocco radice vuoto, al posto di «sempre disponibile». */ vuoto?: string }
 
 /** Un gruppo E/O con le sue righe e i suoi sottogruppi. Al primo livello è il TUTTE implicito. */
-function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRimuovi, profondita, elenchi, nomi, disabilitato, perSpillo, massimo = 20 }: PropsBlocco) {
+function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRimuovi, profondita, elenchi, nomi, disabilitato, perSpillo, massimo = 20, vuoto = 'sempre disponibile' }: PropsBlocco) {
   // le righe hanno uno stato loro (l'operatore scelto): la chiave è un id stabile, non l'indice (`useIdStabili`)
   const chiavi = useIdStabili(condizioni.length);
   /** Sostituisce l'elemento in posizione `i` (riga o gruppo) e passa l'elenco nuovo al genitore. */
@@ -228,7 +228,7 @@ function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRi
         {!radice && onNega && <button type="button" className={`condizione-non touch ${negato ? 'condizione-non--attivo' : ''}`} aria-pressed={negato} disabled={disabilitato} title={negato ? 'Gruppo negato' : 'Nega il gruppo'} onClick={onNega}>NON</button>}
         {onCambiaModo
           ? <button type="button" className="condizioni-blocco__modo touch" disabled={disabilitato} title={`Cambia in ${MODO_NOME[modo === 'tutte' ? 'almeno-una' : 'tutte']}`} onClick={() => onCambiaModo(modo === 'tutte' ? 'almeno-una' : 'tutte')}>{MODO_NOME[modo]}<span className="condizioni-blocco__spiega">{MODO_SPIEGA[modo]}</span></button>
-          : <span className="condizioni-blocco__modo condizioni-blocco__modo--fisso">{MODO_NOME[modo]}<span className="condizioni-blocco__spiega">{condizioni.length === 0 ? 'nessuna condizione: sempre disponibile' : MODO_SPIEGA[modo]}</span></span>}
+          : <span className="condizioni-blocco__modo condizioni-blocco__modo--fisso">{MODO_NOME[modo]}<span className="condizioni-blocco__spiega">{condizioni.length === 0 ? `nessuna condizione: ${vuoto}` : MODO_SPIEGA[modo]}</span></span>}
         {onRimuovi && <button type="button" className="condizione-togli touch" aria-label="Togli il gruppo" disabled={disabilitato} onClick={onRimuovi}><IconaAzione chiave="chiudi" dimensione={16} /></button>}
       </div>
       <div className="condizioni-blocco__corpo">
@@ -318,7 +318,7 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
       {(aperto || condizioni.length > 0) && (dati.errore
         ? <p role="alert" className="m-0 testo-13">{dati.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></p>
         : offerti
-          ? <Blocco condizioni={condizioni} modo="tutte" onCambia={onCambia} profondita={0} elenchi={offerti} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} massimo={massimo} />
+          ? <Blocco condizioni={condizioni} modo="tutte" onCambia={onCambia} profondita={0} elenchi={offerti} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} massimo={massimo} vuoto={testoVuoto.replace(/^nessuna: /, '')} />
           : <p className="m-0 testo-13 text-text-muted">Caricamento degli elenchi…</p>)}
       {(aperto || condizioni.length > 0) && attiva && <div className="mt-2 testo-13" aria-live="polite" aria-label="Anteprima delle condizioni">
         {anteprima.caricamento ? <p className="m-0 text-text-muted">Valutazione sulla partita…</p> : anteprima.errore ? <p className="m-0" role="alert">{anteprima.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void anteprima.ricarica()} /></p> : anteprima.dati && (() => {
