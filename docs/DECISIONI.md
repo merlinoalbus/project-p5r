@@ -507,6 +507,11 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   `server/services/mappe/statiGuida.ts`). Dove i due stati erano in disaccordo (utente 074) la voce letta ha segnato raccolti i suoi pin, e
   la voce con i pin già tutti raccolti è risultata letta; una voce non letta con solo una parte dei pin raccolti resta «in corso». Dopo
   un'importazione o un ripristino delle partite vale il segno dei pin, come per le altre voci con pin. **(13/11)**
+- **Elenchi dell'editor delle mappe a partire dal posto in cui si è**: nelle condizioni di un pin, in una mappa di un Palazzo (o dei
+  Memento) «Voce della guida» offre solo le voci di quel Palazzo (una voce di fuori già citata resta leggibile e modificabile), e «Pin
+  di una mappa» mette prima i pin della mappa, poi quelli delle altre mappe dello stesso Palazzo, poi gli altri (in una mappa del mondo:
+  prima i pin della mappa, e le voci restano tutte). «Porta a» dello spillo, in una mappa di un Palazzo, mette prima le altre mappe dello
+  stesso Palazzo, sotto il suo nome, poi le mappe di fuori; nelle mappe del mondo resta raggruppato per tipo. **(14/11)**
 - **Una sola guida nel visore**: ogni visore (a schermo intero e incorporato) ha la stessa guida da usare, dal pulsante «Guida», su ogni
   mappa che può avere voci della guida: casella ottenuto/riapri con la conferma della scheda del Palazzo, dettagli e pin centrabili nella
   voce, voci fatte nascoste, le Persona da catturare con la piastrella della scheda, finestra spostabile da 1024 px, foglio dal basso su

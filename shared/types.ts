@@ -3471,6 +3471,9 @@ export interface MappaDto extends MappaRiassuntoDto {
   /** Dalla radice a questa mappa. Per una planimetria con Area l'ultima tappa ha il nome dell'Area (Tokyo › Shibuya › Sottopasso):
    *  la versione la dice `area.versioneEtichetta` (L2). */
   percorso: Array<{ chiave: string; nome: string }>;
+  /** Il dungeon a cui appartiene la mappa, risalendo i genitori fino alla radice (un Palazzo, o i Memento); null per le mappe del mondo.
+   *  Lo scrive il server nel dettaglio della mappa; chi non lo trova lo legge come null. */
+  palazzo?: string | null;
   figli: MappaRiassuntoDto[];
   spilli: SpilloDto[];
   /** Gli spilli di **altre** mappe che portano qui. Una mappa conosce da sé solo le vie d'uscita
@@ -3829,11 +3832,15 @@ export interface PinConStatoDto {
   chiave: string; nome: string; tipo: string; gruppo: string;
   /** La parola dello stato con cui si cita: quella del tipo, o «ottenuto» per un pin che la prende dalla sua voce della guida. */
   parola: string;
+  /** La mappa del pin (chiave pubblica) e il Palazzo o i Memento a cui appartiene (null fuori): l'editor delle condizioni mette prima i
+   *  pin della mappa e del Palazzo che si sta modificando. */
+  mappa: string;
+  palazzo: string | null;
 }
 
 /** Una voce della guida di un Palazzo o dei Memento per la condizione «Voce della guida» (`GET /condizioni/voci`, 2026-10-11): `gruppo` è il posto
  *  («Palazzo di Kamoshida › 2. Sala Centrale»). Le descrittive («Altro») non ci sono: non hanno stato. */
-export interface VoceCitabileDto { chiave: string; nome: string; tipo: string; gruppo: string }
+export interface VoceCitabileDto { chiave: string; nome: string; tipo: string; gruppo: string; /** Il Palazzo (o i Memento) della voce. */ palazzo: string }
 
 /** La grafica predefinita che vive nel database, nella forma del manifest degli asset (`GET /immagini/manifest`). */
 export interface ManifestImmaginiDto {

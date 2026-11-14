@@ -88,11 +88,11 @@ export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
  *  (raccolto, aperto, parlato, incontrato, azionato…) e i pin collegati a una voce della guida non descrittiva, col suo «ottenuto» (un Confidente:
  *  2026-10-03, `statoCitabile`). Col nome della mappa preceduto da quello del genitore («Palazzo di Kamoshida › Vecchio castello
  *  1P»): le planimetrie di Palazzi diversi hanno spesso lo stesso nome. */
-export function pinConStato(): Array<{ uid: string; nome: string; tipo: string; mappa: string; parola: string }> {
-  return (prepared(`SELECT s.uid, s.nome, s.tipo, ${VOCE_DA_SEGNARE} AS da_segnare, CASE WHEN g.nome IS NULL THEN m.nome ELSE g.nome || ' › ' || m.nome END AS mappa
+export function pinConStato(): Array<{ uid: string; nome: string; tipo: string; mappa: string; mappaId: string; parola: string }> {
+  return (prepared(`SELECT s.uid, s.nome, s.tipo, s.mappa_chiave AS mappaId, ${VOCE_DA_SEGNARE} AS da_segnare, CASE WHEN g.nome IS NULL THEN m.nome ELSE g.nome || ' › ' || m.nome END AS mappa
     FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave LEFT JOIN mappa g ON g.chiave = m.genitore_chiave
     WHERE s.uid IS NOT NULL ORDER BY mappa, s.ordine, s.nome`)
-    .all() as Array<{ uid: string; nome: string; tipo: string; da_segnare: number; mappa: string }>)
+    .all() as Array<{ uid: string; nome: string; tipo: string; mappaId: string; da_segnare: number; mappa: string }>)
     .flatMap(({ da_segnare, ...p }) => { const parola = statoCitabile(p.tipo, da_segnare === 1); return parola ? [{ ...p, parola }] : []; });
 }
 
@@ -110,11 +110,11 @@ export function pinCitato(uid: string): { nome: string; tipo: string; parola: st
  * 1. Dedalo di Qimranut › Area 1»). Le Persona dei Memento restano citabili: per loro «segnata» vuol dire catturata, cioè
  * registrata nel compendio della partita (2026-10-12, `catturePersona.ts`); stanno nel dedalo, senza un'area (si incontrano in più aree).
  */
-export function vociCitabili(): Array<{ chiave: string; nome: string; tipo: string; posto: string }> {
-  return prepared(`SELECT p.chiave, p.nome, p.tipo, d.nome || ' › ' || (a.ordine + 1) || '. ' || a.nome || COALESCE(' › ' || ad.nome, '') AS posto
+export function vociCitabili(): Array<{ chiave: string; nome: string; tipo: string; posto: string; dungeon: string }> {
+  return prepared(`SELECT p.chiave, p.nome, p.tipo, a.dungeon_chiave AS dungeon, d.nome || ' › ' || (a.ordine + 1) || '. ' || a.nome || COALESCE(' › ' || ad.nome, '') AS posto
     FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave JOIN dungeon d ON d.chiave = a.dungeon_chiave
     LEFT JOIN punto_interesse e ON e.chiave = p.contenitore_chiave LEFT JOIN area_dedalo ad ON ad.chiave = p.area_dedalo_chiave
     WHERE NOT ${sqlVoceDescrittiva('p')}
     ORDER BY d.ordine, a.ordine, ad.ordine, COALESCE(e.ordine, p.ordine), p.contenitore_chiave IS NOT NULL, p.ordine, p.chiave`)
-    .all() as Array<{ chiave: string; nome: string; tipo: string; posto: string }>;
+    .all() as Array<{ chiave: string; nome: string; tipo: string; posto: string; dungeon: string }>;
 }

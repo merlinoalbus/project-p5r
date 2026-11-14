@@ -31,12 +31,12 @@ export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
   },
   'GET /api/condizioni/spilli': {
     sommario: 'Pin delle mappe con uno stato, per la condizione «Pin di una mappa»',
-    descrizione: 'Solo i pin che hanno uno stato da segnare (raccolto, aperto, parlato, incontrato, azionato…, oppure «ottenuto» per un pin collegato a una voce della guida non descrittiva). È un elenco a parte perché sono centinaia e serve solo all\'editor delle mappe. `chiave` è l\'uid del pin, `gruppo` il nome della mappa preceduto da quello del genitore.',
+    descrizione: 'Solo i pin che hanno uno stato da segnare (raccolto, aperto, parlato, incontrato, azionato…, oppure «ottenuto» per un pin collegato a una voce della guida non descrittiva). È un elenco a parte perché sono centinaia e serve solo all\'editor delle mappe. `chiave` è l\'uid del pin, `gruppo` il nome della mappa preceduto da quello del genitore, `mappa` la chiave pubblica della mappa e `palazzo` il Palazzo (o i Memento) a cui appartiene, null fuori: l\'editor mette prima i pin della mappa e del Palazzo che si sta modificando.',
     risposta: 'Elenco di `PinConStatoDto`',
   },
   'GET /api/condizioni/voci': {
     sommario: 'Voci della guida dei Palazzi e dei Memento, per la condizione «Voce della guida»',
-    descrizione: 'Tutte le voci che si segnano (non le descrittive «Altro»), passi degli Enigmi compresi, in ordine di guida. Come i pin serve solo all\'editor delle mappe: la condizione vale solo nei pin. `gruppo` è il posto, «Palazzo › N. Area» (o «Memento › N. Dedalo»).',
+    descrizione: 'Tutte le voci che si segnano (non le descrittive «Altro»), passi degli Enigmi compresi, in ordine di guida. Come i pin serve solo all\'editor delle mappe: la condizione vale solo nei pin. `gruppo` è il posto, «Palazzo › N. Area» (o «Memento › N. Dedalo»), `palazzo` la chiave del Palazzo (o dei Memento): nell\'editor di una mappa di un Palazzo si offrono solo le sue voci.',
     risposta: 'Elenco di `VoceCitabileDto`',
   },
   'GET /api/condizioni/partite/:partita/progressi': {
