@@ -127,7 +127,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     sommario: 'Crea uno spillo di passaggio verso un\'altra mappa in un punto libero',
     descrizione: 'Lo spillo prende il nome della destinazione e un punto libero scelto dal server: vicino al centro, o in basso al centro se la destinazione è il genitore (la via del ritorno). Poi lo si trascina dove sta davvero l\'ingresso. Una mappa non può avere un passaggio verso sé stessa; 409 se ha già uno spillo verso quella destinazione.',
     risposta: 'Lo spillo creato: `SpilloDto`',
-    errori: [[404, 'mappa-non-trovata'], [400, 'passaggio-non-valido'], [409, 'passaggio-esistente']],
+    errori: [[404, 'mappa-non-trovata'], [400, 'passaggio-non-valido'], [409, 'passaggio-esistente'], [404, 'condizione-non-trovata']],
   },
   'PUT /api/mappe/spilli/:id': {
     sommario: 'Aggiorna uno spillo: i campi assenti restano',

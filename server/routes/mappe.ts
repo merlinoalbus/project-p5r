@@ -150,7 +150,7 @@ router.post('/:chiave/spilli', validate({
 });
 /** Passaggio verso un'altra mappa in un punto libero scelto dal server (albero dell'editor, 15.24); 409 se esiste già. */
 router.post('/:chiave/passaggi', validate({ params: paramsMappa, body: bodyCreaPassaggio }), (req, res) => {
-  res.status(201).json(creaPassaggio(String(req.params.chiave), req.body.destinazione));
+  res.status(201).json(creaPassaggio(String(req.params.chiave), req.body.destinazione, req.body.condizioni ?? undefined));
 });
 /** Il corpo di «modifica del pin»: il raccordo al luogo (CAS) oppure i campi del pin, mai insieme (`bodyAggiornaSpillo`). */
 type CorpoAggiornaSpillo = DatiAggiornaSpillo & (

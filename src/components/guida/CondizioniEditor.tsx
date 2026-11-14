@@ -264,6 +264,9 @@ interface Props {
    *  Palazzo, e in un Palazzo le voci della guida offerte sono solo le sue (richiesta dell'utente, 2026-11-14). */
   contesto?: { mappa: string; palazzo: string | null };
   /** Parte aperto anche senza condizioni: dentro una sezione già ripiegabile, una seconda apertura sarebbe un gesto in più. */ apertoDiPartenza?: boolean;
+  /** Il titolo del blocco e la frase che lo accompagna quando è vuoto, dove non sono le condizioni di un elemento già scelto (le
+   *  condizioni dei pin nuovi nell'editor delle mappe). Senza: «Condizioni» e «nessuna: sempre disponibile». */
+  titolo?: string; testoVuoto?: string;
 }
 
 /**
@@ -273,7 +276,7 @@ interface Props {
  * modifica (`pinCorrente`). Con `contesto` (l'editor delle mappe) i pin offerti partono da quelli della mappa e del suo Palazzo, e in un
  * Palazzo o nei Memento le voci della guida offerte sono solo le sue. Si apre da solo se ci sono già condizioni; con elenchi in errore offre «Riprova».
  */
-export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo, pinCorrente, contesto, massimo, apertoDiPartenza = false }: Props) {
+export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo, pinCorrente, contesto, massimo, apertoDiPartenza = false, titolo = 'Condizioni', testoVuoto = 'nessuna: sempre disponibile' }: Props) {
   const attiva = usePartitaStore((s) => s.attiva);
   const anteprima = useCarica(() => attiva ? valutaCondizioni(condizioni, attiva.id, attiva.dataGioco ?? undefined) : Promise.resolve(null), [condizioni, attiva]);
   const dati = useCarica(async () => {
@@ -308,8 +311,8 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
     <fieldset disabled={disabilitato} className="condizioni-editor">
       <legend className="condizioni-editor__titolo">
         <button type="button" className="touch" aria-expanded={aperto || condizioni.length > 0} onClick={() => setAperto((v) => !v)}>
-          Condizioni
-          <span className="condizioni-editor__conteggio">{condizioni.length === 0 ? 'nessuna: sempre disponibile' : `${condizioni.length} di primo livello`}</span>
+          {titolo}
+          <span className="condizioni-editor__conteggio">{condizioni.length === 0 ? testoVuoto : `${condizioni.length} di primo livello`}</span>
         </button>
       </legend>
       {(aperto || condizioni.length > 0) && (dati.errore
