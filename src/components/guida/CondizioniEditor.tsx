@@ -260,6 +260,9 @@ interface Props {
   /** Limite del contratto dell'oggetto modificato; i requisiti di un rango sono al massimo dieci. */ massimo?: number;
   /** Nell'editor delle mappe: segna le condizioni di presenza, che nascondono il pin. */ perSpillo?: boolean;
   /** L'uid del pin che si sta modificando: non può dipendere dal proprio stato (2026-10-03), quindi non si offre. */ pinCorrente?: string;
+  /** La mappa che si sta modificando e il suo Palazzo (o i Memento; null fuori): i pin offerti partono da quelli della mappa e del
+   *  Palazzo, e in un Palazzo le voci della guida offerte sono solo le sue (richiesta dell'utente, 2026-11-14). */
+  contesto?: { mappa: string; palazzo: string | null };
   /** Parte aperto anche senza condizioni: dentro una sezione già ripiegabile, una seconda apertura sarebbe un gesto in più. */ apertoDiPartenza?: boolean;
 }
 
@@ -267,9 +270,10 @@ interface Props {
  * L'editor completo delle condizioni di un elemento. Carica gli elenchi che servono alle scelte (quelli delle regole,
  * più confidenti, quartieri, richieste e dungeon se il genitore non li passa in `elenchi`, più i pin con stato e le voci della guida solo
  * con `perSpillo`), costruisce la mappa chiave → nome per descrivere le condizioni ed esclude dai pin offerti quello in
- * modifica (`pinCorrente`). Si apre da solo se ci sono già condizioni; con elenchi in errore offre «Riprova».
+ * modifica (`pinCorrente`). Con `contesto` (l'editor delle mappe) i pin offerti partono da quelli della mappa e del suo Palazzo, e in un
+ * Palazzo o nei Memento le voci della guida offerte sono solo le sue. Si apre da solo se ci sono già condizioni; con elenchi in errore offre «Riprova».
  */
-export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo, pinCorrente, massimo, apertoDiPartenza = false }: Props) {
+export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo, pinCorrente, contesto, massimo, apertoDiPartenza = false }: Props) {
   const attiva = usePartitaStore((s) => s.attiva);
   const anteprima = useCarica(() => attiva ? valutaCondizioni(condizioni, attiva.id, attiva.dataGioco ?? undefined) : Promise.resolve(null), [condizioni, attiva]);
   const dati = useCarica(async () => {
@@ -284,7 +288,22 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
   const [aperto, setAperto] = useState(apertoDiPartenza || condizioni.length > 0);
   const nomi = useMemo<NomiCondizioni>(() => (dati.dati ? nomiDelleCondizioni(dati.dati) : {}), [dati.dati]);
   // fra i pin offerti non c'è quello che si sta modificando (i nomi sì: una condizione vecchia su se stesso si legge)
-  const offerti = useMemo(() => (dati.dati ? { ...dati.dati, spilli: dati.dati.spilli.filter((p) => p.chiave !== pinCorrente) } : null), [dati.dati, pinCorrente]);
+  const mappaCorrente = contesto?.mappa;
+  const palazzoCorrente = contesto?.palazzo ?? null;
+  const offerti = useMemo(() => {
+    if (!dati.dati) return null;
+    const spilli = dati.dati.spilli.filter((p) => p.chiave !== pinCorrente);
+    if (mappaCorrente === undefined) return { ...dati.dati, spilli };
+    // prima i pin di questa mappa, poi quelli delle altre mappe dello stesso Palazzo, poi tutti gli altri (l'ordinamento è stabile:
+    // dentro ogni fascia resta l'ordine del server, per mappa)
+    const fascia = (p: PinConStato): number => (p.mappa === mappaCorrente ? 0 : palazzoCorrente !== null && p.palazzo === palazzoCorrente ? 1 : 2);
+    const ordinati = [...spilli].sort((a, b) => fascia(a) - fascia(b));
+    // in un Palazzo le voci della guida offerte sono le sue; una voce di fuori già citata da queste condizioni resta nell'elenco, così
+    // la condizione salvata si legge e si può cambiare
+    const citate = JSON.stringify(condizioni);
+    const voci = palazzoCorrente === null ? dati.dati.voci : dati.dati.voci.filter((v) => v.palazzo === palazzoCorrente || citate.includes(JSON.stringify(v.chiave)));
+    return { ...dati.dati, spilli: ordinati, voci };
+  }, [dati.dati, pinCorrente, mappaCorrente, palazzoCorrente, condizioni]);
   return (
     <fieldset disabled={disabilitato} className="condizioni-editor">
       <legend className="condizioni-editor__titolo">

@@ -600,9 +600,34 @@ interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRia
 // L3 (AD6): i termini della gerarchia — il pin indica un luogo o, dentro il luogo, uno dei suoi punti vendita (la macchina)
 const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Punto vendita' }, { tipo: 'luogo', nome: 'Luogo' }, { tipo: 'confidente', nome: 'Confidente' }];
 
+/** La radice di ogni mappa dell'albero (chiave → chiave della radice), risalendo i genitori; una mappa col genitore fuori dall'elenco è radice di sé. */
+function radiciDelleMappe(albero: readonly MappaRiassuntoDto[]): Map<string, string> {
+  const perChiave = new Map(albero.map((m) => [m.chiave, m]));
+  const radici = new Map<string, string>();
+  for (const m of albero) {
+    let corrente = m;
+    const visti = new Set<string>();
+    while (corrente.genitore !== null && perChiave.has(corrente.genitore) && !visti.has(corrente.chiave)) { visti.add(corrente.chiave); corrente = perChiave.get(corrente.genitore)!; }
+    radici.set(m.chiave, corrente.chiave);
+  }
+  return radici;
+}
+
 /** «Porta a»: la mappa d'arrivo e, se si vuole, uno spillo di quella mappa. Elenchi con ricerca, mai un punto da cliccare a mano. */
 function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, onCambia }: { valore: DestinazioneSpillo | null; mappaCorrente: string; albero: MappaRiassuntoDto[]; disabilitato: boolean; onCambia: (d: DestinazioneSpillo | null) => void }) {
-  const mappe = useMemo(() => albero.filter((m) => m.chiave !== mappaCorrente).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), gruppo: NOME_TIPO_MAPPA[m.tipo] })), [albero, mappaCorrente]);
+  // 2026-11-14 (richiesta dell'utente): in una mappa di un Palazzo, prima le altre mappe dello stesso Palazzo, sotto il suo nome; poi le
+  // mappe di fuori, per tipo come prima. L'ordinamento è stabile: dentro ogni fascia resta l'ordine dell'albero. Nelle mappe del mondo
+  // (la loro radice è Tokyo intera) l'elenco resta com'era, per tipo
+  const mappe = useMemo(() => {
+    const radice = radiciDelleMappe(albero);
+    const mia = radice.get(mappaCorrente);
+    const palazzo = mia === undefined ? undefined : albero.find((m) => m.chiave === mia && m.radiceDi?.tipo === 'dungeon');
+    const dentro = (m: MappaRiassuntoDto) => palazzo !== undefined && radice.get(m.chiave) === palazzo.chiave;
+    return albero.filter((m) => m.chiave !== mappaCorrente)
+      .map((m) => ({ m, opzione: { chiave: m.chiave, nome: etichettaPlanimetria(m), gruppo: dentro(m) && palazzo ? nomePresentazioneMappa(palazzo) : NOME_TIPO_MAPPA[m.tipo] } }))
+      .sort((a, b) => Number(dentro(b.m)) - Number(dentro(a.m)))
+      .map((x) => x.opzione);
+  }, [albero, mappaCorrente]);
   const arrivo = useCarica(() => (valore?.mappa ? getMappa(valore.mappa) : Promise.resolve(null)), [valore?.mappa]);
   const spilli = useMemo(() => [{ chiave: '', nome: 'Nessuno: solo la mappa, adattata alla finestra' }, ...(arrivo.dati?.spilli ?? []).map((s) => ({ chiave: String(s.id), nome: s.nome, dettaglio: s.tipoNome }))], [arrivo.dati]);
   return (
@@ -682,6 +707,9 @@ function VociDelPin({ spillo: s, disabilitato, onCollega }: { spillo: SpilloDto;
 /** Proprietà dello spillo selezionato: nome, tipo e descrizione, poi quel che la categoria del tipo richiede. */
 function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onCreaLuogoDaPin, onChiudi, onVai, onCollegaVoce }: PropsFormSpillo) {
   const idModulo = useId();
+  // la mappa e il suo Palazzo o i Memento (dal server: l'albero dell'editor non ha le mappe dei Memento) per l'editor delle condizioni:
+  // pin e voci della guida offerti partono da qui
+  const contestoCondizioni = useMemo(() => ({ mappa: mappa.chiave, palazzo: mappa.palazzo ?? null }), [mappa.chiave, mappa.palazzo]);
   const [nome, setNome] = useState(s.nome);
   const [tipo, setTipo] = useState<TipoSpillo>(s.tipo);
   // L5 (F3): un pin di luogo mostra nome e descrizione del luogo (fonte unica); qui la descrizione è la **nota del pin** (`notaPin`), così
@@ -826,7 +854,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         {puoCreareLuogo && (modificato || !s.uid) && <p className="editor-mappa__avviso">{!s.uid ? 'Ricarica la mappa per recuperare l’identità del pin.' : 'Salva prima le modifiche del pin.'}</p>}
         <VociDelPin spillo={s} disabilitato={occupato} onCollega={onCollegaVoce} />
         {categoria === 'consumabile' && <p className="m-0 testo-12 text-text-muted">Si segna nella partita («{statoDelTipo(tipo)}»); non porta da nessuna parte.</p>}
-        {ammetteCondizioni(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo pinCorrente={s.uid} />}
+        {ammetteCondizioni(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo pinCorrente={s.uid} contesto={contestoCondizioni} />}
 
         {/* le azioni sul pin (non il salvataggio) stanno nel corpo; «Salva» ed «Elimina» nel piè fermo del pannello (AD10) */}
         <div className="flex flex-wrap gap-1.5">

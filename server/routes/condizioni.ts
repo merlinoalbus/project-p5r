@@ -10,6 +10,8 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
+import { palazzoDiOgniMappa } from '../services/palazziService.js';
+import { chiaviPubblicheDelleMappe } from '../services/mappe/percorsiMappe.js';
 import { censimentoLuoghiCondizioni } from '../services/censimentoLuoghiCondizioniService.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import { dataGioco, idParam } from '../schemas/comuni.js';
@@ -35,13 +37,17 @@ router.get('/elenchi', (_req, res) => {
 /** I pin con uno stato, per la condizione «Pin di una mappa» (2026-10-03): solo l'editor delle mappe li chiede, a parte, perché
  *  sono centinaia e agli altri editor non servono. */
 router.get('/spilli', (_req, res) => {
-  const spilli: PinConStatoDto[] = pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola }));
+  // 2026-11-14: la mappa del pin e il suo Palazzo (o i Memento), perché l'editor metta prima i pin della mappa e del Palazzo che si sta modificando
+  const palazzi = palazzoDiOgniMappa();
+  const pubbliche = chiaviPubblicheDelleMappe();
+  const spilli: PinConStatoDto[] = pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola,
+    mappa: pubbliche.get(p.mappaId) ?? p.mappaId, palazzo: palazzi.get(p.mappaId) ?? null }));
   res.json(spilli);
 });
 
 /** Le voci della guida dei Palazzi e dei Memento, per la condizione «Voce della guida» (2026-10-11): come i pin, solo l'editor delle mappe le chiede. */
 router.get('/voci', (_req, res) => {
-  const voci: VoceCitabileDto[] = vociCitabili().map((v) => ({ chiave: v.chiave, nome: v.nome, tipo: v.tipo, gruppo: v.posto }));
+  const voci: VoceCitabileDto[] = vociCitabili().map((v) => ({ chiave: v.chiave, nome: v.nome, tipo: v.tipo, gruppo: v.posto, palazzo: v.dungeon }));
   res.json(voci);
 });
 

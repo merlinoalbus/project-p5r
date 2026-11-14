@@ -659,6 +659,8 @@ export function dettaglioMappa(chiave: string, partitaId?: number, contesto: str
   return {
     ...riassunto(r, mappe), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
     percorso: percorsoDi(r, mappe.aree).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
+    // il Palazzo (o i Memento) della mappa, risalendo i genitori: l'editor delle condizioni parte da qui per pin e voci della guida
+    palazzo: palazzoDellaMappa(chiave),
     // i pezzi (102) con le loro copie (103): con la partita ogni copia porta l'esito delle sue condizioni, come i pin
     pezzi: pezziDellaMappa(chiave, ctx.nomi ?? nomiCondizioni(), ctx.st),
     // dai nomi già letti nel contesto: prima una query in più (P8)

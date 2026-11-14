@@ -29,16 +29,16 @@ vi.mock('../services/api', (vero) => moduloApi(vero, {
   getElenchiRegole: vi.fn().mockResolvedValue({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] }),
   // i pin con uno stato di tutte le mappe, per la condizione «Pin di una mappa» (2026-10-03)
   getPinConStato: vi.fn().mockResolvedValue([
-    { chiave: 'a'.repeat(32), nome: 'Leva del ponte', tipo: 'meccanismo', gruppo: 'Palazzo di Kamoshida › Torre', parola: 'azionato' },
-    { chiave: 'b'.repeat(32), nome: 'Chiave della cella', tipo: 'oggetto-chiave', gruppo: 'Palazzo di Kamoshida › Prigione', parola: 'raccolto' },
+    { chiave: 'a'.repeat(32), nome: 'Leva del ponte', tipo: 'meccanismo', gruppo: 'Palazzo di Kamoshida › Torre', parola: 'azionato', mappa: 'palazzo-di-kamoshida-torre', palazzo: 'kamoshida' },
+    { chiave: 'b'.repeat(32), nome: 'Chiave della cella', tipo: 'oggetto-chiave', gruppo: 'Palazzo di Kamoshida › Prigione', parola: 'raccolto', mappa: 'palazzo-di-kamoshida-prigione', palazzo: 'kamoshida' },
     // un Confidente (stato suo) e una stanza sicura con la sua voce della guida (2026-10-03)
-    { chiave: 'c'.repeat(32), nome: 'Sala giochi', tipo: 'confidente', gruppo: 'Tokyo › Akihabara', parola: 'incontrato' },
-    { chiave: 'd'.repeat(32), nome: 'Stanza sicura del cortile', tipo: 'sicura', gruppo: 'Palazzo di Kamoshida › Cortile', parola: 'ottenuto' },
+    { chiave: 'c'.repeat(32), nome: 'Sala giochi', tipo: 'confidente', gruppo: 'Tokyo › Akihabara', parola: 'incontrato', mappa: 'citta-akihabara', palazzo: null },
+    { chiave: 'd'.repeat(32), nome: 'Stanza sicura del cortile', tipo: 'sicura', gruppo: 'Palazzo di Kamoshida › Cortile', parola: 'ottenuto', mappa: 'palazzo-di-kamoshida-cortile', palazzo: 'kamoshida' },
   ]),
   // le voci della guida dei Palazzi e dei Memento, per la condizione «Voce della guida» (2026-10-11)
   getVociCitabili: vi.fn().mockResolvedValue([
-    { chiave: 'kamoshida-04/2', nome: 'Si apre la cucina', tipo: 'storia', gruppo: 'Palazzo di Kamoshida › 4. Sala da pranzo' },
-    { chiave: 'kamoshida-06/1', nome: 'Leve delle sbarre', tipo: 'meccanismo', gruppo: 'Palazzo di Kamoshida › 6. Corridoio delle Sbarre' },
+    { chiave: 'kamoshida-04/2', nome: 'Si apre la cucina', tipo: 'storia', gruppo: 'Palazzo di Kamoshida › 4. Sala da pranzo', palazzo: 'kamoshida' },
+    { chiave: 'kamoshida-06/1', nome: 'Leve delle sbarre', tipo: 'meccanismo', gruppo: 'Palazzo di Kamoshida › 6. Corridoio delle Sbarre', palazzo: 'kamoshida' },
   ]),
 }));
 
