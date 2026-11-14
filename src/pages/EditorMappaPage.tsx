@@ -56,6 +56,9 @@ const conta = (n: number, singolare: string, plurale: string): string => `${n} $
 /** Il testo da notificare per un errore: il messaggio se è un `Error`, altrimenti il testo predefinito. */
 function messaggio(err: unknown, predefinito: string): string { return err instanceof Error ? err.message : predefinito; }
 
+/** Nessuna condizione per i pin nuovi: lo stesso elenco vuoto a ogni resa. */
+const SENZA_CONDIZIONI: RequisitoSpillo[] = [];
+
 /** Spillo copiato negli appunti dell'editor: tutti i campi tranne la posizione; sopravvive al cambio di mappa e alla ricarica della pagina. */
 export interface AppuntiSpillo { destinazione?: DestinazioneSpillo | null; tipo: TipoSpillo; nome: string; descrizione: string; riferimento: { tipo: TipoRiferimento; chiave: string } | null; condizioni: RequisitoSpillo[] }
 /** Le condizioni dello spillo (o di una copia di un pezzo, 103) senza il testo descrittivo del server (è il server a ricalcolarlo). */
@@ -116,6 +119,11 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [condizioniImportate, setCondizioniImportate] = useState<string[]>([]);
   const [appunti, setAppunti] = useState<AppuntiSpillo | null>(leggiAppunti);
   const [tipoNuovo, setTipoNuovo] = useState<TipoSpillo>('nota');
+  // 2026-11-14 (richiesta dell'utente): le condizioni con cui nasce ogni pin nuovo di questa mappa (creato con un tocco o come passaggio
+  // dalla sezione Collegamenti), per preparare in serie i pin soggetti allo stesso evento. Valgono finché l'editor di questa mappa è
+  // aperto (scelta dell'utente): l'editor si rimonta a ogni cambio di mappa e lo stato riparte vuoto; il confronto con la mappa è una difesa in più
+  const [predefinite, setPredefinite] = useState<{ mappa: string; condizioni: RequisitoSpillo[] }>({ mappa: chiave, condizioni: [] });
+  const condizioniNuovi = predefinite.mappa === chiave ? predefinite.condizioni : SENZA_CONDIZIONI;
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
   /** La copia di un pezzo della planimetria selezionata (102; copie dalla 103): uno spillo o una copia alla volta. */
   const [copiaId, setCopiaId] = useState<number | null>(null);
@@ -171,11 +179,13 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
         }, `Spillo «${appunti.nome}» incollato: stesso tipo, descrizione, riferimento e condizioni di visibilità dell'originale.`);
         return;
       }
+      // le condizioni dei pin nuovi, se ce ne sono e il tipo le ammette: scritte sul pin, restano sue anche quando l'impostazione si azzera
+      const conCondizioni = condizioniNuovi.length > 0 && ammetteCondizioni(tipoNuovo);
       void esegui(async () => {
-        const s = await creaSpillo(chiave, { tipo: tipoNuovo, nome: DEFINIZIONI_SPILLO[tipoNuovo].nome, x, y });
+        const s = await creaSpillo(chiave, { tipo: tipoNuovo, nome: DEFINIZIONI_SPILLO[tipoNuovo].nome, x, y, ...(conCondizioni ? { condizioni: condizioniNuovi } : {}) });
         seleziona(s.id);
         setStrumento('seleziona');
-      }, `Spillo «${DEFINIZIONI_SPILLO[tipoNuovo].nome}» aggiunto: completa nome e riferimento nel pannello.`);
+      }, `Spillo «${DEFINIZIONI_SPILLO[tipoNuovo].nome}» aggiunto${conCondizioni ? ' con le condizioni dei pin nuovi' : ''}: completa nome e riferimento nel pannello.`);
     },
     onSposta: (id, x, y) => void esegui(() => aggiornaSpillo(id, { x, y })),
     // doppio tocco su uno spostamento: si visita l'arrivo senza uscire dalla modifica
@@ -259,7 +269,9 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           pannello={
             <PannelloEditor
               mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti} elenchi={elenchi.dati ?? ELENCHI_VUOTI}
-              onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={seleziona} sezione={sezione} onSezione={setSezione} onCopia={copia}
+              condizioniNuovi={condizioniNuovi} onCondizioniNuovi={(c) => setPredefinite({ mappa: chiave, condizioni: c })}
+              // entrando in «Aggiungi» il pin aperto si chiude: mentre si aggiunge c'è un solo blocco di condizioni, quello dei pin nuovi
+              onStrumento={(s) => { if (s === 'aggiungi') setSelezionatoId(null); setStrumento(s); }} onTipoNuovo={setTipoNuovo} onSeleziona={seleziona} sezione={sezione} onSezione={setSezione} onCopia={copia}
               onSalvaSpillo={(id, d) => esegui(() => aggiornaSpillo(id, d), 'Spillo salvato.')}
               onEliminaSpillo={async (id) => { const spillo = dati.spilli.find(s => s.id === id); if (spillo) setPinDaRimuovere({ spillo, contesto: contestoEditor }); }}
               onCollegaVoce={(id, voce, collega) => esegui(() => collegaPinAlPunto(voce, id, collega), collega ? 'Voce della guida collegata.' : 'Voce della guida scollegata.')}
@@ -288,9 +300,10 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onImmagine={caricaImmagine}
               onEliminaMappa={() => setConfermaEliminaMappa(true)}
               onCreaPassaggio={(destinazione) => esegui(async () => {
-                const s = await creaPassaggio(chiave, destinazione);
+                // anche un passaggio creato da qui è un pin nuovo: nasce con le condizioni dei pin nuovi, se ce ne sono
+                const s = condizioniNuovi.length > 0 ? await creaPassaggio(chiave, destinazione, condizioniNuovi) : await creaPassaggio(chiave, destinazione);
                 seleziona(s.id); setStrumento('seleziona');
-              }, destinazione === dati.genitore ? `Passaggio di ritorno verso «${dati.genitoreNome ?? destinazione}» creato in basso al centro: trascinalo dove sta l'uscita.` : 'Passaggio creato al centro della mappa: trascinalo dove sta l\'ingresso.')}
+              }, `${destinazione === dati.genitore ? `Passaggio di ritorno verso «${dati.genitoreNome ?? destinazione}» creato in basso al centro: trascinalo dove sta l'uscita.` : 'Passaggio creato al centro della mappa: trascinalo dove sta l\'ingresso.'}${condizioniNuovi.length > 0 ? ' Nasce con le condizioni dei pin nuovi.' : ''}`)}
               onEsporta={() => void esegui(async () => {
                 const pacchetto = await esportaMappe();
                 const blob = new Blob([JSON.stringify(pacchetto, null, 1)], { type: 'application/json' });
@@ -379,6 +392,9 @@ interface PropsPannello {
   occupato: boolean;
   appunti: AppuntiSpillo | null;
   elenchi: ElenchiCondizioni;
+  /** Le condizioni con cui nasce ogni pin nuovo di questa mappa (vuote: nasce senza, come sempre); durano finché l'editor resta su questa mappa. */
+  condizioniNuovi: RequisitoSpillo[];
+  onCondizioniNuovi: (c: RequisitoSpillo[]) => void;
   onStrumento: (s: StrumentoEditor) => void;
   onCopia: (a: AppuntiSpillo) => void;
   onTipoNuovo: (t: TipoSpillo) => void;
@@ -487,6 +503,12 @@ function PannelloEditor(p: PropsPannello) {
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'aggiungi'} icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi" dettaglio="tocca la mappa" onClick={() => p.onStrumento('aggiungi')} />
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'incolla'} icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Incolla" dettaglio={appunti ? `«${appunti.nome}»` : 'copia prima uno spillo'} disabled={!appunti} onClick={() => p.onStrumento('incolla')} />
         </div>
+        {/* le condizioni con cui nasce ogni pin nuovo (2026-11-14): subito sotto gli strumenti, prima della tavolozza dei tipi, così si
+            vedono senza scorrere anche sul telefono; vuote occupano una riga */}
+        {strumento === 'aggiungi' && (
+          <CondizioniEditor titolo="Condizioni dei pin nuovi" testoVuoto="nessuna: i pin nascono senza condizioni" condizioni={p.condizioniNuovi} onCambia={p.onCondizioniNuovi}
+            elenchi={p.elenchi} disabilitato={occupato} perSpillo contesto={{ mappa: mappa.chiave, palazzo: mappa.palazzo ?? null }} />
+        )}
         {strumento === 'aggiungi' && (
           <div className="flex flex-col gap-1.5" role="group" aria-label="Tipo del nuovo spillo">
             {CATEGORIE_SPILLO.map((c) => (
@@ -504,7 +526,17 @@ function PannelloEditor(p: PropsPannello) {
             ))}
           </div>
         )}
-        {strumento !== 'seleziona' && <p className="m-0 testo-12 text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.`}</p>}
+        {strumento === 'aggiungi' && p.condizioniNuovi.length > 0 && !ammetteCondizioni(tipoNuovo) && (
+          <p className="m-0 testo-12 text-warning" role="note">Il tipo «{DEFINIZIONI_SPILLO[tipoNuovo].nome}» non ammette condizioni: questo pin nasce senza.</p>
+        )}
+        {/* con un altro strumento resta il segno che le condizioni dei pin nuovi sono attive: un tocco riporta ad «Aggiungi» */}
+        {strumento !== 'aggiungi' && p.condizioniNuovi.length > 0 && (
+          <button type="button" className="chip chip--attivo chip--icona touch self-start testo-12" onClick={() => p.onStrumento('aggiungi')}
+            title="Ogni pin nuovo di questa mappa nasce con queste condizioni, finché resti in questo editor">
+            <IconaAzione chiave="bloccato" dimensione={14} />Pin nuovi con {p.condizioniNuovi.length === 1 ? '1 condizione' : `${p.condizioniNuovi.length} condizioni`}
+          </button>
+        )}
+        {strumento !== 'seleziona' && <p className="m-0 testo-12 text-text-muted">{strumento === 'aggiungi' ? (p.condizioniNuovi.length > 0 && ammetteCondizioni(tipoNuovo) ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto e le condizioni dei pin nuovi.' : 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.') : `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.`}</p>}
       </section>
 
       {selezionato && (

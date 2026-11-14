@@ -57,8 +57,9 @@ export const bodyPresentazioneMappa = z.object({
 export const bodyStanzaMappa = z.object({ con: chiaveMappa.nullable(), nome: z.string().trim().min(1).max(LIMITI_GUIDA.mappa.gruppoNome).optional() });
 /** Riordino in blocco delle mappe figlie di un genitore (`null` = radici): l'elenco è il nuovo ordine. */
 export const bodyRiordinaMappe = z.object({ genitore: chiaveMappa.nullable(), chiavi: z.array(chiaveMappa).max(500) });
-/** Passaggio verso un'altra mappa creato dall'albero dell'editor (15.24): il server sceglie un punto libero. */
-export const bodyCreaPassaggio = z.object({ destinazione: chiaveMappa });
+/** Passaggio verso un'altra mappa creato dall'albero dell'editor (15.24): il server sceglie un punto libero. `condizioni` (2026-11-14):
+ *  quelle con cui l'editor fa nascere i pin nuovi, facoltative, con lo stesso schema delle condizioni di un pin. */
+export const bodyCreaPassaggio = z.object({ destinazione: chiaveMappa, condizioni });
 export const bodyCreaSpillo = z.object({
   soloPosizione: z.boolean().optional(),
   destinazione: schemaDestinazioneSpillo.nullable().optional(),

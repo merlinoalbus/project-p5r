@@ -840,14 +840,15 @@ function posizioneLibera(mappa: string, preferita: [number, number]): [number, n
  * della destinazione e un punto libero — al centro, oppure in basso al centro se la destinazione è il genitore (la via del ritorno,
  * di solito l'uscita). Poi si trascina dove sta davvero l'ingresso. 409 se la mappa ha già uno spillo verso quella destinazione.
  */
-export function creaPassaggio(mappa: string, destinazione: string): SpilloDto {
+export function creaPassaggio(mappa: string, destinazione: string, condizioni?: RequisitoSpillo[]): SpilloDto {
   const r = rigaMappa(mappa);
   const dest = rigaMappa(destinazione);
   mappa=r.chiave;destinazione=dest.chiave;
   if (mappa === destinazione) throw httpErrors.badRequest('passaggio-non-valido', 'Una mappa non può avere un passaggio verso sé stessa.');
   if (passaggioEsistente(mappa, destinazione)) throw httpErrors.conflict('passaggio-esistente', `«${r.nome}» ha già uno spillo verso «${dest.nome}».`);
   const [x, y] = posizioneLibera(mappa, destinazione === r.genitore_chiave ? [50, 92] : [50, 50]);
-  return creaSpillo(mappa, { tipo: 'passaggio', nome: dest.nome, x, y, riferimento: { tipo: 'mappa', chiave: destinazione } });
+  // le condizioni con cui l'editor fa nascere i pin nuovi (2026-11-14): le controlla e le scrive `creaSpillo`, come per ogni pin
+  return creaSpillo(mappa, { tipo: 'passaggio', nome: dest.nome, x, y, riferimento: { tipo: 'mappa', chiave: destinazione }, ...(condizioni?.length ? { condizioni } : {}) });
 }
 
 /**

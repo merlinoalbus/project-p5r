@@ -512,6 +512,11 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   di una mappa» mette prima i pin della mappa, poi quelli delle altre mappe dello stesso Palazzo, poi gli altri (in una mappa del mondo:
   prima i pin della mappa, e le voci restano tutte). «Porta a» dello spillo, in una mappa di un Palazzo, mette prima le altre mappe dello
   stesso Palazzo, sotto il suo nome, poi le mappe di fuori; nelle mappe del mondo resta raggruppato per tipo. **(14/11)**
+- **Condizioni dei pin nuovi**: nell'editor di una mappa, con lo strumento «Aggiungi», si possono scegliere le condizioni (di qualsiasi
+  tipo) con cui nasce ogni pin nuovo, creato con un tocco o come passaggio dalla sezione Collegamenti; vuote, il pin nasce senza
+  condizioni. Le condizioni si scrivono sul pin e restano sue. Entrando in «Aggiungi» il pin aperto si chiude: mentre si aggiunge c'è un
+  solo blocco di condizioni, quello dei pin nuovi, subito sotto gli strumenti. L'impostazione vale finché l'editor resta su quella mappa: cambiando mappa o uscendo si azzera. Un pin incollato tiene le
+  condizioni dell'originale; un tipo che non ammette condizioni nasce senza. **(14/11)**
 - **Una sola guida nel visore**: ogni visore (a schermo intero e incorporato) ha la stessa guida da usare, dal pulsante «Guida», su ogni
   mappa che può avere voci della guida: casella ottenuto/riapri con la conferma della scheda del Palazzo, dettagli e pin centrabili nella
   voce, voci fatte nascoste, le Persona da catturare con la piastrella della scheda, finestra spostabile da 1024 px, foglio dal basso su

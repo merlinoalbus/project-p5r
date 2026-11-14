@@ -69,7 +69,7 @@ export const eliminaCopiaPezzoMappa = (id: number): Promise<{ pezzoEliminato: bo
 /** Aggiunge uno spillo alla mappa (tipo, nome e posizione obbligatori); risponde con lo spillo creato. */
 export const creaSpillo =(mappa: string, dati: DatiSpilloApi & { tipo: TipoSpillo; nome: string; x: number; y: number }): Promise<SpilloDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/spilli`, dati);
 /** Spillo «passaggio» da `mappa` verso `destinazione` in un punto libero scelto dal server (al centro; in basso se la destinazione è il genitore): poi si trascina. 409 se esiste già. */
-export const creaPassaggio = (mappa: string, destinazione: string): Promise<SpilloDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/passaggi`, { destinazione });
+export const creaPassaggio = (mappa: string, destinazione: string, condizioni?: RequisitoSpillo[]): Promise<SpilloDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/passaggi`, { destinazione, ...(condizioni ? { condizioni } : {}) });
 /** Modifica uno spillo (anche solo la posizione o la mappa di appartenenza); risponde con lo spillo aggiornato. */
 export const aggiornaSpillo = (id: number, dati: DatiSpilloApi): Promise<SpilloDto> => apiPut(`/mappe/spilli/${id}`, dati);
 /** Fotografia fresca del pin e delle conseguenze della rimozione recuperabile. */
