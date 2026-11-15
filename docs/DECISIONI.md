@@ -578,6 +578,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   contano più, Kanda/Jinbocho e Roppongi sì.
 
 ## 11. Negozi, oggetti, regali e attività
+- **Magatama psichico**: il Magatama da 150 danni psicocinetici (6.000 ¥ da Tanaka) si chiama «Magatama psichico», come nel gioco e
+  nella pagina del Palazzo di Kaneshiro; «Magatama divino», il nome della pagina Oggetti della guida (da cui è nata la scheda) e del
+  listino dei negozi speciali, resta come nome alternativo della stessa scheda, e la ricerca la trova con entrambi (migrazione
+  390). **(15/11)**
 - **Listino a gruppi**: un listino con più di 12 articoli non è un elenco solo, e non si pagina: «che cosa sto guardando» si sceglie
   in un punto solo per livello (uno corto resta l'elenco con i filtri: tessere delle categorie, «Per chi», stato e disponibilità).
   Lungo o corto lo decide il listino intero, non ciò che resta dopo un filtro. In alto la ricerca e, con una partita, il segmento
