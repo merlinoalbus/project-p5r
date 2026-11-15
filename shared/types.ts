@@ -2064,7 +2064,9 @@ export type { DoteChiave } from './doti.js';
 
 /** L'ingresso di un quartiere: la planimetria (chiave pubblica e nome del percorso), il punto e lo zoom; dalla 109 (L2) anche l'Area
  *  della planimetria (slug e nome), null se la planimetria non ne ha una. */
-export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number; area: { slug: string; nome: string } | null }
+export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number;
+  /** L'Area della planimetria d'ingresso, con l'etichetta di versione della planimetria (il nome completo è «Area · etichetta»). */
+  area: { slug: string; nome: string; versioneEtichetta?: string | null } | null }
 /** L'illustrazione di un posto (quartiere, Palazzo) presa dalla sua mappa con la regola unica di L1: prima l'immagine
  *  caricata (URL versionato), poi l'asset dichiarato. `asset` è null quando l'asset della mappa è lo stemma del posto
  *  (radici dei Palazzi), che le viste mostrano già come segno: l'illustrazione allora c'è solo se caricata. */
@@ -3312,7 +3314,7 @@ export interface DettaglioSpilloDto {
   immagine?: { url: string | null; asset: string | null } | null;
   /** La mappa di destinazione (L2): l'Area che la contiene (il nome che il pin di passaggio mostra, se c'è) e la sua casa (un passaggio
    *  porta alla pagina che la mostra). */
-  mappa?: { chiave: string; nome: string; tipo: TipoMappa; area: { nome: string } | null; casa: string };
+  mappa?: { chiave: string; nome: string; tipo: TipoMappa; area: { nome: string; versioneEtichetta?: string | null } | null; casa: string };
   punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; /** L'area del dedalo (099), o null fuori dai Memento: lì ogni voce ha uno stato. */ areaDedalo: string | null; stato: string | null;
     /** L4 (§3.1), per le voci dei Palazzi (assenti per i dedali): il carattere effettivo, l'infiltrazione della voce (lo stato di una
      *  rigenerabile è quello della sua infiltrazione), «da verificare» nella partita. Con L4 `stato` è quello con cui la voce risulta. */

@@ -21,7 +21,7 @@ import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { datiGuida, finestreDungeon, invalidaDatiGuida, type FinestraDungeon } from './datiGuida.js';
 import { palazzoDellaMappa } from './mappe/alberoMappe.js';
-import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { chiaveMappa, idMappa, nomePercorsoVisibile } from './mappe/percorsiMappe.js';
 import { dataLeggibile, dataValida, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { erroreDatePalazzo, type DatePalazzo } from '../../shared/datePalazzo.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
@@ -56,7 +56,7 @@ export function elencaAtterraggi(dungeon: string): AtterraggioPalazzoDto[] {
   if (!conAtterraggi()) return [];
   const righe = prepared('SELECT * FROM dungeon_atterraggio WHERE dungeon_chiave = ? ORDER BY ordine, id').all(dungeon) as RigaAtterraggio[];
   return righe.map((r) => ({
-    dal: r.dal, al: r.al, mappa: chiaveMappa(r.mappa_chiave), mappaNome: nomePercorso(r.mappa_chiave), spillo: r.spillo_id,
+    dal: r.dal, al: r.al, mappa: chiaveMappa(r.mappa_chiave), mappaNome: nomePercorsoVisibile(r.mappa_chiave), spillo: r.spillo_id,
     spilloNome: r.spillo_id === null ? null : (prepared('SELECT nome FROM spillo WHERE id = ?').get(r.spillo_id) as { nome: string } | undefined)?.nome ?? null,
   }));
 }

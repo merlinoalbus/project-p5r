@@ -12,6 +12,7 @@ import type { AppDatabase } from '../../db/dbService.js';
 import { getDb } from '../../db/dbService.js';
 import { haColonna, haTabella } from '../../db/colonne.js';
 import { slug } from '../../../shared/slug.js';
+import { nomeCompletoPlanimetria } from '../../../shared/nomiPlanimetrie.js';
 import { httpErrors } from '../../utils/httpError.js';
 
 interface Nodo { chiave:string; nome:string; tipo:string; genitore_chiave:string|null;
@@ -66,6 +67,42 @@ export function chiaviPubblicheDelleMappe(db:AppDatabase=getDb()):Map<string,str
 /** Il nome completo di una mappa con i genitori significativi («Palazzo › Piano»); la chiave stessa se non c'è un percorso. */
 export function nomePercorso(identita:string,db:AppDatabase=getDb()):string {
   return (stmt(db,'SELECT nome FROM mappa_percorso WHERE mappa_chiave=?').get(identita) as {nome:string}|undefined)?.nome??identita;
+}
+const conAreeVersionate = new WeakSet<AppDatabase>();
+/** Vero se la connessione ha le Aree con l'etichetta di versione; il sì si ricorda, il no si ricontrolla (arrivano con le migrazioni). */
+function haAreeVersionate(db:AppDatabase):boolean {
+  if(conAreeVersionate.has(db))return true;
+  if(!haTabella(db,'area')||!haColonna(db,'mappa','area_chiave')||!haColonna(db,'mappa','versione_etichetta'))return false;
+  conAreeVersionate.add(db);
+  return true;
+}
+/** L'Area e l'etichetta di versione di una planimetria; null se la mappa non sta in un'Area (o lo schema non ha ancora le Aree). */
+function areaEdEtichetta(identita:string,db:AppDatabase):{area:string;etichetta:string|null}|null {
+  if(!haAreeVersionate(db))return null;
+  return (stmt(db,'SELECT a.nome AS area, m.versione_etichetta AS etichetta FROM mappa m JOIN area a ON a.chiave=m.area_chiave WHERE m.chiave=?').get(identita) as {area:string;etichetta:string|null}|undefined)??null;
+}
+/**
+ * Il nome con cui una planimetria si presenta, col contenitore davanti come `nomePercorso` («Palazzo › Area · etichetta»): l'etichetta
+ * è quella scritta in «Modifica area». Senza Area o senza etichetta resta `nomePercorso`. È il punto unico da cui le viste dei
+ * Palazzi leggono il nome di una planimetria; l'indirizzo e la ricerca restano sul percorso.
+ */
+export function nomePercorsoVisibile(identita:string,db:AppDatabase=getDb()):string {
+  const percorso=nomePercorso(identita,db);
+  const r=areaEdEtichetta(identita,db);
+  const completo=r?nomeCompletoPlanimetria(r.area,r.etichetta):null;
+  if(!completo)return percorso;
+  const pezzi=percorso.split(' › ');
+  return pezzi.length>1?`${pezzi[0]} › ${completo}`:completo;
+}
+/** L'etichetta di versione di una planimetria di un'Area (quella di «Modifica area»), o null. */
+export function etichettaDiVersione(identita:string,db:AppDatabase=getDb()):string|null {
+  return areaEdEtichetta(identita,db)?.etichetta?.trim()||null;
+}
+/** Il nome completo di una planimetria senza il contenitore, «Area · etichetta»; null se non ha un'Area o un'etichetta (chi chiama usa
+ *  allora il nome della mappa, com'era). */
+export function nomeDelPosto(identita:string,db:AppDatabase=getDb()):string|null {
+  const r=areaEdEtichetta(identita,db);
+  return r?nomeCompletoPlanimetria(r.area,r.etichetta):null;
 }
 /** Controlla tutto il piano prima di scrivere. Nessun cambio di identità, FK o stato del giocatore. */
 export function sincronizzaPercorsiMappe(db:AppDatabase):void {

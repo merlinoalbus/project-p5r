@@ -47,6 +47,7 @@ import { IllustrazioneConSegno } from '../components/mappe/IllustrazioneConSegno
 import { usePartitaStore } from '../stores/partitaStore';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
+import { nomeDelPostoDellaMappa } from '../../shared/nomiPlanimetrie';
 import type { SbloccoDto } from '../../shared/types';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
@@ -212,7 +213,7 @@ export function QuartierePage() {
               senza={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={88} altezza={66} />} />}
             chip={<span className="testo-12 text-text-muted">{q.aree.length === 0 ? 'nessuna area' : q.aree.length === 1 ? 'un’area' : `${q.aree.length} aree`} · {q.luoghi.length} {q.luoghi.length === 1 ? 'luogo' : 'luoghi'}</span>}
             azioni={<>
-              {q.ingresso && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={`Entra: ${q.ingresso.area?.nome ?? q.ingresso.nome}`} onClick={() => setEntraAperta(true)} />}
+              {q.ingresso && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={`Entra: ${nomeDelPostoDellaMappa(q.ingresso)}`} onClick={() => setEntraAperta(true)} />}
               {!IN_RILASCIO && <MenuModifica cosa={`il quartiere «${q.nome}»`}>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ingresso" dettaglio={q.ingresso ? undefined : 'da scegliere'} onClick={() => setFinestra('ingresso')} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={() => setFinestra('aggiungi')} />
@@ -287,12 +288,12 @@ export function QuartierePage() {
           {!IN_RILASCIO && finestra === 'sblocco' && <EditorSbloccoQuartiere chiave={q.chiave} nome={q.nome} sblocco={q.sbloccoCondizione} onChiudi={() => setFinestra(null)} onSalvato={() => void dati.ricarica()} />}
           {/* L'area d'ingresso nella sua finestra (decisione del PM, 2026-10-20): dalla metro o con «Entra», sul punto e con lo zoom
               dell'ingresso; «Apri l'area» porta alla sua pagina con lo stesso punto, «Chiudi» resta qui e toglie `ingresso=1`. */}
-          {q.ingresso && <Modal titolo={`${q.ingresso.area?.nome ?? q.ingresso.nome} — ingresso di ${q.nome}`} aperta={entraAperta || dallaMetro} onChiudi={chiudiEntra} larga
+          {q.ingresso && <Modal titolo={`${nomeDelPostoDellaMappa(q.ingresso)} — ingresso di ${q.nome}`} aperta={entraAperta || dallaMetro} onChiudi={chiudiEntra} larga
             azioni={<>
               <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" onClick={chiudiEntra} />
               {q.ingresso.area && <CollegamentoVisivo tono="primario" icona={<IconaAzione chiave="mappa" dimensione={22} />} titolo="Apri l’area" to={urlCasa(`/guida/citta/${encodeURIComponent(q.chiave)}/${encodeURIComponent(q.ingresso.area.slug)}`, { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom })} />}
             </>}>
-            <MappaIncorporata chiave={q.ingresso.mappa} nome={q.ingresso.area?.nome ?? q.ingresso.nome} puntoIniziale={{ x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom }} conEditor={false}
+            <MappaIncorporata chiave={q.ingresso.mappa} nome={nomeDelPostoDellaMappa(q.ingresso)} puntoIniziale={{ x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom }} conEditor={false}
               altezza="min(64dvh, 620px)" />
           </Modal>}
         </div>

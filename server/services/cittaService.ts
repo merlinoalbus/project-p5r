@@ -9,7 +9,7 @@
 // riga; il JSON `sblocco-luoghi` della guida resta il ripiego per un file ancora senza colonna.
 // ============================================================
 
-import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { chiaveMappa, etichettaDiVersione, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -133,7 +133,7 @@ function ingressoQuartiere(quartiere: string): IngressoQuartiereDto | null {
  if (!i) return null;
  // l'Area della planimetria d'ingresso (L2): quella registrata, e su uno schema di prima nessuna
  const area = i.area_chiave ? prepared('SELECT slug, nome FROM area WHERE chiave = ?').get(i.area_chiave) as { slug: string; nome: string } | undefined : undefined;
- return { mappa: chiaveMappa(i.mappa_chiave), nome: nomePercorso(i.mappa_chiave), x: i.x, y: i.y, zoom: i.zoom, area: area ? { slug: area.slug, nome: area.nome } : null };
+ return { mappa: chiaveMappa(i.mappa_chiave), nome: nomePercorso(i.mappa_chiave), x: i.x, y: i.y, zoom: i.zoom, area: area ? { slug: area.slug, nome: area.nome, versioneEtichetta: etichettaDiVersione(i.mappa_chiave) } : null };
 }
 /** Imposta (o, con `null`, toglie) l'ingresso del quartiere. Dalla L2 l'ingresso è un'Area del quartiere più un punto: con `area`
  *  (slug) la planimetria è la predefinita dell'Area in quel momento; con `mappa` (il corpo di prima) la planimetria si riconduce

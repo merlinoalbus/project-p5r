@@ -11,6 +11,7 @@
 
 import { useState } from 'react';
 import { Modal } from '../shared/Modal';
+import { nomeDelPostoDellaMappa } from '../../../shared/nomiPlanimetrie';
 import { Selettore } from '../shared/Selettore';
 import { salvaIngressoQuartiere } from '../../services/api';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
@@ -97,7 +98,7 @@ export function IngressoQuartiere({ quartiere: q, aperta, onChiudi, onSalvato }:
               {!INGRANDIMENTI.some((i) => i.zoom === zoom) && <span className="chip chip--attivo">{zoom}×</span>}
             </div>
             <p className="m-0 testo-12 text-text-muted" role="status">
-              {q.ingresso ? <>Salvato: {q.ingresso.area?.nome ?? q.ingresso.nome}, {q.ingresso.x}% da sinistra, {q.ingresso.y}% dall’alto, {q.ingresso.zoom}×.</> : 'Nessun ingresso salvato: dalla metro si apre la pagina del quartiere.'}
+              {q.ingresso ? <>Salvato: {nomeDelPostoDellaMappa(q.ingresso)}, {q.ingresso.x}% da sinistra, {q.ingresso.y}% dall’alto, {q.ingresso.zoom}×.</> : 'Nessun ingresso salvato: dalla metro si apre la pagina del quartiere.'}
             </p>
             <details className="testo-13">
               <summary className="cursor-pointer text-text-secondary touch">Avanzate: coordinate esatte</summary>

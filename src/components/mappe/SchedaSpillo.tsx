@@ -258,8 +258,6 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         <ImmagineRiferimento immagine={d?.immagine} nome={nomePin(s)} />
         <div className="flex-1 min-w-0">
           <h3 className="m-0 font-display testo-20 leading-tight break-words">{nomePin(s)}</h3>
-          {/* il nome proprio del pin, se diverso dalla meta, resta come nota (L2: «Banchina Metro», «Piano 2», «Mappa»…) */}
-          {nomePin(s) !== s.nome && <p className="m-0 testo-12 text-text-muted">Pin: «{s.nome}»</p>}
           <p className="m-0 testo-12 uppercase tracking-wide text-text-muted">{s.tipoNome}{s.collezionabile ? ' · collezionabile' : ''}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</p>
           {s.disponibilita && <ChipDisponibilita disponibilita={s.disponibilita} compatto />}
         </div>

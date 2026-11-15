@@ -3,6 +3,7 @@
 // ============================================================
 
 import type { MappaRiassuntoDto } from '../types';
+import { nomeCompletoPlanimetria } from '../../shared/nomiPlanimetrie';
 
 /** Che cosa mostra questa versione del luogo: l'estensione della zona che rivela, l'inquadratura
  * che ne incornicia, o la forma dell'immagine quando non rappresenta una zona nota. È l'unica
@@ -20,12 +21,12 @@ export function etichettaVersione(mappa: MappaRiassuntoDto, indice?: number, tot
   return quante ? `Immagine ${ordine} di ${quante}` : `Immagine ${ordine}`;
 }
 
-/** Nome del luogo seguito da ciò che la versione mostra: «Covo dei Ladri — settore d'ingresso».
+/** Nome del luogo seguito da ciò che la versione mostra: «Covo dei Ladri · settore d'ingresso».
  *
  * Solo con un'etichetta dimostrata: l'ordinale descrive la posizione in una fila di miniature, non
  * la zona, e un numero appiccicato al titolo non identifica nulla. Senza etichetta resta il nome
  * del luogo, uguale per tutte le sue versioni. */
 export function nomeConVersione(mappa: Partial<Pick<MappaRiassuntoDto, 'versione'>>, nomeLuogo: string): string {
-  const etichetta = mappa.versione?.etichetta;
-  return etichetta ? `${nomeLuogo} — ${etichetta}` : nomeLuogo;
+  // la regola unica dei nomi delle planimetrie (`shared/nomiPlanimetrie`): «luogo · etichetta», lo stesso separatore ovunque
+  return nomeCompletoPlanimetria(nomeLuogo, mappa.versione?.etichetta) ?? nomeLuogo;
 }

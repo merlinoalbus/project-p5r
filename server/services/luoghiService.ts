@@ -19,7 +19,7 @@ import { condizioniDiSblocco, invitiPerSblocco } from './sbloccoLuoghi.js';
 import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 import type { RigaInvito } from './condizioni/condizioneEffettiva.js';
 import { elencaInviti } from './inviti.js';
-import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { chiaveMappa, nomePercorsoVisibile } from './mappe/percorsiMappe.js';
 import { casaDellArea, casaDellaMappa, contestoAree, type ContestoAree } from './mappe/casaMappa.js';
 import { statoDisponibilitaPartita, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -95,7 +95,7 @@ function pinDeiLuoghi(aree: ContestoAree, luogo?: string): Map<string, PinDelLuo
     const casa = casaDellaMappa({ chiave: r.mappa, tipo: r.tipo, area_chiave: r.area_chiave }, aree);
     const descrizione = (r.descrizione ?? '').trim();
     const notaPin = r.negozio_nome ?? (descrizione && descrizione !== r.cosa_offre.trim() ? descrizione : null);
-    (out.get(r.luogo) ?? out.set(r.luogo, []).get(r.luogo)!).push({ spillo: r.id, mappa: chiaveMappa(r.mappa), mappaNome: nomePercorso(r.mappa),
+    (out.get(r.luogo) ?? out.set(r.luogo, []).get(r.luogo)!).push({ spillo: r.id, mappa: chiaveMappa(r.mappa), mappaNome: nomePercorsoVisibile(r.mappa),
       casa: `${casa}${casa.includes('?') ? '&' : '?'}spillo=${r.id}`, notaPin, negozio: r.negozio });
   }
   return out;

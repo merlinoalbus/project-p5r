@@ -10,6 +10,7 @@
 
 import type { DestinazioneSpillo, SpilloDto } from '../types';
 import { categoriaSpillo } from '../../shared/spilli';
+import { nomeDelPostoDellaMappa } from '../../shared/nomiPlanimetrie';
 
 /** Un punto d'arrivo in percentuale con zoom (ingressi dei quartieri sulla mappa di Tokyo) oppure uno spillo da selezionare. */
 export type PuntoArrivo = { x: number; y: number; zoom: number } | { spillo: number };
@@ -88,10 +89,10 @@ export function casaEQuesta(casa: string, chiave: string): boolean {
 }
 
 /** Il nome del posto in cui porta un gesto di navigazione (decisione dell'utente, 2026-10-20: «chiamandolo con il suo nome… e non con
- *  mappa»): l'area, se la meta è una sua planimetria, altrimenti il nome della mappa (Tokyo, Shibuya, una planimetria di un Palazzo).
- *  Mai «Mappa», mai il tipo. */
-export function nomeDellaMeta(meta: { nome: string; area?: { nome: string } | null }): string {
-  return meta.area?.nome ?? meta.nome;
+ *  mappa»): l'area con l'etichetta della planimetria («Ufficio riciclaggio · Piano -2P»), se la meta è una sua planimetria, altrimenti
+ *  il nome della mappa (Tokyo, Shibuya). Mai «Mappa», mai il tipo. La regola è quella unica di `shared/nomiPlanimetrie`. */
+export function nomeDellaMeta(meta: { nome: string; area?: { nome: string; versioneEtichetta?: string | null } | null }): string {
+  return nomeDelPostoDellaMappa(meta);
 }
 
 /** L'arrivo di uno spillo di spostamento: la sua destinazione, o il riferimento a una mappa. Solo gli spostamenti portano altrove. */
@@ -107,9 +108,9 @@ export function destinazioneMappaSpillo(s: SpilloDto): string | null {
   return arrivoSpillo(s)?.mappa ?? null;
 }
 
-/** Il nome della meta di uno spillo di spostamento, letto dal posto in cui porta (`dettaglio.mappa`: l'Area, se è una sua
- *  planimetria), o null se lo spillo non porta altrove o la meta non è nota. Il nome proprio del pin, se diverso, resta la sua nota
- *  («Banchina Metro», «Piano 2», «Mappa» del 1628 sui Vicoli, che mostra «Yongen-Jaya»). */
+/** Il nome della meta di uno spillo di spostamento, letto dal posto in cui porta (`dettaglio.mappa`: l'Area con l'etichetta, se è
+ *  una sua planimetria), o null se lo spillo non porta altrove o la meta non è nota. Lo mostra il pin che non ha un nome suo
+ *  («Mappa» del 1628 sui Vicoli, che mostra «Yongen-Jaya»): vedi `nomePin`. */
 export function nomeMetaSpillo(s: SpilloDto): string | null {
   if (!arrivoSpillo(s)) return null;
   const meta = s.dettaglio?.tipo === 'mappa' ? s.dettaglio.mappa : null;

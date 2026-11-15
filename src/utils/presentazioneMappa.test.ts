@@ -28,7 +28,7 @@ it.skip('le immagini del Covo condividono solo il nome verificato del luogo',()=
 });
 it('quando la versione ha un’etichetta dimostrata il nome la porta, in ogni schermata',()=>{
   const covo={nome:'Covo dei Ladri',nomeRivisto:false,area:areaDi('Covo dei Ladri'),versione:{etichetta:'settore d’ingresso',ordine:0}} as never;
-  expect(nomePresentazioneMappa(covo)).toBe('Covo dei Ladri — settore d’ingresso');
+  expect(nomePresentazioneMappa(covo)).toBe('Covo dei Ladri · settore d’ingresso');
 });
 
 const parziale: MappaRiassuntoDto = {chiave:'nativo-rmap-153-4-0',nome:'Area 4 — RMAP 153',nomeRivisto:false,tipo:'area',genitore:'palazzo-verificato',genitoreNome:'Palazzo di Madarame',nomeCompleto:'Altro genitore › Area 4 — RMAP 153',ordine:0,immagineUrl:null,asset:null,radiceDi:null,versione:null,origine:'seed',numeroSpilli:0,numeroFigli:0,updatedAt:'',area:null,casa:'/guida/mappe/nativo-rmap-153-4-0',contesti:[{id:'normale',nome:'Ripostiglio',campo:'F153_004_00',texpack:102},{id:'safe',nome:null,campo:'F153_051_00',texpack:103},{id:'altro-ignoto',nome:null,campo:'F153_052_00',texpack:104}]};
@@ -78,13 +78,14 @@ it.skip('il nome della stanza scelto da una persona vince sul nome rivisto della
 // continuava a vedere in alto il titolo dedotto, suffisso della versione compreso.
 const sottopasso = {nome:'Sottopasso',nomeRivisto:false,area:areaDi('Sottopasso'),versione:{etichetta:'inquadratura orientale',ordine:0}};
 it('finché il nome è quello del pacchetto, a presentare la mappa sono gruppo ed etichetta',()=>{
-  expect(nomePresentazioneMappa(sottopasso)).toBe('Sottopasso — inquadratura orientale');
+  expect(nomePresentazioneMappa(sottopasso)).toBe('Sottopasso · inquadratura orientale');
   expect(titoloGruppoImmagini(sottopasso)).toBe('Sottopasso');
 });
-it('il nome rivisto si mostra esattamente com’è scritto, senza il suffisso della versione',()=>{
-  // è il caso segnalato: `nome` e nome del gruppo coincidono, e prima il suffisso restava comunque
-  expect(nomePresentazioneMappa({...sottopasso,nomeRivisto:true})).toBe('Sottopasso');
-  expect(nomePresentazioneMappa({...sottopasso,nome:'Sottopasso di Shibuya',nomeRivisto:true})).toBe('Sottopasso di Shibuya');
+it('una planimetria con Area ed etichetta si chiama «Area · etichetta» anche col nome rivisto; senza Area il nome rivisto resta com’è scritto',()=>{
+  // l'etichetta si cambia in «Modifica area»: è lei, con l'Area, il nome della planimetria in ogni vista
+  expect(nomePresentazioneMappa({...sottopasso,nomeRivisto:true})).toBe('Sottopasso · inquadratura orientale');
+  expect(nomePresentazioneMappa({...sottopasso,nome:'Sottopasso di Shibuya',nomeRivisto:true})).toBe('Sottopasso · inquadratura orientale');
+  expect(nomePresentazioneMappa({...sottopasso,area:undefined,versione:null,nome:'Sottopasso di Shibuya',nomeRivisto:true} as never)).toBe('Sottopasso di Shibuya');
 });
 it('il nome rivisto vale anche dove i contesti non hanno un titolo, e anche se è tecnico',()=>{
   expect(nomePresentazioneMappa({...parziale,nome:'Ripostiglio del seminterrato',nomeRivisto:true})).toBe('Ripostiglio del seminterrato');
@@ -108,7 +109,8 @@ it('albero, miniature e briciole chiamano la mappa rivista come l’editor',()=>
 it('due versioni riviste con lo stesso nome restano distinguibili negli elenchi',()=>{
   const una={...sottopasso,nomeRivisto:true};
   const altra={...sottopasso,nomeRivisto:true,versione:{etichetta:'planimetria completa',ordine:1}};
-  expect(etichetteDistinte([una,altra])).toEqual(['Sottopasso · 1','Sottopasso · 2']);
+  // con l'etichetta nel nome le due versioni sono già distinte: nessun numero d'ordine
+  expect(etichetteDistinte([una,altra])).toEqual(['Sottopasso · inquadratura orientale','Sottopasso · planimetria completa']);
 });
 
 // ---- Il vocabolario dell'estrattore non arriva a chi gioca ----

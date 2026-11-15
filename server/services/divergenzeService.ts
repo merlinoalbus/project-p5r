@@ -11,7 +11,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { chiaveMappa, nomePercorsoVisibile } from './mappe/percorsiMappe.js';
 import { conDivergenze, togliIlFattoAlPin } from './mappe/statiGuida.js';
 import type { DivergenzaDto } from '../../shared/types.js';
 
@@ -25,7 +25,7 @@ export function elencoDivergenze(partitaId: number, dungeon?: string): Divergenz
     WHERE d.partita_id = ? ${dungeon ? 'AND a.dungeon_chiave = ?' : ''} ORDER BY a.dungeon_chiave, a.ordine, p.ordine, p.chiave, s.id`)
     .all(...(dungeon ? [partitaId, dungeon] : [partitaId])) as Array<{ id: number; uid: string; spillo_nome: string; mappa_chiave: string | null; voce: string; voce_nome: string; infiltrazione: string; infiltrazione_nome: string; rilevata_il: string }>;
   return righe.map((r) => ({
-    spillo: r.id, spilloUid: r.uid, spilloNome: r.spillo_nome, mappa: r.mappa_chiave ? chiaveMappa(r.mappa_chiave) : '', mappaNome: r.mappa_chiave ? nomePercorso(r.mappa_chiave) : '',
+    spillo: r.id, spilloUid: r.uid, spilloNome: r.spillo_nome, mappa: r.mappa_chiave ? chiaveMappa(r.mappa_chiave) : '', mappaNome: r.mappa_chiave ? nomePercorsoVisibile(r.mappa_chiave) : '',
     voce: r.voce, voceNome: r.voce_nome, infiltrazione: r.infiltrazione, infiltrazioneNome: r.infiltrazione_nome, rilevataIl: r.rilevata_il,
   }));
 }

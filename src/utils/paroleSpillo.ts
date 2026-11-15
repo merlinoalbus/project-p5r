@@ -7,10 +7,17 @@ import { categoriaSpillo, parolaDelloStato } from '../../shared/spilli';
 import { arrivoSpillo, nomeMetaSpillo } from './navigazioneMappa';
 import type { SpilloDto } from '../types';
 
-/** Come si chiama un pin nell'etichetta, negli elenchi e nella scheda: un passaggio col nome del posto in cui porta, letto dal vivo
- *  (L2, decisione dell'utente: «chiamandolo con il suo nome… e non con mappa»); gli altri col loro nome. Il nome proprio di un
- *  passaggio, se diverso, resta come nota nella scheda. */
-export const nomePin = (s: SpilloDto | SchedaContenutoGuidaDto) => ('mappaChiave' in s ? nomeMetaSpillo(s) : null) ?? s.nome;
+/** Vero se il nome del pin non dice niente di suo: vuoto, «Mappa», o il nome del suo tipo («Passaggio», «Scala», «Uscita»). */
+function nomeGenerico(s: SpilloDto | SchedaContenutoGuidaDto): boolean {
+  const nome = s.nome.trim().toLowerCase();
+  return nome === '' || nome === 'mappa' || nome === s.tipoNome.trim().toLowerCase();
+}
+
+/** Come si chiama un pin nell'etichetta, negli elenchi e nella scheda: col suo nome («Salta giù», «Scendi a Livello 0»), che è quello
+ *  scritto dall'utente (richiesta del 2026-11-15: i pin di navigazione mostrano il nome del pin, non il posto d'arrivo). Solo un
+ *  passaggio senza un nome suo («Mappa», «Passaggio») prende il nome del posto in cui porta, letto dal vivo (decisione del
+ *  2026-10-20: «chiamandolo con il suo nome… e non con mappa»). Dove porta lo dice sempre «Vai: …» nella scheda del pin. */
+export const nomePin = (s: SpilloDto | SchedaContenutoGuidaDto) => (nomeGenerico(s) && 'mappaChiave' in s ? nomeMetaSpillo(s) : null) ?? s.nome;
 
 /** La parola di un pin segnato: lo stato delle sue voci della guida («ottenuto», «esaurito») se ne ha — quello comune, o «segnato»
  *  se differiscono (098) —, che è anche quello dei pulsanti, altrimenti quella del tipo («raccolto», «aperto», «parlato»…). */

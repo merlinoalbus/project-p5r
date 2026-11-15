@@ -12,7 +12,7 @@ import { destinazioneGuida, risolviPercorsoMappa } from './contenutiGuidaService
 import type { DestinazioneGuidaDto } from '../../../shared/organizzazioneMappe.js';
 import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
-import { chiaveMappa, idMappa, nomePercorso } from './percorsiMappe.js';
+import { chiaveMappa, idMappa, nomePercorsoVisibile } from './percorsiMappe.js';
 import { areeDelleInfiltrazioni } from './legamiInfiltrazioni.js';
 import { radiceDelPalazzo, radiceDelQuartiere } from './alberoMappe.js';
 import type { AccessoMondoDto, DestinazioneMondoDto, TipoAccessoMondo } from '../../../shared/accessoMondo.js';
@@ -61,7 +61,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
       if (!presente.provenienze.some(p => p.tipo === provenienza.tipo && p.chiave === provenienza.chiave && p.criterio === criterio)) presente.provenienze.push(provenienza);
       return;
     }
-    destinazioni.set(k, { mappa: chiaveMappa(mappa), nomeMappa: nomePercorso(mappa), spillo, nomeSpillo, centro, provenienze: [provenienza] });
+    destinazioni.set(k, { mappa: chiaveMappa(mappa), nomeMappa: nomePercorsoVisibile(mappa), spillo, nomeSpillo, centro, provenienze: [provenienza] });
   }
   if (tipo === 'mappa') {
     aggiungi(chiave, null, null, 'mappa-diretta', richiesta);

@@ -53,7 +53,8 @@ const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
  *  un'area hanno lo stesso nome). */
 const nomePlanimetria = (m: { nome: string; versioneEtichetta?: string | null }) => {
   const nome = nomeSenzaPalazzo(m.nome);
-  return m.versioneEtichetta && !nome.includes(m.versioneEtichetta) ? `${nome} · ${m.versioneEtichetta}` : nome;
+  // il server manda già «Area · etichetta» (`nomePercorsoVisibile`): l'etichetta si aggiunge solo a un nome che non la porta
+  return m.versioneEtichetta && !nome.toLowerCase().includes(m.versioneEtichetta.trim().toLowerCase()) ? `${nome} · ${m.versioneEtichetta}` : nome;
 };
 
 // L4 §4.1: il carattere della voce, accanto al tipo. Colori dai chip esistenti: Permanente col bordo dell'evidenza, Si ripropone tinto come i
