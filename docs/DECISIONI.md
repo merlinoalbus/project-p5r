@@ -517,6 +517,20 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   condizioni. Le condizioni si scrivono sul pin e restano sue. Entrando in «Aggiungi» il pin aperto si chiude: mentre si aggiunge c'è un
   solo blocco di condizioni, quello dei pin nuovi, subito sotto gli strumenti. L'impostazione vale finché l'editor resta su quella mappa: cambiando mappa o uscendo si azzera. Un pin incollato tiene le
   condizioni dell'originale; un tipo che non ammette condizioni nasce senza. **(14/11)**
+- **Nome di una planimetria**: una planimetria con un'Area e un'etichetta di versione (quella scritta in «Modifica area») si presenta
+  ovunque come «Area · etichetta» («Ufficio riciclaggio · Piano -2P»): negli elenchi «Da raccogliere» e «Nel resto del Palazzo», nei
+  gruppi e nei selettori delle voci della guida, accanto ai pin delle voci, in «Da verificare», nell'atterraggio da Tokyo, nel titolo
+  di ogni visore e dell'editor, in «Vai: …», in «Torna a…», nelle uscite e negli arrivi dei passaggi, in «Entra: …» del quartiere, in
+  «Dove si trova» e nei pin della pagina di un luogo. La regola è una sola (`shared/nomiPlanimetrie.ts`, letta dal server con
+  `nomePercorsoVisibile` e `nomeDelPosto` e dall'interfaccia con `nomePresentazioneMappa`), col separatore « · », e vale anche per
+  una mappa col nome rivisto a mano. Senza etichetta ogni vista mostra il nome che mostrava prima. Restano sul nome della mappa, di
+  proposito: il campo «Nome» dell'editor della mappa, la riga di riferimento in «Modifica area», l'indirizzo e la ricerca, il Cestino e
+  l'archivio di Iweleth. Dove una vista nomina l'Area e non una sua planimetria resta il nome dell'Area: le carte dell'indice delle
+  mappe (un'Area con tutte le sue versioni) e l'intestazione «Area: …» di «Dove si trova», le cui carte delle destinazioni portano
+  invece il nome completo. **(15/11)**
+- **Nome di un pin di passaggio**: sulla mappa, negli elenchi e nella scheda un pin di spostamento si chiama col suo nome («Salta giù»,
+  «Scendi a Livello 0»); dove porta lo dice «Vai: …» col nome completo della planimetria d'arrivo. Solo un pin senza un nome suo
+  (vuoto, «Mappa», o il nome del suo tipo: «Passaggio», «Scala») prende il nome del posto in cui porta. **(15/11)**
 - **Una sola guida nel visore**: ogni visore (a schermo intero e incorporato) ha la stessa guida da usare, dal pulsante «Guida», su ogni
   mappa che può avere voci della guida: casella ottenuto/riapri con la conferma della scheda del Palazzo, dettagli e pin centrabili nella
   voce, voci fatte nascoste, le Persona da catturare con la piastrella della scheda, finestra spostabile da 1024 px, foglio dal basso su

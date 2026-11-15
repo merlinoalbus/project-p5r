@@ -6,6 +6,7 @@ import type { ConteggiPinDto, MappaDto, MappaRiassuntoDto } from '../types';
 import { nomeConVersione } from './etichettaVersione';
 // il gergo dell'estrattore: condiviso col server, che fissa i nomi delle stanze come li mostra l'interfaccia
 import { senzaGergo } from '../../shared/nomiMappe';
+import { nomeCompletoPlanimetria } from '../../shared/nomiPlanimetrie';
 // L11 · B9: la stanza è l'Area della planimetria (`area`), la versione dentro la stanza è `versione`: il gruppo d'immagini non c'è più
 type IdentitaMappa = Pick<MappaRiassuntoDto, 'nome' | 'contesti' | 'genitoreNome' | 'nomeRivisto'> & Partial<Pick<MappaRiassuntoDto, 'area' | 'versione'>>;
 /** Il nome della stanza di una planimetria: quello della sua Area, solo se la planimetria è una versione con etichetta (come il gruppo d'immagini
@@ -48,7 +49,12 @@ export function titoloContesto(mappa: IdentitaMappa, selezione?: string | null):
 export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string | null): string {
   const titolo = titoloContesto(mappa, selezione);
   if (titolo) return titolo;
-  // Il nome rivisto a mano vince su ogni nome dedotto, e da solo: contesti, gruppo di immagini ed
+  // Una planimetria di un'Area con l'etichetta di versione si chiama «Area · etichetta» in ogni vista (regola unica di
+  // `shared/nomiPlanimetrie`, 2026-11-15), anche quando il nome della mappa è stato rivisto: l'etichetta si scrive in «Modifica area»,
+  // ed è quello il posto dove intervenire. Il nome della mappa resta nel campo «Nome» dell'editor e nell'indirizzo.
+  const completo = nomeCompletoPlanimetria(mappa.area?.nome, mappa.area?.versioneEtichetta ?? mappa.versione?.etichetta);
+  if (completo) return senzaGergo(completo);
+  // Senza quell'etichetta il nome rivisto a mano vince su ogni nome dedotto, e da solo: contesti, gruppo di immagini ed
   // etichetta della versione sono un'istantanea dell'estrazione, scritta una volta dal pacchetto e
   // che nessuna schermata modifica. Finché avevano la precedenza, chi correggeva il «Nome»
   // nell'editor salvava e vedeva in alto ancora il vecchio titolo — suffisso della versione

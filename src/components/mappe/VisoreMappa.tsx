@@ -23,6 +23,7 @@ import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { useMedia } from '../../hooks/useMedia';
 import { comportamentoScorrimento } from '../../utils/movimento';
 import { ingombroPezzo } from '../../../shared/pezziMappa';
+import { nomeVisibilePlanimetria } from '../../../shared/nomiPlanimetrie';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
@@ -482,7 +483,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   };
   /** L4-07: la navigazione dell'ospite attraverso il pin di spostamento `s`, che annota il passaggio per il ritorno (`passaggioMappe`). */
   const passaDa = (s: SpilloDto): NavigaMappa => (k, arrivo) => {
-    annotaPassaggio({ da: mappa.chiave, daNome: mappa.nome, spillo: s.id, spilloNome: s.nome, verso: k });
+    annotaPassaggio({ da: mappa.chiave, daNome: nomeVisibilePlanimetria(mappa), spillo: s.id, spilloNome: s.nome, verso: k });
     onNaviga(k, arrivo);
   };
   /** Porta all'arrivo del pin di spostamento (con lo spillo d'arrivo se indicato). */
@@ -1041,7 +1042,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               planimetrie di un'Area), dove il solo nome non direbbe dove si torna */}
           {ritornoPassaggio.passaggio && !editor && (() => {
             const p = ritornoPassaggio.passaggio;
-            return <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={p.daNome} dettaglio={p.daNome === mappa.nome ? p.spilloNome : undefined}
+            return <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={p.daNome} dettaglio={p.daNome === nomeVisibilePlanimetria(mappa) ? p.spilloNome : undefined}
               aria-label={`Torna a ${p.daNome}, al passaggio «${p.spilloNome}» da cui sei arrivato`} onClick={() => onNaviga(p.da, { spillo: p.spillo })} />;
           })()}
           {azioni}
@@ -1272,7 +1273,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                     {selezionato.daVerificare && onDaVerificare && partitaId && selezionato.uid && (() => {
                       const voce = selezionato.voci.find((v) => v.daVerificare) ?? selezionato.voci[0];
                       return voce ? <PulsanteVisivo compatto className="mt-1 self-start" icona={<IconaSegno chiave="da-verificare" dimensione={20} />} titolo="Da verificare"
-                        onClick={() => onDaVerificare({ spilloUid: selezionato.uid!, spilloNome: nomePin(selezionato), mappaNome: mappa.nome, voce: voce.chiave, voceNome: voce.nome, infiltrazioneNome: voce.infiltrazione?.nome ?? null })} /> : null;
+                        onClick={() => onDaVerificare({ spilloUid: selezionato.uid!, spilloNome: nomePin(selezionato), mappaNome: nomeVisibilePlanimetria(mappa), voce: voce.chiave, voceNome: voce.nome, infiltrazioneNome: voce.infiltrazione?.nome ?? null })} /> : null;
                     })()}
                   </div>
                   <button type="button" className="spillo-popup__chiudi" onClick={() => chiudiPopup(selezionato.id)} aria-label="Chiudi il popup">×</button>

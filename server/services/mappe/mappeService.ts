@@ -19,7 +19,8 @@ import { assegnaUidMancanti, uidValido } from './identitaSpillo.js';
 import type { DestinazioneSpillo, NativoSpilloDto, RuoloImmagine } from '../../../shared/types.js';
 import { RUOLI_IMMAGINE } from '../../../shared/types.js';
 import { destinazioneDaRighe, destinazionePerPacchetto, leggiDestinazioneSpillo, righeDestinazioni, risolviSpilloArrivo, salvaDestinazioneSpillo, verificaDestinazioneSpillo, type DestinazioneDaSalvare, type RigaDestinazione } from './destinazioniSpillo.js';
-import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
+import { idMappa, chiaveMappa, nomeDelPosto, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
+import { nomeDelPostoDellaMappa } from '../../../shared/nomiPlanimetrie.js';
 import { slug } from '../../../shared/slug.js';
 import { TIPO_MACCHINA, ancoraPuntoVendita } from '../../../shared/puntoVendita.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
@@ -293,7 +294,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       // L2: l'Area della meta (il nome che il passaggio mostra) e la casa, la pagina a cui il passaggio porta
       const aree = ctx.aree ??= contestoAree();
       const area = m.area_chiave ? aree.aree.get(m.area_chiave) : undefined;
-      return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo, area: area ? { nome: area.nome } : null, casa: casaDellaMappa(m, aree) }, immagine: { url: img ? urlCaricata(img) : null, asset: m.asset } };
+      return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo, area: area ? { nome: area.nome, versioneEtichetta: (m as { versione_etichetta?: string | null }).versione_etichetta ?? null } : null, casa: casaDellaMappa(m, aree) }, immagine: { url: img ? urlCaricata(img) : null, asset: m.asset } };
     }
     case 'punto': {
       const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, p.carattere, a.dungeon_chiave, a.chiave AS area_chiave, a.nome AS area_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?')
@@ -431,7 +432,8 @@ function arriviDi(ctx: ContestoSpilli): ArriviDeiPin {
   if (ctx.arrivi) return ctx.arrivi;
   const nomiMappa = new Map<string, string | undefined>();
   const nomiSpillo = new Map<number, string | undefined>();
-  for (const m of prepared('SELECT chiave, nome FROM mappa WHERE chiave IN (SELECT mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL)').all() as Array<{ chiave: string; nome: string }>) nomiMappa.set(m.chiave, m.nome);
+  // il nome dell'arrivo è quello con cui il posto si presenta («Area · etichetta»), non il nome della mappa
+  for (const m of prepared('SELECT chiave, nome FROM mappa WHERE chiave IN (SELECT mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL)').all() as Array<{ chiave: string; nome: string }>) nomiMappa.set(m.chiave, nomeDelPosto(m.chiave) ?? m.nome);
   if (haColonnaMain(getDb(), 'spillo_destinazione', 'spillo_arrivo_id')) {
     for (const s of prepared('SELECT id, nome FROM spillo WHERE id IN (SELECT spillo_arrivo_id FROM spillo_destinazione WHERE spillo_arrivo_id IS NOT NULL)').all() as Array<{ id: number; nome: string }>) nomiSpillo.set(s.id, s.nome);
   }
@@ -606,7 +608,7 @@ function spilloDto(r: RigaSpillo, contesto?: ContestoSpilli): SpilloDto {
   // i nomi della mappa e dello spillo d'arrivo, per il pulsante «Vai: …» senza un'altra chiamata
   const nomeMappa = (chiave: string): string | undefined => {
     if (arrivi?.nomiMappa.has(chiave)) return arrivi.nomiMappa.get(chiave);
-    const nome = (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome;
+    const nome = nomeDelPosto(chiave) ?? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome;
     arrivi?.nomiMappa.set(chiave, nome);
     return nome;
   };
@@ -640,7 +642,9 @@ function arriviVerso(chiave: string): MappaDto['arrivi'] {
       AND (( s.riferimento_tipo = 'mappa' AND s.riferimento_chiave = ? )
         OR s.id IN (SELECT spillo_id FROM spillo_destinazione WHERE mappa_chiave = ?))
     ORDER BY m.nome, s.ordine, s.id`).all(chiave, chiave, chiave) as Array<{ id: number; tipo: TipoSpillo; nome: string; mappa_chiave: string; mappa_nome: string }>;
-  return righe.map((r) => ({ spilloId: r.id, tipo: r.tipo, nome: r.nome, mappa: chiaveMappa(r.mappa_chiave), mappaNome: r.mappa_nome }));
+  // l'elenco segue il nome che si legge («Area · etichetta»): l'ordinamento è stabile, quindi a parità resta quello della lettura
+  return righe.map((r) => ({ spilloId: r.id, tipo: r.tipo, nome: r.nome, mappa: chiaveMappa(r.mappa_chiave), mappaNome: nomeDelPosto(r.mappa_chiave) ?? r.mappa_nome }))
+    .sort((a, b) => a.mappaNome.localeCompare(b.mappaNome, 'it'));
 }
 
 /** Mappa con percorso, figli, spilli (con stato della partita e dettagli delle entità collegate). `contesto` (L4, `?infiltrazione=`):
@@ -1582,7 +1586,7 @@ export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30, 
   if(tipo==='mappa'){
     // L2: una planimetria con un'Area si presenta col posto e l'Area, più la versione se l'Area ne ha più d'una («Shibuya › Sottopasso ·
     // planimetria completa»): è così che la si sceglie come destinazione di un passaggio
-    const nomeDi=(m:MappaRiassuntoDto)=>m.area?`${m.area.contenitore.nome} › ${m.area.nome}${m.area.versioneEtichetta?` · ${m.area.versioneEtichetta}`:''}`:m.nomeCompleto??m.nome;
+    const nomeDi=(m:MappaRiassuntoDto)=>m.area?`${m.area.contenitore.nome} › ${nomeDelPostoDellaMappa(m)}`:m.nomeCompleto??m.nome;
     return elencaMappe().filter(m=>trova(nomeDi(m),m.nomeCompleto??m.nome,m.chiave)).slice(0,limite).map(m=>({tipo,chiave:m.chiave,nome:nomeDi(m),dettaglio:m.tipo}));
   }
   const righe = prepared(RICERCHE[tipo]).all() as Array<{ chiave: string; nome: string; dettaglio: string | null; nascosto?: number }>;

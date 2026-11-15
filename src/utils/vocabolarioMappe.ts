@@ -11,6 +11,7 @@
 // ============================================================
 
 import { NOME_TIPO_MAPPA, type TipoMappa } from '../../shared/spilli';
+import { nomeDelPostoDellaMappa } from '../../shared/nomiPlanimetrie';
 
 /** Il nome del livello di una mappa, per il chip del visore e gli elenchi: «Planimetria» se sta in un'Area del mondo (L2, R2-39),
  *  altrimenti quello del suo tipo («Città», «Quartiere», «Palazzo»…). */
@@ -28,7 +29,7 @@ export function titoloModificaMappa(mappa: { tipo: TipoMappa; area?: unknown }):
  *  un'Area o di un Palazzo), «Illustrazione di Shibuya» per la città e i quartieri, il solo nome per il resto. Mai «Mappa: …». */
 export function descrizioneImmagineMappa(mappa: { tipo: TipoMappa; nome: string; area?: { nome: string; versioneEtichetta?: string | null } | null }): string {
   // due versioni della stessa Area non hanno lo stesso testo: «Planimetria di Sottopasso · planimetria completa» (condizione di Stesura)
-  if (mappa.area) return mappa.area.versioneEtichetta ? `Planimetria di ${mappa.area.nome} · ${mappa.area.versioneEtichetta}` : `Planimetria di ${mappa.area.nome}`;
+  if (mappa.area) return `Planimetria di ${nomeDelPostoDellaMappa(mappa)}`;
   if (mappa.tipo === 'citta' || mappa.tipo === 'quartiere') return `Illustrazione di ${mappa.nome}`;
   if (mappa.tipo === 'area' || mappa.tipo === 'luogo') return `Planimetria di ${mappa.nome}`;
   return mappa.nome;

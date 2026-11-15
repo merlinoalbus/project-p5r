@@ -77,7 +77,7 @@ describe('VisoreMappa', () => {
       if (this.classList.contains('visore-mappa__controlli')) return rett(260, 10, 40, 150);
       if (this.classList.contains('spillo-mappa__etichetta')) {
         const nome = this.textContent;
-        return nome === 'Shibuya centro' ? rett(200, 100, 90, 20) : rett(0, 0, 0, 0);
+        return nome === 'Verso il centro' ? rett(200, 100, 90, 20) : rett(0, 0, 0, 0);
       }
       if (this.classList.contains('spillo-mappa')) return rett(220, 70, 38, 38);
       return rett(0, 0, 0, 0);
@@ -115,11 +115,12 @@ describe('VisoreMappa', () => {
 
   it('il click su uno spillo apre il popup ancorato con le azioni: passaggio → apre la mappa collegata', () => {
     const { onNaviga } = monta();
-    fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Shibuya centro' }));
-    const popup = within(screen.getByRole('dialog', { name: 'Shibuya centro' }));
+    // il pin si chiama col suo nome (2026-11-15); dove porta lo dice «Vai: …»
+    fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Verso il centro' }));
+    const popup = within(screen.getByRole('dialog', { name: 'Verso il centro' }));
     // immagine della mappa collegata e schermate di riferimento nel popup
-    expect(popup.getByRole('img', { name: 'Immagine: Shibuya centro' })).toHaveAttribute('src', '/api/immagini/mappa/shibuya-centro/file');
-    expect(within(popup.getByRole('list', { name: 'Schermate di Shibuya centro' })).getAllByRole('button')).toHaveLength(2);
+    expect(popup.getByRole('img', { name: 'Immagine: Verso il centro' })).toHaveAttribute('src', '/api/immagini/mappa/shibuya-centro/file');
+    expect(within(popup.getByRole('list', { name: 'Schermate di Verso il centro' })).getAllByRole('button')).toHaveLength(2);
     fireEvent.click(popup.getByRole('button', { name: 'Ingrandisci: La scala' }));
     expect(screen.getByRole('dialog', { name: 'La scala' })).toBeInTheDocument();
     fireEvent.click(popup.getByRole('button', { name: 'Vai: Shibuya centro' }));
@@ -826,8 +827,8 @@ it('un passaggio con la sua destinazione e una voce «Storia» porta altrove e s
   const onStatoPunto = vi.fn().mockResolvedValue(undefined);
   const onNaviga = vi.fn();
   render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={onNaviga} onRaccolto={vi.fn()} onStatoPunto={onStatoPunto} /></MemoryRouter>);
-  fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Shibuya centro' }));
-  const popup = within(screen.getByRole('dialog', { name: 'Shibuya centro' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Verso la sala' }));
+  const popup = within(screen.getByRole('dialog', { name: 'Verso la sala' }));
   expect(popup.getByRole('button', { name: /Shibuya centro/ })).toBeInTheDocument();
   fireEvent.click(popup.getByRole('button', { name: 'Ottenuto' }));
   await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 11 }), 'kamoshida-02/12', 'ottenuto'));
@@ -877,15 +878,15 @@ describe('il popup dello spillo si misura (094: uno spostamento di una voce ha a
   const apri = async (dimensioni: { w: number; h: number }) => {
     tela = dimensioni;
     render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: /^Passaggio: Shibuya centro/ }));
-    await screen.findByRole('dialog', { name: 'Shibuya centro' });
+    fireEvent.click(await screen.findByRole('button', { name: /^Passaggio: Torre Inferiore/ }));
+    await screen.findByRole('dialog', { name: 'Torre Inferiore' });
   };
 
   it('su una tela bassa, dove non sta né sopra né sotto, diventa il foglio invece di farsi tagliare', async () => {
     await apri({ w: 900, h: 300 });
-    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Shibuya centro' }).className).toContain('spillo-popup--foglio'));
+    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Torre Inferiore' }).className).toContain('spillo-popup--foglio'));
     // nel foglio ci sono la navigazione e lo stato
-    const foglio = within(screen.getByRole('dialog', { name: 'Shibuya centro' }));
+    const foglio = within(screen.getByRole('dialog', { name: 'Torre Inferiore' }));
     expect(foglio.getByRole('button', { name: /Shibuya centro/ })).toBeInTheDocument();
     expect(foglio.getByRole('button', { name: 'Ottenuto' })).toBeInTheDocument();
   });
@@ -893,7 +894,7 @@ describe('il popup dello spillo si misura (094: uno spostamento di una voce ha a
   it('su una tela alta resta ancorato allo spillo, sopra', async () => {
     await apri({ w: 1000, h: 900 });
     await waitFor(() => {
-      const popup = screen.getByRole('dialog', { name: 'Shibuya centro' });
+      const popup = screen.getByRole('dialog', { name: 'Torre Inferiore' });
       expect(popup.className).not.toContain('spillo-popup--foglio');
       expect(popup.className).not.toContain('spillo-popup--sotto');
     });

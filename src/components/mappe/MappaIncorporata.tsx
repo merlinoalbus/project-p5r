@@ -12,6 +12,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { PageState } from '../shared/PageState';
 import { nomeDellaMeta, urlMappa, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { nomeFiglieMappa } from '../../utils/vocabolarioMappe';
+import { nomeVisibilePlanimetria } from '../../../shared/nomiPlanimetrie';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -181,7 +182,9 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         contenutiPannello={contenutiPannello}
         pannelloIniziale={pannelloIniziale}
         onPannello={onPannello}
-        titolo={titoloVisore}
+        // il titolo chiesto dalla pagina è il nome dell'Area: per una planimetria con etichetta è il nome completo («Area · etichetta»),
+        // così arrivando da un passaggio si legge su quale planimetria si è
+        titolo={titoloVisore !== undefined && mappa.area ? nomeVisibilePlanimetria({ nome: titoloVisore, area: mappa.area }) : titoloVisore}
         senzaVicine={senzaVicine}
         etichettaChiudi="Torna alla pagina"
         // L3 RG-1: la guida da usare (`GuidaNelVisore`): uno stato salvato rilegge la mappa e lo dice alla pagina; la `versione` della pagina

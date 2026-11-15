@@ -929,8 +929,8 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
   // una planimetria di un'Area sta dove la mette l'Area: tipo e genitore non si cambiano da qui (L2, `modifiche.md` §4.6)
   const dellArea = !!mappa.area;
   const modificata = nome !== mappa.nome || tipo !== mappa.tipo || genitore !== (mappa.genitore ?? '') || Number(ordine) !== mappa.ordine || note !== mappa.note;
-  // Finché il nome non è dichiarato, in alto si legge quello dedotto da contesti e gruppo di
-  // immagini: qui si dice quale dei due si sta guardando, e Salva resta attivo anche senza
+  // Finché il nome non è dichiarato, in alto si legge un altro nome (per una planimetria con etichetta «Area · etichetta», altrimenti
+  // quello dedotto dai contesti): qui si dice quale dei due si sta guardando, e Salva resta attivo anche senza
   // modifiche, perché chi il nome l'aveva già corretto non avrebbe più niente da cambiare.
   const titoloMostrato = nomePresentazioneMappa(mappa);
   const nomeDaConfermare = !mappa.nomeRivisto && titoloMostrato !== mappa.nome;
@@ -940,7 +940,9 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
       <h3 className="visore-mappa__intestazione">Mappa</h3>
       <form id={idModulo} className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, ...(dellArea ? {} : { tipo, genitore: genitore || null }), ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.mappa.nome} /></label>
-        {nomeDaConfermare && <p className="editor-mappa__avviso" role="status">In alto si legge «{titoloMostrato}»: è il nome ricavato dai dati dell’estrazione. Salva per usare «{mappa.nome}» dappertutto.</p>}
+        {nomeDaConfermare && <p className="editor-mappa__avviso" role="status">In alto si legge «{titoloMostrato}»: {mappa.area?.versioneEtichetta
+          ? <>è il nome dell’area con l’etichetta di questa planimetria, che si cambiano dalla pagina dell’area. Salva per confermare «{mappa.nome}» come nome della mappa.</>
+          : <>è il nome ricavato dai dati dell’estrazione. Salva per usare «{mappa.nome}» dappertutto.</>}</p>}
         <div className="grid grid-cols-2 gap-2">
           {!dellArea && (
             <div className="editor-mappa__campo">

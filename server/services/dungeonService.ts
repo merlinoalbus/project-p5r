@@ -34,7 +34,7 @@ import type {
   RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto
 } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
-import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { chiaveMappa, idMappa, nomePercorso, nomePercorsoVisibile } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
 import { bloccoTimbri, fonteDelTotale, timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
@@ -79,7 +79,7 @@ interface AvanzamentoVoce { m: ModelloAvanzamento; s: StatiDellaPartita | null; 
 /** L3: la planimetria di una voce come la vede il client (chiave pubblica, nome con il percorso, se è a mano), con la regola unica. */
 function planimetriaDto(pl: PlanimetrieDelleVoci, voce: string): PlanimetriaDellaVoceDto | null {
   const p = planimetriaDellaVoce(pl, voce);
-  return p ? { chiave: chiaveMappa(p.chiave), nome: nomePercorso(p.chiave), aMano: p.aMano } : null;
+  return p ? { chiave: chiaveMappa(p.chiave), nome: nomePercorsoVisibile(p.chiave), aMano: p.aMano } : null;
 }
 
 /**
@@ -175,7 +175,7 @@ function pinDeiPunti(punto?: string): Map<string, PinDelPuntoDto[]> {
   const out = new Map<string, PinDelPuntoDto[]>();
   for (const r of righe) {
     const elenco = out.get(r.voce) ?? [];
-    elenco.push({ id: r.id, nome: r.nome, tipo: r.tipo, mappa: chiaveMappa(r.mappa_chiave), mappaNome: nomePercorso(r.mappa_chiave) });
+    elenco.push({ id: r.id, nome: r.nome, tipo: r.tipo, mappa: chiaveMappa(r.mappa_chiave), mappaNome: nomePercorsoVisibile(r.mappa_chiave) });
     out.set(r.voce, elenco);
   }
   return out;
@@ -187,7 +187,7 @@ function pinDeiPunti(punto?: string): Map<string, PinDelPuntoDto[]> {
  */
 function mappeDelleAree(dungeonChiave: string): Map<string, Array<{ chiave: string; nome: string; area: string }>> {
   const out = new Map<string, Array<{ chiave: string; nome: string; area: string }>>();
-  for (const [inf, mappe] of planimetrieDelleInfiltrazioni(dungeonChiave)) out.set(inf, mappe.map((m) => ({ chiave: m.chiave, nome: nomePercorso(m.chiave), area: m.area })));
+  for (const [inf, mappe] of planimetrieDelleInfiltrazioni(dungeonChiave)) out.set(inf, mappe.map((m) => ({ chiave: m.chiave, nome: nomePercorsoVisibile(m.chiave), area: m.area })));
   return out;
 }
 
@@ -455,7 +455,7 @@ function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon,
   return righe.map((r) => {
     const m = raccolta.perMappa.get(r.chiave);
     return {
-      chiave: chiaveMappa(r.chiave), nome: nomePercorso(r.chiave), ordine: r.ordine,
+      chiave: chiaveMappa(r.chiave), nome: nomePercorsoVisibile(r.chiave), ordine: r.ordine,
       aree: r.area_chiave ? perArea.get(r.area_chiave) ?? [] : [],
       n: m?.n ?? 0, presi: partitaId === undefined ? null : (m?.presi ?? 0), spilli: m?.spilli ?? [],
       area: r.area_chiave, versioneEtichetta: r.versione_etichetta,
@@ -1344,7 +1344,7 @@ function planimetriaScelta(voce: { nome: string; area_chiave: string; chiave: st
   if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('mappa-non-trovata', `La planimetria '${planimetria}' non esiste.`);
   const d = prepared('SELECT d.chiave, d.tipo FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE a.chiave = ?').get(voce.area_chiave) as { chiave: string; tipo: string } | undefined;
   if (!d || d.tipo !== 'palazzo' || chiave === radiceDelPalazzo(d.chiave) || palazzoDellaMappa(chiave) !== d.chiave) {
-    throw httpErrors.badRequest('planimetria-fuori-dal-palazzo', `«${nomePercorso(chiave)}» non è una planimetria del Palazzo di «${voce.nome}».`);
+    throw httpErrors.badRequest('planimetria-fuori-dal-palazzo', `«${nomePercorsoVisibile(chiave)}» non è una planimetria del Palazzo di «${voce.nome}».`);
   }
   if (voce.chiave && passiDi(getDb(), voce.chiave).length > 0) {
     throw httpErrors.badRequest('enigma-segue-i-passi', `«${voce.nome}» è un Enigma con dei passi: sta dove stanno i passi, sposta quelli.`);

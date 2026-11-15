@@ -17,7 +17,7 @@ it('salva ingresso con coordinate anche agli estremi e mantiene destinazione dop
  await request(app).put('/api/mappe/shibuya-central-street').send({nome:'Central Street Est'});
  regoleAllAvvio(getDb());
  const q=(await request(app).get('/api/compendio/citta/shibuya')).body.data;
- expect(q.ingresso).toEqual({mappa:'shibuya-central-street-est',nome:'Shibuya › Central Street Est',x:0,y:100,zoom:3,area:{slug:'central-street',nome:'Central Street'}});
+ expect(q.ingresso).toEqual({mappa:'shibuya-central-street-est',nome:'Shibuya › Central Street Est',x:0,y:100,zoom:3,area:{slug:'central-street',nome:'Central Street',versioneEtichetta:null}});
  expect((await request(app).get('/api/compendio/citta')).body.data.find((v:{chiave:string})=>v.chiave==='shibuya').ingresso).toEqual(q.ingresso);
  expect((await request(app).delete(url)).status).toBe(204);expect((await request(app).get('/api/compendio/citta/shibuya')).body.data.ingresso).toBeNull();
 });

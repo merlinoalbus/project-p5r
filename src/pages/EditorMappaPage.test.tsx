@@ -914,7 +914,7 @@ it('una mappa mai rivista dice quale nome si legge in alto e lascia «Salva» at
   monta();
   fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
   const scheda = within(screen.getByRole('region', { name: 'Proprietà della mappa' }));
-  expect(scheda.getByRole('status')).toHaveTextContent('In alto si legge «Sottopasso — planimetria completa»');
+  expect(scheda.getByRole('status')).toHaveTextContent('In alto si legge «Sottopasso · planimetria completa»');
   const salva = screen.getByRole('button', { name: /Salva mappa/ });
   expect(salva).toBeEnabled();
   fireEvent.click(salva);

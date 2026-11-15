@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Regola unica di L2/L5: il gesto porta il nome della destinazione («Tokyo», «Shibuya», «Central Street»), mai «Mappa». Il nome viene
-// dall'albero delle mappe (`nomeDellaMeta`: l'Area per una planimetria, altrimenti il nome della mappa); Tokyo si sa senza leggere niente.
+// dall'albero delle mappe (`nomeDellaMeta`: l'Area, con l'etichetta se la planimetria ne ha una, altrimenti il nome della mappa); Tokyo si sa senza leggere niente.
 // ============================================================
 
 import { getAlberoMappe } from '../services/api';
