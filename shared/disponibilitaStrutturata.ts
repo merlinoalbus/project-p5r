@@ -60,7 +60,7 @@ export interface DisponibilitaConfidenteDto {
   /** I ranghi il cui incontro non si fa con la pioggia, letti dai requisiti di rango (la fonte unica della pioggia): solo da mostrare. */
   ranghiNonConLaPioggia: number[];
   /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (`confidente.romanzabile`): solo allora l'eccezione «con la relazione»
-   *  ha senso. Assente su un file di gioco senza la colonna. */
+   *  ha senso. */
   romanzabile?: boolean;
   /** Presente se è stata indicata una partita: se il Confidente è disponibile adesso. */
   oggi?: EsitoDisponibilita;

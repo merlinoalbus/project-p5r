@@ -19,8 +19,7 @@
 // (`statoPartitaEssenziale`), non su quello completo con Palazzi, scorta, pesca e meteo; il valutatore resta quello unico.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { valutaInsieme } from './condizioni/valutatore.js';
@@ -29,8 +28,6 @@ import { dotiSociali, ranghiConfidenti } from './partiteService.js';
 import { statoDisponibilitaPartita } from './disponibilitaService.js';
 
 export interface DonoConfidenteOttenuto { catalogo: string; quantita: number; confidente: string; nota: string | null }
-
-const haColonnaCondizioni = (): boolean => haColonnaMain(getDb(), 'ricompensa_oggetto', 'condizioni_json');
 
 /** Vero se una condizione (anche dentro `gruppo` e `non`) legge le Doti: solo allora lo stato essenziale le legge (sono la lettura più costosa). */
 function usaLeDoti(condizioni: readonly RequisitoSpillo[]): boolean {
@@ -45,10 +42,8 @@ function usaLeVociDellaGuida(condizioni: readonly RequisitoSpillo[]): boolean {
 type RigaDono = { fonte_chiave: string; catalogo_chiave: string; quantita: number; nota: string | null; condizioni_json: string };
 
 /** I doni dei Confidenti che la partita ha meritato adesso, in ordine di catalogo; con `catalogo`, solo quelli di quell'oggetto (chi legge le
- *  copie di un oggetto non paga la valutazione degli altri doni, e un oggetto senza doni non legge la partita). Vuoto se la colonna della regola
- *  non c'è ancora. */
+ *  copie di un oggetto non paga la valutazione degli altri doni, e un oggetto senza doni non legge la partita). */
 export function doniConfidentiOttenuti(partitaId: number, catalogo?: string): DonoConfidenteOttenuto[] {
-  if (!haColonnaCondizioni()) return [];
   const base = "SELECT fonte_chiave, catalogo_chiave, COALESCE(quantita, 1) AS quantita, nota, condizioni_json FROM ricompensa_oggetto WHERE fonte_tipo = 'confidente' AND condizioni_json IS NOT NULL";
   const righe = (catalogo === undefined
     ? prepared(`${base} ORDER BY ordine, catalogo_chiave`).all()

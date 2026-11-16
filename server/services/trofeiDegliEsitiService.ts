@@ -15,15 +15,11 @@
 // (`cediTrofeoAUnTurno`). Nessuno yen si muove da qui (gli importi delle vincite non sono nella guida: si scrivono a mano, decisione 18).
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haTabellaUtente } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { impostaTrofeo } from './completamentoService.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
 
 const TABELLA = 'trofeo_esito_turno';
-
-/** La tabella c'è? (Uno schema vecchio non ha trofei dagli esiti: niente da segnare né da togliere.) */
-const conTabella = (): boolean => haTabellaUtente(getDb(), TABELLA);
 
 interface RigaTrofeoTurno { attivita_chiave: string; ordine: number; trofeo_chiave: string; gia: number; evento_id: number | null }
 
@@ -37,7 +33,7 @@ export function trofeoDellEsito(attivita: string, esito: string): string | null 
  * Va chiamata dentro la transazione del turno. Un trofeo tolto dall'elenco non si segna (nessuna riga).
  */
 export function segnaTrofeoDelTurno(p: number, attivita: string, ordine: number, esito: string | null | undefined): void {
-  if (!esito || !conTabella()) return;
+  if (!esito) return;
   // una riga rimasta da un turno con lo stesso numero, tolto per un'altra strada, si chiude prima con la regola di sempre
   togliTrofeoDelTurno(p, attivita, ordine);
   const trofeo = trofeoDellEsito(attivita, esito);
@@ -59,7 +55,6 @@ export function segnaTrofeoDelTurno(p: number, attivita: string, ordine: number,
  * Va chiamata dentro la transazione del turno. Senza riga (un turno senza trofeo) non fa niente.
  */
 export function togliTrofeoDelTurno(p: number, attivita: string, ordine: number): void {
-  if (!conTabella()) return;
   const r = prepared(`SELECT attivita_chiave, ordine, trofeo_chiave, gia, evento_id FROM utente.${TABELLA} WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?`)
     .get(p, attivita, ordine) as RigaTrofeoTurno | undefined;
   if (!r) return;
@@ -92,7 +87,6 @@ export function togliTrofeoDelTurno(p: number, attivita: string, ordine: number)
  * sua spunta tolta non lo revochi. Vero se un turno lo rivendica (allora chi chiama non riporta indietro il trofeo).
  */
 export function cediTrofeoAUnTurno(p: number, trofeo: string, voceUid: string, cedi: boolean): boolean {
-  if (!conTabella()) return false;
   const t = prepared(`SELECT attivita_chiave, ordine FROM utente.${TABELLA} WHERE partita_id = ? AND trofeo_chiave = ? ORDER BY creato_il, rowid LIMIT 1`)
     .get(p, trofeo) as { attivita_chiave: string; ordine: number } | undefined;
   if (!t) return false;

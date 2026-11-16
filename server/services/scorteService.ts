@@ -14,8 +14,7 @@
 // ha una sede e ogni macchina ha le sue offerte, quindi le righe di un'offerta sono già quelle del suo punto vendita.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haTabellaUtente } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import { descriviRifornimento, descriviStatoScorta, normalizzaRifornimento, numeroGiorno, statoScorta, type RegolaRifornimento } from '../../shared/rifornimento.js';
 import type { ScortaArticoloDto } from '../../shared/types.js';
@@ -28,11 +27,6 @@ export interface RigaRegistro { id: number; partita_id: number; articolo_chiave:
 /** Quel che serve della riga dell'articolo: la regola, i pezzi per ciclo e, per la biblioteca, il libro. */
 export interface ArticoloConRegola { chiave: string; quantita: number | null; rifornimento_json?: string | null; oggetto_fonte?: string | null; oggetto_chiave?: string | null }
 
-/** Il registro esiste: su un partite.db vecchio, senza la tabella, nessuna scorta. */
-function conRegistro(): boolean {
-  return haTabellaUtente(getDb(), 'registro_acquisti');
-}
-
 /** La regola dell'articolo, o null se non ne ha (né la colonna c'è ancora). */
 export function regolaDi(a: ArticoloConRegola): RegolaRifornimento | null {
   return normalizzaRifornimento(a.rifornimento_json ?? null);
@@ -43,7 +37,6 @@ export function regolaDi(a: ArticoloConRegola): RegolaRifornimento | null {
  * stessa di `acquisto_partita`): il segno «ottenuto» e la riga che lo porta restano così della stessa chiave.
  */
 export function righeDellArticolo(partitaId: number, articolo: string): RigaRegistro[] {
-  if (!conRegistro()) return [];
   return prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND articolo_chiave = ? ORDER BY id').all(partitaId, articolo) as RigaRegistro[];
 }
 
@@ -54,7 +47,7 @@ export function righeDellArticolo(partitaId: number, articolo: string): RigaRegi
  */
 export function presenzaSenzaRiga(partitaId: number, articolo: string): boolean {
   return !!prepared('SELECT 1 FROM utente.acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articolo)
-    && !(conRegistro() && prepared('SELECT 1 FROM utente.registro_acquisti WHERE partita_id = ? AND articolo_chiave = ? AND ottenuto_qui = 1').get(partitaId, articolo));
+    && !prepared('SELECT 1 FROM utente.registro_acquisti WHERE partita_id = ? AND articolo_chiave = ? AND ottenuto_qui = 1').get(partitaId, articolo);
 }
 
 /**
@@ -63,7 +56,6 @@ export function presenzaSenzaRiga(partitaId: number, articolo: string): boolean 
  * all'arrivo della spedizione non sarà possibile effettuare nuovi ordini»). null per i negozi che non spediscono.
  */
 function consegnaDelNegozio(partitaId: number, articolo: string): { giorni: number; ordini: RigaRegistro[] } | null {
-  if (!conRegistro()) return null;
   const negozio = prepared('SELECT negozio_chiave FROM main.articolo WHERE chiave = ?').pluck().get(articolo) as string | undefined;
   if (!negozio) return null;
   const giorni = prepared(`SELECT MAX(json_extract(rifornimento_json, '$.giorni')) FROM main.articolo
@@ -136,8 +128,7 @@ export interface NuovaRiga { giorno: string; fascia: 'giorno' | 'sera'; quantita
  * Scrive una riga del registro (dentro la transazione di chi chiama). Per una voce la riga è una sola per voce ed effetto: se c'è già, si
  * aggiornano giorno, fascia e pezzi (la voce corretta nella guida), e il segno «ottenuto» resta quello di prima. Restituisce l'id.
  */
-export function scriviRiga(partitaId: number, articolo: string, r: NuovaRiga): number | null {
-  if (!conRegistro()) return null;
+export function scriviRiga(partitaId: number, articolo: string, r: NuovaRiga): number {
   const adesso = new Date().toISOString();
   const quantita = Math.min(999, Math.max(1, Math.trunc(r.quantita) || 1));
   if (r.fonte === 'voce') {
@@ -156,7 +147,6 @@ export function scriviRiga(partitaId: number, articolo: string, r: NuovaRiga): n
  * passa alla più vecchia; `tolgoOttenuto` = era l'ultima con il segno: chi chiama toglie anche `acquisto_partita`, come faceva prima.
  */
 export function togliRiga(partitaId: number, id: number): { riga: RigaRegistro | null; tolgoOttenuto: boolean } {
-  if (!conRegistro()) return { riga: null, tolgoOttenuto: false };
   const riga = prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, id) as RigaRegistro | undefined;
   if (!riga) return { riga: null, tolgoOttenuto: false };
   prepared('DELETE FROM utente.registro_acquisti WHERE id = ?').run(id);
@@ -168,7 +158,6 @@ export function togliRiga(partitaId: number, id: number): { riga: RigaRegistro |
 
 /** La riga della voce e del suo effetto, se c'è. */
 export function rigaDellaVoce(partitaId: number, voceUid: string, effettoUid: string): RigaRegistro | null {
-  if (!conRegistro()) return null;
   return (prepared("SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND fonte = 'voce'").get(partitaId, voceUid, effettoUid) as RigaRegistro | undefined) ?? null;
 }
 

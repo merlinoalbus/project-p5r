@@ -69,9 +69,11 @@ export function accendiFortunaDaVoce(partitaId: number, voceUid: string, dote: D
   const prima = leggiFortuna(partitaId);
   const riga = prepared('SELECT da_voce, prima_json FROM utente.fortuna_partita WHERE partita_id = ?').get(partitaId) as { da_voce: string | null; prima_json: string | null } | undefined;
   // rispuntando la stessa voce lo stato «di prima» resta quello originale; lo stato di prima porta con sé la voce che l'aveva acceso e
-  // il suo «prima», così togliere la spunta a quella voce lo scioglie dalla catena anche quando un'altra voce l'ha già coperto
+  // il suo «prima», così togliere la spunta a quella voce lo scioglie dalla catena anche quando un'altra voce l'ha già coperto.
+  // Una voce coperta che si riaccende (il suo effetto è cambiato mentre un'altra voce era in vigore) esce prima dalla catena: una voce
+  // vi compare una volta sola, altrimenti togliere le due spunte lascerebbe accesa la sua Fortuna di prima
   const memoria = riga?.da_voce === voceUid ? riga.prima_json
-    : prima.attiva && prima.dote ? JSON.stringify({ dote: prima.dote, giorno: prima.giorno, daVoce: riga?.da_voce ?? null, prima: leggiPrima(riga?.prima_json ?? null) } satisfies StatoPrimaFortuna) : null;
+    : prima.attiva && prima.dote ? JSON.stringify({ dote: prima.dote, giorno: prima.giorno, daVoce: riga?.da_voce ?? null, prima: senzaLaVoce(leggiPrima(riga?.prima_json ?? null), voceUid).catena } satisfies StatoPrimaFortuna) : null;
   const oggi = giornoDellaPartita(partitaId);
   prepared('INSERT INTO utente.fortuna_partita (partita_id, dote, giorno, acceso_il, da_voce, prima_json) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(partita_id) DO UPDATE SET dote = excluded.dote, giorno = excluded.giorno, acceso_il = excluded.acceso_il, da_voce = excluded.da_voce, prima_json = excluded.prima_json')
     .run(partitaId, dote, oggi, nowIso(), voceUid, memoria);

@@ -18,7 +18,7 @@ import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
 import type { OmbraRiferimentoDto } from './ombre.js';
-import type { PiazzamentoEsame, PremioPiazzamentoEsame, ReazioneRegalo, RequisitoConoscenzaEsame } from './puntiConfidenti.js';
+import type { PiazzamentoEsame, ReazioneRegalo, RequisitoConoscenzaEsame } from './puntiConfidenti.js';
 import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
@@ -1177,8 +1177,6 @@ export interface DomandaDto {
 
 /** L13 (ondata 7, O7-2): il premio di un piazzamento con i nomi, come lo mostra la pagina («Primi 10 · Fascino ♪♪♪»). */
 export interface PremioEsameDto { piazzamento: PiazzamentoEsame; nome: string; doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3 }>; trofeo: { chiave: string; nome: string } | null }
-/** I premi per piazzamento letti dalla colonna, prima dei nomi (per chi li applica). */
-export type PremiEsame = PremioPiazzamentoEsame[];
 
 export interface EsameDto {
   chiave: string;
@@ -3772,8 +3770,6 @@ export interface EsitoImportazionePacchettoDto {
   /** Immagini con contenuto nei dati di gioco dopo l'importazione. */
   immagini: number;
   orfani: OrfanoPartiteDto[];
-  /** L6: righe del backup con condizioni legacy `manuale` recuperate come avvisi; nessun contenuto delle note. */
-  condizioniConvertite?: string[];
   stato: StatoIstanzaDto;
 }
 
@@ -4060,10 +4056,9 @@ export interface OggettoDettaglioDto extends CatalogoOggettoDto {
   } | null;
 }
 
-/** Ondata 5: una consegna di un regalo nella partita (una riga di `regalo_partita`). `id` è null su un file delle partite senza la colonna;
- *  `catalogo` è null per un regalo segnato per nome senza oggetto del catalogo. */
+/** Ondata 5: una consegna di un regalo nella partita (una riga di `regalo_partita`). `catalogo` è null per un regalo segnato per nome senza oggetto del catalogo. */
 export interface ConsegnaRegaloDto {
-  id: number | null;
+  id: number;
   catalogo: string | null;
   /** Il nome storico della consegna (resta quello anche se l'oggetto si rinomina). */
   nome: string;

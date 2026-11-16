@@ -1,7 +1,6 @@
 // Letture del catalogo condivise dai consumatori: nessuna dipendenza da negozi, letture o avanzamento.
 // Il dettaglio aggregato vive in catalogoOggettiService; questa base evita cicli fra i servizi.
-import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { casaOggetto, categoriaDelListino, eCategoriaOggetto, normalizzaCostoScambio, type CategoriaOggetto } from '../../shared/catalogo.js';
 import { filtroRicerca } from '../../shared/testo.js';
 import type { CatalogoOggettoDto, ContenutoOggettoDto, CostoOggettoDto, OggettiGuidaDto, RicompensaOggettoDto, RiferimentoOggettoDto } from '../../shared/types.js';
@@ -21,10 +20,6 @@ export interface RigaCatalogoOggetto {
 }
 
 function analizza(json: string | null): unknown { try { return json ? JSON.parse(json) as unknown : null; } catch { return null; } }
-/** Nessuna query alle colonne nuove finché M7 non è registrata e applicata. */
-export function catalogoOggettiDisponibile(): boolean {
-  return haTabellaMain(getDb(), 'catalogo_oggetto');
-}
 export function nomiAltriOggetto(json: string): string[] {
   const v = analizza(json); return Array.isArray(v) ? v.filter((n): n is string => typeof n === 'string') : [];
 }
@@ -73,13 +68,12 @@ export function dtoOggetto(r: RigaCatalogoOggetto): CatalogoOggettoDto {
 /**
  * La lettura del catalogo con il prezzo minimo in yen fra le offerte. Ondata 5 (lotto E, decisione 5): il minimo conta anche il prezzo di una
  * fascia (`articolo.prezzo_per_fascia_json`, le sfide della Big Bang Burger a 500 ¥ di sera), la stessa regola di `prezzoNellaFascia`: la fascia
- * che non compare vale `prezzo`, e un JSON non leggibile vale `prezzo` (mai «gratis»). Su uno schema senza i prezzi per fascia resta `MIN(prezzo)`.
+ * che non compare vale `prezzo`, e un JSON non leggibile vale `prezzo` (mai «gratis»).
  */
 function sqlCatalogo(): string {
   const pf = sqlPrezzoPerFascia('a');
-  const prezzoMinimoOfferta = pf === 'NULL' ? 'a.prezzo'
-    // il minimo dei prezzi presenti fra listino, giorno e sera: ogni termine cade sugli altri se è vuoto, così un NULL non azzera il minimo
-    : `CASE WHEN ${pf} IS NOT NULL AND json_valid(${pf}) THEN MIN(COALESCE(a.prezzo, json_extract(${pf}, '$.giorno'), json_extract(${pf}, '$.sera')),
+  // il minimo dei prezzi presenti fra listino, giorno e sera: ogni termine cade sugli altri se è vuoto, così un NULL non azzera il minimo
+  const prezzoMinimoOfferta = `CASE WHEN ${pf} IS NOT NULL AND json_valid(${pf}) THEN MIN(COALESCE(a.prezzo, json_extract(${pf}, '$.giorno'), json_extract(${pf}, '$.sera')),
         COALESCE(json_extract(${pf}, '$.giorno'), a.prezzo, json_extract(${pf}, '$.sera')), COALESCE(json_extract(${pf}, '$.sera'), a.prezzo, json_extract(${pf}, '$.giorno'))) ELSE a.prezzo END`;
   return `SELECT c.*,
   (SELECT MIN(${prezzoMinimoOfferta}) FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
@@ -135,8 +129,7 @@ export function sqlRiferimentiFonte(fonte: CatalogoOggettoDto['fonte']['tipo']):
 
 /** Le fonti confluite restano riferimenti diretti, senza copie d'identità o ricerche per nome. */
 export function oggettiPerFonte(fonte: CatalogoOggettoDto['fonte']['tipo'], chiavi?: Iterable<string>): Map<string, CatalogoOggettoDto> {
-  if (!catalogoOggettiDisponibile()) return new Map();
-  const richieste = chiavi === undefined ? undefined : [...new Set(chiavi)];
+  const richieste =chiavi === undefined ? undefined : [...new Set(chiavi)];
   if (richieste?.length === 0) return new Map();
   if (fonte === 'guida') {
     const r = prepared("SELECT json FROM dati_guida WHERE chiave = 'oggetti-guida'").get() as { json: string } | undefined;
@@ -157,7 +150,7 @@ export function oggettiPerFonte(fonte: CatalogoOggettoDto['fonte']['tipo'], chia
 /** Un'unica lettura delle identità richieste dal listino; mai una ricerca o una fusione per nome. */
 export function riferimentiOggettiPerFonti(fonti: Iterable<CatalogoOggettoDto['fonte']['tipo']>): Map<string, RiferimentoOggettoDto> {
   const tipi = [...new Set(fonti)];
-  if (!tipi.length || !catalogoOggettiDisponibile()) return new Map();
+  if (!tipi.length) return new Map();
   const out = new Map<string, RiferimentoOggettoDto>();
   for (const tipo of tipi) for (const [fonte, o] of oggettiPerFonte(tipo)) out.set(`${tipo}/${fonte}`, { chiave: o.chiave, nome: o.nome, casa: o.casa });
   return out;
@@ -166,7 +159,7 @@ export function riferimentiOggettiPerFonti(fonti: Iterable<CatalogoOggettoDto['f
 /** Un'unica lettura delle identità richieste dal listino; mai una ricerca o una fusione per nome. */
 export function oggettiConChiavi(chiavi: Iterable<string>): Map<string, CatalogoOggettoDto> {
   const elenco = [...new Set(chiavi)];
-  if (!elenco.length || !catalogoOggettiDisponibile()) return new Map();
+  if (!elenco.length) return new Map();
   return new Map((prepared(`${sqlCatalogo()} WHERE c.chiave IN (SELECT value FROM json_each(?))`).all(JSON.stringify(elenco)) as RigaCatalogoOggetto[])
     .map((r) => [r.chiave, dtoOggetto(r)]));
 }
@@ -177,7 +170,6 @@ export interface OffertaBaseOggetto {
 
 /** Nomi e numero delle offerte correnti: prezzi, costi, condizioni e gesti restano nel listino L5. */
 export function riferimentiListiniScambi(): NonNullable<OggettiGuidaDto['listiniScambi']> {
-  if (!catalogoOggettiDisponibile()) return [];
   const negozi = ['mercante-sakai', 'venditore-ambulante', 'gachapon-akihabara', 'tanaka-affari-loschi', 'jose'];
   return (prepared(`SELECT n.chiave,n.nome,l.nome AS posto,
     (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.nascosto = 0) AS offerte
@@ -191,7 +183,7 @@ export function riferimentiListiniScambi(): NonNullable<OggettiGuidaDto['listini
 /** Indicazioni commerciali della guida, senza inventare disponibilità o acquisti in assenza di una partita. */
 export function offerteBaseDegliOggetti(chiavi: Iterable<string>): Map<string, OffertaBaseOggetto[]> {
   const out = new Map<string, OffertaBaseOggetto[]>(); const elenco = [...new Set(chiavi)];
-  if (!elenco.length || !catalogoOggettiDisponibile()) return out;
+  if (!elenco.length) return out;
   const righe = prepared(`SELECT a.catalogo_chiave,n.nome AS negozio_nome,n.tipo AS negozio_tipo,l.nome AS sede_nome,a.prezzo,a.costo_json
     FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
     LEFT JOIN luogo l ON l.chiave = n.sede_chiave
@@ -211,7 +203,6 @@ export function offerteBaseDegliOggetti(chiavi: Iterable<string>): Map<string, O
 /** Le offerte delle letture seguono il legame canonico, anche se il vecchio oggetto_fonte non c'è più. */
 export function negoziPerFonte(fonte: 'libro' | 'film' | 'videogioco'): Map<string, Array<{ articolo: string; negozio: string; negozioNome: string; prezzo: number | null }>> {
   const out = new Map<string, Array<{ articolo: string; negozio: string; negozioNome: string; prezzo: number | null }>>();
-  if (!catalogoOggettiDisponibile()) return out;
   const righe = prepared(`SELECT f.fonte_chiave,a.chiave,n.chiave AS negozio,n.nome AS negozio_nome,a.prezzo
     FROM (${sqlRiferimentiFonte(fonte)}) f JOIN articolo a ON a.catalogo_chiave = f.catalogo_chiave JOIN negozio n ON n.chiave = a.negozio_chiave
     WHERE a.nascosto = 0 AND n.nascosto = 0
@@ -229,7 +220,7 @@ export function negoziPerFonte(fonte: 'libro' | 'film' | 'videogioco'): Map<stri
 export function contenutiDelleVoci(voci?: Iterable<string>): Map<string, ContenutoOggettoDto[]> {
   const out = new Map<string, ContenutoOggettoDto[]>();
   const chiavi = voci === undefined ? undefined : [...new Set(voci)];
-  if (chiavi?.length === 0 || !catalogoOggettiDisponibile()) return out;
+  if (chiavi?.length === 0) return out;
   const righe = prepared(`SELECT v.voce_chiave,c.chiave,c.nome,v.quantita,v.nota FROM voce_oggetto v
     JOIN catalogo_oggetto c ON c.chiave = v.catalogo_chiave ${chiavi ? 'WHERE v.voce_chiave IN (SELECT value FROM json_each(?))' : ''}
     ORDER BY v.voce_chiave,v.ordine,c.chiave`).all(...(chiavi ? [JSON.stringify(chiavi)] : [])) as Array<ContenutoOggettoDto & { voce_chiave: string }>;
@@ -249,8 +240,8 @@ export interface OpzioniRicompense { condizione?: (condizioniJson: string) => st
 export function ricompensePerFonte(tipo: string, fonti?: Iterable<string>, opzioni: OpzioniRicompense = {}): Map<string, RicompensaOggettoDto[]> {
   const out = new Map<string, RicompensaOggettoDto[]>();
   const chiavi = fonti === undefined ? undefined : [...new Set(fonti)];
-  if (chiavi?.length === 0 || !catalogoOggettiDisponibile()) return out;
-  const descrivi = opzioni.condizione && haColonnaMain(getDb(), 'ricompensa_oggetto', 'condizioni_json') ? opzioni.condizione : null;
+  if (chiavi?.length === 0) return out;
+  const descrivi = opzioni.condizione ?? null;
   const righe = prepared(`SELECT r.fonte_chiave,c.chiave,c.nome,r.quantita,r.nota${descrivi ? ',r.condizioni_json' : ''} FROM ricompensa_oggetto r
     JOIN catalogo_oggetto c ON c.chiave = r.catalogo_chiave WHERE r.fonte_tipo = ? ${chiavi ? 'AND r.fonte_chiave IN (SELECT value FROM json_each(?))' : ''}
     ORDER BY r.fonte_chiave,r.ordine,c.chiave`).all(tipo, ...(chiavi ? [JSON.stringify(chiavi)] : [])) as Array<RicompensaOggettoDto & { fonte_chiave: string; condizioni_json?: string | null }>;
@@ -269,7 +260,7 @@ export function ricompensePerFonte(tipo: string, fonti?: Iterable<string>, opzio
  */
 export function effettiDegliOggetti(chiavi: Iterable<string>): Map<string, string> {
   const elenco = [...new Set(chiavi)];
-  if (!elenco.length || !catalogoOggettiDisponibile()) return new Map();
+  if (!elenco.length) return new Map();
   const righe = prepared('SELECT chiave,effetto FROM catalogo_oggetto WHERE chiave IN (SELECT value FROM json_each(?))').all(JSON.stringify(elenco)) as Array<{ chiave: string; effetto: string }>;
   return new Map(righe.map((r) => [r.chiave, r.effetto]));
 }
@@ -284,7 +275,6 @@ export function effettoDellaFonte(proprio: string | null | undefined, collegati:
 /** Materiali per le ricette esistenti: la chiave della ricetta non viene rinominata insieme al prodotto. */
 export function materialiDelleRicette(): Map<string, ContenutoOggettoDto[]> {
   const out = new Map<string, ContenutoOggettoDto[]>();
-  if (!catalogoOggettiDisponibile()) return out;
   const righe = prepared(`SELECT r.ricetta,c.chiave,c.nome,r.quantita FROM ricetta_materiale r
     JOIN catalogo_oggetto c ON c.chiave = r.catalogo_chiave ORDER BY r.ricetta,c.nome,c.chiave`).all() as Array<{ ricetta: string; chiave: string; nome: string; quantita: number }>;
   for (const r of righe) {

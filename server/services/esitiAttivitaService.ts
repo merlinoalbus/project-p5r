@@ -30,7 +30,6 @@ import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { statoAlGiorno, statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { meteoOra } from './meteoService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
-import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { scelteAlternativeDellaVoce } from './alternativeAcquistiService.js';
 import { sqlPrezzoPerFascia } from './prezziArticoli.js';
 import { normalizzaPrezzoPerFascia, prezzoNellaFascia, type PrezzoPerFascia } from '../../shared/catalogo.js';
@@ -67,9 +66,8 @@ export function lavoroAScelta(chiave: string): { nome: string; paga: { base: num
   return { nome: r.nome, paga: r.paga_yen != null && r.paga_yen > 0 ? { base: r.paga_yen, massima: r.paga_massima != null && r.paga_massima > r.paga_yen ? r.paga_massima : null } : null, doti };
 }
 
-/** Gli esiti dichiarati da un'attività (null se non ne dichiara o se la colonna non c'è ancora) e il suo nome. */
+/** Gli esiti dichiarati da un'attività (null se non ne dichiara) e il suo nome. */
 export function esitiDellAttivita(chiave: string): { nome: string; esiti: EsitiAttivita | null } | null {
-  // `SELECT *`: su uno schema vecchio la colonna non c'è e l'attività vale «senza esiti»
   const r = prepared('SELECT * FROM attivita WHERE chiave = ?').get(chiave) as { nome: string; esiti_json?: string | null } | undefined;
   return r ? { nome: r.nome, esiti: leggiEsitiAttivita(r.esiti_json) } : null;
 }
@@ -80,9 +78,7 @@ interface ArticoloEsito { chiave: string; nome: string; prezzo: number | null; p
  *  ripetuta sulle sue offerte) e poi quelle del listino. */
 function articoloEsito(chiave: string): ArticoloEsito | null {
   const perFascia = sqlPrezzoPerFascia('a');
-  const a = prepared(catalogoOggettiDisponibile()
-    ? `SELECT a.chiave, COALESCE(c.nome, NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json, n.sblocco_json FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave LEFT JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?`
-    : `SELECT a.chiave, COALESCE(NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json, n.sblocco_json FROM articolo a LEFT JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?`)
+  const a = prepared(`SELECT a.chiave, COALESCE(c.nome, NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json, n.sblocco_json FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave LEFT JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?`)
     .get(chiave) as { chiave: string; nome: string; prezzo: number | null; prezzo_per_fascia_json: string | null; condizioni_json: string | null; sblocco_json: string | null } | undefined;
   return a ? { chiave: a.chiave, nome: a.nome, prezzo: a.prezzo, prezzoPerFascia: normalizzaPrezzoPerFascia(a.prezzo_per_fascia_json),
     condizioni: [...leggiCondizioniSalvate(a.sblocco_json), ...leggiCondizioniSalvate(a.condizioni_json)] } : null;
@@ -99,8 +95,8 @@ function trofeoEsito(chiave: string | undefined): EsitoDisponibileDto['trofeo'] 
  *  turno non entra fra gli ottenuti). */
 function oggettiEsito(oggetti: EsitoAttivita['oggetti']): EsitoDisponibileDto['oggetti'] {
   if (!oggetti?.length) return [];
-  const nome = catalogoOggettiDisponibile() ? prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck() : null;
-  return oggetti.map((o) => ({ chiave: o.oggetto, nome: (nome?.get(o.oggetto) as string | undefined) ?? 'Oggetto non più nel catalogo', quantita: o.quantita }));
+  const nome = prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck();
+  return oggetti.map((o) => ({ chiave: o.oggetto, nome: (nome.get(o.oggetto) as string | undefined) ?? 'Oggetto non più nel catalogo', quantita: o.quantita }));
 }
 
 /** Ondata 5 (lotto F-bis): gli oggetti che l'esito consuma, con il nome del catalogo e, con una partita, le copie possedute adesso (la stessa
@@ -108,10 +104,9 @@ function oggettiEsito(oggetti: EsitoAttivita['oggetti']): EsitoDisponibileDto['o
  *  che l'app non conosce, e la scelta mostra il numero senza bloccare. */
 function consumaEsito(consuma: EsitoAttivita['consuma'], partitaId: number | undefined): EsitoDisponibileDto['consuma'] {
   if (!consuma?.length) return [];
-  const conCatalogo = catalogoOggettiDisponibile();
-  const nome = conCatalogo ? prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck() : null;
-  return consuma.map((o) => ({ chiave: o.oggetto, nome: (nome?.get(o.oggetto) as string | undefined) ?? 'Oggetto non più nel catalogo', quantita: o.quantita,
-    disponibili: partitaId !== undefined && conCatalogo ? copieDellOggetto(partitaId, o.oggetto).disponibili : null }));
+  const nome = prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck();
+  return consuma.map((o) => ({ chiave: o.oggetto, nome: (nome.get(o.oggetto) as string | undefined) ?? 'Oggetto non più nel catalogo', quantita: o.quantita,
+    disponibili: partitaId !== undefined ? copieDellOggetto(partitaId, o.oggetto).disponibili : null }));
 }
 
 /** Un esito come lo vede la scelta: le condizioni sono le sue più quelle dell'articolo, valutate sullo stato (senza stato: disponibile). */

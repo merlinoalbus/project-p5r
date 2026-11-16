@@ -3,7 +3,6 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
@@ -21,7 +20,7 @@ import { fattiPartita } from './cruciverbaService.js';
 import { timbriRaccoltiInTutto } from './timbriService.js';
 
 interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; fonte: string; verificato: number;
-  /** L13 (O7-4): quando si ottiene, nel vocabolario unico delle condizioni; assente su uno schema di prima. */
+  /** L13 (O7-4): quando si ottiene, nel vocabolario unico delle condizioni. */
   condizioni_json?: string | null }
 type SeedCompletamento = Omit<CompletamentoDto, 'trofei' | 'ottenuti'>;
 
@@ -96,8 +95,6 @@ function unitaDelConteggio(c: ConteggioSfidaCovo): { una: string; tante: string;
 
 const nomeDelNegozio = (chiave: string): string => (prepared('SELECT nome FROM negozio WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave;
 
-/** Vero se la tabella delle partite c'è (uno schema di prima non ce l'ha: il conteggio allora non si dice). */
-
 /**
  * L8-03: a che punto è la partita in quello che la sfida conta, e l'obiettivo. I totali «tutti» si contano nel DB a ogni lettura, mai scritti:
  * le attività `videogioco` (lo stesso criterio del contatore `videogiochi-completati`, `disponibilitaService`), i Confidenti (tutti quelli del
@@ -140,7 +137,7 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
     case 'timbri-raccolti': return { fatti: timbriRaccoltiInTutto(partitaId), obiettivo: c.obiettivo };
     case 'spesa-negozio': return { fatti: st.spesaPerNegozio.get(c.negozio) ?? 0, obiettivo: c.obiettivo };
     case 'persona-livello': {
-      const fatti = !haTabellaUtente(getDb(), 'persona_posseduta') ? 0 : prepared('SELECT COALESCE(MAX(livello), 0) FROM utente.persona_posseduta WHERE partita_id = ?').pluck().get(partitaId) as number;
+      const fatti = prepared('SELECT COALESCE(MAX(livello), 0) FROM utente.persona_posseduta WHERE partita_id = ?').pluck().get(partitaId) as number;
       return { fatti, obiettivo: c.obiettivo };
     }
   }
@@ -149,7 +146,6 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
 /** I regali della partita, tutti: la guida dice «almeno 10 regali totali ai Confidenti» e non esclude nessun regalo, quindi conta anche la
  *  Cartolina spedita (revisione dei lotti D e D2: escluderla era una regola senza fonte). */
 function regaliConsegnati(partitaId: number): number {
-  if (!haTabellaUtente(getDb(), 'regalo_partita')) return 0;
   return prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ?').pluck().get(partitaId) as number;
 }
 

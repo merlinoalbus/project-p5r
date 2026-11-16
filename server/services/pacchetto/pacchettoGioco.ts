@@ -20,7 +20,7 @@ import path from 'node:path';
 import { config } from '../../config.js';
 import { logger } from '../../utils/logger.js';
 import { resolveDbPath, type AppDatabase } from '../../db/dbService.js';
-import { haColonna, haTabella } from '../../db/colonne.js';
+import { haTabella } from '../../db/colonne.js';
 import { creaPartiteDalModelloSeMancano } from '../../db/partiteVuote.js';
 import { verificaVersioni } from '../../db/versioneSchema.js';
 import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
@@ -168,17 +168,8 @@ export function ricaricaPacchetto(db: AppDatabase, percorso: string = percorsoPa
         }
         tabelle++;
       }
-      // Le copie dei pezzi vivono in una tabella a parte dai loro ritagli: se il file da cui si ricarica porta i ritagli con la posa
-      // accanto e nessuna tabella delle copie, la posa di ogni ritaglio diventa la sua prima copia; in ogni caso nessuna copia resta
-      // senza il suo ritaglio (nota N2 del validatore).
-      if (haTabella(db, 'copia_pezzo') && nomi.includes('pezzo_mappa')) {
-        const conPosa = haColonna(db, 'pezzo_mappa', 'x', 'pacchetto');
-        if (conPosa && !nomi.includes('copia_pezzo')) {
-          db.prepare('DELETE FROM main.copia_pezzo').run();
-          righe += db.prepare(`INSERT INTO main.copia_pezzo (uid, pezzo_id, etichetta, x, y, rotazione, specchio_orizzontale, specchio_verticale, condizioni_json, ordine, updated_at)
-            SELECT lower(hex(randomblob(16))), p.id, '', p.x, p.y, p.rotazione, p.specchio_orizzontale, p.specchio_verticale, p.condizioni_json, 0, p.updated_at
-            FROM pacchetto.pezzo_mappa p WHERE p.id IN (SELECT id FROM main.pezzo_mappa) ORDER BY p.id`).run().changes;
-        }
+      // Le copie dei pezzi vivono in una tabella a parte dai loro ritagli: nessuna copia resta senza il suo ritaglio (nota N2 del validatore).
+      if (nomi.includes('pezzo_mappa')) {
         db.prepare('DELETE FROM main.copia_pezzo WHERE pezzo_id NOT IN (SELECT id FROM main.pezzo_mappa)').run();
       }
     })();

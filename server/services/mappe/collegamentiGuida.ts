@@ -14,7 +14,6 @@
 
 import type { AppDatabase } from '../../db/dbService.js';
 import { getDb, prepared } from '../../db/dbService.js';
-import { haTabellaUtente } from '../../db/schemaMemo.js';
 import { httpErrors, type HttpError } from '../../utils/httpError.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
 import { palazzoDiOgniMappa } from '../palazziService.js';
@@ -47,12 +46,6 @@ export function erroreVoceDelPin(pin: { nome: string; mappa: string | null }, pu
   return null;
 }
 
-/** Le partite ci sono (il file `utente` è attaccato, con le sue tabelle)? Senza, chi allinea gli stati non fa niente. */
-function conPartite(db: AppDatabase): boolean {
-  if (!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()) return false;
-  return haTabellaUtente(db, 'punto_partita') && haTabellaUtente(db, 'spillo_partita') && haTabellaUtente(db, 'partita');
-}
-
 /**
  * Quando un punto riceve i suoi pin, i due stati che fino a quel momento vivevano separati si uniscono, in ogni partita:
  *   - un punto già segnato segna i pin che hanno solo lui; un pin con altre voci è fatto quando lo sono tutte;
@@ -60,10 +53,8 @@ function conPartite(db: AppDatabase): boolean {
  *     suo Enigma lo segue). Un pin con altre voci non conta: il suo «raccolto» parla di quelle (voci indipendenti, 2026-10-09),
  *     e segue le sue voci, tra cui ora questa ancora da fare. È la stessa regola di `impostaRaccolto`.
  * Un pin che ha solo questo punto, raccolto o no, non perde niente.
- * Va eseguita con il file delle partite attaccato (`utente`); senza, non fa niente.
  */
 export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string): void {
-  if (!conPartite(db)) return;
   // L4 (§8.11): per una voce con un carattere (permanente, rigenerabile, racconto) gli stati li riallinea chi collega
   // (`riallineaStati`: il pin tiene il suo segno, la voce si calcola dai suoi pin). Resta la regola di prima per le voci senza
   // carattere (dedali dei Memento, Persona: R4-30).
@@ -91,7 +82,7 @@ export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string
  * il pin è fatto). Senza più voci resta com'era, come quando si scollegava l'unica voce.
  */
 export function allineaPinScollegato(db: AppDatabase, pin: { id: number; uid: string | null }, adesso: string): void {
-  if (!pin.uid || !conPartite(db)) return;
+  if (!pin.uid) return;
   // L4: solo i pin delle sole voci senza carattere (dedali dei Memento) hanno un segno che segue le voci; gli altri lo calcolano
   const voci = modelloAvanzamento(db).pin.get(pin.id);
   if (!voci || voci.contano.length > 0 || voci.altre.length === 0) return;

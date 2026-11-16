@@ -13,11 +13,8 @@
 // aggiungere dati costruisce un oggetto nuovo.
 // ============================================================
 
-import { getDb, prepared, type AppDatabase } from '../db/dbService.js';
-import { haTabella } from '../db/colonne.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
+import { prepared, type AppDatabase } from '../db/dbService.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
-import { logger } from '../utils/logger.js';
 import { analizzaPercorso, generePrimitivo, impostaImmutabile, risolvi } from '../../shared/percorsoGuida.js';
 
 const cache = new Map<string, unknown>();
@@ -55,13 +52,9 @@ const cacheCorretti = new Map<string, BloccoCorretto>();
 
 const SQL_CORREZIONI_DEL_BLOCCO = 'SELECT percorso, valore_json FROM correzione_dati_guida WHERE blocco = ? ORDER BY percorso';
 
-/** Le correzioni di un blocco (`correzione_dati_guida`), nell'ordine dell'indirizzo; vuote se la tabella non c'è (uno schema vecchio). */
+/** Le correzioni di un blocco (`correzione_dati_guida`), nell'ordine dell'indirizzo. */
 export function correzioniDelBlocco(chiave: string): RigaCorrezione[] {
-  try {
-    return prepared(SQL_CORREZIONI_DEL_BLOCCO).all(chiave) as RigaCorrezione[];
-  } catch {
-    return [];
-  }
+  return prepared(SQL_CORREZIONI_DEL_BLOCCO).all(chiave) as RigaCorrezione[];
 }
 
 /**
@@ -127,10 +120,9 @@ export function correzioniOrfane(chiave: string): string[] {
 
 /**
  * Un blocco della guida letto da un database qualunque (le conversioni possono lavorare su una connessione
- * loro): null se la tabella o la chiave non ci sono o se il JSON è illeggibile. Senza cache: la usa chi gira una volta.
+ * loro): null se la chiave non c'è o se il JSON è illeggibile. Senza cache: la usa chi gira una volta.
  */
 export function bloccoGuidaDi(db: AppDatabase, chiave: string): unknown {
-  if (!haTabella(db, 'dati_guida')) return null;
   const riga = db.prepare('SELECT json FROM dati_guida WHERE chiave = ?').get(chiave) as { json: string } | undefined;
   if (!riga) return null;
   try {
@@ -165,24 +157,10 @@ export function finestreDaDati(dati: unknown): Map<string, FinestraDungeon> {
 
 /** Le finestre dei Palazzi. L6 (§4.4): stanno nelle colonne `dungeon.finestra_dal`/`finestra_al` (un solo scrittore:
  *  `impostaFinestra`, che scrive anche furto consigliato e lettera e svuota questa copia; sono l'apertura e la scadenza della
- *  scheda del Palazzo, senza testi in prosa accanto); il blocco `finestre-dungeon` della guida si legge solo su uno schema senza queste colonne. Una trascrizione
- *  illeggibile vale «nessuna finestra»: non si indovina una data. */
+ *  scheda del Palazzo, senza testi in prosa accanto). Un errore SQL qui è un guasto vero e risale, non diventa «nessuna finestra». */
 export function finestreDungeon(): ReadonlyMap<string, FinestraDungeon> {
   if (finestre) return finestre;
-  // le colonne ci sono (sempre, sullo schema atteso): un errore SQL qui è un guasto vero e risale, non diventa «nessuna finestra»
-  if (haColonnaMain(getDb(), 'dungeon', 'finestra_dal')) {
-    const righe = prepared('SELECT chiave, finestra_dal, finestra_al FROM dungeon WHERE finestra_dal IS NOT NULL').all() as Array<{ chiave: string; finestra_dal: string; finestra_al: string | null }>;
-    finestre = new Map(righe.map((r) => [r.chiave, { dal: r.finestra_dal, al: r.finestra_al }]));
-    return finestre;
-  }
-  // uno schema vecchio: le colonne non ci sono
-  let dati: unknown;
-  try {
-    dati = datiGuida('finestre-dungeon');
-  } catch (err) {
-    logger.warn({ err }, 'Finestre dei Palazzi: il blocco «finestre-dungeon» della guida non si legge, nessuna finestra.');
-    dati = null;
-  }
-  finestre = finestreDaDati(dati);
+  const righe = prepared('SELECT chiave, finestra_dal, finestra_al FROM dungeon WHERE finestra_dal IS NOT NULL').all() as Array<{ chiave: string; finestra_dal: string; finestra_al: string | null }>;
+  finestre = new Map(righe.map((r) => [r.chiave, { dal: r.finestra_dal, al: r.finestra_al }]));
   return finestre;
 }

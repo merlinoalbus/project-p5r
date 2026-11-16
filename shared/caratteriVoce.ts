@@ -73,13 +73,3 @@ export function carattereDellaVoce(v: VoceConCarattere): CarattereVoce | null {
   if (regola === null) return null;
   return eCarattere(v.carattere) ? v.carattere : regola;
 }
-
-/**
- * La stessa regola in SQL, per la voce con l'alias dato (colonne `tipo`, `area_dedalo_chiave` e, se c'è, `carattere`): il carattere
- * effettivo o NULL. `conColonna` falso per uno schema senza la colonna `carattere`.
- */
-export function sqlCarattereVoce(alias: string, conColonna = true): string {
-  const lista = (tipi: readonly string[]) => tipi.map((t) => `'${t}'`).join(', ');
-  const regola = `CASE WHEN ${alias}.tipo IN (${lista(TIPI_RIGENERABILI)}) THEN 'rigenerabile' WHEN ${alias}.tipo IN (${lista(TIPI_DESCRITTIVI)}) THEN 'descrittiva' ELSE 'permanente' END`;
-  return `(CASE WHEN ${alias}.area_dedalo_chiave IS NOT NULL OR ${alias}.tipo IN (${lista(TIPI_SENZA_CARATTERE)}) THEN NULL ${conColonna ? `WHEN ${alias}.carattere IS NOT NULL THEN ${alias}.carattere ` : ''}ELSE ${regola} END)`;
-}

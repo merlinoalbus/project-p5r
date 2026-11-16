@@ -19,7 +19,7 @@ import { statoDisponibilitaPartita, type StatoDisponibilita } from './disponibil
 import { esitoAperturaDelDedalo, valutaInsieme } from './condizioni/valutatore.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { slug } from '../../shared/slug.js';
-import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { dettaglioNegozio } from './negoziService.js';
 import { profiliOmbre } from './ombreService.js';
 import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
@@ -217,7 +217,7 @@ export function richieste(partitaId?: number): Congelato<RichiesteDto> {
     if (r.stato === 'completata') d.completate += 1;
   }
   const fonteJose = datiGuidaCorretti<JoseDto>('jose');
-  const jose = fonteJose && catalogoOggettiDisponibile() ? { ...fonteJose, scambi: [],
+  const jose = fonteJose ? { ...fonteJose, scambi: [],
     listino: prepared("SELECT 1 FROM negozio WHERE chiave = 'jose' AND nascosto = 0").get() ? dettaglioNegozio('jose', partitaId) : null } : fonteJose;
   return { richieste: lista, jose, dedali, completate: lista.filter((r) => r.stato === 'completata').length, totale: lista.length, collocazioni: collocazioni() };
 }

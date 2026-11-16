@@ -60,19 +60,6 @@ export function resaPuntiScelta(s: PuntiScelta): string {
   return resaPunti(s.punti);
 }
 
-/**
- * Vero se toccare la scelta alla spunta della voce dice da sé le note ottenute: il valore non dipende dal ramo (amicizia o amore) ed è
- * nessuno o da una a tre note. Una scelta senza punti nella guida dà «nessun punto», come oggi.
- */
-export function sceltaToccabile(s: PuntiScelta): boolean {
-  return !puntiAmoreDiversi(s) && (s.punti === null || (Number.isInteger(s.punti) && s.punti >= 0 && s.punti <= 3));
-}
-
-/** Le note che la scelta dà alla spunta (1–3; null = nessun punto). Solo per le scelte toccabili (`sceltaToccabile`). */
-export function noteDellaScelta(s: PuntiScelta): 1 | 2 | 3 | null {
-  return s.punti === 1 || s.punti === 2 || s.punti === 3 ? s.punti : null;
-}
-
 /** «5 punti», «1 punto», «−3 punti»; `segno`: anche il «+» davanti ai punti in più. */
 export function testoPunti(n: number, opz: { segno?: boolean } = {}): string {
   const assoluto = Math.abs(n);

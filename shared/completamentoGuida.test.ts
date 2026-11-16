@@ -2,7 +2,7 @@
 // Test — il completamento con la funzione unica (L4 «Avanzamento unico», lotti/L4/modifiche.md §1.5)
 // ============================================================
 
-import { areaCompletata, infiltrazioneCompletata, palazzoCompletato, palazzoConcluso, percentualeOggetti } from './completamentoGuida.js';
+import { areaCompletata, infiltrazioneCompletata, palazzoCompletato, palazzoConcluso } from './completamentoGuida.js';
 
 describe('completamento della guida dei Palazzi', () => {
   it('un’infiltrazione: completata con tutti gli oggetti permanenti fatti; senza niente da contare mai (R4-22); senza partita null', () => {
@@ -35,14 +35,5 @@ describe('completamento della guida dei Palazzi', () => {
     expect(palazzoConcluso({ tesoro: null, boss: null })).toBeNull();
     // Kamoshida p1: concluso, non completato (56/71)
     expect(palazzoConcluso({ tesoro: true, boss: true }) && !palazzoCompletato({ oggetti: 71, fatti: 56, tesoro: true, boss: true })).toBe(true);
-  });
-
-  it('la percentuale: intera per difetto, il 100% solo a oggetti tutti fatti; null senza partita o senza oggetti', () => {
-    expect(percentualeOggetti({ oggetti: 71, fatti: 56 })).toBe(78);
-    expect(percentualeOggetti({ oggetti: 3, fatti: 2 })).toBe(66);
-    expect(percentualeOggetti({ oggetti: 200, fatti: 199 })).toBe(99);
-    expect(percentualeOggetti({ oggetti: 80, fatti: 80 })).toBe(100);
-    expect(percentualeOggetti({ oggetti: 0, fatti: 0 })).toBeNull();
-    expect(percentualeOggetti({ oggetti: 3, fatti: null })).toBeNull();
   });
 });

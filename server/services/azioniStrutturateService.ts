@@ -15,7 +15,6 @@ import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { destinazioneDellaVoce } from './palazziService.js';
 import { postoDelPin } from './mappe/nomiDeiPosti.js';
-import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { DatoConYen, NomiFraseEffetto } from '../../shared/effettiVoce.js';
@@ -34,7 +33,6 @@ const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.ch
 /** Le chiavi di lettura restano quelle originali; il titolo corrente segue anche una fonte confluita. */
 function titoliLettura(tabella: 'libro' | 'film' | 'attivita', coda = ''): string {
   const originale = 'l.nome';
-  if (!catalogoOggettiDisponibile()) return `SELECT l.*,${originale} AS titolo_corrente FROM ${tabella} l ${coda}`;
   return `SELECT l.*,COALESCE(c.nome,${originale}) AS titolo_corrente FROM ${tabella} l
     LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave ${tabella === 'attivita' ? "AND l.tipo = 'videogioco'" : ''} ${coda}`;
 }
@@ -184,7 +182,6 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
 function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti' | 'conBonus' | 'senzaBonus' | 'gemelliTempo'> {
   const esiti: Record<string, string> = {}, modiEsiti: Record<string, 'scelta' | 'automatico'> = {}, strumenti: Record<string, string> = {}, conBonus: Record<string, true> = {}, senzaBonus: Record<string, true> = {};
   const gemelliTempo: Record<string, string> = {};
-  // `SELECT *`: su uno schema senza `esiti_json` la colonna non c'è e nessuna attività ha esiti
   for (const r of prepared('SELECT * FROM attivita').all() as Array<{ chiave: string; esiti_json?: string | null }>) {
     const e = leggiEsitiAttivita(r.esiti_json);
     if (!e) continue;
@@ -271,7 +268,6 @@ export function elenchiAzione(): ElenchiAzioneDto {
   const voci = (sql: string) => prepared(sql).all() as Array<{ chiave: string; nome: string; dettaglio?: string | null }>;
   /** Le stesse righe senza `dettaglio` quando è vuoto o nullo, così il campo compare solo se ha un valore. */
   const pulite = (r: Array<{ chiave: string; nome: string; dettaglio?: string | null }>) => r.map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dettaglio ? { dettaglio: x.dettaglio } : {}) }));
-  // `*` e poi `titolo_corrente`: su uno schema vecchio `esiti_json` non c'è (nessun esito)
   const attivita = (prepared(`SELECT * FROM (${titoliLettura('attivita', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`).all() as Array<{ chiave: string; titolo_corrente: string; tipo: string; tracciamento: string; confidente_chiave: string | null; esiti_json?: string | null }>)
     .map((a) => ({ ...a, nome: a.titolo_corrente, esiti_json: a.esiti_json ?? null }));
   // L13: gli esiti di ogni attività, per scegliere nella voce l'esito atteso del turno (solo nel modo «scelta»)
@@ -297,7 +293,7 @@ export function elenchiAzione(): ElenchiAzioneDto {
     confidenti: (prepared('SELECT chiave, nome, arcana FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string; arcana: string }>).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: t('arcana', c.arcana) })),
     dungeon: pulite(voci('SELECT chiave, nome FROM dungeon ORDER BY ordine')),
     richieste: conYen(pulite(voci('SELECT chiave, nome, committente AS dettaglio FROM richiesta ORDER BY ordine')), yenRichieste),
-    libri: pulite(voci(`SELECT chiave,titolo_corrente AS nome,${catalogoOggettiDisponibile() ? 'NULL' : 'dove'} AS dettaglio FROM (${titoliLettura('libro', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
+    libri: pulite(voci(`SELECT chiave,titolo_corrente AS nome,NULL AS dettaglio FROM (${titoliLettura('libro', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
     film: conYen(pulite(voci(`SELECT chiave,titolo_corrente AS nome,CASE dove WHEN 'cinema' THEN 'Cinema' ELSE 'DVD' END AS dettaglio FROM (${titoliLettura('film', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)), yenFilm),
     videogiochi: attivita.filter((a) => a.tipo === 'videogioco').map((a) => ({ chiave: a.chiave, nome: a.nome })),
     attivita: attivita.map((a) => ({

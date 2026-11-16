@@ -9,8 +9,7 @@
 // pin è fatto quando **tutte** le sue voci sono segnate (`fattoPerVoci`).
 // ============================================================
 
-import { getDb, prepared } from '../../db/dbService.js';
-import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
+import { prepared } from '../../db/dbService.js';
 import { sqlVoceDescrittiva } from '../../../shared/spilli.js';
 
 /**
@@ -32,22 +31,14 @@ export function vociDelPinSql(alias: string): string {
 export const VOCI_GESTITE_SQL = `SELECT pp.punto_chiave FROM punto_partita pp JOIN punto_interesse pi ON pi.chiave = pp.punto_chiave
   WHERE pp.partita_id = ? AND NOT ${sqlVoceDescrittiva('pi')}`;
 
-/** Le colonne di `spillo` e se c'è `spillo_voce`: lo schema può essere vecchio. */
-function schemaVoci(): { tabella: boolean; colonna: boolean } {
-  const tabella = haTabellaMain(getDb(), 'spillo_voce');
-  const colonna = !tabella && haColonnaMain(getDb(), 'spillo', 'voce_chiave');
-  return { tabella, colonna };
-}
-
 /**
  * Le voci della guida di ogni pin che ne ha, per id, in ordine di chiave: la stessa regola di `vociDelPinSql`, letta una volta
- * per tutti i pin. Si adatta allo schema: senza `spillo_voce` vale `voce_chiave`, senza nemmeno quella il solo riferimento «punto».
+ * per tutti i pin.
  * Con `soloDaSegnare` restano le voci che si segnano: una descrittiva («Altro») non ha stato, e non può tenere un pin «da fare»
  * (le regole del collegamento non la ammettono, ma una scritta da prima può esserci).
  */
 export function vociDiOgniPin(soloDaSegnare = false): Map<number, string[]> {
-  const { tabella, colonna } = schemaVoci();
-  const righe = prepared(`SELECT v.id, v.voce FROM (${tabella ? 'SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION ' : ''}${colonna ? 'SELECT id, voce_chiave FROM spillo WHERE voce_chiave IS NOT NULL UNION ' : ''}
+  const righe = prepared(`SELECT v.id, v.voce FROM (SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION
     SELECT id, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave IS NOT NULL) v
     ${soloDaSegnare ? `JOIN punto_interesse pi ON pi.chiave = v.voce AND NOT ${sqlVoceDescrittiva('pi')}` : ''} ORDER BY 1, 2`).all() as Array<{ id: number; voce: string }>;
   const out = new Map<number, string[]>();

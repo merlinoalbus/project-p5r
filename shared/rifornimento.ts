@@ -43,9 +43,6 @@ export interface RegolaRifornimento {
   daVerificare?: boolean;
 }
 
-/** La regola dell'utente dove la guida tace: il segno «comprato» vale fino al cambio di giornata, senza limite di pezzi. */
-export const REGOLA_FALLBACK_UTENTE: RegolaRifornimento = { tipo: 'giorno', origine: 'fallback-utente' };
-
 const GIORNI_VALIDI: ReadonlySet<string> = new Set(GIORNI_SETTIMANA.map((g) => g.chiave));
 
 /** La regola letta dal dato salvato (testo JSON o oggetto); null se assente o non riconoscibile (nessuna regola: nessuna scorta). */

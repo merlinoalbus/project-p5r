@@ -9,7 +9,7 @@
 // **versione uguale a quella che il codice legge**: un backup di un'altra versione dell'app non si ripristina, nessuna conversione),
 // poi si salva una copia di sicurezza di ciò che c'è ora, si chiude la connessione, si mettono al loro posto i file e si riapre. Se
 // qualcosa fallisce dopo la chiusura, la copia di sicurezza viene ripristinata e l'app resta utilizzabile. La riapertura è la stessa
-// di «Importa» (`riapriDopoSostituzione`): conversione delle condizioni `manuale` e regole dell'avvio se cambia il file di gioco,
+// di «Importa» (`riapriDopoSostituzione`): regole dell'avvio se cambia il file di gioco,
 // effetti di stato mai applicati fra le proposte, specchio dei pin, registro Tanaka.
 //
 // **Tutto passa da file, mai da buffer interi** (rilievi F19/P3' della verifica completa, 2026-10-03): con ~300 MB tenere in memoria
@@ -36,7 +36,6 @@ import { occupaIstanza } from './lucchettoIstanza.js';
 import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
 import { verificaCollegamentiPescaImportati } from './vincoliAttivitaPesca.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
-import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
 import { proponiStatiMancanti } from './statiMancantiService.js';
 import { riallineaStati } from './mappe/statiGuida.js';
 import { ESTENSIONI_BACKUP, copiaDalDeposito, elencaDeposito as elencaCartella } from './depositoService.js';
@@ -337,17 +336,16 @@ export function riapriIstanza(): void {
  * L13-01: la via unica con cui un file di gioco o di partite messo al posto di quello di prima entra in servizio, per «Importa» (solo il file
  * di gioco, `pacchettoGiocoService`) e per il ripristino dell'istanza da un backup (qui sotto):
  *  - riapertura con la verifica delle versioni (`riapriIstanza`);
- *  - se è cambiato il file di gioco: le condizioni `manuale` rimaste nei backup convertite in avvisi e le regole dell'avvio, rigide (un errore
- *    riporta alla copia di sicurezza, come all'importazione; solo all'avvio sono tolleranti);
+ *  - se è cambiato il file di gioco: le regole dell'avvio, rigide (un errore riporta alla copia di sicurezza, come all'importazione; solo
+ *    all'avvio sono tolleranti);
  *  - gli effetti di stato mai applicati fra le proposte delle partite, tollerante come all'avvio (il prossimo avvio li riprova);
  *  - lo specchio delle voci con pin rifatto con la funzione unica;
  *  - il registro delle decisioni Tanaka integro, o errore (e chi chiama torna alla copia di sicurezza).
- * Restituisce le condizioni convertite. Chiamata a connessione chiusa, con il lucchetto dell'istanza in mano.
+ * Chiamata a connessione chiusa, con il lucchetto dell'istanza in mano.
  */
-export function riapriDopoSostituzione({ gioco, operazione }: { gioco: boolean; operazione: 'importazione' | 'ripristino' }): string[] {
+export function riapriDopoSostituzione({ gioco, operazione }: { gioco: boolean; operazione: 'importazione' | 'ripristino' }): void {
   riapriIstanza();
   const db = getDb();
-  const condizioniConvertite = gioco ? convertiCondizioniDatabaseImportato(db) : [];
   if (gioco) regoleAllAvvio(db, 'rigido');
   // L13 (decisione 19): gli effetti di stato del gioco sulle voci già spuntate e mai applicati entrano nell'elenco da approvare delle partite (mai
   // applicati da soli). Servizio accessorio: il censimento è una transazione sola, e un suo errore non annulla la sostituzione; il log lo dice
@@ -365,7 +363,6 @@ export function riapriDopoSostituzione({ gioco, operazione }: { gioco: boolean; 
   // L7-TANAKA-IMPORT: il registro delle decisioni arriva integro, o si torna alla copia di sicurezza (un registro rotto non si installa)
   const tanaka = statoTanakaDi(db);
   if (!tanaka.registroIntegro) throw httpErrors.conflict('registro-tanaka-non-integro', `Il registro delle decisioni Tanaka ${operazione === 'importazione' ? 'del pacchetto' : 'del backup'} non è integro: ${tanaka.problemi.join(' ')}`);
-  return condizioniConvertite;
 }
 
 /**
@@ -528,9 +525,8 @@ async function ripristinaDaFileDiLavoro(file: string, lavoro: string): Promise<E
         await estraiVoce(file, v, destinazione);
       }
     }
-    // L13-01: la stessa riapertura dell'importazione (verifica delle versioni, conversione e regole se cambia il file di gioco, proposte, specchio dei pin, Tanaka)
-    const condizioniConvertite = riapriDopoSostituzione({ gioco: !!gioco, operazione: 'ripristino' });
-    if (condizioniConvertite.length) logger.info({ condizioniConvertite: condizioniConvertite.length }, 'ripristino: condizioni «manuale» del backup convertite in avvisi');
+    // L13-01: la stessa riapertura dell'importazione (verifica delle versioni, regole se cambia il file di gioco, proposte, specchio dei pin, Tanaka)
+    riapriDopoSostituzione({ gioco: !!gioco, operazione: 'ripristino' });
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'ripristino-fallito', 'Ripristino');
   }

@@ -11,14 +11,12 @@
 
 import { prepared } from '../db/dbService.js';
 import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
-import { slug } from '../../shared/slug.js';
 import { confidenti } from './partiteService.js';
 import { statoAzione } from './azioniStrutturateService.js';
 import { righeDelGiorno, spuntePartita, voceBase } from './giornataService.js';
 import type { SuggerimentiOggiDto } from '../../shared/types.js';
 import { CHIAVI_DOTI } from '../../shared/doti.js';
 import { datiGuida, type Congelato } from './datiGuida.js';
-import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 
 const RE_DOTE_GUADAGNO = new RegExp(`(?:(${CHIAVI_DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${CHIAVI_DOTI.join('|')}))`, 'gi');
 
@@ -92,34 +90,22 @@ function aggiungiNegozio(r: Raccolta, chiaveNegozio: string): void {
   if (sp) r.spilli.add(sp.id);
 }
 
-/** Dopo M7 le offerte sono indicizzate per fonte/chiave, mai per somiglianza del titolo. */
+/** Le offerte sono indicizzate per fonte/chiave, mai per somiglianza del titolo. */
 function indiceArticoli(): Map<string, Array<{ chiave: string; negozio: string }>> {
   const mappa = new Map<string, Array<{ chiave: string; negozio: string }>>();
-  if (catalogoOggettiDisponibile()) {
-    const righe = prepared(`SELECT f.fonte_tipo,f.fonte_chiave,a.chiave,a.negozio_chiave FROM (
-      SELECT 'libro' AS fonte_tipo,chiave AS fonte_chiave,catalogo_chiave FROM libro
-      UNION ALL SELECT 'film',chiave,catalogo_chiave FROM film
-      UNION ALL SELECT 'videogioco',chiave,catalogo_chiave FROM attivita WHERE tipo = 'videogioco') f
-      JOIN catalogo_oggetto c ON c.chiave = f.catalogo_chiave
-      JOIN articolo a ON a.catalogo_chiave = c.chiave JOIN negozio n ON n.chiave = a.negozio_chiave
-      WHERE f.fonte_tipo IN ('libro','film','videogioco')
-        AND c.nascosto = 0 AND a.nascosto = 0 AND n.nascosto = 0`).all() as Array<{
-          fonte_tipo: string; fonte_chiave: string; chiave: string; negozio_chiave: string;
-        }>;
-    for (const r of righe) {
-      const k = `${r.fonte_tipo}/${r.fonte_chiave}`; const elenco = mappa.get(k) ?? [];
-      elenco.push({ chiave: r.chiave, negozio: r.negozio_chiave }); mappa.set(k, elenco);
-    }
-    return mappa;
-  }
-  // Compatibilità prima della registrazione di M7; non viene usata sui dati convertiti.
-  const righe = prepared('SELECT chiave, negozio_chiave, nome FROM articolo').all() as Array<{ chiave: string; negozio_chiave: string; nome: string }>;
-  for (const a of righe) {
-    if (!a.nome) continue;
-    const k = slug(a.nome);
-    const elenco = mappa.get(k) ?? [];
-    elenco.push({ chiave: a.chiave, negozio: a.negozio_chiave });
-    mappa.set(k, elenco);
+  const righe = prepared(`SELECT f.fonte_tipo,f.fonte_chiave,a.chiave,a.negozio_chiave FROM (
+    SELECT 'libro' AS fonte_tipo,chiave AS fonte_chiave,catalogo_chiave FROM libro
+    UNION ALL SELECT 'film',chiave,catalogo_chiave FROM film
+    UNION ALL SELECT 'videogioco',chiave,catalogo_chiave FROM attivita WHERE tipo = 'videogioco') f
+    JOIN catalogo_oggetto c ON c.chiave = f.catalogo_chiave
+    JOIN articolo a ON a.catalogo_chiave = c.chiave JOIN negozio n ON n.chiave = a.negozio_chiave
+    WHERE f.fonte_tipo IN ('libro','film','videogioco')
+      AND c.nascosto = 0 AND a.nascosto = 0 AND n.nascosto = 0`).all() as Array<{
+        fonte_tipo: string; fonte_chiave: string; chiave: string; negozio_chiave: string;
+      }>;
+  for (const r of righe) {
+    const k = `${r.fonte_tipo}/${r.fonte_chiave}`; const elenco = mappa.get(k) ?? [];
+    elenco.push({ chiave: r.chiave, negozio: r.negozio_chiave }); mappa.set(k, elenco);
   }
   return mappa;
 }
@@ -177,7 +163,6 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
     .filter((a) => statoAzione(a, conf).tipo !== 'bloccata');
   const r = nuovaRaccolta();
   const motivi: SuggerimentiOggiDto['motivi'] = [];
-  const conCatalogo = catalogoOggettiDisponibile();
   let articoli: Map<string, Array<{ chiave: string; negozio: string }>> | null = null;
   /** Annota perché una chiave è suggerita: categoria, chiave, testo dell'azione e fascia. */
   const segna = (categoria: string, chiave: string, azione: string, fascia: 'giorno' | 'sera') => motivi.push({ categoria, chiave, azione, fascia });
@@ -211,7 +196,7 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
       for (const chiaveLuogo of [...luoghiPerTesto(riga?.dove), ...luoghiPerTesto(a.azione)]) aggiungiLuogo(r, chiaveLuogo);
       // 30 libri su 46 sono anche articoli a scaffale: acceso il libro si accende l'articolo e il negozio che lo vende
       if (!articoli) articoli = indiceArticoli();
-      const offerte = conCatalogo ? articoli.get(`${rif.tipo}/${rif.chiave}`) ?? [] : [...(articoli.get(rif.chiave) ?? []), ...(riga ? articoli.get(slug(riga.nome)) ?? [] : [])];
+      const offerte = articoli.get(`${rif.tipo}/${rif.chiave}`) ?? [];
       for (const art of offerte) {
         r.articoli.add(art.chiave);
         aggiungiNegozio(r, art.negozio);
@@ -228,7 +213,7 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
       // il quartiere che ospita l'attività è quello del luogo-sede (`attivita.sede_chiave`)
       const att = prepared('SELECT l.quartiere_chiave AS quartiere, a.tipo FROM attivita a LEFT JOIN luogo l ON l.chiave = a.sede_chiave WHERE a.chiave = ?').get(rif.chiave) as { quartiere: string | null; tipo: string } | undefined;
       if (att?.quartiere) { r.quartieri.add(att.quartiere); r.mappe.add(`citta-${att.quartiere}`); }
-      if (conCatalogo && att?.tipo === 'videogioco') {
+      if (att?.tipo === 'videogioco') {
         if (!articoli) articoli = indiceArticoli();
         for (const art of articoli.get(`videogioco/${rif.chiave}`) ?? []) { r.articoli.add(art.chiave); aggiungiNegozio(r, art.negozio); }
       }

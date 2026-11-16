@@ -12,7 +12,6 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haColonnaUtente, haTabellaUtente } from '../db/schemaMemo.js';
 // quando un Palazzo è concluso lo decide `palazziService` (Tesoro e boss finale: mai la data)
 import { statoPalazzi } from './palazziService.js';
 import { EVENTI_STORIA, condizioneConTesto, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
@@ -92,12 +91,10 @@ export interface ContenutiPartita {
 
 /**
  * Il salvataggio di Persona 5 (`utente.partita.salvataggio_p5`), la Nuova Partita+ (`utente.partita.nuova_partita_plus`)
- * e i set di contenuti scaricabili posseduti (`utente.partita.dlc_posseduti_json`, lo stesso dato della Fusione), dal punto unico della partita. Su uno schema senza la colonna del
- * salvataggio il salvataggio vale «no»; un JSON dei set che non si legge vale «nessuno», mai un errore.
+ * e i set di contenuti scaricabili posseduti (`utente.partita.dlc_posseduti_json`, lo stesso dato della Fusione), dal punto unico della partita. Un JSON dei set che non si legge vale «nessuno», mai un errore.
  */
 export function contenutiDellaPartita(partitaId: number): ContenutiPartita {
-  const conSalvataggio = haColonnaUtente(getDb(), 'partita', 'salvataggio_p5');
-  const r = prepared(`SELECT dlc_posseduti_json, nuova_partita_plus${conSalvataggio ? ', salvataggio_p5' : ''} FROM partita WHERE id = ?`).get(partitaId) as { dlc_posseduti_json: string; nuova_partita_plus: number; salvataggio_p5?: number } | undefined;
+  const r = prepared('SELECT dlc_posseduti_json, nuova_partita_plus, salvataggio_p5 FROM partita WHERE id = ?').get(partitaId) as { dlc_posseduti_json: string; nuova_partita_plus: number; salvataggio_p5?: number } | undefined;
   let set: unknown;
   try { set = JSON.parse(r?.dlc_posseduti_json ?? '[]'); } catch { set = []; }
   return { salvataggioP5: r?.salvataggio_p5 === 1, nuovaPartitaPlus: r?.nuova_partita_plus === 1, dlcPosseduti: new Set(Array.isArray(set) ? set.filter((x): x is number => Number.isSafeInteger(x)) : []) };
@@ -121,10 +118,9 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
   const dataGioco = partita?.data_gioco ?? null;
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
-  // L6: gli inviti registrati (su uno schema senza la tabella nessun invito)
-  const conInviti = haTabellaUtente(getDb(), 'invito_partita');
-  const invitiRegistrati = new Set(conInviti ? (prepared('SELECT invito_chiave FROM invito_partita WHERE partita_id = ?').all(partitaId) as Array<{ invito_chiave: string }>).map((r) => r.invito_chiave) : []);
-  // L13: gli sblocchi (su uno schema senza la tabella nessuno sblocco)
+  // L6: gli inviti registrati
+  const invitiRegistrati = new Set((prepared('SELECT invito_chiave FROM invito_partita WHERE partita_id = ?').all(partitaId) as Array<{ invito_chiave: string }>).map((r) => r.invito_chiave));
+  // L13: gli sblocchi
   const sblocchiRicevuti = new Set(sblocchiDellaPartita(partitaId));
   // Chi e' in squadra: i Ladri con l'interruttore «In squadra» acceso (`in_squadra = 1`), e chi e' fuori quelli con
   // l'interruttore spento. **L'interruttore, non la presenza della riga.** Prima bastava avere segnato un livello (la riga
@@ -169,9 +165,8 @@ export function statoPartitaEssenziale(partitaId: number, ranghiConfidenti: Map<
     meteoOra: null, eventi: new Set() };
 }
 
-/** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»); vuoto se lo schema non ha ancora la tabella. */
+/** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»). */
 export function sblocchiDellaPartita(partitaId: number): string[] {
-  if (!haTabellaUtente(getDb(), 'sblocco_partita')) return [];
   return (prepared("SELECT bersaglio_tipo || ':' || bersaglio_chiave AS k FROM utente.sblocco_partita WHERE partita_id = ?").all(partitaId) as Array<{ k: string }>).map((r) => r.k);
 }
 

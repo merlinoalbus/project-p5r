@@ -43,11 +43,6 @@ export function fasceDellaGuida(testo: string | null | undefined): { giorno: Met
 /** La pioggia torrenziale è pioggia: per i requisiti «non deve piovere» e «piove» vale come tale. */
 export const ALLERTA_PIOGGIA = 'pioggia-torrenziale';
 
-/** La chiave di un'allerta dal suo nome («Ondata di calore (di giorno)» → «ondata-di-calore»). */
-export function chiaveAllerta(nome: string): string {
-  return nome.replace(/\(.*?\)/g, '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
-
 /** Giorno e mese scritti all'italiana («7», «8») come data «MM-GG» («08-07»), con gli zeri davanti. */
 const mmgg = (g: string, m: string): string => `${m.padStart(2, '0')}-${g.padStart(2, '0')}`;
 

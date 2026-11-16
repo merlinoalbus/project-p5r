@@ -13,7 +13,6 @@
 // ============================================================
 
 import { getDb, type AppDatabase } from '../../db/dbService.js';
-import { haTabellaMain } from '../../db/schemaMemo.js';
 import { chiaveMappa } from './percorsiMappe.js';
 import { entitaDellaRadice } from './alberoMappe.js';
 import { httpErrors } from '../../utils/httpError.js';
@@ -27,21 +26,15 @@ export interface RigaArea {
   chiave: string; quartiere_chiave: string | null; dungeon_chiave: string | null; citta_chiave: string | null; slug: string; nome: string;
   nome_rivisto: number; ordine: number; planimetria_predefinita: string | null; origine: 'seed' | 'utente'; seed_json: string | null;
   da_verificare: number; updated_at: string;
-  /** La condizione propria dell'Area (il Covo dei Ladri dal 5 maggio), in AND con il quartiere; assente su uno schema vecchio. */
+  /** La condizione propria dell'Area (il Covo dei Ladri dal 5 maggio), in AND con il quartiere. */
   condizioni_json?: string | null;
 }
 
 /** Le Aree e i nomi dei loro contenitori, letti una volta per una risposta che descrive molte mappe. */
 export interface ContestoAree { aree: Map<string, RigaArea>; nomiQuartieri: Map<string, string>; nomiDungeon: Map<string, string> }
 
-/** Vero se la tabella delle Aree c'è (uno schema vecchio non l'ha). */
-export function conAree(db: AppDatabase = getDb()): boolean {
-  return haTabellaMain(db, 'area');
-}
-
-/** Le Aree e i nomi dei contenitori; vuoto su uno schema senza Aree. */
+/** Le Aree e i nomi dei contenitori. */
 export function contestoAree(db: AppDatabase = getDb()): ContestoAree {
-  if (!conAree(db)) return { aree: new Map(), nomiQuartieri: new Map(), nomiDungeon: new Map() };
   return {
     aree: new Map((db.prepare('SELECT * FROM area').all() as RigaArea[]).map((a) => [a.chiave, a])),
     nomiQuartieri: new Map((db.prepare('SELECT chiave, nome FROM quartiere').all() as Array<{ chiave: string; nome: string }>).map((q) => [q.chiave, q.nome])),
@@ -103,11 +96,9 @@ export function casaDellaMappa(r: RigaPerCasa, ctx: ContestoAree): string {
 /**
  * L'ingresso di un quartiere è un'Area del quartiere più un punto (R2-21): la planimetria indicata deve stare in un'Area di quel
  * quartiere. 400 `area-di-altro-quartiere` se è di un'Area di un altro posto, 400 `ingresso-senza-area` se non ha un'Area (la mappa
- * del quartiere, una planimetria da collocare). Vale per la PUT dell'ingresso e per l'importazione (difetto FUN2-1). Su uno schema
- * senza Aree non controlla niente.
+ * del quartiere, una planimetria da collocare). Vale per la PUT dell'ingresso e per l'importazione (difetto FUN2-1).
  */
 export function verificaIngressoNelQuartiere(quartiere: string, mappaInterna: string, db: AppDatabase = getDb()): void {
-  if (!conAree(db)) return;
   const a = db.prepare('SELECT a.quartiere_chiave, a.nome FROM mappa m JOIN area a ON a.chiave = m.area_chiave WHERE m.chiave = ?').get(mappaInterna) as
     { quartiere_chiave: string | null; nome: string } | undefined;
   if (!a) throw httpErrors.badRequest('ingresso-senza-area', 'L’ingresso di un quartiere sta in una delle sue aree: questa planimetria non appartiene a nessuna area.');

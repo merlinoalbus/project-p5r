@@ -36,12 +36,3 @@ export const AMBITI_PREDEFINITI = ['affinita', 'attivita', 'confidenti', 'decori
 export const AMBITI_IMMAGINE = [...AMBITI_CARICAMENTO, ...AMBITI_PREDEFINITI] as const;
 export type AmbitoImmagine = (typeof AMBITI_IMMAGINE)[number];
 
-/** Estensioni ammesse per i file della grafica predefinita, in ordine di preferenza a parità di chiave (come il manifest di Vite). */
-export const ESTENSIONI_IMMAGINE = ['webp', 'png', 'svg', 'jpg', 'jpeg', 'gif'] as const;
-
-const MIME_PER_ESTENSIONE: Record<string, string> = { webp: 'image/webp', png: 'image/png', svg: 'image/svg+xml', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif' };
-
-/** Il MIME di un'estensione ammessa (minuscola), oppure null. */
-export function mimeDaEstensione(estensione: string): string | null {
-  return MIME_PER_ESTENSIONE[estensione.toLowerCase()] ?? null;
-}

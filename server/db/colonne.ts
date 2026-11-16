@@ -1,10 +1,10 @@
 // ============================================================
-// colonne — le due domande sullo schema: c'è la tabella? c'è la colonna?
+// colonne — le due domande sullo schema di un file da ispezionare: c'è la tabella? c'è la colonna?
 // ============================================================
 
 import type Database from 'better-sqlite3';
 
-/** Vero se la tabella esiste nello schema indicato (`main` = gioco.db, `utente` = partite.db, o l'alias di un file attaccato), letto da `sqlite_master`; sempre riletto, mai ricordato (la versione ricordata per le letture è `schemaMemo.ts`). */
+/** Vero se la tabella esiste nello schema indicato (`main` = gioco.db, `utente` = partite.db, o l'alias di un file attaccato), letto da `sqlite_master`; sempre riletto, mai ricordato. Serve a chi ispeziona un file che non è l'istanza già verificata (anteprima di «Importa» e del ripristino, confronto fra edizioni, registro del Cestino). */
 export function haTabella(db: Database.Database, tabella: string, schema = 'main'): boolean {
   return !!db.prepare(`SELECT 1 FROM "${schema.replaceAll('"', '""')}".sqlite_master WHERE type = 'table' AND name = ?`).get(tabella);
 }

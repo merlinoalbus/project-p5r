@@ -24,14 +24,12 @@
 
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { avvisiDisponibilitaDellaVoce, collocaInFascia, compatta, eGiornoDelDiarioValidato, eliminaVoce, fasciaDi, rigaVoce, ripristinaOrdineVoce, righeDelGiorno, ULTIMO_GIORNO_VALIDATO, vociDelGiorno, type RigaVoce } from './giornataService.js';
 import { leggiEffettiVocePerMostrare, problemaEffettoDaIncollare, problemaListaDaIncollare, scriviEffettiDaIstantanea, type IstantaneaEffettiVoce } from './motoreDiario.js';
 import { riallineaVoceNelRegistro } from './puntiCronologici.js';
 import { nomeRiferimento } from './azioniStrutturateService.js';
-import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { improntaDato } from './propostePartitaService.js';
 import { normalizzaEffettoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
 import { TIPI_RIFERIMENTO_AZIONE } from '../../shared/effettiAzione.js';
@@ -65,9 +63,8 @@ function nellOrdine(righe: RigaVoce[]): RigaVoce[] {
   const ordine = ordineDeiGiorni();
   return [...righe].sort((a, b) => (ordine.get(a.data) ?? 0) - (ordine.get(b.data) ?? 0) || (fasciaDi(a) === fasciaDi(b) ? 0 : fasciaDi(a) === 'giorno' ? -1 : 1) || a.ordine - b.ordine || a.uid.localeCompare(b.uid));
 }
-/** L'insieme ordinato delle infiltrazioni della voce (vuoto senza le tabelle di L3). */
+/** L'insieme ordinato delle infiltrazioni della voce. */
 function infiltrazioniDellaVoce(uid: string): string[] {
-  if (!conLegami()) return [];
   return (prepared('SELECT infiltrazione_chiave FROM voce_infiltrazione WHERE voce_uid = ? ORDER BY ordine').all(uid) as Array<{ infiltrazione_chiave: string }>).map((r) => r.infiltrazione_chiave);
 }
 
@@ -165,7 +162,6 @@ function chiusuraDeiTolti(effetti: DettaglioVoce['effetti'], segnalati: Readonly
 /** Il Palazzo che la copia avrà (lo stesso collegamento della voce, o quello delle sue infiltrazioni) e le infiltrazioni che vi si legano. */
 function infiltrazioniApplicabili(v: VoceAppunti, riferimentoValido: boolean): { valide: string[]; scartate: string[] } {
   if (v.infiltrazioni.length === 0) return { valide: [], scartate: [] };
-  if (!conLegami()) return { valide: [], scartate: [...v.infiltrazioni] };
   const righe = new Map(v.infiltrazioni.map((k) => [k, prepared('SELECT dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(k) as { dungeon_chiave: string } | undefined]));
   const palazzoRif = riferimentoValido && v.riferimento?.tipo === 'dungeon' && prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(v.riferimento.chiave) ? v.riferimento.chiave : null;
   const palazzo = palazzoRif ?? v.infiltrazioni.map((k) => righe.get(k)?.dungeon_chiave).find((d) => d !== undefined) ?? null;
@@ -252,12 +248,12 @@ function pianoCopia(v: VoceAppunti, indice: number, giorno: string, fasciaDest: 
     testo: `«${breve(azione)}»: ${inf.scartate.length === 1 ? 'un’infiltrazione non esiste più o non è' : `${inf.scartate.length} infiltrazioni non esistono più o non sono`} del Palazzo della voce: la copia ne resta senza.` });
   // ciò che la copia non eredita, detto prima (la voce d'origine, se c'è ancora, lo tiene)
   if (prepared('SELECT 1 FROM voce_giornata WHERE uid = ?').get(v.uid)) {
-    const eventi = haTabellaMain(getDb(), 'evento_calendario_voce') ? prepared('SELECT COUNT(*) FROM evento_calendario_voce WHERE voce_uid = ?').pluck().get(v.uid) as number : 0;
+    const eventi = prepared('SELECT COUNT(*) FROM evento_calendario_voce WHERE voce_uid = ?').pluck().get(v.uid) as number;
     if (eventi) mio({ codice: 'eventi-calendario', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» è collegata a ${eventi === 1 ? 'un evento' : `${eventi} eventi`} del calendario: la copia nasce senza il collegamento (resta all’originale).` });
-    const proposte = haTabellaMain(getDb(), 'proposta_conversione_voce') ? prepared("SELECT COUNT(*) FROM proposta_conversione_voce WHERE voce_uid = ? AND stato = 'aperta'").pluck().get(v.uid) as number : 0;
+    const proposte = prepared("SELECT COUNT(*) FROM proposta_conversione_voce WHERE voce_uid = ? AND stato = 'aperta'").pluck().get(v.uid) as number;
     if (proposte) mio({ codice: 'proposte-aperte', gravita: 'conferma', voceIndice: indice,
       testo: `«${breve(azione)}» ha ${proposte === 1 ? 'una proposta «da completare» aperta: resta all’originale, la copia non la ha' : `${proposte} proposte «da completare» aperte: restano all’originale, la copia non le ha`}.` });
-    const proposta = conLegami() && d.infiltrazioni.length === 0 ? prepared('SELECT COUNT(*) FROM proposta_infiltrazione_voce WHERE voce_uid = ?').pluck().get(v.uid) as number : 0;
+    const proposta = d.infiltrazioni.length === 0 ? prepared('SELECT COUNT(*) FROM proposta_infiltrazione_voce WHERE voce_uid = ?').pluck().get(v.uid) as number : 0;
     if (proposta) mio({ codice: 'proposta-infiltrazioni', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» ha una proposta d’infiltrazioni salvata: la copia non la eredita (se la riconosce dal testo la ricalcola).` });
   }
   if (v.daRivedere) mio({ codice: 'da-rivedere', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» è da rivedere: la copia nasce senza il segno (resta sull’originale).` });
@@ -357,7 +353,7 @@ function inserisciCopia(
   const condizioni = condizioniDaSalvare(v.condizioni, v.genere);
   if (condizioni) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
   const mappa = scriviEffettiDaIstantanea(uid, effetti, { verifica: opz.verifica, registro: { origine: 'copia-voce', operazione: opz.operazione, daVoce: v.uid } });
-  if (infiltrazioni.length && conLegami()) infiltrazioni.forEach((k, i) => prepared('INSERT INTO voce_infiltrazione (voce_uid, ordine, infiltrazione_chiave) VALUES (?, ?, ?)').run(uid, i, k));
+  if (infiltrazioni.length) infiltrazioni.forEach((k, i) => prepared('INSERT INTO voce_infiltrazione (voce_uid, ordine, infiltrazione_chiave) VALUES (?, ?, ?)').run(uid, i, k));
   return { uid, mappaEffetti: Object.fromEntries(mappa) };
 }
 

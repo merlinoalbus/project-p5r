@@ -244,10 +244,6 @@ export function gemelloPerIlTempo(esiti: EsitiAttivita, chiave: string): EsitoAt
   return gemelli.length === 1 ? gemelli[0]! : null;
 }
 
-/** 2026-10-27: l'attività dichiara esiti con una versione con il bonus? Allora lo strumento (l'esito) e la quantità si scelgono nella voce e
- *  alla spunta resta solo l'interruttore «Bonus». */
-export const haVersioniBonus = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti?.esiti.some((e) => e.bonusDi);
-
 /**
  * 2026-10-27 (revisione: la fabbricazione di Kawakami, «e quando creo l'aroma calmante? o il Goho-M?», vale per ogni strumento): un esito è una
  * CREAZIONE quando consuma oggetti del catalogo e ne dà altri (una ricetta: i materiali diventano lo strumento). Ricavato dai dati, nessun

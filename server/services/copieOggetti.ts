@@ -25,8 +25,7 @@
 // ottenuti», così il numero che vede chi gioca è quello della scelta dell'esito e della finestra «Regala».
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaUtente, haTabellaUtente } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import type { CopieOggettoDto } from '../../shared/types.js';
 import { doniConfidentiOttenuti, type DonoConfidenteOttenuto } from './doniConfidenti.js';
 
@@ -34,16 +33,11 @@ import { doniConfidentiOttenuti, type DonoConfidenteOttenuto } from './doniConfi
 /** Le copie comprate nella partita, per chiave d'articolo (come le scrive il registro, o il segno «ottenuto» senza riga). */
 function copiePerArticolo(partitaId: number): Map<string, number> {
   const per = new Map<string, number>();
-  const conRegistro = haTabellaUtente(getDb(), 'registro_acquisti');
-  if (conRegistro) {
-    for (const r of prepared('SELECT articolo_chiave, SUM(quantita) AS n FROM utente.registro_acquisti WHERE partita_id = ? GROUP BY articolo_chiave').all(partitaId) as Array<{ articolo_chiave: string; n: number }>) {
-      per.set(r.articolo_chiave, r.n);
-    }
+  for (const r of prepared('SELECT articolo_chiave, SUM(quantita) AS n FROM utente.registro_acquisti WHERE partita_id = ? GROUP BY articolo_chiave').all(partitaId) as Array<{ articolo_chiave: string; n: number }>) {
+    per.set(r.articolo_chiave, r.n);
   }
-  const senzaRiga = conRegistro
-    ? `SELECT a.articolo_chiave FROM utente.acquisto_partita a WHERE a.partita_id = ? AND NOT EXISTS (SELECT 1 FROM utente.registro_acquisti r
-        WHERE r.partita_id = a.partita_id AND r.articolo_chiave = a.articolo_chiave AND r.ottenuto_qui = 1)`
-    : 'SELECT articolo_chiave FROM utente.acquisto_partita WHERE partita_id = ?';
+  const senzaRiga = `SELECT a.articolo_chiave FROM utente.acquisto_partita a WHERE a.partita_id = ? AND NOT EXISTS (SELECT 1 FROM utente.registro_acquisti r
+        WHERE r.partita_id = a.partita_id AND r.articolo_chiave = a.articolo_chiave AND r.ottenuto_qui = 1)`;
   for (const k of prepared(senzaRiga).pluck().all(partitaId) as string[]) per.set(k, (per.get(k) ?? 0) + 1);
   return per;
 }
@@ -87,28 +81,18 @@ export function dettaglioCopie(partitaId: number, catalogo: string, doni?: reado
     }
   }
   let ricevute = 0;
-  if (haTabellaUtente(getDb(), 'oggetto_ottenuto_partita')) {
-    ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
-  }
+  ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   // Ondata 5 (lotto G): ricevute dai turni con un esito che dà oggetti (la sfida della Big Bang Burger vinta)
-  if (haTabellaUtente(getDb(), 'oggetto_esito_turno')) {
-    ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_esito_turno WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
-  }
+  ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_esito_turno WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   // Ondata 5 (lotto F-bis): i doni dei Confidenti già meritati (il rango e il giorno della partita lo dicono)
   ricevute += (doni ?? doniConfidentiOttenuti(partitaId, catalogo)).filter((d) => d.catalogo === catalogo).reduce((n, d) => n + d.quantita, 0);
   // Ondata 5 (lotto F-bis): le ricompense delle Richieste completate, una volta per Richiesta (la lettura di `oggettiOttenutiPartita`)
-  if (haTabellaUtente(getDb(), 'richiesta_partita')) {
-    ricevute += (prepared(`SELECT COALESCE(SUM(COALESCE(ro.quantita, 1)), 0) FROM utente.richiesta_partita rp
-      JOIN main.richiesta r ON r.chiave = rp.richiesta_chiave
-      JOIN main.ricompensa_oggetto ro ON ro.fonte_tipo = 'richiesta' AND ro.fonte_chiave = r.chiave
-      WHERE rp.partita_id = ? AND rp.stato = 'completata' AND ro.catalogo_chiave = ?`).pluck().get(partitaId, catalogo) as number);
-  }
-  const regalate = haColonnaUtente(getDb(), 'regalo_partita', 'copia_consumata')
-    ? prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ? AND catalogo_chiave = ? AND copia_consumata = 1').pluck().get(partitaId, catalogo) as number
-    : 0;
+  ricevute += (prepared(`SELECT COALESCE(SUM(COALESCE(ro.quantita, 1)), 0) FROM utente.richiesta_partita rp
+    JOIN main.richiesta r ON r.chiave = rp.richiesta_chiave
+    JOIN main.ricompensa_oggetto ro ON ro.fonte_tipo = 'richiesta' AND ro.fonte_chiave = r.chiave
+    WHERE rp.partita_id = ? AND rp.stato = 'completata' AND ro.catalogo_chiave = ?`).pluck().get(partitaId, catalogo) as number);
+  const regalate = prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ? AND catalogo_chiave = ? AND copia_consumata = 1').pluck().get(partitaId, catalogo) as number;
   // Ondata 5 (lotto F-bis): le copie usate da un turno con un esito che consuma o bruciate in un Isolamento
-  const usate = haTabellaUtente(getDb(), 'consumo_oggetto_partita')
-    ? prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.consumo_oggetto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number
-    : 0;
+  const usate = prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.consumo_oggetto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number;
   return { comprate, ricevute, regalate, cedute, usate, disponibili: Math.max(0, comprate + ricevute - regalate - cedute - usate) };
 }

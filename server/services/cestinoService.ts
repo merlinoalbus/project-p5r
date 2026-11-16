@@ -34,7 +34,6 @@
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { haTabella } from '../db/colonne.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { ARCHIVI_LEGACY_IMMUTABILI, verificaArchivioLegacy, verificaCestinoLegacy } from '../db/acquistiLegacy.js';
 import { httpErrors } from '../utils/httpError.js';
 import { getProprietario } from '../middleware/requestContext.js';
@@ -735,8 +734,8 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
     // Controllo finale della transazione: tutti gli oggetti del registro sono ormai tornati.
     // I JSON e i puntatori fra i due database non hanno foreign key SQLite; in errore
     // l'intero gesto torna indietro e il registro resta recuperabile nel cestino.
-    if (haTabellaMain(db, 'catalogo_oggetto')) {
-      const esiste = db.prepare('SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ?');
+    {
+      const esiste =db.prepare('SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ?');
       const richiedi = (chiave: unknown) => {
         if (typeof chiave === 'string' && !esiste.get(chiave)) throw httpErrors.conflict('cestino-oggetto-mancante',
           'Un riferimento da ripristinare cita un oggetto non più presente. Ripristina prima quell’oggetto: questo elemento resta nel cestino.', { oggetto: chiave });

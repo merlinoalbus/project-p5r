@@ -8,7 +8,6 @@
 
 import type { Statement } from 'better-sqlite3';
 import type { AppDatabase } from '../../db/dbService.js';
-import { haColonnaMain, haTabellaMain, haTabellaUtente } from '../../db/schemaMemo.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { puntoDescrittivo, sqlVoceDescrittiva } from '../../../shared/spilli.js';
 import type { EffettiDelGestoDto, StatoPunto, VoceDelGestoDto } from '../../../shared/types.js';
@@ -82,8 +81,8 @@ export interface ModelloAvanzamento {
 //
 // Ricostruirlo costava ad ogni apertura di mappa, Palazzo o area (tutte le voci, tutti i legami pin-voce, il grafo degli oggetti). Sono soli dati
 // di gioco, quindi si tiene l'ultimo modello per connessione, mai nulla della partita (gli stati stanno in `statiDellaPartita`, sempre letti
-// ora). Il modello vale finché il «gettone» della connessione non cambia: `data_version` di `main` (un'altra connessione ha scritto il file),
-// `schema_version` di `main` (la struttura è cambiata: le colonne opzionali che il modello legge) e `total_changes()` (QUALSIASI
+// ora). Il modello vale finché il «gettone» della connessione non cambia: `data_version` di `main` (un'altra connessione ha scritto il file)
+// e `total_changes()` (QUALSIASI
 // scrittura di questa connessione, anche di una partita: più prudente del necessario, ma senza elenchi di scrittori da ricordare, cosa che
 // il registro delle cache di gioco da solo non garantisce: dungeon, mappe e cestino scrivono senza chiamarlo). Dentro una transazione non si
 // usa né si salva niente (una scrittura annullata lascerebbe un modello fatto su dati che non esistono più), e `registraCacheDiGioco` lo
@@ -91,18 +90,18 @@ export interface ModelloAvanzamento {
 // lo legge soltanto (nessun chiamante lo modifica).
 interface ModelloInMemoria { gettone: string; generazione: number; modello: ModelloAvanzamento }
 const modelliInMemoria = new WeakMap<AppDatabase, ModelloInMemoria>();
-const gettoniDati = new WeakMap<AppDatabase, [Statement, Statement, Statement]>();
+const gettoniDati = new WeakMap<AppDatabase, [Statement, Statement]>();
 let generazioneModelli = 0;
 registraCacheDiGioco(() => { generazioneModelli++; });
 
-/** Il gettone dei dati di gioco della connessione: cambia a ogni scrittura, di questa o di un'altra connessione, e a ogni cambio di struttura. */
+/** Il gettone dei dati di gioco della connessione: cambia a ogni scrittura, di questa o di un'altra connessione. */
 function gettoneDeiDati(db: AppDatabase): string {
   let s = gettoniDati.get(db);
   if (!s) {
-    s = [db.prepare('PRAGMA main.data_version').pluck(), db.prepare('PRAGMA main.schema_version').pluck(), db.prepare('SELECT total_changes()').pluck()];
+    s = [db.prepare('PRAGMA main.data_version').pluck(), db.prepare('SELECT total_changes()').pluck()];
     gettoniDati.set(db, s);
   }
-  return `${s[0].get()}.${s[1].get()}.${s[2].get()}`;
+  return `${s[0].get()}.${s[1].get()}`;
 }
 
 /**
@@ -123,11 +122,8 @@ export function modelloAvanzamento(db: AppDatabase): ModelloAvanzamento {
 
 /** Il modello letto dal DB, ogni volta da capo. */
 function costruisciModello(db: AppDatabase): ModelloAvanzamento {
-  // lo schema può essere vecchio: le colonne opzionali si controllano
-  const conCarattere = haColonnaMain(db, 'punto_interesse', 'carattere');
-  const conDedalo = haColonnaMain(db, 'punto_interesse', 'area_dedalo_chiave');
   const voci = new Map<string, VoceDelModello>();
-  for (const r of db.prepare(`SELECT p.chiave, p.tipo, p.nome, p.ordine, p.esauribile, p.area_chiave, a.dungeon_chiave, ${conDedalo ? 'p.area_dedalo_chiave' : 'NULL AS area_dedalo_chiave'}, ${conCarattere ? 'p.carattere' : 'NULL AS carattere'}
+  for (const r of db.prepare(`SELECT p.chiave, p.tipo, p.nome, p.ordine, p.esauribile, p.area_chiave, a.dungeon_chiave, p.area_dedalo_chiave, p.carattere
     FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave`).all() as Array<{ chiave: string; tipo: string; nome: string; ordine: number; esauribile: number; area_chiave: string; dungeon_chiave: string; area_dedalo_chiave: string | null; carattere: string | null }>) {
     voci.set(r.chiave, {
       chiave: r.chiave, carattere: carattereDellaVoce({ tipo: r.tipo, areaDedalo: r.area_dedalo_chiave, carattere: r.carattere }), infiltrazione: r.area_chiave, palazzo: r.dungeon_chiave,
@@ -140,9 +136,7 @@ function costruisciModello(db: AppDatabase): ModelloAvanzamento {
     infiltrazioni.set(r.chiave, { chiave: r.chiave, nome: r.nome, palazzo: r.dungeon_chiave, ordine: r.ordine });
     (infiltrazioniDelPalazzo.get(r.dungeon_chiave) ?? infiltrazioniDelPalazzo.set(r.dungeon_chiave, []).get(r.dungeon_chiave)!).push(r.chiave);
   }
-  const conTabella = haTabellaMain(db, 'spillo_voce');
-  const conUid = haColonnaMain(db, 'spillo', 'uid');
-  const legami = db.prepare(`SELECT DISTINCT v.id, v.voce, s.mappa_chiave AS mappa, ${conUid ? 's.uid' : 'NULL'} AS uid FROM (${conTabella ? 'SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION ' : ''}
+  const legami = db.prepare(`SELECT DISTINCT v.id, v.voce, s.mappa_chiave AS mappa, s.uid AS uid FROM (SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION
     SELECT id, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave IS NOT NULL) v JOIN spillo s ON s.id = v.id ORDER BY 1, 2`).all() as Array<{ id: number; voce: string; mappa: string | null; uid: string | null }>;
   const pin = new Map<number, VociDelPinModello>();
   // §8.11: i pin di ogni voce (delle planimetrie, con uid) e le infiltrazioni delle rigenerabili di ogni pin
@@ -183,7 +177,7 @@ function costruisciModello(db: AppDatabase): ModelloAvanzamento {
     for (const k of elenco) oggetto.set(k, elenco[0]);
   }
   const idDelPin = new Map<string, number>();
-  if (conUid) for (const r of db.prepare('SELECT id, uid FROM spillo WHERE uid IS NOT NULL').all() as Array<{ id: number; uid: string }>) idDelPin.set(r.uid, r.id);
+  for (const r of db.prepare('SELECT id, uid FROM spillo WHERE uid IS NOT NULL').all() as Array<{ id: number; uid: string }>) idDelPin.set(r.uid, r.id);
   const condivisi = new Map<number, string[]>();
   for (const [id, inf] of infiltrazioniRigenerabili) {
     if (inf.size > 1) condivisi.set(id, [...inf].sort((a, b) => (infiltrazioni.get(a)?.ordine ?? 0) - (infiltrazioni.get(b)?.ordine ?? 0) || a.localeCompare(b)));
@@ -226,33 +220,17 @@ export interface StatiDellaPartita {
   oggettiFatti: Set<string>;
 }
 
-/** La tabella delle divergenze conservate c'è? */
-export function conDivergenze(db: AppDatabase): boolean {
-  return !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
-    && haTabellaUtente(db, 'divergenza_partita');
-}
-
-/** La tabella dello stato per infiltrazione dei pin condivisi c'è? */
-export function conStatoPerInfiltrazione(db: AppDatabase): boolean {
-  return !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
-    && haTabellaUtente(db, 'spillo_partita_infiltrazione');
-}
-
 /**
  * L'unico punto che toglie dal file delle partite gli stati dei pin eliminati: «raccolto» (`spillo_partita`), divergenze «da
  * verificare» (`divergenza_partita`) e stato per infiltrazione dei pin condivisi (`spillo_partita_infiltrazione`). Sono tabelle
  * di `partite.db`: il vincolo di `gioco.db` non le elimina in cascata, e l'uid di un pin è l'impronta della sua identità (se si
  * ricrea un elemento identico, uno stato rimasto orfano ricomparirebbe). `uidDaTogliere` è una sottoselezione di uid
  * («SELECT uid FROM main.spillo WHERE … AND uid IS NOT NULL», o «SELECT ?» se l'uid è già noto) da valutare PRIMA di cancellare i pin.
- * Senza lo schema delle partite (un file di gioco aperto da solo) non
- * c'è nessuno stato da togliere, come per `riallineaStati` (`conPartite`).
  */
 export function togliStatiDeiPin(db: AppDatabase, uidDaTogliere: string, parametri: ReadonlyArray<string | number>): void {
-  const conRaccolti = !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
-    && haTabellaUtente(db, 'spillo_partita');
-  if (conRaccolti) db.prepare(`DELETE FROM utente.spillo_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
-  if (conDivergenze(db)) db.prepare(`DELETE FROM utente.divergenza_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
-  if (conStatoPerInfiltrazione(db)) db.prepare(`DELETE FROM utente.spillo_partita_infiltrazione WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
+  db.prepare(`DELETE FROM utente.spillo_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
+  db.prepare(`DELETE FROM utente.divergenza_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
+  db.prepare(`DELETE FROM utente.spillo_partita_infiltrazione WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
 }
 
 /** Legge gli stati di una partita nel modello e calcola lo stato di ogni voce e gli oggetti fatti. */
@@ -260,16 +238,12 @@ export function statiDellaPartita(db: AppDatabase, m: ModelloAvanzamento, partit
   const segnate = new Map((db.prepare('SELECT punto_chiave, stato FROM punto_partita WHERE partita_id = ?').all(partita) as Array<{ punto_chiave: string; stato: StatoPunto }>).map((r) => [r.punto_chiave, r.stato]));
   const raccolti = new Set(db.prepare('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').pluck().all(partita) as string[]);
   const raccoltiPerInfiltrazione = new Map<string, Set<string>>();
-  if (conStatoPerInfiltrazione(db)) {
-    for (const r of db.prepare('SELECT spillo_uid, infiltrazione_chiave FROM spillo_partita_infiltrazione WHERE partita_id = ? AND raccolto = 1').all(partita) as Array<{ spillo_uid: string; infiltrazione_chiave: string }>) {
-      (raccoltiPerInfiltrazione.get(r.spillo_uid) ?? raccoltiPerInfiltrazione.set(r.spillo_uid, new Set()).get(r.spillo_uid)!).add(r.infiltrazione_chiave);
-    }
+  for (const r of db.prepare('SELECT spillo_uid, infiltrazione_chiave FROM spillo_partita_infiltrazione WHERE partita_id = ? AND raccolto = 1').all(partita) as Array<{ spillo_uid: string; infiltrazione_chiave: string }>) {
+    (raccoltiPerInfiltrazione.get(r.spillo_uid) ?? raccoltiPerInfiltrazione.set(r.spillo_uid, new Set()).get(r.spillo_uid)!).add(r.infiltrazione_chiave);
   }
   const divergenze = new Map<string, string[]>();
-  if (conDivergenze(db)) {
-    for (const r of db.prepare('SELECT spillo_uid, voce_chiave FROM divergenza_partita WHERE partita_id = ? ORDER BY spillo_uid, voce_chiave').all(partita) as Array<{ spillo_uid: string; voce_chiave: string }>) {
-      (divergenze.get(r.spillo_uid) ?? divergenze.set(r.spillo_uid, []).get(r.spillo_uid)!).push(r.voce_chiave);
-    }
+  for (const r of db.prepare('SELECT spillo_uid, voce_chiave FROM divergenza_partita WHERE partita_id = ? ORDER BY spillo_uid, voce_chiave').all(partita) as Array<{ spillo_uid: string; voce_chiave: string }>) {
+    (divergenze.get(r.spillo_uid) ?? divergenze.set(r.spillo_uid, []).get(r.spillo_uid)!).push(r.voce_chiave);
   }
   const s: StatiDellaPartita = { partita, segnate, raccolti, raccoltiPerInfiltrazione, divergenze, voci: new Map(), oggettiFatti: new Set() };
   for (const k of m.voci.keys()) s.voci.set(k, statoVoce(m, s, k));
@@ -483,12 +457,6 @@ export function allineaRaccoltoDelPin(db: AppDatabase, partita: number, pin: { i
 // passi che si segnano sono tutti fatti — lo stato dell'Enigma, in `punto_partita` come per ogni voce, segue i passi —, e
 // segnarlo segna i passi. Un Enigma senza passi da segnare (nessuno, o solo voci descrittive) si segna da sé, come prima.
 
-/** Le partite (e il loro file) ci sono? Senza `utente` attaccato, chi allinea gli stati non fa niente. */
-function conPartite(db: AppDatabase): boolean {
-  if (!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()) return false;
-  return haTabellaUtente(db, 'punto_partita') && haTabellaUtente(db, 'spillo_partita') && haTabellaUtente(db, 'partita');
-}
-
 /** I passi di un Enigma, nel loro ordine. */
 export function passiDi(db: AppDatabase, enigma: string): Array<{ chiave: string; tipo: string; nome: string; area_dedalo_chiave: string | null }> {
   return db.prepare('SELECT chiave, tipo, nome, area_dedalo_chiave FROM punto_interesse WHERE contenitore_chiave = ? ORDER BY ordine, chiave').all(enigma) as Array<{ chiave: string; tipo: string; nome: string; area_dedalo_chiave: string | null }>;
@@ -526,7 +494,7 @@ export function effettiDelGestoDto(db: AppDatabase, e: EffettiDelGesto): Effetti
  * ritorno identica del pacchetto); togliere il segno non crea righe nuove. Vero se ha scritto.
  */
 export function scriviSegnoDelPin(db: AppDatabase, partita: number, uid: string, infiltrazione: string | null, raccolto: boolean, adesso: string): boolean {
-  if (infiltrazione !== null && conStatoPerInfiltrazione(db)) {
+  if (infiltrazione !== null) {
     return (raccolto
       ? db.prepare(`INSERT INTO spillo_partita_infiltrazione (partita_id, spillo_uid, infiltrazione_chiave, raccolto, updated_at) VALUES (?, ?, ?, 1, ?)
           ON CONFLICT(partita_id, spillo_uid, infiltrazione_chiave) DO UPDATE SET raccolto = 1, updated_at = excluded.updated_at WHERE spillo_partita_infiltrazione.raccolto IS NOT 1`).run(partita, uid, infiltrazione, adesso)
@@ -614,7 +582,7 @@ export function segnaIlPin(db: AppDatabase, partita: number, pin: { id: number; 
   const rigenerabili = (voci?.contano ?? []).filter((v) => m.voci.get(v)!.carattere === 'rigenerabile');
   const nel = m.condivisi.has(pin.id) ? infiltrazioneDelPin(m, s, rigenerabili, contesto) : null;
   scriviSegnoDelPin(db, partita, pin.uid, nel, raccolto, adesso);
-  if (!raccolto && conDivergenze(db)) db.prepare('DELETE FROM divergenza_partita WHERE partita_id = ? AND spillo_uid = ?').run(partita, pin.uid);
+  if (!raccolto) db.prepare('DELETE FROM divergenza_partita WHERE partita_id = ? AND spillo_uid = ?').run(partita, pin.uid);
   const effetti = rifaiSpecchio(db, partita, vociDelPinNellInfiltrazione(m, pin.id, nel), adesso);
   pulisciDivergenzeRisolte(db, partita);
   return effetti;
@@ -622,7 +590,6 @@ export function segnaIlPin(db: AppDatabase, partita: number, pin: { id: number; 
 
 /** Le divergenze conservate di una partita che non lo sono più: la voce è fatta, o il pin non ha più il suo segno. Si tolgono. */
 export function pulisciDivergenzeRisolte(db: AppDatabase, partita: number): void {
-  if (!conDivergenze(db)) return;
   const righe = db.prepare('SELECT spillo_uid, voce_chiave FROM divergenza_partita WHERE partita_id = ?').all(partita) as Array<{ spillo_uid: string; voce_chiave: string }>;
   if (righe.length === 0) return;
   const m = modelloAvanzamento(db);
@@ -645,17 +612,16 @@ export function pulisciDivergenzeRisolte(db: AppDatabase, partita: number): void
  *    la voce lo legge: la voce resta fatta, come prima di L4 («un punto già segnato segna i suoi pin»); un pin già segnato collegato a
  *    una voce i cui pin sono così tutti fatti la rende fatta (lo specchio, qui sotto);
  * 3. lo specchio delle voci con pin si rifà (`rifaiSpecchio`), e le divergenze risolte se ne vanno.
- * Un pin che resta senza voci che contano tiene il segno che aveva (§8.3: lo ha già, non si scrive niente). Senza le partite non fa niente.
+ * Un pin che resta senza voci che contano tiene il segno che aveva (§8.3: lo ha già, non si scrive niente).
  */
 export function riallineaStati(db: AppDatabase, mPrima: ModelloAvanzamento | null, adesso: string): SegniAggiunti {
   const aggiunti: SegniAggiunti = [];
-  if (!conPartite(db)) return aggiunti;
   const partite = db.prepare('SELECT id FROM partita ORDER BY id').pluck().all() as number[];
   if (mPrima) {
     const mDopo = modelloAvanzamento(db);
     // le letture di prima, per tutte le partite, prima di scrivere
     const prima = new Map(partite.map((p) => [p, statiDellaPartita(db, mPrima, p)]));
-    if (conStatoPerInfiltrazione(db)) riportaLaFormaDeiPin(db, mPrima, mDopo, partite, prima, adesso);
+    riportaLaFormaDeiPin(db, mPrima, mDopo, partite, prima, adesso);
     // i pin nuovi delle voci che erano fatte; per una voce che prima non leggeva i pin (era senza stato o senza carattere: un «Altro»
     // rimasto con dei pin a cui si dà «Permanente») tutti i suoi pin sono nuovi, così il cambio di carattere non perde il segno (§6.3)
     for (const [voce, pin] of mDopo.pinDellaVoce) {
@@ -727,9 +693,9 @@ function riportaLaFormaDeiPin(db: AppDatabase, mPrima: ModelloAvanzamento, mDopo
  * riapre). Vero se c'era qualcosa da togliere.
  */
 export function togliIlFattoAlPin(db: AppDatabase, partita: number, uid: string, adesso: string): boolean {
-  const divergenze = conDivergenze(db) ? db.prepare('DELETE FROM divergenza_partita WHERE partita_id = ? AND spillo_uid = ?').run(partita, uid).changes : 0;
+  const divergenze = db.prepare('DELETE FROM divergenza_partita WHERE partita_id = ? AND spillo_uid = ?').run(partita, uid).changes;
   const segno = db.prepare('UPDATE spillo_partita SET raccolto = 0, updated_at = ? WHERE partita_id = ? AND spillo_uid = ? AND raccolto = 1').run(adesso, partita, uid).changes
-    + (conStatoPerInfiltrazione(db) ? db.prepare('DELETE FROM spillo_partita_infiltrazione WHERE partita_id = ? AND spillo_uid = ?').run(partita, uid).changes : 0);
+    + db.prepare('DELETE FROM spillo_partita_infiltrazione WHERE partita_id = ? AND spillo_uid = ?').run(partita, uid).changes;
   const m = modelloAvanzamento(db);
   const id = m.idDelPin.get(uid);
   if (id !== undefined) rifaiSpecchio(db, partita, vociCheLeggonoIlPin(m, id), adesso);
@@ -762,7 +728,6 @@ export function allineaEnigmaDellaVoce(db: AppDatabase, partita: number, voce: s
  * riapre» — i progressi non cambiano da soli), un passo tolto può risolverlo. Nessun passo viene segnato da qui.
  */
 export function allineaEnigmaInOgniPartita(db: AppDatabase, enigma: string, adesso: string): void {
-  if (!conPartite(db)) return;
   for (const { id: partita } of db.prepare('SELECT id FROM partita').all() as Array<{ id: number }>) allineaEnigma(db, partita, enigma, adesso);
 }
 

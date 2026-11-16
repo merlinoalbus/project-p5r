@@ -1,6 +1,5 @@
 // L7: scheda aggregata. L'identità è il catalogo; disponibilità e avanzamento restano ai servizi esistenti.
 import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
 import { casaOggetto } from '../../shared/catalogo.js';
 import type { OggettoDettaglioDto, OffertaOggettoDto, RicompensaOggettoDto } from '../../shared/types.js';
 import { costoOggetto, dtoOggetto, rigaOggetto, ricompensePerFonte } from './catalogoOggettiLetture.js';
@@ -107,11 +106,10 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   const consegneOggetto = partita === undefined ? [] : regaliDellaPartita(partita).filter((r) => r.catalogo === chiave);
   const regalati = new Set(consegneOggetto.map((r) => r.confidente));
   // ondata 5 (decisioni 13 e 21): a chi piace lo dice l'elenco dei regali, con la reazione (+3/+2/+1); un Confidente compare una volta, con la
-  // reazione più alta (su un file di gioco senza la colonna della reazione «sconsigliato» vale +1, il resto +3)
-  const conReazione = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
+  // reazione più alta
   // revisione dei lotti D e D2: anche la nota della riga, perché la scheda dell'oggetto decida chi lo gradisce con lo stesso criterio della
   // scheda del Confidente (`fraIGraditi`); le note diverse delle righe dello stesso Confidente si uniscono, nessuna si perde
-  const righeRegalo = prepared(`SELECT g.confidente_chiave,c.nome,${conReazione ? 'g.reazione' : 'CASE WHEN g.sconsigliato = 1 THEN 1 ELSE 3 END AS reazione'},g.nota FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave
+  const righeRegalo = prepared(`SELECT g.confidente_chiave,c.nome,g.reazione,g.nota FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave
     WHERE g.catalogo_chiave = ? ORDER BY c.ordine,g.reazione DESC,g.ordine`).all(chiave) as Array<{ confidente_chiave: string; nome: string; reazione: number | null; nota: string | null }>;
   const noteDi = (confidente: string): string | null => {
     const note = [...new Set(righeRegalo.filter((r) => r.confidente_chiave === confidente).map((r) => r.nota?.trim() ?? '').filter(Boolean))];

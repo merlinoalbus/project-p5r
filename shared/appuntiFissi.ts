@@ -79,12 +79,3 @@ export interface PostoAppuntoFisso {
   indice: number;
 }
 
-/** Una categoria nuova (va in fondo alle categorie) o il suo nome nuovo. */
-export interface NomeCategoriaAppunti {
-  nome: string;
-}
-
-/** Il posto nuovo di una categoria fra le categorie. */
-export interface PostoCategoriaAppunti {
-  indice: number;
-}

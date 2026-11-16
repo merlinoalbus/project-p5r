@@ -4,7 +4,7 @@
 
 import { closeDb, getDb } from '../db/dbService.js';
 import { arcoAllaData, dataSbloccoQuartiere, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
-import { convertiProsa, migraTestiCondizioni, type ContestoConversione } from '../../shared/migraCondizioni.js';
+import { convertiProsa, type ContestoConversione } from '../../shared/migraCondizioni.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
@@ -36,73 +36,73 @@ function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilit
 /** Affianca a ogni requisito dello spillo il testo leggibile prodotto da `descriviRequisitoSpillo`, come fa il servizio prima di valutarli. */
 const conTesto = (c: RequisitoSpillo[]): RequisitoDisponibilita[] => c.map((x) => ({ ...x, testo: descriviRequisitoSpillo(x) }));
 /** La stessa strada dei dati: prosa → stati (una volta) → valutazione. */
-const daProsa = (testi: string[], st: StatoDisponibilita, extra: Partial<ContestoConversione> = {}) => valutaRequisiti(conTesto(migraTestiCondizioni(testi, { ...ctx, ...extra })), st);
+const daProsa = (testi: string[], st: StatoDisponibilita, extra: Partial<ContestoConversione> = {}) => valutaRequisiti(conTesto(convertiProsa(testi, { ...ctx, ...extra }).condizioni), st);
 
 describe('convertiProsa — le frasi della guida diventano stati, o niente', () => {
   it('date, periodi, giorni singoli, mesi', () => {
-    expect(migraTestiCondizioni(['dal 18 aprile'])).toEqual([{ tipo: 'data', dal: '04-18' }]);
-    expect(migraTestiCondizioni(['dal primo settembre'])).toEqual([{ tipo: 'data', dal: '09-01' }]);
-    expect(migraTestiCondizioni(['domenica 8 maggio'])).toEqual([{ tipo: 'intervallo', dal: '05-08', al: '05-08' }]);
-    expect(migraTestiCondizioni(['scambio disponibile dal 26 al 30 luglio'])).toEqual([{ tipo: 'intervallo', dal: '07-26', al: '07-30' }]);
-    expect(migraTestiCondizioni(['dal 22 gennaio al 2 febbraio'])).toEqual([{ tipo: 'intervallo', dal: '01-22', al: '02-02' }]);
-    expect(migraTestiCondizioni(['gennaio'])).toEqual([{ tipo: 'intervallo', dal: '01-01', al: '01-31' }]);
-    expect(migraTestiCondizioni(['agosto-settembre'])).toEqual([{ tipo: 'intervallo', dal: '08-01', al: '09-30' }]);
-    expect(migraTestiCondizioni(['disponibile fino al 20 maggio secondo allgamestaff.it (poi sostituito)'])).toEqual([{ tipo: 'intervallo', dal: '04-09', al: '05-20' }]);
+    expect(convertiProsa(['dal 18 aprile']).condizioni).toEqual([{ tipo: 'data', dal: '04-18' }]);
+    expect(convertiProsa(['dal primo settembre']).condizioni).toEqual([{ tipo: 'data', dal: '09-01' }]);
+    expect(convertiProsa(['domenica 8 maggio']).condizioni).toEqual([{ tipo: 'intervallo', dal: '05-08', al: '05-08' }]);
+    expect(convertiProsa(['scambio disponibile dal 26 al 30 luglio']).condizioni).toEqual([{ tipo: 'intervallo', dal: '07-26', al: '07-30' }]);
+    expect(convertiProsa(['dal 22 gennaio al 2 febbraio']).condizioni).toEqual([{ tipo: 'intervallo', dal: '01-22', al: '02-02' }]);
+    expect(convertiProsa(['gennaio']).condizioni).toEqual([{ tipo: 'intervallo', dal: '01-01', al: '01-31' }]);
+    expect(convertiProsa(['agosto-settembre']).condizioni).toEqual([{ tipo: 'intervallo', dal: '08-01', al: '09-30' }]);
+    expect(convertiProsa(['disponibile fino al 20 maggio secondo allgamestaff.it (poi sostituito)']).condizioni).toEqual([{ tipo: 'intervallo', dal: '04-09', al: '05-20' }]);
   });
 
   it('archi della storia: «a partire dall\'arco» è un arco, «durante l\'arco» è il periodo del Palazzo', () => {
-    expect(migraTestiCondizioni(["a partire dall'arco del Palazzo di Madarame"])).toEqual([{ tipo: 'arco', dungeon: 'madarame' }]);
-    expect(migraTestiCondizioni(['a partire dall’arco del Palazzo di Shido'])).toEqual([{ tipo: 'arco', dungeon: 'shido' }]);
-    expect(migraTestiCondizioni(["Durante l'arco del Palazzo di Niijima (Casinò)"], { finestraArco: (d) => FINESTRE.get(d) ?? null })).toEqual([{ tipo: 'intervallo', dal: '10-29', al: '11-20' }]);
-    expect(migraTestiCondizioni(['dopo Palazzo di Kaneshiro'])).toEqual([{ tipo: 'palazzo', dungeon: 'kaneshiro' }]);
-    expect(migraTestiCondizioni(['dopo il primo Palazzo (Kamoshida)'])).toEqual([{ tipo: 'palazzo', dungeon: 'kamoshida' }]);
+    expect(convertiProsa(["a partire dall'arco del Palazzo di Madarame"]).condizioni).toEqual([{ tipo: 'arco', dungeon: 'madarame' }]);
+    expect(convertiProsa(['a partire dall’arco del Palazzo di Shido']).condizioni).toEqual([{ tipo: 'arco', dungeon: 'shido' }]);
+    expect(convertiProsa(["Durante l'arco del Palazzo di Niijima (Casinò)"], { finestraArco: (d) => FINESTRE.get(d) ?? null }).condizioni).toEqual([{ tipo: 'intervallo', dal: '10-29', al: '11-20' }]);
+    expect(convertiProsa(['dopo Palazzo di Kaneshiro']).condizioni).toEqual([{ tipo: 'palazzo', dungeon: 'kaneshiro' }]);
+    expect(convertiProsa(['dopo il primo Palazzo (Kamoshida)']).condizioni).toEqual([{ tipo: 'palazzo', dungeon: 'kamoshida' }]);
   });
 
   it('Doti, Confidenti (con alias e col gestore del negozio), richieste con alias di titolo', () => {
-    expect(migraTestiCondizioni(['richiede Fascino Rango 3'])).toEqual([{ tipo: 'dote', dote: 'fascino', rango: 3 }]);
-    expect(migraTestiCondizioni(['richiede Coraggio Rango 2, Conoscenza Rango 2 e Perizia Rango 2']).map((r) => (r.tipo === 'dote' ? `${r.dote}${r.rango}` : r.tipo))).toEqual(['coraggio2', 'conoscenza2', 'perizia2']);
-    expect(migraTestiCondizioni(['Rango Confidente Sojiro 6'])).toEqual([{ tipo: 'confidente', confidente: 'sojiro', rango: 6 }]);
-    expect(migraTestiCondizioni(['Rango Confidente 3'], { confidenteNegozio: 'iwai' })).toEqual([{ tipo: 'confidente', confidente: 'iwai', rango: 3 }]);
-    expect(migraTestiCondizioni(['richiede rango massimo del Confidente Haru, Imperatrice'])).toEqual([{ tipo: 'confidente', confidente: 'haru', rango: 10 }]);
-    expect(migraTestiCondizioni(["Richiede il Rango Confidente Gemelle 3 (sblocco dell'Isolamento)"])).toEqual([{ tipo: 'confidente', confidente: 'gemelle', rango: 3 }]);
-    expect(migraTestiCondizioni(['legato al confidente della torre (shinya oda)'])).toEqual([{ tipo: 'confidente', confidente: 'shinya', rango: 1 }]);
-    expect(migraTestiCondizioni(['Rango Confidente Sojiro 9, richiede il completamento della richiesta Lo zio ingordo'], ctx)).toEqual([{ tipo: 'confidente', confidente: 'sojiro', rango: 9 }, { tipo: 'richiesta', richiesta: 'lo-zio-ingordo' }]);
-    expect(migraTestiCondizioni(["avviabile dal 4 settembre tramite la richiesta mementos 'i baro non vincono mai'"], ctx)).toEqual([{ tipo: 'data', dal: '09-04' }, { tipo: 'richiesta', richiesta: 'i-vincenti-non-imbrogliano' }]);
+    expect(convertiProsa(['richiede Fascino Rango 3']).condizioni).toEqual([{ tipo: 'dote', dote: 'fascino', rango: 3 }]);
+    expect(convertiProsa(['richiede Coraggio Rango 2, Conoscenza Rango 2 e Perizia Rango 2']).condizioni.map((r) => (r.tipo === 'dote' ? `${r.dote}${r.rango}` : r.tipo))).toEqual(['coraggio2', 'conoscenza2', 'perizia2']);
+    expect(convertiProsa(['Rango Confidente Sojiro 6']).condizioni).toEqual([{ tipo: 'confidente', confidente: 'sojiro', rango: 6 }]);
+    expect(convertiProsa(['Rango Confidente 3'], { confidenteNegozio: 'iwai' }).condizioni).toEqual([{ tipo: 'confidente', confidente: 'iwai', rango: 3 }]);
+    expect(convertiProsa(['richiede rango massimo del Confidente Haru, Imperatrice']).condizioni).toEqual([{ tipo: 'confidente', confidente: 'haru', rango: 10 }]);
+    expect(convertiProsa(["Richiede il Rango Confidente Gemelle 3 (sblocco dell'Isolamento)"]).condizioni).toEqual([{ tipo: 'confidente', confidente: 'gemelle', rango: 3 }]);
+    expect(convertiProsa(['legato al confidente della torre (shinya oda)']).condizioni).toEqual([{ tipo: 'confidente', confidente: 'shinya', rango: 1 }]);
+    expect(convertiProsa(['Rango Confidente Sojiro 9, richiede il completamento della richiesta Lo zio ingordo'], ctx).condizioni).toEqual([{ tipo: 'confidente', confidente: 'sojiro', rango: 9 }, { tipo: 'richiesta', richiesta: 'lo-zio-ingordo' }]);
+    expect(convertiProsa(["avviabile dal 4 settembre tramite la richiesta mementos 'i baro non vincono mai'"], ctx).condizioni).toEqual([{ tipo: 'data', dal: '09-04' }, { tipo: 'richiesta', richiesta: 'i-vincenti-non-imbrogliano' }]);
   });
 
   it('calendario, meteo, fascia, stagione, quartieri', () => {
-    expect(migraTestiCondizioni(['solo nei giorni di pioggia'])).toEqual([{ tipo: 'piove' }]);
-    expect(migraTestiCondizioni(['solo la domenica sera'])).toEqual([{ tipo: 'giorno-settimana', giorni: ['domenica'] }, { tipo: 'fascia', fascia: 'sera' }]);
-    expect(migraTestiCondizioni(['Aperto solo di giorno'])).toEqual([{ tipo: 'fascia', fascia: 'giorno' }]);
-    expect(migraTestiCondizioni(['Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia'])).toEqual([{ tipo: 'giorno-settimana', giorni: ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi'] }, { tipo: 'fascia', fascia: 'sera' }, { tipo: 'meteo', condizione: 'non-piove' }]);
-    expect(migraTestiCondizioni(['solo in inverno'])).toEqual([{ tipo: 'stagione', stagione: 'inverno' }]);
-    expect(migraTestiCondizioni(['Disponibile da quando si sblocca Akihabara'], ctx)).toEqual([{ tipo: 'quartiere', quartiere: 'akihabara' }]);
+    expect(convertiProsa(['solo nei giorni di pioggia']).condizioni).toEqual([{ tipo: 'piove' }]);
+    expect(convertiProsa(['solo la domenica sera']).condizioni).toEqual([{ tipo: 'giorno-settimana', giorni: ['domenica'] }, { tipo: 'fascia', fascia: 'sera' }]);
+    expect(convertiProsa(['Aperto solo di giorno']).condizioni).toEqual([{ tipo: 'fascia', fascia: 'giorno' }]);
+    expect(convertiProsa(['Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia']).condizioni).toEqual([{ tipo: 'giorno-settimana', giorni: ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi'] }, { tipo: 'fascia', fascia: 'sera' }, { tipo: 'meteo', condizione: 'non-piove' }]);
+    expect(convertiProsa(['solo in inverno']).condizioni).toEqual([{ tipo: 'stagione', stagione: 'inverno' }]);
+    expect(convertiProsa(['Disponibile da quando si sblocca Akihabara'], ctx).condizioni).toEqual([{ tipo: 'quartiere', quartiere: 'akihabara' }]);
     // un quartiere senza data nella Guida non è valutabile: si tiene la data esplicita se c'è
-    expect(migraTestiCondizioni(['Disponibile dal 5 giugno, quando si sblocca Kichijoji'], { quartiereDatato: () => false })).toEqual([{ tipo: 'data', dal: '06-05' }]);
+    expect(convertiProsa(['Disponibile dal 5 giugno, quando si sblocca Kichijoji'], { quartiereDatato: () => false }).condizioni).toEqual([{ tipo: 'data', dal: '06-05' }]);
   });
 
   it('attività, eventi, letture, grado cliente, punti negozio, contatori', () => {
-    expect(migraTestiCondizioni(['dopo aver giocato a biliardo almeno una volta'])).toEqual([{ tipo: 'attivita', attivita: 'biliardo', volte: 1 }]);
-    expect(migraTestiCondizioni(['dopo essere andati a pescare a Ichigaya almeno una volta'])).toEqual([{ tipo: 'attivita', attivita: 'pesca-ichigaya', volte: 1 }]);
-    expect(migraTestiCondizioni(['dopo la prima esperienza al lavoro dal fioraio Rafflesia'])).toEqual([{ tipo: 'attivita', attivita: 'lavoro-rafflesia', volte: 1 }]);
-    expect(migraTestiCondizioni(["dopo l'evento con Makoto"])).toEqual([{ tipo: 'evento', evento: 'evento-makoto' }]);
-    expect(migraTestiCondizioni(['dopo la prima creazione di uno strumento'])).toEqual([{ tipo: 'evento', evento: 'primo-strumento-creato' }]);
-    expect(migraTestiCondizioni(["dopo aver letto 'Spadaccino provetto'"], ctx)).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'spadaccino-provetto' }]);
-    expect(migraTestiCondizioni(['rango cliente Oscuro'], { negozio: 'tanaka-affari-loschi' })).toEqual([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'oscuro' }]);
-    expect(migraTestiCondizioni(['grado Nero (spendere oltre 10.000 yen)'], { negozio: 'tanaka-affari-loschi' })).toEqual([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'nero' }]);
-    expect(migraTestiCondizioni(['rango cliente Iniziale'], { negozio: 'tanaka-affari-loschi' })).toEqual([]);
-    expect(migraTestiCondizioni(['150 punti negozio'], { negozio: 'vestiti-usati-kichijoji' })).toEqual([{ tipo: 'punti-negozio', negozio: 'vestiti-usati-kichijoji', punti: 150 }]);
-    expect(migraTestiCondizioni(['dopo essere andati al cinema o aver visto un DVD almeno una volta'])).toEqual([{ tipo: 'contatore', cosa: 'film-completati', almeno: 1 }]);
-    expect(migraTestiCondizioni(['dopo il completamento di un videogioco'])).toEqual([{ tipo: 'contatore', cosa: 'videogiochi-completati', almeno: 1 }]);
+    expect(convertiProsa(['dopo aver giocato a biliardo almeno una volta']).condizioni).toEqual([{ tipo: 'attivita', attivita: 'biliardo', volte: 1 }]);
+    expect(convertiProsa(['dopo essere andati a pescare a Ichigaya almeno una volta']).condizioni).toEqual([{ tipo: 'attivita', attivita: 'pesca-ichigaya', volte: 1 }]);
+    expect(convertiProsa(['dopo la prima esperienza al lavoro dal fioraio Rafflesia']).condizioni).toEqual([{ tipo: 'attivita', attivita: 'lavoro-rafflesia', volte: 1 }]);
+    expect(convertiProsa(["dopo l'evento con Makoto"]).condizioni).toEqual([{ tipo: 'evento', evento: 'evento-makoto' }]);
+    expect(convertiProsa(['dopo la prima creazione di uno strumento']).condizioni).toEqual([{ tipo: 'evento', evento: 'primo-strumento-creato' }]);
+    expect(convertiProsa(["dopo aver letto 'Spadaccino provetto'"], ctx).condizioni).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'spadaccino-provetto' }]);
+    expect(convertiProsa(['rango cliente Oscuro'], { negozio: 'tanaka-affari-loschi' }).condizioni).toEqual([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'oscuro' }]);
+    expect(convertiProsa(['grado Nero (spendere oltre 10.000 yen)'], { negozio: 'tanaka-affari-loschi' }).condizioni).toEqual([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'nero' }]);
+    expect(convertiProsa(['rango cliente Iniziale'], { negozio: 'tanaka-affari-loschi' }).condizioni).toEqual([]);
+    expect(convertiProsa(['150 punti negozio'], { negozio: 'vestiti-usati-kichijoji' }).condizioni).toEqual([{ tipo: 'punti-negozio', negozio: 'vestiti-usati-kichijoji', punti: 150 }]);
+    expect(convertiProsa(['dopo essere andati al cinema o aver visto un DVD almeno una volta']).condizioni).toEqual([{ tipo: 'contatore', cosa: 'film-completati', almeno: 1 }]);
+    expect(convertiProsa(['dopo il completamento di un videogioco']).condizioni).toEqual([{ tipo: 'contatore', cosa: 'videogiochi-completati', almeno: 1 }]);
   });
 
   it('alternative e gruppi: «oppure» diventa ALMENO UNA; la mansarda è NON dentro un ALMENO UNA', () => {
-    expect(migraTestiCondizioni(['rango 5 di ryuji oppure rango 8 di ann'])).toEqual([{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'confidente', confidente: 'ryuji', rango: 5 }, { tipo: 'confidente', confidente: 'ann', rango: 8 }] }]);
-    expect(migraTestiCondizioni(['solo se la mansarda del Leblanc non viene pulita (altrimenti si ottiene dopo aver pulito la mansarda del Leblanc, dal 18 aprile)'])).toEqual([{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [
+    expect(convertiProsa(['rango 5 di ryuji oppure rango 8 di ann']).condizioni).toEqual([{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'confidente', confidente: 'ryuji', rango: 5 }, { tipo: 'confidente', confidente: 'ann', rango: 8 }] }]);
+    expect(convertiProsa(['solo se la mansarda del Leblanc non viene pulita (altrimenti si ottiene dopo aver pulito la mansarda del Leblanc, dal 18 aprile)']).condizioni).toEqual([{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [
       { tipo: 'non', condizione: { tipo: 'evento', evento: 'mansarda-pulita' } },
       { tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'evento', evento: 'mansarda-pulita' }, { tipo: 'data', dal: '04-18' }] },
     ] }]);
-    expect(migraTestiCondizioni(['dopo aver letto tutti gli altri libri di Jinbocho'], { libriJinbocho: () => ['a', 'b', 'c'], chiaveCorrente: 'b' })).toEqual([{ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'lettura', categoria: 'libro', chiave: 'a' }, { tipo: 'lettura', categoria: 'libro', chiave: 'c' }] }]);
+    expect(convertiProsa(['dopo aver letto tutti gli altri libri di Jinbocho'], { libriJinbocho: () => ['a', 'b', 'c'], chiaveCorrente: 'b' }).condizioni).toEqual([{ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'lettura', categoria: 'libro', chiave: 'a' }, { tipo: 'lettura', categoria: 'libro', chiave: 'c' }] }]);
   });
 
   it('il rumore non produce condizioni; ciò che non si converte finisce fra le scartate, mai nei dati', () => {

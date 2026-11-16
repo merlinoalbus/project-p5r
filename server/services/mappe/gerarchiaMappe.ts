@@ -27,14 +27,13 @@
 // Modulo foglia: lo importa soltanto la rotta. Nessuna scrittura. `mappeDaCollocare` esclude le mappe dei Memento di proposito: hanno il loro posto qui.
 // ============================================================
 
-import { getDb, prepared } from '../../db/dbService.js';
-import { haTabellaMain } from '../../db/schemaMemo.js';
+import { prepared } from '../../db/dbService.js';
 import { GRUPPI_CONTEGGIO_SPILLO, gruppoConteggioSpillo } from '../../../shared/spilli.js';
 import type { ConteggiNodoDto, ConteggiPinDto, GerarchiaMappeDto, IllustrazioneDto, NodoGerarchiaDto } from '../../../shared/types.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { statoDisponibilitaPartita } from '../disponibilitaService.js';
 import { disponibilitaQuartiere } from '../cittaService.js';
-import { casaDeiMemento, casaDelDedalo, casaDelPalazzo, casaDellArea, casaDellaMappa, conAree, contestoAree, type RigaArea } from './casaMappa.js';
+import { casaDeiMemento, casaDelDedalo, casaDelPalazzo, casaDellArea, casaDellaMappa, contestoAree, type RigaArea } from './casaMappa.js';
 import { illustrazioneDaRiga, immaginiCaricateDelleMappe, immaginiCaricateDi, urlCaricataDi, type RigaPerIllustrazione } from './immagineMappa.js';
 import { AMBITO_MINIATURA_LUOGO } from '../../../shared/immagini.js';
 import { chiaviPubblicheDelleMappe } from './percorsiMappe.js';
@@ -46,13 +45,9 @@ import { avanzamentoDeiLuoghi } from '../dungeonService.js';
 /**
  * Il filtro dei Palazzi, in un solo punto (è quello di `utils/palazzi.ts`, `soloPalazzi`): quando Iweleth diventa solo un dedalo
  * (L8 B7) esce dai Palazzi: i dungeon che confluiscono in un dedalo (`dedalo_confluenza`) non sono Palazzi, e il loro posto è il
- * ramo dei Memento. Senza la tabella (uno schema vecchio) vale il solo tipo.
+ * ramo dei Memento.
  */
-const tabellaConfluenza = (): boolean => haTabellaMain(getDb(), 'dedalo_confluenza');
-const sqlPalazzi = (): string => {
-  const confluenza = tabellaConfluenza();
-  return confluenza ? "d.tipo = 'palazzo' AND d.chiave NOT IN (SELECT dungeon_chiave FROM dedalo_confluenza)" : "d.tipo = 'palazzo'";
-};
+const sqlPalazzi = (): string => "d.tipo = 'palazzo' AND d.chiave NOT IN (SELECT dungeon_chiave FROM dedalo_confluenza)";
 
 const vuoti = (): ConteggiPinDto => ({ contenuto: 0, passaggi: 0, note: 0 });
 const somma = (a: ConteggiPinDto, b: ConteggiPinDto): void => { for (const g of GRUPPI_CONTEGGIO_SPILLO) a[g] += b[g]; };
@@ -118,15 +113,15 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   };
 
   // ---- letture, una volta per richiesta ----
-  const quartieri = (conAree() ? prepared(`SELECT q.chiave, q.nome, 'citta-' || q.chiave AS mappa_interna, m.chiave AS mappa_presente, m.immagine_chiave, m.asset, m.ruolo_immagine
-      FROM quartiere q LEFT JOIN mappa m ON m.chiave = 'citta-' || q.chiave WHERE q.chiave <> 'mementos' ORDER BY q.ordine, q.chiave`).all() : []) as RigaQuartiereG[];
-  const palazzi = (conAree() ? prepared(`SELECT d.chiave, d.nome FROM dungeon d WHERE ${sqlPalazzi()} ORDER BY d.ordine, d.chiave`).all() : []) as RigaPalazzoG[];
+  const quartieri = prepared(`SELECT q.chiave, q.nome, 'citta-' || q.chiave AS mappa_interna, m.chiave AS mappa_presente, m.immagine_chiave, m.asset, m.ruolo_immagine
+      FROM quartiere q LEFT JOIN mappa m ON m.chiave = 'citta-' || q.chiave WHERE q.chiave <> 'mementos' ORDER BY q.ordine, q.chiave`).all() as RigaQuartiereG[];
+  const palazzi = prepared(`SELECT d.chiave, d.nome FROM dungeon d WHERE ${sqlPalazzi()} ORDER BY d.ordine, d.chiave`).all() as RigaPalazzoG[];
   // i Palazzi confluiti in un dedalo (Iweleth): la loro riga resta per le Aree e le planimetrie, che diventano l'archivio del dedalo
-  const confluiti = (conAree() && tabellaConfluenza() ? prepared(`SELECT d.chiave, d.nome, c.dedalo_chiave FROM dedalo_confluenza c JOIN dungeon d ON d.chiave = c.dungeon_chiave
-      ORDER BY d.ordine, d.chiave`).all() : []) as Array<RigaPalazzoG & { dedalo_chiave: string }>;
-  const aree = (conAree() ? prepared('SELECT * FROM area ORDER BY ordine, slug').all() : []) as RigaArea[];
-  const planimetrie = (conAree() ? prepared(`SELECT chiave, nome, immagine_chiave, asset, ruolo_immagine, area_chiave, versione_etichetta, versione_ordine
-      FROM mappa WHERE area_chiave IS NOT NULL ORDER BY area_chiave, versione_ordine, chiave`).all() : []) as RigaPlanimetriaG[];
+  const confluiti = prepared(`SELECT d.chiave, d.nome, c.dedalo_chiave FROM dedalo_confluenza c JOIN dungeon d ON d.chiave = c.dungeon_chiave
+      ORDER BY d.ordine, d.chiave`).all() as Array<RigaPalazzoG & { dedalo_chiave: string }>;
+  const aree = prepared('SELECT * FROM area ORDER BY ordine, slug').all() as RigaArea[];
+  const planimetrie = prepared(`SELECT chiave, nome, immagine_chiave, asset, ruolo_immagine, area_chiave, versione_etichetta, versione_ordine
+      FROM mappa WHERE area_chiave IS NOT NULL ORDER BY area_chiave, versione_ordine, chiave`).all() as RigaPlanimetriaG[];
   const righeTokyo = prepared("SELECT chiave, immagine_chiave, asset, ruolo_immagine FROM mappa WHERE chiave = 'tokyo'").get() as RigaPerIllustrazione | undefined;
   const pin = prepared(`SELECT s.mappa_chiave, s.tipo, s.id, s.uid, s.riferimento_tipo, s.riferimento_chiave, v.voci
       FROM spillo s LEFT JOIN (SELECT spillo_id, group_concat(voce_chiave, '|') AS voci FROM spillo_voce GROUP BY spillo_id) v ON v.spillo_id = s.id
@@ -136,7 +131,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const infiltrazioniDeiPalazzi = (conInfiltrazioni.length === 0 ? [] : prepared(`SELECT chiave, nome, ordine, dungeon_chiave FROM dungeon_area
       WHERE dungeon_chiave IN (${conInfiltrazioni.map(() => '?').join(',')}) ORDER BY ordine, chiave`).all(...conInfiltrazioni.map((p) => p.chiave))) as Array<InfiltrazioneDellArea & { dungeon_chiave: string }>;
   // il ramo dei Memento: dedali, aree dei dedali, conteggi per chiave e le mappe senza Area (una lettura ciascuno, nessuna query per nodo)
-  const memento = (conAree() ? prepared("SELECT chiave, nome FROM dungeon WHERE tipo = 'mementos' ORDER BY ordine, chiave LIMIT 1").get() : undefined) as RigaPalazzoG | undefined;
+  const memento = prepared("SELECT chiave, nome FROM dungeon WHERE tipo = 'mementos' ORDER BY ordine, chiave LIMIT 1").get() as RigaPalazzoG | undefined;
   const dedali = (memento ? prepared('SELECT chiave, nome FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine, chiave').all(memento.chiave) : []) as RigaDedaloG[];
   const areeDedali = (memento ? prepared(`SELECT ad.chiave, ad.nome, ad.dedalo_chiave FROM area_dedalo ad JOIN dungeon_area a ON a.chiave = ad.dedalo_chiave
       WHERE a.dungeon_chiave = ? ORDER BY a.ordine, a.chiave, ad.ordine, ad.chiave`).all(memento.chiave) : []) as RigaAreaDedaloG[];

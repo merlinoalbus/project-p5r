@@ -387,11 +387,6 @@ export function PacchettoGioco() {
             </p>
             <ElencoOrfani orfani={esito.orfani} quando="dopo" />
             {esito.scarti !== undefined && <section aria-label="Strutture scartate"><h3 className="m-0 testo-14">Scartato nell’importazione</h3><ElencoScarti scarti={esito.scarti} quando="dopo" copia={esito.riepilogoSalvatoIn ?? esito.copiaDiSicurezza} /></section>}
-            {!!esito.condizioniConvertite?.length && <section aria-label="Condizioni recuperate dal backup">
-              <h3 className="m-0 testo-14">Vecchie condizioni recuperate come avvisi</h3>
-              <p className="m-0 text-text-secondary">Non bloccano la disponibilità. Le altre condizioni non sono state riscritte da questo recupero.</p>
-              <ul className="m-0 pl-4">{esito.condizioniConvertite.map((c, i) => <li key={i}>{c}</li>)}</ul>
-            </section>}
             <p className="m-0 text-text-muted">Ricarica l'app per rileggere glossario, mappe, catalogo e grafica con i dati nuovi.</p>
           </div>
         )}

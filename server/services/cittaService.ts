@@ -131,7 +131,7 @@ export function elencaLuoghi(): LuogoOpzioneDto[] {
 function ingressoQuartiere(quartiere: string): IngressoQuartiereDto | null {
  const i = prepared('SELECT * FROM quartiere_ingresso WHERE quartiere_chiave=?').get(quartiere) as { mappa_chiave: string; x: number; y: number; zoom: number; area_chiave?: string | null } | undefined;
  if (!i) return null;
- // l'Area della planimetria d'ingresso (L2): quella registrata, e su uno schema di prima nessuna
+ // l'Area della planimetria d'ingresso (L2): quella registrata
  const area = i.area_chiave ? prepared('SELECT slug, nome FROM area WHERE chiave = ?').get(i.area_chiave) as { slug: string; nome: string } | undefined : undefined;
  return { mappa: chiaveMappa(i.mappa_chiave), nome: nomePercorso(i.mappa_chiave), x: i.x, y: i.y, zoom: i.zoom, area: area ? { slug: area.slug, nome: area.nome, versioneEtichetta: etichettaDiVersione(i.mappa_chiave) } : null };
 }

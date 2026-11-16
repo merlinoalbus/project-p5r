@@ -21,8 +21,7 @@
 // registrabile dal compendio e per fusione.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haTabellaUtente } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { httpErrors, type HttpError } from '../utils/httpError.js';
 import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './maschere.js';
 import type { PersonaDellaMascheraDto } from '../../shared/types.js';
@@ -94,13 +93,12 @@ export function vociDiCattura(idx: IndiceMaschere = indiceMaschere(), voci?: rea
   return out;
 }
 
-/** Le Persona registrate nel compendio della partita (vuoto se il compendio non c'è). */
+/** Le Persona registrate nel compendio della partita. */
 export function personeRegistrate(partitaId: number): Set<number> {
-  if (!haTabellaUtente(getDb(), 'compendio_partita')) return new Set();
   return new Set(prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1').pluck().all(partitaId) as number[]);
 }
 
-/** Le voci Persona da catturare la cui Persona è registrata nel compendio della partita (vuoto se il compendio non c'è). `voci` si passa se già lette. */
+/** Le voci Persona da catturare la cui Persona è registrata nel compendio della partita. `voci` si passa se già lette. */
 export function vociPersonaCatturate(partitaId: number, voci?: ReadonlyMap<string, VoceDiCattura>): Set<string> {
   const registrate = personeRegistrate(partitaId);
   if (registrate.size === 0) return new Set();

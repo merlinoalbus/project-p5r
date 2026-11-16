@@ -11,7 +11,6 @@
 import { condizioneConTesto, leggiCondizioniSalvate, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabellaUtente } from '../db/schemaMemo.js';
 import { nuovaValutazioneLegacy } from '../db/acquistiLegacy.js';
 import { conCestinoPrivato } from './cestinoService.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -19,7 +18,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
 import { registraEvento } from './storicoService.js';
 import { attivitaConQuiz, quizVoceDto } from './attivitaService.js';
-import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { categoriaDelListino, normalizzaPrezzoPerFascia, prezzoNellaFascia, testoCostoAImporto } from '../../shared/catalogo.js';
 import { filtroRicerca } from '../../shared/testo.js';
 import { fasciaDellaPartita, fasciaDellaVoce, prezzoDellArticolo, scontoNellaPartita } from './prezziArticoli.js';
@@ -180,8 +179,8 @@ function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita, scorta: 
  * Un articolo collegato non ha una descrizione propria: nome, effetto, statistiche e «per chi»
  * vengono dall'oggetto a ogni lettura. Se il collegamento punta a qualcosa che non c'e' piu' si
  * torna a quel che la riga ha di suo, invece di mostrare una scheda vuota. */
-function identitaArticoli(righe: readonly RigaArticolo[]): Map<string, CatalogoOggettoDto> | undefined {
-  return catalogoOggettiDisponibile() ? oggettiConChiavi(righe.flatMap((r) => r.catalogo_chiave ? [r.catalogo_chiave] : [])) : undefined;
+function identitaArticoli(righe: readonly RigaArticolo[]): Map<string, CatalogoOggettoDto> {
+  return oggettiConChiavi(righe.flatMap((r) => r.catalogo_chiave ? [r.catalogo_chiave] : []));
 }
 
 function statisticheDelCatalogo(o: CatalogoOggettoDto): string | null {
@@ -317,12 +316,9 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
   const acquistati = st?.articoliOttenuti ?? new Set<string>();
   const cond: string[] = ['a.nascosto = 0', 'n.nascosto = 0']; const par: unknown[] = [];
-  const conCatalogo = catalogoOggettiDisponibile();
-  // il testo cercato si filtra dopo, sui DTO, con la ricerca comune dell'app (parola per parola, `shared/testo.ts`): con e senza catalogo
+  // il testo cercato si filtra dopo, sui DTO, con la ricerca comune dell'app (parola per parola, `shared/testo.ts`)
   const trova = filtroRicerca(filtro.q);
   const categorie = [...new Set([...(filtro.categorie ?? []), ...(filtro.categoria ? [filtro.categoria] : [])])];
-  if (categorie.length && !conCatalogo) { cond.push(`a.categoria IN (${categorie.map(() => '?').join(',')})`); par.push(...categorie); }
-  if (filtro.per && !conCatalogo) { cond.push("(a.per = ? OR a.per = 'tutti')"); par.push(filtro.per); }
   const righe = prepared(`${SQL_ARTICOLO} WHERE ${cond.join(' AND ')} ORDER BY n.ordine, a.ordine`).all(...par) as RigaArticolo[];
   const catalogo = identitaArticoli(righe);
   const ricevuti = ricompensePerFonte('articolo', righe.map((r) => r.chiave));
@@ -332,9 +328,7 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   let valutati = righe.map((r) => articoloDto(r, acquistati, st, catalogo, ricevuti.get(r.chiave), letture));
   valutati = valutati.filter((a) => trova(a.nome, a.nomeOriginale, ...(a.nomiAltri ?? []), ...(a.ricevuti?.map((r) => r.nome) ?? []),
     ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome) : []), a.effetto, a.negozioNome));
-  if (conCatalogo) {
-    valutati = valutati.filter((a) => (!categorie.length || categorie.includes(a.categoria)) && (!filtro.per || a.per === filtro.per || a.per === 'tutti'));
-  }
+  valutati = valutati.filter((a) => (!categorie.length || categorie.includes(a.categoria)) && (!filtro.per || a.per === filtro.per || a.per === 'tutti'));
   // Ondata 5: ciò che si rifornisce è «acquistato» nel ciclo in corso e torna «da acquistare» con la scorta nuova (`compratoNelCiclo`)
   if (partitaId !== undefined && filtro.stato) valutati = valutati.filter((a) => (filtro.stato === 'acquistati' ? compratoNelCiclo(a) : !compratoNelCiclo(a)));
   // «Disponibili» = tutte le condizioni vere. Un «ignoto» — una condizione che la partita non sa
@@ -506,15 +500,14 @@ export function togliCopiaDaVoce(partitaId: number, voceUid: string, effettoUid:
  */
 export function annullaRigaDelRegistro(partitaId: number, rigaId: number): ArticoloDto {
   verificaPartita(partitaId);
-  const riga = (haTabellaUtente(getDb(), 'registro_acquisti')
-    ? prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, rigaId) : undefined) as { articolo_chiave: string; fonte: string } | undefined;
+  const riga = prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, rigaId) as { articolo_chiave: string; fonte: string } | undefined;
   if (!riga) throw httpErrors.notFound('acquisto-non-trovato', 'Questo acquisto non risulta nel registro della partita.');
   if (riga.fonte !== 'negozio') throw httpErrors.conflict('acquisto-della-voce', 'Questo acquisto viene da una voce del Diario: si annulla togliendo la spunta della voce.');
   const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(riga.articolo_chiave) as RigaArticolo | undefined;
   getDb().transaction(() => {
     const { tolgoOttenuto } = togliRiga(partitaId, rigaId);
     if (tolgoOttenuto) {
-      const nome = r ? (identitaArticoli([r])?.get(r.catalogo_chiave ?? '')?.nome ?? (r.nome || r.chiave)) : riga.articolo_chiave;
+      const nome = r ? (identitaArticoli([r]).get(r.catalogo_chiave ?? '')?.nome ?? (r.nome || r.chiave)) : riga.articolo_chiave;
       togliPresenza(partitaId, riga.articolo_chiave, nome);
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);

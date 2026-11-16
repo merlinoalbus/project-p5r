@@ -20,13 +20,12 @@ import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/co
 import { isDeepStrictEqual } from 'node:util';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
 import { TIPI_CATALOGO, type ElementoCatalogoDto, type RiepilogoCatalogoDto, type TipoCatalogo } from '../../shared/types.js';
 import { normalizzaVociEffetto } from '../../shared/effettiCatalogo.js';
 import { tracciamentoPerTipo } from '../../shared/attivita.js';
-import { catalogoOggettiDisponibile, identitaDellOggettoPerLOfferta, riferimentoOggetto, oggettiPerFonte } from './catalogoOggettiLetture.js';
+import { identitaDellOggettoPerLOfferta, riferimentoOggetto, oggettiPerFonte } from './catalogoOggettiLetture.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { conCestino } from './cestinoService.js';
 import { IDENTITA_DI_UN_OFFERTA_COLLEGATA, normalizzaCostoScambio } from '../../shared/catalogo.js';
@@ -122,10 +121,9 @@ function riga(tipo: TipoCatalogo, chiave: string): Riga {
  *  colonna del profilo (o la chiave se vuoto), l'origine, se è una riga del seed corretta (utente con `seed_json`) e se è nascosta. */
 function dto(tipo: TipoCatalogo, r: Riga): ElementoCatalogoDto {
   const dati: Record<string, unknown> = {};
-  for (const c of campiDisponibili(tipo)) dati[c] = r[c] ?? null;
+  for (const c of CAMPI[tipo]) dati[c] = r[c] ?? null;
   if (tipo === 'attivita') dati._fonteConfidente = fonteConfidenteAttivita(r);
   if (tipo === 'attivita') dati._fontePesca = typeof r.pesca_regola_chiave==='string'?leggiRegolaPesca(r.pesca_regola_chiave):null;
-  if (tipo === 'articolo' && 'costo_json' in r) dati.costo_json = r.costo_json;
   const oggetto = typeof r.catalogo_chiave === 'string' ? riferimentoOggetto(r.catalogo_chiave) : null;
   if (categoriaLettura(tipo, r) && oggetto) {
     dati.nome = oggetto.nome;
@@ -144,20 +142,12 @@ function categoriaLettura(tipo: TipoCatalogo, dati: Record<string, unknown>): 'l
 
 /** Crea il riferimento diretto soltanto per una sorgente esplicitamente aggiunta/corretta dall'utente. */
 function assicuraIdentitaLettura(tipo: TipoCatalogo, chiave: string, nome: string): void {
-  if (!catalogoOggettiDisponibile()) return;
   const sorgente = riga(tipo, chiave);
   const categoria = categoriaLettura(tipo, sorgente);
   if (!categoria || typeof sorgente.catalogo_chiave === 'string') return;
   const o = creaOggetto({ categoria, nome, sottocategoria: tipo === 'film' && typeof sorgente.dove === 'string' ? sorgente.dove : null,
     nomiAltri: [], nomeOriginale: null, effetto: '', descrizione: typeof sorgente.dettagli === 'string' ? sorgente.dettagli : '', statistiche: null });
   prepared(`UPDATE ${TABELLA[tipo]} SET catalogo_chiave = ? WHERE chiave = ?`).run(o.chiave, chiave);
-}
-
-/** Prima di M7 non legge/scrive la colonna nuova, neppure negli snapshot dei gesti esistenti. */
-function campiDisponibili(tipo: TipoCatalogo): readonly string[] {
-  // un file di gioco vecchio non ha lo sconto del negozio: non si legge né si scrive
-  if (tipo === 'negozio' && !haColonnaMain(getDb(), 'negozio', 'sconto_json')) return CAMPI.negozio.filter((c) => c !== 'sconto_json');
-  return tipo === 'articolo' && !catalogoOggettiDisponibile() ? CAMPI[tipo].filter((c) => c !== 'catalogo_chiave' && c !== 'costo_json') : CAMPI[tipo];
 }
 
 function legameStoricoCambiato(d: Record<string, unknown>, r: Riga | null): boolean {
@@ -213,9 +203,7 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   if (padre && dati[padre.campo] != null && !esiste(padre.tabella, dati[padre.campo])) {
     throw httpErrors.badRequest(padre.codice, `${padre.nome} '${String(dati[padre.campo])}' non esiste.`);
   }
-  if (tipo === 'articolo' && dati.oggetto_fonte === 'catalogo' && !catalogoOggettiDisponibile()) throw httpErrors.conflict('catalogo-non-disponibile', 'Il catalogo degli oggetti non è ancora disponibile.');
-  if (tipo === 'articolo' && (dati.catalogo_chiave != null || (catalogoOggettiDisponibile() && legameStoricoCambiato(dati, esistente)))) {
-    if (!catalogoOggettiDisponibile()) throw httpErrors.conflict('catalogo-non-disponibile', 'Il catalogo degli oggetti non è ancora disponibile.');
+  if (tipo === 'articolo' && (dati.catalogo_chiave != null || legameStoricoCambiato(dati, esistente))) {
     const chiave = 'catalogo_chiave' in dati ? dati.catalogo_chiave : chiaveDaLegameStorico(dati, esistente);
     if (chiave != null) {
       if (esistente?.chiave && prepared("SELECT 1 FROM ricompensa_oggetto WHERE fonte_tipo = 'articolo' AND fonte_chiave = ?").get(esistente.chiave)) {
@@ -226,7 +214,6 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
     }
   }
   if (tipo === 'articolo' && dati.costo_json != null) {
-    if (!catalogoOggettiDisponibile()) throw httpErrors.conflict('catalogo-non-disponibile', 'Il catalogo degli oggetti non è ancora disponibile.');
     const costo = normalizzaCostoScambio(dati.costo_json);
     if (!costo) throw httpErrors.badRequest('costo-non-valido', 'Completa il costo dello scambio prima di salvare.');
     if (costo.tipo === 'oggetti') {
@@ -262,23 +249,21 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   if(pesca)verificaCampiAttivitaPesca({...esistente,...d});
   const collegata = tipo === 'attivita' && (d.confidente_chiave !== undefined ? d.confidente_chiave : esistente?.confidente_chiave) != null;
   if (collegata) verificaCampiAttivitaConfidente({ ...esistente, ...d });
-  if (catalogoOggettiDisponibile() && categoriaLettura(tipo, { ...esistente, ...d })) {
+  if (categoriaLettura(tipo, { ...esistente, ...d })) {
     delete d.prezzo;
     if (tipo === 'attivita') delete d.costo;
   }
   if (tipo === 'articolo') {
-    const conCatalogo = catalogoOggettiDisponibile();
     // Ondata 5, lotto F (decisione 21): il testo dell'effetto e le statistiche vivono solo nell'oggetto del catalogo (l'offerta non ha più le
     // colonne). Un valore mandato per l'offerta non si accetta in silenzio: si rifiuta e si dice dove si scrive. `null` o vuoto passano.
     const mandati = (['effetto', 'statistiche', 'effetto_json'] as const).filter((c) => d[c] != null && (typeof d[c] !== 'string' || (d[c] as string).trim() !== ''));
     if (mandati.length) throw httpErrors.badRequest('effetto-nell-oggetto', `L’effetto e le statistiche si scrivono nell’oggetto del catalogo, non nell’offerta (campi: ${mandati.join(', ')}).`);
     for (const c of ['effetto_json', 'effetto', 'statistiche']) delete d[c];
-    if (!conCatalogo) { delete d.catalogo_chiave; delete d.costo_json; }
-    else if (!('catalogo_chiave' in d) && legameStoricoCambiato(d, esistente)) d.catalogo_chiave = chiaveDaLegameStorico(d, esistente);
+    if (!('catalogo_chiave' in d) && legameStoricoCambiato(d, esistente)) d.catalogo_chiave = chiaveDaLegameStorico(d, esistente);
     const chiave = 'catalogo_chiave' in d ? d.catalogo_chiave : esistente?.catalogo_chiave;
     // uno scambio non ha prezzo in yen, né in una fascia (Ondata 5, lotto E)
     if (d.costo_json != null) { d.prezzo = null; d.prezzo_per_fascia_json = null; }
-    if (conCatalogo && typeof chiave === 'string') {
+    if (typeof chiave === 'string') {
       // L4-07: nome, categoria e «per chi» valgono solo per un'offerta senza legame; con il legame li dà l'oggetto del catalogo. Non si
       // copiano né si corregge l'identità dal listino: la riga collegata li ha vuoti (NOT NULL: nome vuoto, categoria «altro»), anche
       // quando un'offerta che aveva i suoi viene collegata adesso.
@@ -289,7 +274,7 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
       if (!esistente && d.categoria === undefined) d.categoria = 'altro';
       // L4-07: un'offerta che perde adesso il legame senza un nome scritto qui tiene nome, categoria e «per chi» che mostrava (dall'oggetto);
       // con un nome scritto valgono i valori mandati
-      if (conCatalogo && typeof esistente?.catalogo_chiave === 'string' && (typeof d.nome !== 'string' || !d.nome.trim())) {
+      if (typeof esistente?.catalogo_chiave === 'string' && (typeof d.nome !== 'string' || !d.nome.trim())) {
         const prima = identitaDellOggettoPerLOfferta(esistente.catalogo_chiave);
         if (prima) Object.assign(d, prima);
       }
@@ -423,7 +408,7 @@ export function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<
   // si scavalca il predefinito — e con `attivita.sessioni`, che è `NOT NULL DEFAULT 1`, la
   // creazione falliva con un errore di vincolo che l'utente si vedeva come «errore interno».
   const valori: Record<string, unknown> = { chiave, ordine: ordineSuccessivo(tipo, dati), origine: 'utente', nascosto: 0, updated_at: adesso };
-  const compilate = campiDisponibili(tipo).filter((c) => dati[c] !== undefined);
+  const compilate = CAMPI[tipo].filter((c) => dati[c] !== undefined);
   // SQLite non ha booleani: `verificato` viaggia come `true`/`false` e in tabella e' 1/0.
   for (const c of compilate) valori[c] = c === 'verificato' ? (dati[c] === true ? 1 : 0) : (dati[c] ?? null);
   const colonne = ['chiave', 'ordine', ...compilate, 'origine', 'nascosto', 'updated_at'];
@@ -480,13 +465,13 @@ export function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: str
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), { ...r, ...dati }, r);
   const lettura = categoriaLettura(tipo, { ...r, ...dati });
   const titolo = lettura && typeof dati.nome === 'string' ? dati.nome.trim() : null;
-  if (lettura && catalogoOggettiDisponibile()) {
+  if (lettura) {
     // Il titolo si modifica sull'identità; i valori storici della sorgente non si riscrivono.
     delete dati.nome; delete dati.prezzo;
     if (tipo === 'attivita') delete dati.costo;
   }
   const adesso = nowIso();
-  const campi = campiDisponibili(tipo);
+  const campi = CAMPI[tipo];
   const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(campi.map((c) => [c, r[c] ?? null]))) : null);
   const set = campi.filter((c) => c in dati).map((c) => `${c} = @${c}`);
   const valori: Record<string, unknown> = { chiave, origine: 'utente', seed_json: seedJson, updated_at: adesso };
@@ -494,7 +479,7 @@ export function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: str
   getDb().transaction(() => {
     verificaTipoVideogioco(tipo, r, dati.tipo ?? r.tipo);
     prepared(`UPDATE ${TABELLA[tipo]} SET ${[...set, "origine = 'utente'", 'seed_json = @seed_json', 'updated_at = @updated_at'].join(', ')} WHERE chiave = @chiave`).run(valori);
-    if (lettura && catalogoOggettiDisponibile()) {
+    if (lettura) {
       assicuraIdentitaLettura(tipo, chiave, titolo || String(r.nome));
       const aggiornata = riga(tipo, chiave);
       if (titolo && typeof aggiornata.catalogo_chiave === 'string') aggiornaOggetto(aggiornata.catalogo_chiave, { nome: titolo });
@@ -511,7 +496,7 @@ export function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: str
  *  `aggiornaElementoNellaTransazione`: passa a `origine = 'utente'` e, se era della guida, conserva l'originale in `seed_json`. */
 export function adottaRigaDellaGuida(tipo: TipoCatalogo, chiave: string): void {
   const r = riga(tipo, chiave);
-  const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(campiDisponibili(tipo).map((c) => [c, r[c] ?? null]))) : null);
+  const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(CAMPI[tipo].map((c) => [c, r[c] ?? null]))) : null);
   prepared(`UPDATE ${TABELLA[tipo]} SET origine = 'utente', seed_json = ? WHERE chiave = ?`).run(seedJson, chiave);
 }
 
@@ -519,7 +504,7 @@ export function adottaRigaDellaGuida(tipo: TipoCatalogo, chiave: string): void {
 export function nascondiElemento(tipo: TipoCatalogo, chiave: string, nascosta: boolean): ElementoCatalogoDto {
   const r = riga(tipo, chiave);
   if (tipo === 'negozio' && nascosta) verificaPuntoVenditaNascosto(r);
-  const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(campiDisponibili(tipo).map((c) => [c, r[c] ?? null]))) : null);
+  const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(CAMPI[tipo].map((c) => [c, r[c] ?? null]))) : null);
   prepared(`UPDATE ${TABELLA[tipo]} SET nascosto = ?, seed_json = ?, updated_at = ? WHERE chiave = ?`).run(nascosta ? 1 : 0, seedJson, nowIso(), chiave);
   invalidaCacheDiGioco();
   return dto(tipo, riga(tipo, chiave));

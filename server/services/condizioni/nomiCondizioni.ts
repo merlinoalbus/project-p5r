@@ -10,7 +10,6 @@
 import { prepared } from '../../db/dbService.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { giocabili } from '../squadraService.js';
-import { catalogoOggettiDisponibile } from '../catalogoOggettiLetture.js';
 import { dataConArticolo, type NomiCondizioni } from '../../../shared/condizioniSpillo.js';
 import { sqlVoceDescrittiva, statoCitabile } from '../../../shared/spilli.js';
 import { vociDelPinSql } from '../mappe/voceDelPin.js';
@@ -42,19 +41,18 @@ export function nomiCondizioniMemo(): NomiCondizioni {
 export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
   /** Da una query chiave/nome a una funzione che, chiamata, restituisce l'oggetto chiave → nome. */
   const mappa = (sql: string) => () => Object.fromEntries((prepared(sql).all() as Array<{ chiave: string; nome: string }>).map((r) => [r.chiave, r.nome]));
-  const dalCatalogo = (prima: string, dopo: string) => () => mappa(catalogoOggettiDisponibile() ? dopo : prima)();
   const elenchi: { [K in keyof NomiCondizioni]-?: () => NonNullable<NomiCondizioni[K]> } = {
     allerte: mappa('SELECT DISTINCT chiave,nome FROM allerta_meteo'),
-    articoli: dalCatalogo('SELECT chiave, nome FROM articolo',
+    articoli: mappa(
       "SELECT a.chiave,COALESCE(c.nome,NULLIF(a.nome,''),'Oggetto da collegare') AS nome FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave"),
-    letture: dalCatalogo('SELECT chiave, nome FROM libro UNION ALL SELECT chiave, nome FROM film',
+    letture: mappa(
       `SELECT l.chiave,COALESCE(c.nome,l.nome) AS nome FROM libro l
         LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave
         UNION ALL SELECT f.chiave,COALESCE(c.nome,f.nome) FROM film f
         LEFT JOIN catalogo_oggetto c ON c.chiave = f.catalogo_chiave`),
     confidenti: mappa('SELECT chiave, nome FROM confidente'), quartieri: mappa('SELECT chiave, nome FROM quartiere'),
     richieste: mappa('SELECT chiave, nome FROM richiesta'), dungeon: mappa('SELECT chiave, nome FROM dungeon'),
-    attivita: dalCatalogo('SELECT chiave, nome FROM attivita',
+    attivita: mappa(
       `SELECT a.chiave,COALESCE(c.nome,a.nome) AS nome FROM attivita a
         LEFT JOIN catalogo_oggetto c ON a.tipo = 'videogioco' AND c.chiave = a.catalogo_chiave`), negozi: mappa('SELECT chiave, nome FROM negozio'),
     squadra: () => Object.fromEntries(giocabili().map((p) => [p.chiave, p.nome])),

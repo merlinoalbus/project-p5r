@@ -42,19 +42,6 @@ export function eChiaveElemento(v: unknown): v is ChiaveElemento {
   return typeof v === 'string' && Object.hasOwn(NOME_ELEMENTO, v);
 }
 
-// ---- Tipi di skill (oltre agli elementi) ----
-
-export type ChiaveTipoSkill = 'ailment' | 'healing' | 'support' | 'passive' | 'trait';
-
-/** I tipi di skill: `nome` è l'etichetta della singola skill, `plurale` l'intestazione di un gruppo. */
-export const TIPI_SKILL: ReadonlyArray<{ chiave: ChiaveTipoSkill; nome: string; plurale: string }> = [
-  { chiave: 'ailment', nome: 'Alterazione', plurale: 'Alterazioni' },
-  { chiave: 'healing', nome: 'Recupero', plurale: 'Recupero' },
-  { chiave: 'support', nome: 'Supporto', plurale: 'Supporto' },
-  { chiave: 'passive', nome: 'Passiva', plurale: 'Passive' },
-  { chiave: 'trait', nome: 'Tratto', plurale: 'Tratti' },
-];
-
 // ---- Esiti delle affinità ----
 
 /** I codici dell'affinità, come in `persona_affinita.codice`. «-» è normale. */
@@ -97,13 +84,6 @@ export const NOME_PERSONALITA: Readonly<Record<PersonalitaOmbra, string>> = { gi
 
 /** Gli esiti di una risposta di negoziazione (non sono gli esiti dell'affinità). */
 export type EsitoNegoziazione = 'buona' | 'passabile' | 'cattiva';
-
-/** Dalla personalità scritta dalla guida («Giocosa», «-», «Non reclutabile», vuota) alla chiave; ciò che non è una delle quattro è «sconosciuta». */
-export function personalitaDaTesto(testo: unknown): PersonalitaOmbra {
-  if (typeof testo !== 'string') return 'sconosciuta';
-  const k = testo.trim().toLowerCase();
-  return (UMORI.find((u) => u.chiave === k)?.chiave) ?? 'sconosciuta';
-}
 
 // ---- Lettura del testo della guida ----
 

@@ -3,7 +3,6 @@
 import type { AppDatabase } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { tabellaTolta } from '../../db/fontiTolte.js';
-import { haTabella } from '../../db/colonne.js';
 import { slug } from '../../../shared/slug.js';
 import { pinCompatibileConNuovoLuogo, type LuogoNuovoDaPin } from '../../../shared/luogoDaPin.js';
 import { canonico, verificaPin, type PinDelRaccordo } from './precondizioneRaccordoPin.js';
@@ -86,8 +85,6 @@ function passiDelRegistro(db: AppDatabase, schema: 'main' | 'utente', raw: unkno
 }
 
 function fotografiaCestino(db: AppDatabase, pin: PinLuogoDaPin, area: string, quartiere: string, chiave: string, nome: string, voci: Set<string>): Riga {
-  const principale = haTabella(db, 'cestino', 'main');
-  const partite = haTabella(db, 'cestino_partite', 'utente');
   const pertinente = (t: string, r: Riga): boolean => {
     if (t === 'spillo') return r.id === pin.id || r.uid === pin.uid
       || (['luogo', 'attivita'].includes(String(r.riferimento_tipo)) && r.riferimento_chiave === chiave);
@@ -99,45 +96,34 @@ function fotografiaCestino(db: AppDatabase, pin: PinLuogoDaPin, area: string, qu
     if (t === 'negozio' || t === 'attivita') return r.sede_chiave === chiave;
     return false;
   };
-  if (principale) {
-    for (const c of db.prepare('SELECT * FROM main.cestino ORDER BY id').all() as Riga[]) {
-      if ((c.tipo === 'luogo' && (c.chiave === chiave || (typeof c.chiave === 'string' && c.chiave.startsWith(`${quartiere}/`) && typeof c.nome === 'string' && slug(c.nome) === slug(nome))))
-        || (c.tipo === 'mappa' && c.chiave === pin.mappa_chiave) || (c.tipo === 'area-fisica' && c.chiave === area)) {
-        conflitto('Il cestino conserva questa identità o collocazione: nessun ripristino viene sovrascritto.');
-      }
-      for (const p of passiDelRegistro(db, 'main', c.registro_json)) if (p.righe.some(r => pertinente(p.tabella, r))) {
-        conflitto('Il cestino conserva fotografie pertinenti al pin o al luogo: riconciliale prima della creazione.');
-      }
+  for (const c of db.prepare('SELECT * FROM main.cestino ORDER BY id').all() as Riga[]) {
+    if ((c.tipo === 'luogo' && (c.chiave === chiave || (typeof c.chiave === 'string' && c.chiave.startsWith(`${quartiere}/`) && typeof c.nome === 'string' && slug(c.nome) === slug(nome))))
+      || (c.tipo === 'mappa' && c.chiave === pin.mappa_chiave) || (c.tipo === 'area-fisica' && c.chiave === area)) {
+      conflitto('Il cestino conserva questa identità o collocazione: nessun ripristino viene sovrascritto.');
+    }
+    for (const p of passiDelRegistro(db, 'main', c.registro_json)) if (p.righe.some(r => pertinente(p.tabella, r))) {
+      conflitto('Il cestino conserva fotografie pertinenti al pin o al luogo: riconciliale prima della creazione.');
     }
   }
-  if (partite) {
-    for (const c of db.prepare('SELECT * FROM utente.cestino_partite ORDER BY uid').all() as Riga[]) {
-      for (const p of passiDelRegistro(db, 'utente', c.registro_json)) {
-        if (p.righe.some(r => (['spillo_partita', 'spillo_partita_infiltrazione', 'divergenza_partita'].includes(p.tabella) && (r.spillo_uid === pin.uid || r.spillo_id === pin.id))
-          || (p.tabella === 'punto_partita' && voci.has(String(r.punto_chiave))))) {
-          conflitto('Il cestino conserva stati del pin o delle sue voci: nessuno stato viene modificato dalla creazione.');
-        }
+  for (const c of db.prepare('SELECT * FROM utente.cestino_partite ORDER BY uid').all() as Riga[]) {
+    for (const p of passiDelRegistro(db, 'utente', c.registro_json)) {
+      if (p.righe.some(r => (['spillo_partita', 'spillo_partita_infiltrazione', 'divergenza_partita'].includes(p.tabella) && (r.spillo_uid === pin.uid || r.spillo_id === pin.id))
+        || (p.tabella === 'punto_partita' && voci.has(String(r.punto_chiave))))) {
+        conflitto('Il cestino conserva stati del pin o delle sue voci: nessuno stato viene modificato dalla creazione.');
       }
     }
   }
   // L'assenza di conflitti è ricontrollata al salvataggio; i registri estranei non invalidano il token.
-  return { principale, partite, conflitti: [] };
+  return { conflitti: [] };
 }
 
 function fotografiaStati(db: AppDatabase, pin: PinLuogoDaPin): Riga {
-  if (!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()) {
-    conflitto('Il file delle partite non è disponibile: impossibile controllare la conservazione dello stato.');
-  }
   const stati: Riga = {};
   for (const t of ['spillo_partita', 'spillo_partita_infiltrazione', 'divergenza_partita'] as const) {
-    const presente = haTabella(db, t, 'utente');
-    if (t === 'spillo_partita' && !presente) conflitto('Lo stato dei pin non è disponibile.');
     const ordine = t === 'spillo_partita_infiltrazione' ? ', infiltrazione_chiave' : t === 'divergenza_partita' ? ', voce_chiave' : '';
-    stati[t] = { presente, righe: presente ? db.prepare(`SELECT * FROM utente.${t} WHERE spillo_uid = ? ORDER BY partita_id${ordine}`).all(pin.uid) : [] };
+    stati[t] = { righe: db.prepare(`SELECT * FROM utente.${t} WHERE spillo_uid = ? ORDER BY partita_id${ordine}`).all(pin.uid) };
   }
-  const presente = haTabella(db, 'punto_partita', 'utente');
-  if (!presente) conflitto('Lo stato delle voci non è disponibile.');
-  stati.punto_partita = { presente, righe: db.prepare(`SELECT p.* FROM utente.punto_partita p WHERE EXISTS (
+  stati.punto_partita = { righe: db.prepare(`SELECT p.* FROM utente.punto_partita p WHERE EXISTS (
     SELECT 1 FROM main.spillo_voce sv WHERE sv.spillo_id = ? AND sv.voce_chiave = p.punto_chiave
   ) ORDER BY p.partita_id, p.punto_chiave`).all(pin.id) };
   return stati;

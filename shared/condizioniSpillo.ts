@@ -187,8 +187,6 @@ export type RequisitoSpillo =
 /** L6: il vocabolario unico delle condizioni (pin, catalogo, quartieri, luoghi, inviti, requisiti dei Confidenti). Il nome storico
  *  resta `RequisitoSpillo`; `Condizione` è lo stesso tipo, per chi non parla di pin. */
 export type Condizione = RequisitoSpillo;
-/** I tipi del vocabolario (31, R6-01: nessun `manuale`). */
-export type TipoCondizione = RequisitoSpillo['tipo'];
 
 const PROFONDITA_MASSIMA = 5;
 const CONDIZIONI_PER_GRUPPO = 20;

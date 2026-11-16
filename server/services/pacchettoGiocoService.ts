@@ -496,14 +496,13 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
   }
   verificaArchivioLegacy(getDb());
   closeDb();
-  let condizioniConvertite: string[] = [];
   try {
     avanza('sostituzione');
     await installaDatabase(file, resolveDbPath(), 'sposta');
     avanza('riapertura');
     // L13-01: la via unica di riapertura, la stessa del ripristino dell'istanza (`impostazioniService.riapriDopoSostituzione`): verifica delle
-    // versioni, condizioni `manuale` convertite, regole dell'avvio rigide, effetti di stato mai applicati fra le proposte, specchio dei pin, registro Tanaka
-    condizioniConvertite = riapriDopoSostituzione({ gioco: true, operazione: 'importazione' });
+    // versioni, regole dell'avvio rigide, effetti di stato mai applicati fra le proposte, specchio dei pin, registro Tanaka
+    riapriDopoSostituzione({ gioco: true, operazione: 'importazione' });
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'importazione-fallita', 'Importazione del pacchetto');
   }
@@ -519,7 +518,6 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     versioneSchema,
     immagini,
     orfani,
-    condizioniConvertite,
     scarti: anteprima.scarti ?? [],
     ...(riepilogoSalvatoIn ? { riepilogoSalvatoIn } : {}),
     stato: statoIstanza(),

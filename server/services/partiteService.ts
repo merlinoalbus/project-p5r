@@ -3,8 +3,6 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabella } from '../db/colonne.js';
-import { haColonnaMain, haColonnaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { getProprietario, getProprietarioEmail, PROPRIETARIO_UNICO } from '../middleware/requestContext.js';
 import { partitaNonTrovata } from './verificaPartita.js';
@@ -38,12 +36,9 @@ import type {
 interface RigaPartita {
   id: number; nome: string; note: string; attiva: number; livello_protagonista: number; data_gioco: string | null; fascia_gioco: FasciaGioco; difficolta: Difficolta;
   nuova_partita_plus: number; dlc_posseduti_json: string; allarme_attivo: number; created_at: string; updated_at: string;
-  /** Il salvataggio di Persona 5 (0/1); assente su uno schema vecchio (vale «no»). */
+  /** Il salvataggio di Persona 5 (0/1). */
   salvataggio_p5?: number;
 }
-
-/** La colonna del salvataggio di Persona 5 c'è? Su uno schema vecchio il dato non si scrive e vale «no». */
-const conSalvataggioP5 = (): boolean => haColonnaUtente(getDb(), 'partita', 'salvataggio_p5');
 
 /** Una riga della tabella `partita` per l'API: flag booleani, DLC posseduti dal JSON, fascia («sera» o «giorno») e meteo del momento. */
 function partitaDto(r: RigaPartita): PartitaDto {
@@ -130,8 +125,7 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     const maxPartita = (prepared('SELECT COALESCE(MAX(id), 0) AS m FROM partita').get() as { m: number }).m;
     const maxCestino = (prepared("SELECT COALESCE(MAX(partita_id), 0) AS m FROM utente.cestino_partite WHERE partita_id IS NOT NULL").get() as { m: number }).m;
     const maxCestinoGioco = (prepared("SELECT COALESCE(MAX(CAST(chiave AS INTEGER)), 0) AS m FROM main.cestino WHERE tipo = 'partita'").get() as { m: number }).m;
-    const conContatore = haTabella(getDb(), 'sqlite_sequence', 'utente');
-    const contatore = conContatore ? (prepared("SELECT COALESCE(MAX(seq), 0) AS m FROM utente.sqlite_sequence WHERE name = 'partita'").get() as { m: number }).m : 0;
+    const contatore = (prepared("SELECT COALESCE(MAX(seq), 0) AS m FROM utente.sqlite_sequence WHERE name = 'partita'").get() as { m: number }).m;
     const idNuovo = Math.max(maxPartita, maxCestino, maxCestinoGioco, contatore) + 1;
     const info = prepared(`INSERT INTO partita (id, nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at, proprietario, proprietario_email)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
@@ -140,7 +134,7 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     );
     const id = Number(info.lastInsertRowid);
     // il salvataggio di Persona 5: «no» dal valore predefinito della colonna, si scrive solo se indicato
-    if (dati.salvataggioP5 && conSalvataggioP5()) prepared('UPDATE partita SET salvataggio_p5 = 1 WHERE id = ?').run(id);
+    if (dati.salvataggioP5) prepared('UPDATE partita SET salvataggio_p5 = 1 WHERE id = ?').run(id);
     // Doti sociali a zero e Confidenti non sbloccati: righe esplicite così il tracking parte completo.
     for (const d of prepared('SELECT chiave FROM dote_sociale').all() as Array<{ chiave: string }>) {
       prepared('INSERT INTO dote_sociale_partita (partita_id, dote_chiave, punti, updated_at) VALUES (?, ?, 0, ?)').run(id, d.chiave, adesso);
@@ -179,9 +173,8 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
       dati.dlcPosseduti ? JSON.stringify(dati.dlcPosseduti) : r.dlc_posseduti_json,
       dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,
     );
-    // il salvataggio di Persona 5: solo se indicato; su uno schema senza la colonna non c'è dove scriverlo (409, mai in silenzio)
+    // il salvataggio di Persona 5: solo se indicato
     if (dati.salvataggioP5 !== undefined) {
-      if (!conSalvataggioP5()) throw httpErrors.conflict('schema-partite-vecchio', 'Il file delle partite non ha la colonna del salvataggio di Persona 5.');
       prepared('UPDATE partita SET salvataggio_p5 = ? WHERE id = ?').run(dati.salvataggioP5 ? 1 : 0, id);
     }
     // le impostazioni dei contenuti cambiate: gli effetti con condizioni delle voci già spuntate diventati validi (o tornati non validi) seguono
@@ -348,12 +341,9 @@ export function ranghiConfidenti(partitaId: number): Map<string, number> {
   return new Map(righe.map((r) => [r.chiave, r.rango]));
 }
 
-/** Ondata 5 (RG-11): le chiavi dei Confidenti che ricevono regali; senza la colonna `regalabile` quelli con un elenco di regali. */
+/** Ondata 5 (RG-11): le chiavi dei Confidenti che ricevono regali. */
 export function confidentiRegalabili(): string[] {
-  if (haColonnaMain(getDb(), 'confidente', 'regalabile')) {
-    return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
-  }
-  return prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo').pluck().all() as string[];
+  return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
 }
 
 /** I regali consegnati, per Confidente, in una lettura sola (prima una query per Confidente: rilievo P1' della verifica). */
@@ -382,8 +372,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
   // valutatore, con i ranghi di TUTTI i Confidenti
   const stato = { ...statoDisponibilitaPartita(partitaId), ranghiConfidenti: ranghi };
   const esame = esameCorrente(partitaId);
-  // ondata 5 (RG-11): i Confidenti che ricevono regali (`confidente.regalabile`); su un file di gioco senza la colonna quelli
-  // con un elenco di regali, come prima
+  // ondata 5 (RG-11): i Confidenti che ricevono regali (`confidente.regalabile`)
   const regalabili = new Set<string>(confidentiRegalabili());
   // L13 (decisione 18): gli oggetti che regalati adesso non scalano il prezzo (consegna di prima ridata nello stesso momento), letti una volta
   const regaliGiaNelSaldo = regaliConYenGiaNelSaldo(partitaId);

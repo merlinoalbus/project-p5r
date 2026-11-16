@@ -47,9 +47,3 @@ export function palazzoCompletato(c: Omit<CompletamentoPalazzo, 'concluso' | 'co
   if (c.fatti === null || concluso === null) return null;
   return concluso && c.oggetti > 0 && c.fatti >= c.oggetti;
 }
-
-/** La percentuale (0–100, intera per difetto: il 100% solo a oggetti tutti fatti), o null senza partita o senza oggetti. */
-export function percentualeOggetti(c: ConteggioOggetti): number | null {
-  if (c.fatti === null || c.oggetti === 0) return null;
-  return Math.floor((Math.min(c.fatti, c.oggetti) / c.oggetti) * 100);
-}

@@ -15,20 +15,18 @@
 // `disponibilitaStrutturataService` senza un giro di import.
 // ============================================================
 
-import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haColonnaMain, haColonnaUtente } from '../db/schemaMemo.js';
+import { nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { registraEvento } from './storicoService.js';
 import { RANGO_DELLA_SCELTA_ROMANTICA } from '../../shared/puntiConfidenti.js';
 
-/** I Confidenti romanzabili, letti una volta e svuotati quando il DB di gioco cambia; vuoto su un file di gioco senza la colonna. */
+/** I Confidenti romanzabili, letti una volta e svuotati quando il DB di gioco cambia. */
 let romanzabili: Set<string> | null = null;
 registraCacheDiGioco(() => { romanzabili = null; });
 export function confidentiRomanzabili(): ReadonlySet<string> {
   if (!romanzabili) {
-    const conColonna = haColonnaMain(getDb(), 'confidente', 'romanzabile');
-    romanzabili = new Set(conColonna ? prepared('SELECT chiave FROM confidente WHERE romanzabile = 1').pluck().all() as string[] : []);
+    romanzabili = new Set(prepared('SELECT chiave FROM confidente WHERE romanzabile = 1').pluck().all() as string[]);
   }
   return romanzabili;
 }
@@ -43,9 +41,6 @@ export function relazioniDellaPartita(partitaId: number): ReadonlySet<string> {
   return new Set((prepared('SELECT confidente_chiave FROM utente.confidente_partita WHERE partita_id = ? AND relazione_romantica = 1').pluck().all(partitaId) as string[]).filter((c) => r.has(c)));
 }
 
-/** La colonna del giorno d'inizio c'è: su uno schema vecchio la relazione si legge senza giorno (null). */
-const conGiornoDInizio = (): boolean => haColonnaUtente(getDb(), 'confidente_partita', 'relazione_romantica_dal');
-
 /**
  * L13 (ondata 11, O11-1; risposta dell'utente del 2026-10-31 «Sì, in automatico» sui doni «se fidanzata»): le relazioni romantiche della
  * partita con il giorno in cui sono iniziate (MM-GG del calendario di gioco, `utente.confidente_partita.relazione_romantica_dal`;
@@ -55,9 +50,7 @@ const conGiornoDInizio = (): boolean => haColonnaUtente(getDb(), 'confidente_par
 export function relazioniConGiorno(partitaId: number): ReadonlyMap<string, string | null> {
   const r = confidentiRomanzabili();
   if (!r.size) return new Map();
-  const righe = (conGiornoDInizio()
-    ? prepared('SELECT confidente_chiave, relazione_romantica_dal AS dal FROM utente.confidente_partita WHERE partita_id = ? AND relazione_romantica = 1').all(partitaId)
-    : prepared('SELECT confidente_chiave, NULL AS dal FROM utente.confidente_partita WHERE partita_id = ? AND relazione_romantica = 1').all(partitaId)) as Array<{ confidente_chiave: string; dal: string | null }>;
+  const righe = prepared('SELECT confidente_chiave, relazione_romantica_dal AS dal FROM utente.confidente_partita WHERE partita_id = ? AND relazione_romantica = 1').all(partitaId) as Array<{ confidente_chiave: string; dal: string | null }>;
   return new Map(righe.filter((x) => r.has(x.confidente_chiave)).map((x) => [x.confidente_chiave, x.dal]));
 }
 

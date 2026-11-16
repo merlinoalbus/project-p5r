@@ -28,7 +28,6 @@ import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { RIFERIMENTO_DI_TIPO, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione, type TipoAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto } from '../../shared/types.js';
 import { attivitaConQuiz, costoDelTurno, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
-import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
 import { dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
@@ -60,9 +59,9 @@ export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
   riferimento_tipo: string | null; riferimento_chiave: string | null; riferimento_testo: string | null; rango_atteso: number | null;
   indice_guida: number | null; created_at: string; updated_at: string;
-  /** L3 §1.4 (assenti su uno schema vecchio): voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
+  /** L3 §1.4: voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
   da_rivedere?: number; aggiunta_da?: string | null; testo_precedente_json?: string | null; motivo_revisione?: string | null;
-  /** L13 (O9-3; assente su uno schema vecchio): quando la voce è dovuta («Si fa solo se»), NULL = sempre (`voceDovuta`). */
+  /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»), NULL = sempre (`voceDovuta`). */
   condizioni_json?: string | null;
 }
 
@@ -298,7 +297,7 @@ interface DatiDiGiocoDelDiario { nomi: NomiEffettiAzione; quiz: Map<string, Atti
 let datiDiGioco: DatiDiGiocoDelDiario | null = null;
 registraCacheDiGioco(() => { datiDiGioco = null; });
 /** I dati di gioco del Diario dalla memoria; se una delle tre letture fallisce non si memorizza niente. Dentro una transazione si rileggono
- *  sempre e non si memorizzano (come il modello dei Palazzi e `schemaMemo`): una transazione che cambia i dati di gioco e poi rilegge una
+ *  sempre e non si memorizzano (come il modello dei Palazzi): una transazione che cambia i dati di gioco e poi rilegge una
  *  voce non deve vedere quelli di prima, e un valore letto a metà non deve restare dopo un annullamento. */
 function datiDiGiocoDelDiario(): DatiDiGiocoDelDiario {
   const leggi = (): DatiDiGiocoDelDiario => ({ nomi: nomiEffetti(), quiz: attivitaConQuiz(), oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']) });
@@ -548,7 +547,6 @@ function ePalazzo(dungeon: string): boolean {
  * `dungeon:<k>`; altrimenti quello delle infiltrazioni già nell'insieme; altrimenti quello della sua proposta; altrimenti nessuno.
  */
 export function palazzoDellaVoce(r: Pick<RigaVoce, 'uid' | 'riferimento_tipo' | 'riferimento_chiave'>): string | null {
-  if (!conLegami()) return null;
   if (r.riferimento_tipo === 'dungeon' && r.riferimento_chiave && ePalazzo(r.riferimento_chiave)) return r.riferimento_chiave;
   const insieme = insiemeDellaVoce(r.uid);
   if (insieme.length > 0) return insieme[0].dungeon;
@@ -784,7 +782,7 @@ export function ingressiConclusiNascosti(partitaId: number): Array<{ uid: string
   const giorno = (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco;
   if (!giorno) return [];
   const conclusi = palazziConclusi(partitaId);
-  if (conclusi.size === 0 || !conLegami()) return [];
+  if (conclusi.size === 0) return [];
   const righe = prepared(`SELECT v.uid AS uid, v.data AS data, v.riferimento_chiave AS palazzo FROM voce_giornata v
     JOIN giorno g ON g.data = v.data
     LEFT JOIN spunta_voce_partita s ON s.voce_uid = v.uid AND s.partita_id = ?
@@ -1076,10 +1074,8 @@ export function eliminaVoce(uid: string): string[] {
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
     revocaEventiDellaVoceInOgniPartita(uid); // R10-22 (N5): come togliendo la spunta, gli eventi legati alla voce non restano nello Storico
     // L3: l'insieme d'infiltrazioni e la proposta della voce se ne vanno con lei (la chiave è l'uid, senza vincolo)
-    if (conLegami()) {
-      prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
-      prepared('DELETE FROM proposta_infiltrazione_voce WHERE voce_uid = ?').run(uid);
-    }
+    prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
+    prepared('DELETE FROM proposta_infiltrazione_voce WHERE voce_uid = ?').run(uid);
     compatta(r.data, r.fascia);
     return avvisi;
   });

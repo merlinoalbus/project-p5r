@@ -42,10 +42,6 @@ export function tracciamentoPerTipo(tipo: string): TracciamentoAttivita {
   return 'nessuno';
 }
 
-/** Vero se il valore è la chiave di un tipo di attività del catalogo. */
-export function eTipoAttivita(x: unknown): x is TipoAttivita { return typeof x === 'string' && TIPI_ATTIVITA.some((t) => t.chiave === x); }
-/** Vero se il valore è la chiave di una fascia d'orario delle attività. */
-export function eFasciaAttivita(x: unknown): x is FasciaAttivita { return typeof x === 'string' && FASCE_ATTIVITA.some((f) => f.chiave === x); }
 /** Vero se il valore è la chiave di un modo di tracciamento delle attività. */
 export function eTracciamentoAttivita(x: unknown): x is TracciamentoAttivita { return typeof x === 'string' && TRACCIAMENTI_ATTIVITA.some((t) => t.chiave === x); }
 

@@ -35,7 +35,6 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
 import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
 import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
@@ -58,10 +57,9 @@ export function palazzoDiOgniMappa(): Map<string, string> {
   return new Map(righe.map((r) => [r.chiave, r.dungeon]));
 }
 
-/** La voce del boss finale dichiarata per ogni Palazzo (`dungeon.voce_boss_finale`; L4 §8.14); vuota su uno schema
- *  vecchio. Un Palazzo senza voce non c'è nella mappa. */
+/** La voce del boss finale dichiarata per ogni Palazzo (`dungeon.voce_boss_finale`; L4 §8.14).
+ *  Un Palazzo senza voce non c'è nella mappa. */
 export function vociBossFinale(): Map<string, string> {
-  if (!haColonnaMain(getDb(), 'dungeon', 'voce_boss_finale')) return new Map();
   return new Map((prepared('SELECT chiave, voce_boss_finale FROM dungeon WHERE voce_boss_finale IS NOT NULL').all() as Array<{ chiave: string; voce_boss_finale: string }>).map((r) => [r.chiave, r.voce_boss_finale]));
 }
 
@@ -70,8 +68,8 @@ interface SpilloCollezionabile { id: number; uid: string | null; tipo: string; m
 /** I collezionabili sulle planimetrie di ogni Palazzo. */
 function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, SpilloCollezionabile[]> {
   const out = new Map<string, SpilloCollezionabile[]>();
-  // le voci che si segnano le legge `vociDiOgniPin`, che si adatta allo schema (`spillo_voce`, `voce_chiave`, o il solo riferimento «punto»)
-  const righe = prepared(`SELECT id, ${haColonnaMain(getDb(), 'spillo', 'uid') ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ id: number; uid: string | null; tipo: string; mappa_chiave: string }>;
+  // le voci che si segnano le legge `vociDiOgniPin`
+  const righe = prepared('SELECT id, uid, tipo, mappa_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL').all() as Array<{ id: number; uid: string | null; tipo: string; mappa_chiave: string }>;
   const voci = vociDiOgniPin(true);
   for (const r of righe) {
     const dungeon = palazzi.get(r.mappa_chiave);
@@ -94,10 +92,8 @@ export interface StatoPalazzo { concluso: string | null; mancaPerConcludere: str
    *  requisiti e condizioni): `palazziConclusi` e i semafori lo saltano. */
   senzaEffetti?: true }
 
-/** La regola del boss di ogni dungeon (`dungeon.regola_boss`): i Palazzi con la regola dei Memento; vuota su uno schema
- *  vecchio. */
+/** La regola del boss di ogni dungeon (`dungeon.regola_boss`): i Palazzi con la regola dei Memento. */
 function palazziColBossDellaGuida(): Set<string> {
-  if (!haColonnaMain(getDb(), 'dungeon', 'regola_boss')) return new Set();
   return new Set(prepared("SELECT chiave FROM dungeon WHERE tipo = 'palazzo' AND regola_boss = 'memento'").pluck().all() as string[]);
 }
 
@@ -194,9 +190,7 @@ export function ingressoDelPalazzo(dungeon: string, giorno?: string, opzioni: { 
   const radice = radiceDelPalazzo(dungeon);
   if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(radice)) return null;
   const palazzi = palazzoDiOgniMappa();
-  const destinazioni = haTabellaMain(getDb(), 'spillo_destinazione')
-    ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
-    : new Map<number, string>();
+  const destinazioni = new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]));
   const spilli = prepared('SELECT id, mappa_chiave, riferimento_tipo, riferimento_chiave, seed_identita_json, condizioni_json FROM spillo WHERE mappa_chiave IS NOT NULL ORDER BY id')
     .all() as Array<{ id: number; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null; seed_identita_json: string | null; condizioni_json: string | null }>;
   const ingressi = spilli.filter((s) => palazzoDiIngresso(s, destinazioni.get(s.id) ?? null, palazzi) === dungeon);

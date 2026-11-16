@@ -10,7 +10,6 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
@@ -52,7 +51,7 @@ export function esameCorrente(partitaId: number): PiazzamentoEsameDto | null {
 
 /**
  * L13 (ondata 7, O7-2): un esame con i suoi premi per piazzamento (`esame.premi_json`, la fonte unica) e il requisito di Conoscenza per il primo
- * posto; null se l'esame non c'è. `SELECT *`: su uno schema vecchio le colonne dei premi non ci sono e l'esame non dichiara premi.
+ * posto; null se l'esame non c'è.
  */
 export function premiDellEsame(chiave: string): { chiave: string; nome: string; premi: PremioPiazzamentoEsame[]; requisito: RequisitoConoscenzaEsame | null } | null {
   const r = prepared('SELECT * FROM esame WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; premi_json?: string | null; requisito_conoscenza?: string | null } | undefined;
@@ -81,9 +80,8 @@ function scriviPiazzamento(partitaId: number, esameChiave: string, piazzamento: 
 
 /** Il trofeo è rivendicato da qualcos'altro nella partita (un effetto «trofeo» di una voce spuntata, un turno con un esito che lo dà)? */
 function trofeoRivendicatoAltrove(partitaId: number, trofeo: string): boolean {
-  const esiste = (t: string) => haTabellaUtente(getDb(), t);
-  if (esiste('effetto_stato_voce') && prepared("SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = 'trofeo' AND chiave = ?").get(partitaId, trofeo)) return true;
-  return esiste('trofeo_esito_turno') && !!prepared('SELECT 1 FROM utente.trofeo_esito_turno WHERE partita_id = ? AND trofeo_chiave = ?').get(partitaId, trofeo);
+  if (prepared("SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = 'trofeo' AND chiave = ?").get(partitaId, trofeo)) return true;
+  return !!prepared('SELECT 1 FROM utente.trofeo_esito_turno WHERE partita_id = ? AND trofeo_chiave = ?').get(partitaId, trofeo);
 }
 
 /**

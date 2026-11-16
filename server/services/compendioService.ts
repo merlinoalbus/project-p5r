@@ -3,7 +3,6 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
 import { fonteNodoGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
@@ -12,8 +11,8 @@ import { uguali } from '../../shared/percorsoGuida.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { invitiDelConfidente } from './inviti.js';
-import { catalogoOggettiDisponibile, effettiDegliOggetti, effettoDellaFonte, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
-import { datiGuida, datiGuidaCorretti, type Congelato } from './datiGuida.js';
+import { effettiDegliOggetti, effettoDellaFonte, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
+import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
 import { eRomanzabile } from './relazioneRomanticaService.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
@@ -47,19 +46,6 @@ function testoOggettoCompendio(o: CatalogoOggettoDto): string {
 export function oggettiGuida(): Congelato<OggettiGuidaDto> {
   const dati = datiGuidaCorretti<OggettiGuidaDto>('oggetti-guida');
   if (!dati) throw httpErrors.notFound('oggetti-non-disponibili', 'I dati degli oggetti della guida non sono caricati.');
-  if (!catalogoOggettiDisponibile()) {
-    const ponte = datiGuida<{ abbinamenti: Array<{ nome: string; articolo?: string; negozi: string[] }> }>('oggetti-crosswalk');
-    if (!ponte) return dati;
-    const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
-    const lega = <V extends { nome: string }>(v: V): V => {
-      const a = per.get(v.nome); if (!a) return v;
-      if (a.articolo) return { ...v, articolo: a.articolo, posto: postoDellArticolo(a.articolo) };
-      const postiNegozi: Record<string, string> = {};
-      for (const n of a.negozi) { const p = postoDelNegozio(n); if (p) postiNegozi[n] = p; }
-      return { ...v, negozi: a.negozi, postiNegozi };
-    };
-    return { ...dati, consumabili: dati.consumabili.map(lega), chiaveEMateriali: dati.chiaveEMateriali.map(lega) };
-  }
   const catalogo = oggettiPerFonte('guida');
   const offerte = new Map<string, Array<{ chiave: string; negozio: string }>>();
   for (const a of prepared(`SELECT a.catalogo_chiave,a.chiave,a.negozio_chiave FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
@@ -587,15 +573,13 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const dialoghi = (prepared('SELECT id, rango, etichetta, note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ id: number; rango: number | null; etichetta: string; note: string; scelte_json: string }>)
     // i punti solo numerici (con il ramo amore), letti dall'unico lettore delle scelte
     .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: leggiScelteDialogo(d.scelte_json).map((s) => ({ ...s, puntiAmore: s.puntiAmore ?? null })) }));
-  const conCatalogo = catalogoOggettiDisponibile();
-  // ondata 5: la reazione è una colonna; su un file di gioco che non la ha «sconsigliato» vale +1 e il resto +3
-  const conReazione = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
-  const righeRegali = (prepared(`SELECT ordine,nome,dove,costo,sconsigliato,${conReazione ? 'reazione' : 'NULL AS reazione'},${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`)
+  // ondata 5: la reazione è una colonna
+  const righeRegali = (prepared(`SELECT ordine,nome,dove,costo,sconsigliato,reazione,catalogo_chiave,nota,seed_json FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`)
     .all(chiave) as Array<{
       ordine: number; nome: string; dove: string | null; costo: string | null; sconsigliato: number; reazione: number | null; catalogo_chiave: string | null;
       nota: string | null; seed_json: string | null
     }>)
-    .map((g) => ({ ...g, reazione: (g.reazione === 1 || g.reazione === 2 || g.reazione === 3 ? g.reazione : conReazione ? null : g.sconsigliato === 1 ? 1 : 3) as ReazioneRegalo | null }));
+    .map((g) => ({ ...g, reazione: (g.reazione === 1 || g.reazione === 2 || g.reazione === 3 ? g.reazione : null) as ReazioneRegalo | null }));
   const chiaviRegali = righeRegali.flatMap((g) => g.catalogo_chiave ? [g.catalogo_chiave] : []);
   const oggettiRegali = oggettiConChiavi(chiaviRegali); const offerteRegali = offerteBaseDegliOggetti(chiaviRegali);
   const regali = righeRegali.map((g) => {
@@ -619,8 +603,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
       costo: conListino ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
       nota: g.nota };
   });
-  const regalabile = haColonnaMain(getDb(), 'confidente', 'regalabile')
-    ? !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave) : righeRegali.length > 0;
+  const regalabile = !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave);
   // L13 (ondata 6, O6-2): della riga si leggono solo note e fonti; giorni, fasce, luoghi e sblocco sono la disponibilità strutturata
   const disp = prepared('SELECT note, note_generali, fonti_json FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { note: string; note_generali: string; fonti_json: string } | undefined;
   return {

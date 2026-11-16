@@ -11,7 +11,6 @@
 
 import { randomBytes, randomUUID } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haColonnaMain, haTabellaMain, haTabellaUtente } from '../db/schemaMemo.js';
 import { assegnaUidMancanti } from './mappe/identitaSpillo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -42,7 +41,7 @@ import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './mas
 import { contenutiDelleVoci } from './catalogoOggettiLetture.js';
 import { eVoceDiCattura, erroreCatturaNelCompendio, vociDiCattura, vociPersonaCatturate, type VoceDiCattura } from './catturePersona.js';
 import { eliminaImmaginiDeiPin } from './mappe/mappeService.js';
-import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
+import { areeDelleInfiltrazioni, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
 import { areeDelPalazzo } from './mappe/areeService.js';
 import { atterraggioDelPalazzo, palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziService.js';
 import { elencaAtterraggi, impostaFinestra, type ConsigliPalazzo } from './atterraggioPalazziService.js';
@@ -140,12 +139,10 @@ function areeDellePersone(voce?: string): Map<string, string[]> {
 /**
  * L8 (B7, R8-16): gli archivi dei «Palazzi» confluiti in un dedalo dei Memento (oggi Iweleth), per la chiave del dedalo: le planimetrie del Palazzo
  * per l'area del dedalo a cui appartengono (`mappa_dedalo`) e quante voci sono diventate Trama o punteggiano la voce del dedalo (`voce_confluenza`).
- * Vuoto su uno schema senza la tabella `dedalo_confluenza`.
  */
 
 function archiviDeiDedali(): Map<string, ArchivioDelPalazzoDto> {
   const out = new Map<string, ArchivioDelPalazzoDto>();
-  if (!haTabellaMain(getDb(), 'dedalo_confluenza')) return out;
   for (const c of prepared('SELECT c.dungeon_chiave, c.dedalo_chiave, d.nome FROM dedalo_confluenza c JOIN dungeon d ON d.chiave = c.dungeon_chiave').all() as Array<{ dungeon_chiave: string; dedalo_chiave: string; nome: string }>) {
     const mappe = prepared(`SELECT m.mappa_chiave, m.area_dedalo_chiave, m.nota, ad.nome AS area_nome FROM mappa_dedalo m JOIN mappa x ON x.chiave = m.mappa_chiave
       LEFT JOIN area_dedalo ad ON ad.chiave = m.area_dedalo_chiave ORDER BY COALESCE(ad.ordine, 9999), m.mappa_chiave`).all() as Array<{ mappa_chiave: string; area_dedalo_chiave: string | null; nota: string; area_nome: string | null }>;
@@ -381,7 +378,7 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
       // condizione del PM sulla 112 (una voce di G-027 mancante lascia NULL): un Palazzo con la regola della voce e senza voce non si
       // concluderebbe mai senza che nessuno lo sappia — la scheda lo segna «boss finale da dichiarare» (→ «Modifica › Boss finale»), e
       // l'elenco unico «da rivedere» di L11 (R11-10c) lo raccoglie
-      bossFinaleDaDichiarare: r.regola_boss !== 'memento' && !r.voce_boss_finale && haColonnaMain(getDb(), 'dungeon', 'voce_boss_finale'),
+      bossFinaleDaDichiarare: r.regola_boss !== 'memento' && !r.voce_boss_finale,
     } : {}),
   };
 }
@@ -487,10 +484,8 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const dedali = r.tipo === 'mementos' ? lettureDedali(chiave, partitaId, stati) : null;
   const archivi = r.tipo === 'mementos' ? archiviDeiDedali() : new Map<string, ArchivioDelPalazzoDto>();
   // L8 (B7): un Palazzo confluito in un dedalo (Iweleth) rimanda al dedalo: la sua scheda è un archivio, non una casa
-  const confluenza = haTabellaMain(getDb(), 'dedalo_confluenza')
-    ? (prepared('SELECT c.dedalo_chiave, a.dungeon_chiave, a.nome FROM dedalo_confluenza c JOIN dungeon_area a ON a.chiave = c.dedalo_chiave WHERE c.dungeon_chiave = ?')
-      .get(chiave) as { dedalo_chiave: string; dungeon_chiave: string; nome: string } | undefined)
-    : undefined;
+  const confluenza = (prepared('SELECT c.dedalo_chiave, a.dungeon_chiave, a.nome FROM dedalo_confluenza c JOIN dungeon_area a ON a.chiave = c.dedalo_chiave WHERE c.dungeon_chiave = ?')
+    .get(chiave) as { dedalo_chiave: string; dungeon_chiave: string; nome: string } | undefined);
   // lo stato di una Persona da catturare (dedali e Palazzi, L8 R8-12/R8-14) è la sua cattura nel compendio (2026-10-12, `catturePersona.ts`), non `punto_partita`
   const catturate = partitaId !== undefined ? vociPersonaCatturate(partitaId, cattura) : new Set<string>();
   // L3: le Aree toccate da ogni infiltrazione. Solo nei Palazzi: per i Memento i campi nuovi non si emettono e la risposta resta
@@ -521,7 +516,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const oggettiPerMappa = palazzo ? oggettiDelleMappe(getDb(), m, mappeDelPalazzo(chiave)) : new Map<string, Set<string>>();
   const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId).map((p) => ({ ...p, completamento: completamentoDegliOggetti(oggettiPerMappa.get(idMappa(p.chiave)) ?? new Set(), segni?.s ?? null) })) : [];
   // nei Memento una Persona è «catturata» se è registrata nel compendio della partita (scelte dell'utente, 2026-10-12)
-  const personeCatturate = partitaId === undefined || !haTabellaUtente(getDb(), 'compendio_partita') ? null
+  const personeCatturate = partitaId === undefined ? null
     : (prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1 ORDER BY persona_id').all(partitaId) as Array<{ persona_id: number }>).map((x) => x.persona_id);
   // L3: le Aree del Palazzo con infiltrazioni e raccolta (la stessa della colonna «Da raccogliere», per planimetria); non per i Memento.
   // L4: con il completamento (oggetti permanenti con un pin su una sua planimetria; senza niente da contare completata)
@@ -670,7 +665,6 @@ export function aggiornaDungeon(chiave: string, dati: DatiDungeon): DungeonDetta
 function verificaVoceBossFinale(r: RigaDungeon, voce: string | null): void {
   // i Memento, e i Palazzi con la regola del boss dei Memento (Iweleth, §8.15): il boss si segna nella Guida
   if (r.tipo !== 'palazzo' || r.regola_boss === 'memento') throw httpErrors.badRequest('boss-finale-dei-memento', `${r.tipo === 'palazzo' ? r.nome : 'I Memento'}: il boss si segna nella Guida, come nei Memento, senza una voce del boss finale.`);
-  if (!haColonnaMain(getDb(), 'dungeon', 'voce_boss_finale')) throw httpErrors.badRequest('boss-finale-non-disponibile', 'Il database non ha la colonna della voce del boss finale.');
   if (voce === null) return;
   const v = prepared('SELECT p.nome, p.tipo, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(voce) as { nome: string; tipo: string; dungeon_chiave: string } | undefined;
   if (!v) throw httpErrors.notFound('punto-non-trovato', `Il punto '${voce}' non esiste.`);
@@ -834,21 +828,17 @@ function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
     prepared('DELETE FROM punto_interesse WHERE area_chiave = ?').run(chiaveArea);
     for (const ombra of ombre) togliOmbraRimastaSenzaVoci(ombra);
     // gli spilli della guida (senza mappa) vincolano l'area con RESTRICT: vanno via prima di lei
-    if (haColonnaMain(getDb(), 'spillo', 'area_guida_chiave')) {
-      togliStatiDeiPin(getDb(), 'SELECT uid FROM main.spillo WHERE area_guida_chiave = ? AND uid IS NOT NULL', [chiaveArea]);
-      eliminaImmaginiDeiPin('s.area_guida_chiave = ?', chiaveArea);
-      prepared('DELETE FROM spillo WHERE area_guida_chiave = ?').run(chiaveArea);
-    }
+    togliStatiDeiPin(getDb(), 'SELECT uid FROM main.spillo WHERE area_guida_chiave = ? AND uid IS NOT NULL', [chiaveArea]);
+    eliminaImmaginiDeiPin('s.area_guida_chiave = ?', chiaveArea);
+    prepared('DELETE FROM spillo WHERE area_guida_chiave = ?').run(chiaveArea);
     // i timbri delle partite sono del dedalo (L10-02): se ne vanno con lui, e con loro una riga rimasta per una sua area
     // (tornata da un Cestino vecchio); le sue aree se ne vanno con lui (in cascata), le Richieste restano
-    if (haTabellaUtente(getDb(), 'timbri_dedalo_partita')) {
-      prepared('DELETE FROM timbri_dedalo_partita WHERE area_chiave = ? OR area_chiave IN (SELECT chiave FROM area_dedalo WHERE dedalo_chiave = ?)').run(chiaveArea, chiaveArea);
-    }
+    prepared('DELETE FROM timbri_dedalo_partita WHERE area_chiave = ? OR area_chiave IN (SELECT chiave FROM area_dedalo WHERE dedalo_chiave = ?)').run(chiaveArea, chiaveArea);
     prepared('UPDATE richiesta SET area_dedalo_chiave = NULL WHERE area_dedalo_chiave IN (SELECT chiave FROM area_dedalo WHERE dedalo_chiave = ?)').run(chiaveArea);
     prepared('DELETE FROM area_dedalo WHERE dedalo_chiave = ?').run(chiaveArea);
     // L3: i legami con le Aree del Palazzo e il posto nei diari (insiemi e proposte, ricompattati); le aree e le voci restano.
     // Le fonti vecchie (`mappa_entita`) sono state tolte da L11 · B9: i legami stanno solo in `infiltrazione_area`
-    if (conLegami()) prepared('DELETE FROM infiltrazione_area WHERE infiltrazione_chiave = ?').run(chiaveArea);
+    prepared('DELETE FROM infiltrazione_area WHERE infiltrazione_chiave = ?').run(chiaveArea);
     staccaInfiltrazioneDalleVoci(chiaveArea);
     ripulisciRiferimentiTestuali(chiaveArea);
     prepared('DELETE FROM dungeon_area WHERE chiave = ?').run(chiaveArea);
@@ -863,7 +853,6 @@ function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
  * delle mappe assenti. Il nome dell'area sulle Ombre resta: è quel che dice la guida.
  */
 function ripulisciRiferimentiTestuali(chiaveArea: string): void {
-  if (!haTabellaMain(getDb(), 'dati_guida')) return;
   // qui si riscrive `dati_guida`: chi chiama (`eliminaArea`) butta la copia in memoria a transazione chiusa
   const battaglia = prepared("SELECT json FROM dati_guida WHERE chiave = 'battaglia'").get() as { json: string } | undefined;
   if (battaglia) {
@@ -912,8 +901,7 @@ export function creaArea(dungeonChiave: string, dati: { nome: string; descrizion
   const base = `${dungeonChiave}-${radice}`;
   let chiave = base;
   // la chiave non deve coincidere con un'area né con un alias della guida (le vecchie mappe d'area)
-  const alias = haTabellaMain(getDb(), 'guida_alias');
-  for (let i = 2; prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiave) || (alias && prepared('SELECT 1 FROM guida_alias WHERE chiave = ?').get(chiave)); i++) chiave = `${base}-${i}`;
+  for (let i = 2; prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiave) || prepared('SELECT 1 FROM guida_alias WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
   const posto = dati.dopo === null ? 0 : dati.dopo === undefined ? elenco.length : elenco.indexOf(dati.dopo) + 1;
   elenco.splice(posto, 0, chiave);
   getDb().transaction(() => {
@@ -1305,7 +1293,6 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   if (dati.carattere != null && (dedalo || carattereDaTipo(dati.tipo ?? p.tipo, areaDopo) === null)) {
     throw httpErrors.badRequest('carattere-non-ammesso', `«${p.nome}» non ha un carattere da scegliere: le voci dei dedali dei Memento e le Persona restano come sono.`);
   }
-  if (dati.carattere !== undefined && !haColonnaMain(getDb(), 'punto_interesse', 'carattere')) throw httpErrors.badRequest('carattere-non-ammesso', 'Il database non ha la colonna del carattere delle voci.');
   // L3: l'aggancio a mano a una planimetria del suo Palazzo (null lo toglie: la voce torna alla planimetria 1); controllato con l'infiltrazione
   // dopo l'eventuale spostamento
   const planimetria = dati.planimetria === undefined ? undefined : planimetriaScelta({ nome: p.nome, area_chiave: areaGuida, chiave: puntoChiave }, dati.planimetria);
@@ -1530,7 +1517,7 @@ function staccaPunto(puntoChiave: string): void {
   // §8.11: i pin che la voce lascia tengono il loro segno (lo hanno già: §8.3); le altre voci di quei pin si ricalcolano dopo
   const mPrima = modelloAvanzamento(getDb());
   prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
-  if (haTabellaUtente(getDb(), 'divergenza_partita')) prepared('DELETE FROM divergenza_partita WHERE voce_chiave = ?').run(puntoChiave);
+  prepared('DELETE FROM divergenza_partita WHERE voce_chiave = ?').run(puntoChiave);
   togliStatiDeiPin(getDb(), "SELECT uid FROM main.spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL", [puntoChiave]);
   prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
   // i pin perdono il collegamento a questa voce (le altre restano), e in ogni partita seguono quelle che gli restano (dedali)
@@ -1665,7 +1652,6 @@ interface RigaScheda { id: number; nome: string; descrizione: string; tipo: stri
 
 /** Le schede da sistemare di un Palazzo, nell'ordine della guida. */
 function schedeDaSistemare(dungeon: string): SchedaDaSistemareDto[] {
-  if (!haColonnaMain(getDb(), 'spillo', 'area_guida_chiave')) return [];
   return (prepared(`SELECT s.id, s.nome, s.descrizione, s.tipo, s.x, s.y, s.area_guida_chiave, a.nome AS area_nome FROM spillo s JOIN dungeon_area a ON a.chiave = s.area_guida_chiave
     WHERE a.dungeon_chiave = ? AND s.mappa_chiave IS NULL AND s.riferimento_tipo IS NULL AND NOT EXISTS (SELECT 1 FROM spillo_voce sv WHERE sv.spillo_id = s.id)
     ORDER BY a.ordine, s.ordine, s.id`).all(dungeon) as Array<RigaScheda & { area_nome: string }>)
@@ -1674,7 +1660,7 @@ function schedeDaSistemare(dungeon: string): SchedaDaSistemareDto[] {
 
 /** La scheda da sistemare con quell'id: 404 se non c'è o non è una scheda senza mappa; 409 se ha già una voce. */
 function schedaDaSistemare(id: number): RigaScheda {
-  const s = haColonnaMain(getDb(), 'spillo', 'area_guida_chiave') ? prepared('SELECT id, nome, descrizione, tipo, x, y, area_guida_chiave, riferimento_tipo, mappa_chiave FROM spillo WHERE id = ?').get(id) as RigaScheda | undefined : undefined;
+  const s = prepared('SELECT id, nome, descrizione, tipo, x, y, area_guida_chiave, riferimento_tipo, mappa_chiave FROM spillo WHERE id = ?').get(id) as RigaScheda | undefined;
   if (!s || s.mappa_chiave !== null || !s.area_guida_chiave) throw httpErrors.notFound('scheda-non-trovata', 'La scheda della guida senza mappa non esiste.');
   if (s.riferimento_tipo !== null || prepared('SELECT 1 FROM spillo_voce WHERE spillo_id = ?').get(id)) throw httpErrors.conflict('scheda-gia-sistemata', `«${s.nome}» è già legata a una voce.`);
   return s;

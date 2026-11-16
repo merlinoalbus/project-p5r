@@ -18,7 +18,6 @@ import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
-import { haTabellaMain } from '../../db/schemaMemo.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
@@ -74,11 +73,6 @@ export type PezzoDaImportare = Omit<z.infer<typeof pezzoPacchetto>, 'copie'> & {
 /** Le dimensioni dell'immagine della mappa, in pixel. */
 export interface DimensioniMappa { larghezza: number; altezza: number }
 
-/** Le due tabelle (pezzi e copie) possono mancare nei file vecchi: senza entrambe i pezzi non si leggono. */
-export function conPezzi(): boolean {
-  return haTabellaMain(getDb(), 'copia_pezzo');
-}
-
 /** La copia per l'API: con lo stato della partita (`st`) porta l'esito delle condizioni, come i pin. */
 export function copiaDto(r: RigaCopia, nomi: NomiCondizioni, st?: StatoDisponibilita | null): CopiaPezzoDto {
   const condizioni = leggiCondizioniSalvate(r.condizioni_json).map((c) => condizioneConTesto(c, nomi));
@@ -103,7 +97,6 @@ export function pezzoDto(r: RigaPezzo, copie: readonly RigaCopia[], nomi: NomiCo
 
 /** I ritagli di una mappa, nel loro ordine. */
 export function righePezzi(mappa: string): RigaPezzo[] {
-  if (!conPezzi()) return [];
   return prepared('SELECT * FROM pezzo_mappa WHERE mappa_chiave = ? ORDER BY ordine, id').all(mappa) as RigaPezzo[];
 }
 
@@ -131,14 +124,14 @@ export function pezziDellaMappa(mappa: string, nomi: NomiCondizioni, st?: StatoD
 
 /** La riga di un ritaglio; 404 se non c'è. */
 export function rigaPezzo(id: number): RigaPezzo {
-  const r = conPezzi() ? prepared('SELECT * FROM pezzo_mappa WHERE id = ?').get(id) as RigaPezzo | undefined : undefined;
+  const r = prepared('SELECT * FROM pezzo_mappa WHERE id = ?').get(id) as RigaPezzo | undefined;
   if (!r) throw httpErrors.notFound('pezzo-non-trovato', `Il pezzo ${id} non esiste.`);
   return r;
 }
 
 /** La riga di una copia; 404 se non c'è. */
 export function rigaCopia(id: number): RigaCopia {
-  const r = conPezzi() ? prepared('SELECT * FROM copia_pezzo WHERE id = ?').get(id) as RigaCopia | undefined : undefined;
+  const r = prepared('SELECT * FROM copia_pezzo WHERE id = ?').get(id) as RigaCopia | undefined;
   if (!r) throw httpErrors.notFound('copia-non-trovata', `La copia ${id} non esiste.`);
   return r;
 }
@@ -173,22 +166,21 @@ export function posaNellImmagine(s: Sorgente, p: Posa, dim: DimensioniMappa): bo
 
 /** Quanti ritagli ha una mappa. */
 export function quantiPezzi(mappa: string): number {
-  return conPezzi() ? prepared('SELECT COUNT(*) FROM pezzo_mappa WHERE mappa_chiave = ?').pluck().get(mappa) as number : 0;
+  return prepared('SELECT COUNT(*) FROM pezzo_mappa WHERE mappa_chiave = ?').pluck().get(mappa) as number;
 }
 
 /** Quante copie posate ha una mappa, fra tutti i suoi ritagli. */
 export function quanteCopie(mappa: string): number {
-  return conPezzi() ? prepared('SELECT COUNT(*) FROM copia_pezzo c JOIN pezzo_mappa p ON p.id = c.pezzo_id WHERE p.mappa_chiave = ?').pluck().get(mappa) as number : 0;
+  return prepared('SELECT COUNT(*) FROM copia_pezzo c JOIN pezzo_mappa p ON p.id = c.pezzo_id WHERE p.mappa_chiave = ?').pluck().get(mappa) as number;
 }
 
 /** Le mappe che hanno almeno un ritaglio. */
 export function mappeConPezzi(): string[] {
-  return conPezzi() ? prepared('SELECT DISTINCT mappa_chiave FROM pezzo_mappa ORDER BY mappa_chiave').pluck().all() as string[] : [];
+  return prepared('SELECT DISTINCT mappa_chiave FROM pezzo_mappa ORDER BY mappa_chiave').pluck().all() as string[];
 }
 
 /** Toglie tutti i pezzi di una mappa con le loro copie (anche senza contare sulla cascata delle chiavi esterne). */
 export function eliminaPezziDellaMappa(mappa: string): void {
-  if (!conPezzi()) return;
   prepared('DELETE FROM copia_pezzo WHERE pezzo_id IN (SELECT id FROM pezzo_mappa WHERE mappa_chiave = ?)').run(mappa);
   prepared('DELETE FROM pezzo_mappa WHERE mappa_chiave = ?').run(mappa);
 }

@@ -11,7 +11,7 @@
 //      poi il censimento delle tabelle delle partite (`avvisaCensimentoPartite`): un avviso nel log se una tabella o una colonna
 //      di riferimento non è classificata
 //   4. regole sui dati — nomi e uid degli spilli, spilli dei luoghi, miniature orfane (rieseguite a ogni avvio)
-//   5. createApp() + listen(porta)
+//   5. createApp() + listen(porta) + copie dell'avanzamento delle partite (all'avvio e ogni 6 ore, in DATA_DIR/backups)
 //
 // Arresto: su SIGINT/SIGTERM (Ctrl-C, docker stop) si chiude il server
 // HTTP, si esegue `PRAGMA optimize` e si chiude la connessione SQLite.
@@ -31,6 +31,8 @@ import { riscaldaMiniature } from './services/miniatureService.js';
 import { proponiStatiMancanti } from './services/statiMancantiService.js';
 import { verificaRuntimeNode } from './utils/nodeRuntime.js';
 import { avvisaCensimentoPartite } from './services/censimentoPartite.js';
+import { avviaCopieUtente } from './rilascio/backupUtente.js';
+import { istanzaOccupata } from './services/lucchettoIstanza.js';
 
 // Le linee Node interessate dall'advisory di sicurezza del 2026-10-21 devono
 // essere almeno alle rispettive release correttive prima di avviare il backend.
@@ -103,6 +105,7 @@ try {
 
 const app = createApp();
 
+let fermaCopie: (() => void) | null = null;
 const server = app.listen(config.port, (err?: Error) => {
   // Express passa qui anche l'errore di ascolto (porta occupata, permessi): senza porta il processo non serve a niente e deve dirlo
   if (err) {
@@ -113,6 +116,9 @@ const server = app.listen(config.port, (err?: Error) => {
     { port: config.port, dataDir: config.dataDir },
     `Backend in ascolto su http://localhost:${config.port}`,
   );
+  // l'avanzamento delle partite si copia subito (se l'ultima copia ha più di un'ora) e poi ogni 6 ore in DATA_DIR/backups (le ultime 40);
+  // un giro non comincia durante una sostituzione dei file
+  fermaCopie = avviaCopieUtente(config.backupDir, istanzaOccupata, 60 * 60 * 1000);
   // le miniature delle schede (L1): in background, mai bloccante; il log dice quante e in quanto tempo
   setImmediate(() => { riscaldaMiniature().catch((err: unknown) => logger.error({ err }, 'riscaldamento delle miniature non riuscito')); });
 });
@@ -129,6 +135,7 @@ function arresta(segnale: NodeJS.Signals): void {
   if (inArresto) return;
   inArresto = true;
   logger.info({ segnale }, 'arresto in corso');
+  fermaCopie?.();
   // Timer di sicurezza: se le connessioni non si chiudono, si esce comunque.
   const timer = setTimeout(() => {
     logger.warn('arresto forzato dopo il timeout');

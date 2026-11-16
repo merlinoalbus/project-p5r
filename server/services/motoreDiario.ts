@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
@@ -131,11 +130,8 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     if(!statoVoce)return null;
     const giaComprato=leggiJsonRegistro<{gia?:boolean}|null>(statoVoce.prima_json,'stato prima dell’acquisto')?.gia===true;
     if(giaComprato&&!altraVoceHaLArticolo(p,x.articolo,uid))return null;
-    // il nome del catalogo, se il file di gioco lo ha (come `esitiAttivitaService.articoloEsito`), altrimenti quello del listino
-    const conCatalogo=haTabellaMain(getDb(),'catalogo_oggetto');
-    const a=prepared(conCatalogo
-      ?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?"
-      :"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?")
+    // il nome del catalogo (come `esitiAttivitaService.articoloEsito`)
+    const a=prepared("SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?")
       .get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
     const copie=x.quantita??1;
     // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce (le sfide della Big Bang Burger costano 500 ¥ di sera), con lo sconto

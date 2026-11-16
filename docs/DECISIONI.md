@@ -98,7 +98,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - **Niente migrazioni: i due file si aprono alla versione attesa**. `gioco.db` e `partite.db` portano ciascuno la propria versione
   (`PRAGMA user_version`), e il codice ne legge una sola per file: `VERSIONE_GIOCO` e `VERSIONE_PARTITE` in
   `server/db/versioneSchema.ts`. Un file di un'altra versione fa fermare l'avvio, con un messaggio che dice quale file e che cosa
-  fare; «Importa» e il ripristino lo rifiutano. Non c'è conversione automatica dei dati né copia di avvio. Un'istanza nuova nasce dal
+  fare; «Importa» e il ripristino lo rifiutano. Non c'è conversione automatica dei dati. L'avanzamento (`partite.db`) si
+  copia da solo all'avvio e ogni 6 ore in `data/backups` (le ultime 40); `gioco.db` si salva dal backup dell'istanza. Un'istanza nuova nasce dal
   pacchetto: `pacchetto/gioco.db` per i dati di gioco (senza immagini) e `pacchetto/partite-vuoto.db` per il file delle partite. Un
   cambio di struttura o di dati si applica a mano sui dati dell'istanza, e nello stesso cambiamento si aggiornano le due costanti e i
   due file del pacchetto (`npm run pacchetto` rifà `gioco.db`; `partite-vuoto.db` si aggiorna a mano).
@@ -109,7 +110,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   copia di sicurezza (ne restano 3); non unisce e non tocca `partite.db`. Il file non passa dal browser. L'esportazione
   dell'istanza deve essere sempre reimportabile **(24/10)**.
 - Il ripristino dell'istanza da un backup e «Importa» mettono in servizio il file con la stessa riapertura, che verifica le versioni; se cambia
-  il file di gioco, le condizioni `manuale` dei backup convertite in avvisi e le regole dell'avvio, che fermano la sostituzione se non
+  il file di gioco, le regole dell'avvio, che fermano la sostituzione se non
   riescono (si torna alla copia di sicurezza); poi gli effetti di stato mai applicati fra le proposte delle partite, lo specchio dei pin e il
   registro Tanaka integro. Il Cestino ha un solo motore di ripristino per le voci di gioco e per quelle personali.
 - Il backup completo dei dati di gioco (con le immagini) resta fuori da git per il limite di dimensione di GitHub; niente LFS per ora.

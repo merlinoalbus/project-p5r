@@ -288,8 +288,3 @@ export function convertiProsa(testi: Array<string | null | undefined>, ctx: Cont
   }
   return { condizioni, scartate };
 }
-
-/** Solo le condizioni, per chi non registra gli scarti. */
-export function migraTestiCondizioni(testi: Array<string | null | undefined>, ctx: ContestoConversione = {}): RequisitoSpillo[] {
-  return convertiProsa(testi, ctx).condizioni;
-}

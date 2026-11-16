@@ -16,8 +16,7 @@
 // Una chiave che non si risolve (fonte tolta o cambiata) lascia l'evento alla data della sua riga.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { esami } from './domandeService.js';
 import { letteraDelPalazzo } from '../../shared/datePalazzo.js';
 
@@ -47,8 +46,6 @@ export function risolutoreFonti(): (chiave: string | null | undefined) => FonteE
       return al ? { data: al, tipo: 'scadenza' } : null;
     }
     if (p[0] === 'furto' && p.length === 2) {
-      // su uno schema senza la colonna del furto la chiave non si risolve
-      if (!haColonnaMain(getDb(), 'dungeon', 'furto_consigliato_data')) return null;
       const d = prepared('SELECT furto_consigliato_data FROM dungeon WHERE chiave = ?').pluck().get(p[1]) as string | null | undefined;
       return d ? { data: d, tipo: 'consiglio' } : null;
     }

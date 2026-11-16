@@ -61,10 +61,7 @@ export function nomeSpilloTradotto(nome: string): string | null {
 
 /** Traduce i nomi degli spilli del seed; quelli che hai scritto tu restano come li hai scritti. */
 export function traduciNomiSpilli(db: Database.Database): number {
-  const colonne = (db.prepare('PRAGMA table_info(spillo)').all() as Array<{ name: string }>).map((c) => c.name);
-  if (!colonne.includes('nome')) return 0;
-  const conOrigine = colonne.includes('origine');
-  const righe = db.prepare(`SELECT id, nome FROM spillo WHERE nome LIKE 'Da identificare: %'${conOrigine ? " AND origine = 'seed'" : ''}`).all() as Array<{ id: number; nome: string }>;
+  const righe = db.prepare("SELECT id, nome FROM spillo WHERE nome LIKE 'Da identificare: %' AND origine = 'seed'").all() as Array<{ id: number; nome: string }>;
   const aggiorna = db.prepare('UPDATE spillo SET nome = ? WHERE id = ?');
   let fatti = 0;
   for (const r of righe) {

@@ -11,7 +11,6 @@
 
 import { z } from 'zod';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import type { NotaStoricaOfferta } from '../../shared/types.js';
@@ -26,11 +25,6 @@ function valoreGuida(r: RigaNota): z.infer<typeof guida> | null {
   try { const e = guida.safeParse(JSON.parse(r.seed_json)); return e.success ? e.data : null; } catch { return null; }
 }
 
-/** Vero se le tabelle ci sono (uno schema vecchio non ha note storiche). */
-function conNote(): boolean {
-  return haTabellaMain(getDb(), 'nota_storica_legame');
-}
-
 /** La nota come DTO, con se è diversa dalla guida. */
 function dto(r: RigaNota): NotaStoricaOfferta {
   const g = valoreGuida(r);
@@ -40,14 +34,13 @@ function dto(r: RigaNota): NotaStoricaOfferta {
 /** Le note storiche di una riga (un'offerta per chiave, un oggetto del catalogo per chiave, un Palazzo per chiave: il confronto delle
  *  fonti sul livello consigliato, L8-04); vuoto se non ne ha. */
 export function noteStoricheDi(tipo: 'articolo' | 'catalogo' | 'dungeon', chiave: string): NotaStoricaOfferta[] {
-  if (!conNote()) return [];
   return (prepared(`SELECT n.chiave, n.testo, n.fonte, n.versione, n.seed_json FROM nota_storica n JOIN nota_storica_legame l ON l.nota_chiave = n.chiave
     WHERE l.tipo = ? AND l.chiave = ? ORDER BY n.chiave`).all(tipo, chiave) as RigaNota[]).map(dto);
 }
 
 /** La riga della nota, o 404. */
 function riga(chiave: string): RigaNota {
-  const r = conNote() ? prepared('SELECT chiave, testo, fonte, versione, seed_json FROM nota_storica WHERE chiave = ?').get(chiave) as RigaNota | undefined : undefined;
+  const r = prepared('SELECT chiave, testo, fonte, versione, seed_json FROM nota_storica WHERE chiave = ?').get(chiave) as RigaNota | undefined;
   if (!r) throw httpErrors.notFound('nota-storica-non-trovata', 'Nota storica non trovata.');
   return r;
 }

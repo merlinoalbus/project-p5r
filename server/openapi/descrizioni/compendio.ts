@@ -270,13 +270,13 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     sommario: 'Negoziazione per umore: domande, risposte ed esiti (L8)',
     descrizione: 'Il lettore unico della negoziazione. Ogni domanda raccoglie le sue varianti (Royal, file originale dell\'app, eventuali ritocchi); ogni risposta porta, per ogni umore richiesto, una cella: `principale` (l\'esito Royal quando è documentato), `alternative` (quando la fonte si contraddice: celle multi-esito di Royal, esiti dell\'app discordanti dove Royal non dice nulla), `altre` (gli esiti dell\'app, sempre conservati) e `divergenza`. `nonConfermata` avvisa che l\'esito viene dalla classe «unconfirmed» di Royal (ereditato da P5, non confermato). Una cella senza esito (`senza-dato`) resta tale: non è un esito neutro. Una risposta dell\'app legata con sicurezza a una Royal non ripete le celle (`celle` vuote, `celleDa` = la risposta Royal): i suoi esiti sono fra le `altre` di quella cella; le domande composte e l\'abbinamento a bassa certezza (A87) restano con le sole attestazioni dell\'app. Filtri: `umore` (cupa, irritabile, timida, giocosa), oppure `ombra` (la chiave dell\'Ombra: vale la sua personalità valida; sconosciuta o non negoziabile = nessun umore e nessuna domanda, mai una personalità dedotta dal nome), `q` (testo su domande e risposte, anche nell\'originale inglese). Senza `umore` né `ombra`, tutti e quattro gli umori. `domanda` (la chiave di una famiglia) restituisce solo quella, con tutto il dettaglio. `compatto=1` (un umore solo, scelto o dell\'Ombra) è la forma per consultare in battaglia: per ogni domanda le risposte della variante principale con la cella in breve (esito, se è incerto, alternative e divergenze), poche decine di KB invece di circa 800; la ricerca `q` vale sull\'intero corpus. Le rese italiane delle domande nuove sono rese dell\'Esperto, non il testo del gioco (`testoOrigine`).',
     risposta: '`NegoziazioneDto`; con `compatto=1` `NegoziazioneCompattaDto`',
-    errori: [[400, 'umore-e-ombra-discordi'], [400, 'umore-richiesto'], [404, 'ombra-non-trovata'], [404, 'negoziazione-non-disponibile']],
+    errori: [[400, 'umore-e-ombra-discordi'], [400, 'umore-richiesto'], [404, 'ombra-non-trovata']],
   },
   'GET /api/compendio/negoziazione/verifica': {
     sommario: 'Conteggi della negoziazione rimisurati e rapporto dell\'importazione',
     descrizione: 'Sola lettura. I conteggi rifatti ora sulle righe (domande, varianti, risposte, celle Royal per umore, attestazioni dell\'app confrontate con Royal, contraddizioni, rettifiche, domande senza risposta buona), il confronto voce per voce con le misure del contratto (un riscontro, non una soglia) e il rapporto scritto dall\'importazione con l\'impronta degli ingressi e gli elenchi consultabili. Non c\'è nulla da approvare dall\'interfaccia.',
     risposta: '`NegoziazioneVerificaDto`',
-    errori: [[404, 'negoziazione-non-disponibile']],
+    errori: [],
   },
   'GET /api/compendio/ombre/:chiave': {
     sommario: 'Scheda di un\'Ombra (L8)',
@@ -544,7 +544,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     sommario: 'Sostituisce le regole di atterraggio dalla mappa di Tokyo',
     descrizione: 'Le regole si salvano tutte insieme, nell\'ordine dato, che è l\'ordine in cui si provano: vale la prima che copre il giorno della partita (senza partita o senza giorno, la prima senza date). Ogni regola vale sempre (date nulle), da `dal` in poi (`al` nullo), fra `dal` e `al` compresi, o in un giorno solo (`dal` = `al`), e porta a una planimetria di questo Palazzo, centrata sul pin `spillo` se dato. Prima di scrivere si controlla tutto: giorni esistenti, fine non prima dell\'inizio, planimetria del Palazzo (non la mappa d\'insieme), pin su quella planimetria. Un elenco vuoto toglie tutte le regole.',
     risposta: 'Le regole salvate, elenco di `AtterraggioPalazzoDto`',
-    errori: [[404, 'dungeon-non-trovato'], [400, 'data-non-valida'], [400, 'fine-senza-inizio'], [400, 'fine-prima-di-inizio'], [404, 'mappa-non-trovata'], [400, 'mappa-fuori-palazzo'], [400, 'spillo-fuori-mappa'], [409, 'schema-non-aggiornato']],
+    errori: [[404, 'dungeon-non-trovato'], [400, 'data-non-valida'], [400, 'fine-senza-inizio'], [400, 'fine-prima-di-inizio'], [404, 'mappa-non-trovata'], [400, 'mappa-fuori-palazzo'], [400, 'spillo-fuori-mappa']],
   },
   'POST /api/compendio/dungeon/:chiave/aree': {
     sommario: 'Aggiunge un\'infiltrazione nuova alla guida di un Palazzo',

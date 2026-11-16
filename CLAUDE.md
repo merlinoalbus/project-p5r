@@ -33,7 +33,7 @@ Dove documento e codice dissentono, vale il codice.
   senza immagini) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `creaPartiteDalModelloSeMancano` (un
   `partite.db` senza tabelle nasce da `pacchetto/partite-vuoto.db`) → `verificaVersioni` (i due file devono essere alle versioni
   `VERSIONE_GIOCO` e `VERSIONE_PARTITE` di `server/db/versioneSchema.ts`, altrimenti l'avvio si ferma) → censimento delle partite
-  (avviso nel log) → `regoleAllAvvio` → effetti di stato mai applicati (proposte nell'elenco da approvare) → `listen`. Nessuna
+  (avviso nel log) → `regoleAllAvvio` → effetti di stato mai applicati (proposte nell'elenco da approvare) → `listen` → copia di `partite.db` in `data/backups` (subito e ogni 6 ore). Nessuna
   conversione automatica dei dati: un cambio di struttura si applica a mano (vedi `docs/DECISIONI.md`).
 - Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/`.
 - Risposte API: successo `{ data }`, errore `{ error: { code, message, details? }, requestId }`; 404 JSON su `/api/*`.

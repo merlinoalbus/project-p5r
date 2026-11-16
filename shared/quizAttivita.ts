@@ -81,11 +81,3 @@ export function giorniDelQuizTesto(giorni: readonly number[]): string {
   const elenco = voci.length === 1 ? voci[0] : `${voci.slice(0, -1).join(', ')} e ${voci[voci.length - 1]}`;
   return `${elenco} di ogni mese`;
 }
-
-/** I giorni scritti a mano («7, 17, 27»; virgole, punti e virgola o spazi): vuoto = nessun giorno fisso; null se c'è
- *  qualcosa che non è un giorno del mese (1–31). Ordinati e senza doppioni. */
-export function leggiGiorniQuiz(testo: string): number[] | null {
-  const parti = testo.split(/[\s,;]+/).filter(Boolean);
-  if (parti.some((p) => !/^\d{1,2}$/.test(p) || Number(p) < 1 || Number(p) > 31)) return null;
-  return [...new Set(parti.map(Number))].sort((a, b) => a - b);
-}

@@ -11,7 +11,6 @@
 // ============================================================
 
 import { getDb, type AppDatabase } from '../../db/dbService.js';
-import { haTabellaMain } from '../../db/schemaMemo.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { datiGuidaCorretti } from '../datiGuida.js';
 import { t, vociAmbito } from '../traduzioniService.js';
@@ -490,8 +489,7 @@ function contestoDi(db: AppDatabase): ContestoIndice {
     caricatePersona: new Map((db.prepare("SELECT chiave, created_at FROM immagine WHERE ambito = 'persona'").all() as Array<{ chiave: string; created_at: string }>).map((i) => [i.chiave, i.created_at])),
     dungeon: new Map((db.prepare('SELECT chiave, nome, tipo FROM dungeon').all() as Array<{ chiave: string; nome: string; tipo: string }>).map((d) => [d.chiave, { nome: d.nome, tipo: d.tipo }])),
     dungeonArea: new Map((db.prepare('SELECT chiave, dungeon_chiave, nome FROM dungeon_area ORDER BY dungeon_chiave, ordine').all() as Array<{ chiave: string; dungeon_chiave: string; nome: string }>).map((a) => [a.chiave, { dungeon: a.dungeon_chiave, nome: a.nome }])),
-    confluiti: new Set(haTabellaMain(db, 'dedalo_confluenza')
-      ? (db.prepare('SELECT dungeon_chiave FROM dedalo_confluenza').all() as Array<{ dungeon_chiave: string }>).map((r) => r.dungeon_chiave) : []),
+    confluiti: new Set((db.prepare('SELECT dungeon_chiave FROM dedalo_confluenza').all() as Array<{ dungeon_chiave: string }>).map((r) => r.dungeon_chiave)),
     sinonimi,
   };
 }

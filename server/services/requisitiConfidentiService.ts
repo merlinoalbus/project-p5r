@@ -14,7 +14,6 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { condizioneDelRequisito, notaDelRequisito } from './semaforiService.js';
@@ -59,11 +58,6 @@ function verificaConfidente(chiave: string): void {
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
 }
 
-/** Vero se la copia della guida c'è (uno schema vecchio non ce l'ha). */
-function conGuida(): boolean {
-  return haTabellaMain(getDb(), 'confidente_requisito_guida');
-}
-
 /** Le righe di un rango (o di tutti i ranghi) in una delle due tabelle, in ordine. */
 function righe(tabella: 'confidente_requisito' | 'confidente_requisito_guida', confidente: string, rango?: number): RigaRequisitoRango[] {
   return (rango === undefined
@@ -87,7 +81,7 @@ export function requisitiDelConfidente(confidente: string): RequisitiConfidenteD
   verificaConfidente(confidente);
   const nomi = nomiCondizioniMemo();
   const attuali = righe('confidente_requisito', confidente);
-  const guida = conGuida() ? righe('confidente_requisito_guida', confidente) : null;
+  const guida = righe('confidente_requisito_guida', confidente);
   const ranghi: RequisitiConfidenteDto['ranghi'] = [];
   for (let rango = 1; rango <= RANGO_MASSIMO_CONFIDENTE; rango++) {
     const qui = attuali.filter((r) => r.rango === rango);
@@ -97,7 +91,7 @@ export function requisitiDelConfidente(confidente: string): RequisitiConfidenteD
       const descrizione = descriviRequisitoSpillo(c, nomi);
       return [{ indice: r.indice, condizione: c, descrizione, nota: notaDelRequisito(r, descrizione) }];
     });
-    ranghi.push({ rango, requisiti, modificato: guida !== null && firma(qui) !== firma(guida.filter((r) => r.rango === rango)) });
+    ranghi.push({ rango, requisiti, modificato: firma(qui) !== firma(guida.filter((r) => r.rango === rango)) });
   }
   return { confidente, ranghi };
 }

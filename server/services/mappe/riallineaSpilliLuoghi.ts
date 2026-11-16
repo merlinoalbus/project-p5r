@@ -8,7 +8,6 @@
 // ============================================================
 
 import { nowIso } from '../../db/dbService.js';
-import { haTabella } from '../../db/colonne.js';
 import type { AppDatabase } from '../../db/dbService.js';
 import { spilloPerLuogo } from '../../../shared/tipiLuogo.js';
 
@@ -16,9 +15,8 @@ import { spilloPerLuogo } from '../../../shared/tipiLuogo.js';
  *  la scuola era «attività» (il «servizio» resta sull'icona generica dell'attività: il Leblanc e la palestra non sono lavanderie). */
 const VECCHIA_CORRISPONDENZA: Record<string, string> = { scuola: 'attivita' };
 
-/** Riallinea i pin di seed dei luoghi al catalogo dei tipi; restituisce quanti ne ha cambiati. Senza le tabelle `spillo` e `luogo` non fa niente. */
+/** Riallinea i pin di seed dei luoghi al catalogo dei tipi; restituisce quanti ne ha cambiati. */
 export function riallineaSpilliLuoghi(db: AppDatabase): number {
-  if (!haTabella(db, 'spillo') || !haTabella(db, 'luogo')) return 0;
   const agg = db.prepare(`UPDATE spillo SET tipo = ?, updated_at = ? WHERE origine = 'seed' AND riferimento_tipo = 'luogo' AND tipo = ?
     AND riferimento_chiave IN (SELECT chiave FROM luogo WHERE tipo = ?)`);
   const t = nowIso();

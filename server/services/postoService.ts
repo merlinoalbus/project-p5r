@@ -36,9 +36,8 @@ function luogoEsistente(chiave: string): void {
 /** Vero se l'offerta ha acquisti in una partita (registro, segno «ottenuto») o risultati collegati: non si elimina, si nasconde. */
 function offertaConAcquisti(chiave: string): boolean {
   const c = (sql: string) => !!prepared(sql).get(chiave);
-  const registro = !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get();
   return c('SELECT 1 FROM utente.acquisto_partita WHERE articolo_chiave = ? LIMIT 1')
-    || (registro && c('SELECT 1 FROM utente.registro_acquisti WHERE articolo_chiave = ? LIMIT 1'))
+    || c('SELECT 1 FROM utente.registro_acquisti WHERE articolo_chiave = ? LIMIT 1')
     || c("SELECT 1 FROM ricompensa_oggetto WHERE fonte_tipo = 'articolo' AND fonte_chiave = ? LIMIT 1");
 }
 
