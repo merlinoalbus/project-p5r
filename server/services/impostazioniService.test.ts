@@ -10,6 +10,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { config } from '../config.js';
 import { closeDb, initDb, prepared, resolveDbPath } from '../db/dbService.js';
+import { VERSIONE_GIOCO, VERSIONE_PARTITE } from '../db/versioneSchema.js';
 import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
 import { copiaDatabase, copiaIstanza, ripristinaIstanza, statoIstanza, verificaDatabase } from './impostazioniService.js';
 import { estraiVoce, leggiIndiceZip, scriviZip, type VoceZip } from '../utils/zip.js';
@@ -30,7 +31,7 @@ async function zipDiProva(nome: string, voci: VoceZip[]): Promise<string> {
   return p;
 }
 
-/** Prepara un'istanza reale su disco: database migrato e con seed, un'immagine nel database e un carattere finto su disco. */
+/** Prepara un'istanza reale su disco: i due database dal pacchetto e dal modello, un'immagine nel database e un carattere finto su disco. */
 function apriIstanza(): void {
   const db = initDb();
   caricaPacchetto(db);
@@ -39,7 +40,9 @@ function apriIstanza(): void {
 
 beforeAll(() => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-backup-'));
-  (config as { dataDir: string }).dataDir = dataDir;
+  // i due database stanno in `edizioneDir` e `partiteDir`, che senza le loro variabili d'ambiente valgono quanto `DATA_DIR` all'avvio:
+  // vanno portati nella cartella di prova insieme a `dataDir`, o la prova aprirebbe i file veri dell'istanza
+  Object.assign(config, { dataDir, edizioneDir: dataDir, partiteDir: dataDir });
   fs.mkdirSync(path.join(dataDir, 'font'), { recursive: true });
   fs.writeFileSync(path.join(dataDir, 'font', 'display.woff2'), Buffer.from('finto carattere'));
   apriIstanza();
@@ -57,13 +60,13 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     expect(s.database).toMatchObject({ nome: 'gioco.db', inMemoria: false });
     expect(s.databasePartite.nome).toBe('partite.db');
     expect(s.databasePartite.byte).toBeGreaterThan(0);
-    expect(s.versioneSchemaPartite).toBeGreaterThanOrEqual(1);
+    expect(s.versioneSchemaPartite).toBe(VERSIONE_PARTITE);
     expect(s.database.byte).toBeGreaterThan(0);
-    expect(s.versioneSchema).toBeGreaterThan(0);
+    expect(s.versioneSchema).toBe(VERSIONE_GIOCO);
     expect(s.immagini).toEqual({ file: 1, byte: 14 });
     expect(s.caratteri).toEqual({ file: 1, byte: 'finto carattere'.length });
     expect(s.partite).toBe(1);
-    // la memoria del seed JSON dismesso non c'è più (migrazione 096, rilievo R3')
+    // la memoria del seed JSON dismesso non c'è più (rilievo R3')
     expect(s).not.toHaveProperty('seed');
   });
 
@@ -129,12 +132,12 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     // il file di partenza resta com'è (si lavora una copia) e la cartella di lavoro non resta in data/tmp
     expect(fs.existsSync(istantanea)).toBe(true);
     expect(fs.readdirSync(path.join(dataDir, 'tmp')).filter((f) => f.startsWith('ripristino-'))).toEqual([]);
-    expect(esito).toMatchObject({ formato: 'database', database: false, partite: true, immagini: 0, caratteri: 0 });
+    expect(esito).toMatchObject({ formato: 'database', database: false, partite: true, caratteri: 0 });
     expect(esito.copiaDiSicurezza).toMatch(/^prima-del-ripristino-/);
     expect(fs.existsSync(path.join(dataDir, 'backups', esito.copiaDiSicurezza, 'gioco.db'))).toBe(true);
     expect(fs.existsSync(path.join(dataDir, 'backups', esito.copiaDiSicurezza, 'partite.db'))).toBe(true);
     expect(esito.stato.partite).toBe(1);
-    // l'app è di nuovo utilizzabile: la connessione è aperta, migrazioni e seed applicati
+    // l'app è di nuovo utilizzabile: la connessione è aperta sui dati di gioco e sulle partite del file
     expect((prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n).toBe(1);
     expect((prepared('SELECT COUNT(*) AS n FROM persona').get() as { n: number }).n).toBeGreaterThan(200);
     expect(fs.existsSync(`${resolveDbPath()}-wal`)).toBe(true); // WAL ricreato dalla nuova connessione
@@ -147,57 +150,69 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     fs.rmSync(path.join(dataDir, 'font', 'display.woff2'), { force: true });
     const esito = await ripristinaIstanza(zip.percorso);
     fs.rmSync(zip.percorso, { force: true });
-    expect(esito).toMatchObject({ formato: 'istanza', immagini: 0, caratteri: 1 });
+    expect(esito).toMatchObject({ formato: 'istanza', caratteri: 1 });
     expect((prepared("SELECT contenuto FROM immagine WHERE ambito = 'mappa' AND chiave = 'prova'").get() as { contenuto: Buffer }).contenuto.toString()).toBe('finta immagine');
     expect(fs.readFileSync(path.join(dataDir, 'font', 'display.woff2')).toString()).toBe('finto carattere');
   });
 
-  it('le voci dello ZIP che porterebbero fuori dalla cartella dati vengono scartate (anche con separatori Windows)', async () => {
+  it('le voci dello ZIP che porterebbero fuori dalla cartella dei caratteri vengono scartate (anche con separatori Windows); le voci `immagini/` non si scrivono', async () => {
     const copia = await copiaDatabase();
     const fuori = path.join(path.dirname(dataDir), 'fuori-dalla-cartella-dati.txt');
     fs.rmSync(fuori, { force: true });
     // `scriviZip` scrive «\» come «/»: la voce con le barre rovesciate nasce con un segnaposto («|») che poi, nei byte dell'archivio
     // (intestazione locale e central directory), diventa «\». Così il nome arriva al ripristino davvero con le barre di Windows.
     const zip = await zipDiProva('fuori.zip', [
-      { nome: 'database/project-p5r.db', file: copia.percorso },
-      { nome: 'immagini/../../fuori-dalla-cartella-dati.txt', contenuto: Buffer.from('con le barre normali') },
-      { nome: 'immagini/..|..|fuori-dalla-cartella-dati.txt', contenuto: Buffer.from('con le barre rovesciate') },
+      { nome: 'database/gioco.db', file: copia.percorso },
+      { nome: 'font/../../fuori-dalla-cartella-dati.txt', contenuto: Buffer.from('con le barre normali') },
+      { nome: 'font/..|..|fuori-dalla-cartella-dati.txt', contenuto: Buffer.from('con le barre rovesciate') },
+      { nome: 'font/display.woff2', contenuto: Buffer.from('finto carattere') },
       { nome: 'immagini/mappa/prova.png', contenuto: Buffer.from('finta immagine') },
     ]);
     fs.rmSync(copia.percorso, { force: true });
     const byte = fs.readFileSync(zip);
-    const segnaposto = Buffer.from('immagini/..|..|fuori');
+    const segnaposto = Buffer.from('font/..|..|fuori');
     for (let i = byte.indexOf(segnaposto); i >= 0; i = byte.indexOf(segnaposto, i + 1)) {
-      byte[i + 11] = 0x5c;
-      byte[i + 14] = 0x5c;
+      byte[i + 7] = 0x5c;
+      byte[i + 10] = 0x5c;
     }
     fs.writeFileSync(zip, byte);
-    expect((await leggiIndiceZip(zip)).map((v) => v.nome)).toContain('immagini/..\\..\\fuori-dalla-cartella-dati.txt');
+    expect((await leggiIndiceZip(zip)).map((v) => v.nome)).toContain('font/..\\..\\fuori-dalla-cartella-dati.txt');
     const esito = await ripristinaIstanza(zip);
-    // solo l'immagine legittima è stata scritta; poi, alla riapertura, la cartella dei backup di prima della 079 è stata assorbita e messa da parte
-    expect(esito.immagini).toBe(1);
+    // solo il carattere legittimo è stato scritto; le immagini viaggiano dentro il database di gioco, una cartella `immagini/` dello ZIP non entra
+    expect(esito.caratteri).toBe(1);
     expect(fs.existsSync(fuori)).toBe(false);
+    expect(fs.readdirSync(path.join(dataDir, 'font'))).toEqual(['display.woff2']);
     expect(fs.existsSync(path.join(dataDir, 'immagini'))).toBe(false);
-    expect(fs.readdirSync(path.join(dataDir, 'backups')).some((n) => n.startsWith('immagini-su-disco-'))).toBe(true);
   });
 
-  it('se il ripristino fallisce a metà, l’istanza torna com’era e il database resta utilizzabile', async () => {
+  it('un backup di un’altra versione dell’app non si ripristina; se il ripristino fallisce a metà, l’istanza torna com’era e il database resta utilizzabile', async () => {
     const partitePrima = statoIstanza().partite;
-    // database valido ma con uno schema più avanzato di quello che le migrazioni sanno gestire: la riapertura fallisce
     const copia = await copiaDatabase();
     const rotto = fs.readFileSync(copia.percorso);
     fs.rmSync(copia.percorso, { force: true });
     const Database = (await import('better-sqlite3')).default;
+    const backupPrima = fs.readdirSync(path.join(dataDir, 'backups'));
+    // un file di gioco di un'altra versione: rifiutato prima di toccare l'istanza (nessuna copia di sicurezza nuova)
+    const percorsoVecchio = path.join(dataDir, 'vecchio.db');
+    fs.writeFileSync(percorsoVecchio, rotto);
+    const vecchio = new Database(percorsoVecchio);
+    vecchio.pragma('journal_mode = DELETE');
+    vecchio.pragma(`user_version = ${VERSIONE_GIOCO - 1}`);
+    vecchio.close();
+    await expect(ripristinaIstanza(percorsoVecchio)).rejects.toMatchObject({ code: 'database-di-altra-versione' });
+    expect(fs.readdirSync(path.join(dataDir, 'backups'))).toEqual(backupPrima);
+    // un file di gioco alla versione giusta ma con una condizione «manuale» illeggibile: alla riapertura la conversione delle condizioni
+    // si ferma, e il ripristino deve tornare indietro
     const percorsoRotto = path.join(dataDir, 'rotto.db');
     fs.writeFileSync(percorsoRotto, rotto);
     const db = new Database(percorsoRotto);
-    // un file di gioco fermo alla 66 e senza la tabella spillo: la 067 non può applicarsi, il ripristino deve tornare indietro
-    db.exec('DROP TABLE spillo_immagine; DROP TABLE spillo_destinazione; DROP TABLE spillo');
-    db.pragma('user_version = 66');
+    db.pragma('journal_mode = DELETE');
+    expect(db.prepare("UPDATE spillo SET condizioni_json = '{manuale' WHERE id = (SELECT MIN(id) FROM spillo)").run().changes).toBe(1);
     db.close();
     await expect(ripristinaIstanza(percorsoRotto)).rejects.toThrowError(/Ripristino non riuscito/);
     // l'app è viva e i dati sono quelli di prima
     expect(statoIstanza().partite).toBe(partitePrima);
+    expect((prepared("SELECT COUNT(*) AS n FROM spillo WHERE condizioni_json = '{manuale'").get() as { n: number }).n).toBe(0);
     expect((prepared('SELECT COUNT(*) AS n FROM traduzione').get() as { n: number }).n).toBeGreaterThan(0);
   });
 

@@ -1,5 +1,5 @@
 // ============================================================
-// Test dedali — il conteggio di un dedalo ricalcolato nella pagina, con la regola condivisa col server (099; L10-02: timbri del dedalo)
+// Test dedali — il conteggio di un dedalo ricalcolato nella pagina, con la regola condivisa col server (L10-02: timbri del dedalo)
 // ============================================================
 
 import { contaNelDedalo, contoAreaDedalo, contoDedalo, TIPI_VOCE_DEDALO, tipoDelDedalo } from '../../shared/dedali';

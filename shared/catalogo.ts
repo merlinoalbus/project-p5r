@@ -146,17 +146,3 @@ export function normalizzaNomeOggetto(nome: string): string {
     .replace(/[’`´]/g, "'").replace(/\s+/g, ' ').trim();
 }
 
-/** La forma estesa deve essere attestata dalla fonte: non si inventano espansioni dei nomi del menu. */
-export function nomiCatalogo(nome: string, altri: readonly string[] = [], esteso?: string | null): { nome: string; nomiAltri: string[] } {
-  const mostrato = esteso?.trim() || nome.trim();
-  return { nome: mostrato, nomiAltri: [...new Set([nome, ...altri].map((n) => n.trim()).filter((n) => n && n !== mostrato))] };
-}
-
-/** La categoria storica della merce non viene riscritta dalla migrazione. */
-export function categoriaOggettoDaArticolo(categoria: string): CategoriaOggetto {
-  if (eCategoriaOggetto(categoria)) return categoria;
-  if (['cura', 'sp', 'battaglia', 'stato', 'esplorazione'].includes(categoria)) return 'consumabile';
-  if (categoria === 'oggetto-chiave') return 'chiave';
-  if (categoria === 'dvd') return 'film';
-  return 'altro';
-}

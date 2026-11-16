@@ -77,7 +77,7 @@ const E = (p: string, e: string, o: Partial<CampoDef> = {}): CampoDef => ({ p, e
 const N = (p: string, e: string, o: Partial<CampoDef> = {}): CampoDef => ({ p, e, t: 'numero', ...o });
 const B = (p: string, e: string, o: Partial<CampoDef> = {}): CampoDef => ({ p, e, t: 'booleano', ...o });
 /** L8-03 (D4, «Solo i campi che l'app può usare: requisiti, date, prezzi»): le condizioni strutturate di un elemento della guida, come JSON
- *  di un elenco del vocabolario unico (lo stesso modo dei trofei, migrazione 313); il giorno «MM-GG» di una scadenza. */
+ *  di un elenco del vocabolario unico (lo stesso modo dei trofei); il giorno «MM-GG» di una scadenza. */
 const C = (p: string, e: string): CampoDef => ({ p, e, t: 'testolungo', formato: 'condizioni' });
 const G = (p: string, e: string): CampoDef => ({ p, e, t: 'testo', formato: 'giorno', nullable: true, max: 5 });
 const FONTE = L('fonte', 'Fonte');
@@ -175,7 +175,7 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
     campi: [T('nome', 'Nome'), L('requisito', 'Requisito'), N('medaglie', 'Medaglie', { nullable: true }), N('conteggio/obiettivo', 'Obiettivo da contare nella partita', { max: YEN_MASSIMI_EFFETTO })],
   },
   'covo-premio': {
-    // Ondata 5, lotto F (decisione 21, migrazione 279): il premio che è un oggetto del catalogo (Velo invisibile, Lettera dei Reali) ne legge
+    // Ondata 5, lotto F (decisione 21): il premio che è un oggetto del catalogo (Velo invisibile, Lettera dei Reali) ne legge
     // l'effetto dalla scheda dell'oggetto; i premi che non sono oggetti (decorazioni, Galleria) tengono il loro
     modalita: 'blocco', blocco: 'completamento', etichetta: 'Premio del Covo', radice: ['covo', 'premi'], sel: 'nome',
     campi: [N('costo', 'Costo', { nullable: true }), L('sblocco', 'Come si sblocca', { nullable: true }), L('effetto', 'Effetto', { nullable: true })],
@@ -204,7 +204,7 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
     campi: [L('introduzione', 'Introduzione'), L('sblocco', 'Come si sblocca', { nullable: true }), E('regole', 'Regole'), FONTE],
   },
   ricetta: {
-    // Ondata 5, lotto F (decisione 21, migrazione 279): l'effetto della ricetta è quello del prodotto e si corregge sull'oggetto del catalogo
+    // Ondata 5, lotto F (decisione 21): l'effetto della ricetta è quello del prodotto e si corregge sull'oggetto del catalogo
     modalita: 'blocco', blocco: 'oggetti-guida', etichetta: 'Ricetta', radice: ['fabbricazione', 'ricette'], sel: 'attrezzo', campoTitolo: 'attrezzo',
     campi: [L('sblocco', 'Come si sblocca', { nullable: true }), C('condizioniJson', 'Quando si può fabbricare'), FONTE, VERIFICATO],
   },

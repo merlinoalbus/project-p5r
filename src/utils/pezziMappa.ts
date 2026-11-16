@@ -1,12 +1,12 @@
 // ============================================================
-// pezziMappa — come il visore disegna i pezzi delle planimetrie (102): zone cancellate, pezzi posati, visibilità
+// pezziMappa — come il visore disegna i pezzi delle planimetrie: zone cancellate, pezzi posati, visibilità
 // ============================================================
 //
 // Richiesta dell'utente (2026-10-14): i pezzi che il gioco disegna a parte (i muri mobili in fondo al Museo 2P di Madarame) tolti
 // dalla vista ordinaria e posati sulla mappa con le condizioni che li mostrano. Scelte: la zona d'origine è «sempre cancellata»;
 // un pezzo senza le sue condizioni è «nascosto, in trasparenza a richiesta»; rotazione a 90° e specchio.
 // Tutto in pixel dell'immagine: il livello del visore è grande quanto l'immagine e lo zoom lo scala intero, pezzi compresi.
-// Dal 2026-10-15 (103) un pezzo è il ritaglio e si posa in più copie: la zona si cancella una volta per ritaglio, si disegna
+// Dal 2026-10-15 un pezzo è il ritaglio e si posa in più copie: la zona si cancella una volta per ritaglio, si disegna
 // ogni copia, con posizione, rotazione, specchio e condizioni proprie.
 // ============================================================
 
@@ -91,7 +91,7 @@ export function stilePezzo(p: PosaPezzo, src: string, nat: { w: number; h: numbe
 }
 
 /**
- * Come si vede una copia (103: le condizioni sono per copia): senza filtro delle condizioni (nessuna partita, o l'editor con
+ * Come si vede una copia (le condizioni sono per copia): senza filtro delle condizioni (nessuna partita, o l'editor con
  * «Giorno corrente» spento) sempre; con il filtro, se le condizioni valgono; se no nascosta, o in trasparenza con «Mostra anche i
  * non ancora disponibili» (come i pin).
  */

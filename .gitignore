@@ -42,10 +42,8 @@ worktrees/
 .codex-temp*
 .codex-assets*/
 
-# Il pacchetto di gioco COMPLETO (stesso gioco.db ma con le immagini dentro, ~311 MB) resta fuori da GitHub (decisione
-# dell'utente, 2026-09-12) e vive qui in locale in pacchetto/completo/ (vedi pacchetto/README.md): si carica dall'app, dalla
-# cartella d'appoggio (Impostazioni → Pacchetto di gioco), e sostituisce il file dell'istanza. In git c'è pacchetto/gioco.db
-# iniziale (senza immagini).
+# Un backup completo dei dati di gioco (stesso gioco.db con le immagini dentro, centinaia di MB) non va in GitHub: si importa
+# dall'app dalla cartella d'appoggio (Impostazioni → Pacchetto di gioco). In git c'è pacchetto/gioco.db iniziale (senza immagini).
 pacchetto/completo/
 
 # Cartella d'appoggio di prova in locale (i file pesano centinaia di MB)

@@ -13,8 +13,7 @@
 // ============================================================
 
 import { z } from 'zod';
-import { getDb, prepared } from '../../db/dbService.js';
-import { haColonnaMain } from '../../db/schemaMemo.js';
+import { prepared } from '../../db/dbService.js';
 import { chiaveMappa, idMappa } from './percorsiMappe.js';
 import { httpErrors } from '../../utils/httpError.js';
 import type { DestinazionePacchetto, DestinazioneSpillo } from '../../../shared/types.js';
@@ -72,11 +71,6 @@ export function risolviSpilloArrivo(mappa: string, cerca: { nome: string | null;
   return vicini[0]?.id ?? null;
 }
 
-/** La colonna arriva con la migrazione 065: il seed può caricarsi con lo schema ancora indietro (nei test le migrazioni si applicano a scaglioni). */
-function haColonnaArrivo(): boolean {
-  return haColonnaMain(getDb(), 'spillo_destinazione', 'spillo_arrivo_id');
-}
-
 /** La riga salvata della destinazione di uno spillo: la mappa d'arrivo (chiave interna) e lo spillo d'arrivo. */
 export interface RigaDestinazione { mappa_chiave: string | null; spillo_arrivo_id: number | null }
 
@@ -93,13 +87,13 @@ function destinazioneDaRiga(r: RigaDestinazione | undefined): { destinazione: De
  * mappa nulla è la lapide di un collegamento perso: niente destinazione e `destinazioneNonDisponibile` vero.
  */
 export function leggiDestinazioneSpillo(id: number): { destinazione: DestinazioneSpillo | null; destinazioneNonDisponibile: boolean } {
-  const r = prepared(haColonnaArrivo() ? 'SELECT mappa_chiave, spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?' : 'SELECT mappa_chiave, NULL AS spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?').get(id) as RigaDestinazione | undefined;
+  const r = prepared('SELECT mappa_chiave, spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?').get(id) as RigaDestinazione | undefined;
   return destinazioneDaRiga(r);
 }
 
 /** Le destinazioni salvate di TUTTI gli spilli (spillo → riga), in una sola lettura: per chi descrive molti pin in una risposta (L5-05). */
 export function righeDestinazioni(): Map<number, RigaDestinazione> {
-  const righe = prepared(haColonnaArrivo() ? 'SELECT spillo_id, mappa_chiave, spillo_arrivo_id FROM spillo_destinazione' : 'SELECT spillo_id, mappa_chiave, NULL AS spillo_arrivo_id FROM spillo_destinazione').all() as Array<RigaDestinazione & { spillo_id: number }>;
+  const righe = prepared('SELECT spillo_id, mappa_chiave, spillo_arrivo_id FROM spillo_destinazione').all() as Array<RigaDestinazione & { spillo_id: number }>;
   return new Map(righe.map((r) => [r.spillo_id, { mappa_chiave: r.mappa_chiave, spillo_arrivo_id: r.spillo_arrivo_id }]));
 }
 
@@ -123,12 +117,6 @@ export function salvaDestinazioneSpillo(id: number, value: DestinazioneDaSalvare
   if (value === null && !invalidata) { prepared('DELETE FROM spillo_destinazione WHERE spillo_id=?').run(id); return; }
   const mappa = value?.mappa ? idMappa(value.mappa) : null;
   const spillo = value ? (value.spillo ?? (value.cerca && mappa ? risolviSpilloArrivo(mappa, value.cerca) : null)) : null;
-  if (!haColonnaArrivo()) {
-    // schema ancora alla 064: si conserva il punto descritto, che la 065 convertirà nello spillo più vicino
-    prepared(`INSERT INTO spillo_destinazione (spillo_id, mappa_chiave, x, y, zoom) VALUES(?,?,?,?,?) ON CONFLICT(spillo_id) DO UPDATE SET
-      mappa_chiave=excluded.mappa_chiave, x=excluded.x, y=excluded.y, zoom=excluded.zoom`).run(id, mappa, value?.cerca?.x ?? 0, value?.cerca?.y ?? 0, 1);
-    return;
-  }
   prepared(`INSERT INTO spillo_destinazione (spillo_id, mappa_chiave, x, y, zoom, spillo_arrivo_id) VALUES(?,?,?,?,?,?) ON CONFLICT(spillo_id) DO UPDATE SET
     mappa_chiave=excluded.mappa_chiave, x=excluded.x, y=excluded.y, zoom=excluded.zoom, spillo_arrivo_id=excluded.spillo_arrivo_id`).run(id, mappa, 0, 0, 1, spillo);
 }

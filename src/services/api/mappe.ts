@@ -51,15 +51,15 @@ export const impostaStanzaMappa = (chiave: string, dati: { con: string | null; n
 export const riordinaMappe =(genitore: string | null, chiavi: string[]): Promise<MappaRiassuntoDto[]> => apiPut('/mappe/ordine', { genitore, chiavi });
 
 /** Carica l'immagine di base della mappa (file dell'utente, mai nel repository): corpo grezzo `image/*`. Su una mappa con dei pezzi
- *  (102) il server risponde 409 `mappa-con-pezzi` finché non si conferma con `eliminaPezzi` (i pezzi se ne vanno con l'immagine). */
+ *  il server risponde 409 `mappa-con-pezzi` finché non si conferma con `eliminaPezzi` (i pezzi se ne vanno con l'immagine). */
 export const caricaImmagineMappa = (chiave: string, file: File, opz: { eliminaPezzi?: boolean } = {}): Promise<MappaDto> =>
   inviaFile('PUT', `/mappe/${encodeURIComponent(chiave)}/immagine${queryString({ eliminaPezzi: opz.eliminaPezzi ? '1' : undefined })}`, file);
 
-/** Ritaglia un pezzo dalla zona scelta (102), in pixel dell'immagine, con la sua prima copia (103): senza posizione resta dove stava. */
+/** Ritaglia un pezzo dalla zona scelta, in pixel dell'immagine, con la sua prima copia: senza posizione resta dove stava. */
 export const creaPezzoMappa = (mappa: string, dati: DatiNuovoPezzoMappa): Promise<PezzoMappaDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/pezzi`, dati);
 /** Elimina un pezzo con tutte le sue copie: la sua zona torna visibile nell'immagine di base. */
 export const eliminaPezzoMappa = (id: number): Promise<void> => apiDelete(`/mappe/pezzi/${id}`);
-/** Aggiunge una copia di un pezzo (103): un'altra posa dello stesso ritaglio, con posizione, rotazione, specchio e condizioni proprie. */
+/** Aggiunge una copia di un pezzo: un'altra posa dello stesso ritaglio, con posizione, rotazione, specchio e condizioni proprie. */
 export const creaCopiaPezzoMappa = (pezzoId: number, dati: DatiCopiaPezzo): Promise<CopiaPezzoDto> => apiPost(`/mappe/pezzi/${pezzoId}/copie`, dati);
 /** Corregge una copia (con `nomePezzo` anche il nome del ritaglio, insieme): i campi assenti restano. */
 export const aggiornaCopiaPezzoMappa = (id: number, dati: DatiAggiornaCopiaPezzo): Promise<CopiaPezzoDto> => apiPut(`/mappe/pezzi/copie/${id}`, dati);
@@ -89,7 +89,7 @@ export interface RiferimentoTrovatoApi { tipo: TipoRiferimento; chiave: string; 
 /** Entità collegabili a uno spillo (editor): per tipo e testo. */
 export const cercaRiferimenti = (tipo: TipoRiferimento, q: string, limite = 30, includi?: string): Promise<RiferimentoTrovatoApi[]> => apiGet(`/mappe/riferimenti${queryString({ tipo, q, limite, includi })}`);
 
-/** Le voci della guida che si possono collegare allo spillo (098: un pin può averne più d'una); si collegano con `collegaPinAlPunto`. */
+/** Le voci della guida che si possono collegare allo spillo (un pin può averne più d'una); si collegano con `collegaPinAlPunto`. */
 export const getVociCollegabili = (spilloId: number): Promise<VoceCollegabileDto[]> => apiGet(`/mappe/spilli/${spilloId}/voci-collegabili`);
 
 /** Pacchetto JSON con mappe, spilli e immagini dell'istanza (base64); con `radice` solo quella mappa e le discendenti. */

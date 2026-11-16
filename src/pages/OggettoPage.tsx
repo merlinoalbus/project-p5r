@@ -115,8 +115,8 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
             {o.effetto && <p className="m-0 whitespace-pre-line testo-13"><TestoNote testo={o.effetto} daParole="conteggi" /></p>}
             {o.descrizione && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary"><TestoNote testo={o.descrizione} daParole="conteggi" /></p>}
             <NoteStoricheOfferta note={o.noteStoriche} onLegamiCambiati={() => dati.ricarica()} />
-            {/* Ondata 5, lotto F: un'arma senza altro effetto ha le sue statistiche (separate dall'effetto, migrazione 275), e un libro, un film o
-                un videogioco dice che cosa dà nella sezione della lettura (la copia nella descrizione è tolta, 279): allora l'avviso non serve */}
+            {/* Ondata 5, lotto F: un'arma senza altro effetto ha le sue statistiche (separate dall'effetto), e un libro, un film o
+                un videogioco dice che cosa dà nella sezione della lettura (la descrizione non lo ripete): allora l'avviso non serve */}
             {/* chiusura dell'ondata 5: un regalo senza effetto proprio dà l'affinità, che vive nelle reazioni dei Confidenti (sezione «A chi
                 piace»): lo si dice con una frase calcolata dalla categoria, non con l'etichetta «Regalo» che i dati ripetevano né con l'avviso */}
             {!o.effetto && !o.descrizione && !o.lettura && !(typeof o.statistiche?.testo === 'string' && o.statistiche.testo) && (o.categoria === 'regalo'

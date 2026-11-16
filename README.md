@@ -16,7 +16,8 @@ Interfaccia, API, schema dei dati e documentazione sono in italiano.
 - **Frontend**: React 19, react-router 7, zustand 5, Tailwind 4, Vite 8. Porta di sviluppo **5273**.
 - **Backend**: Express 5, better-sqlite3 12, zod 4, pino 10, eseguito con `tsx`. Porta **3101**.
 - **Persistenza**: due file SQLite in `DATA_DIR` (predefinito `data/`): `gioco.db` (dati di gioco) e `partite.db` (dati delle
-  partite, attaccato come schema `utente`). Modalità WAL, migrazioni versionate, copie di sicurezza a ogni avvio.
+  partite, attaccato come schema `utente`). Modalità WAL. Ogni file porta la sua versione (`PRAGMA user_version`): l'avvio si
+  ferma se non è quella che il codice legge, senza conversioni. Copie di sicurezza prima di «Importa» e del ripristino.
 - **Qualità**: TypeScript ~5.9 (`tsc -b`), ESLint 10, Vitest 4.
 - **Node**: `^22.23.4 || ^24.22.1 || ^26.12.1` (campo `engines` di `package.json`).
 
@@ -28,13 +29,14 @@ cp .env.example .env
 bash scripts/start-all.sh     # backend (3101) e frontend (5273), con verifica di avvio
 ```
 
-Al primo avvio, senza `data/gioco.db`, il backend copia il pacchetto iniziale `pacchetto/gioco.db` (senza immagini) e applica
-le migrazioni. Il pacchetto completo, con le immagini, si carica dall'app: vedi [`pacchetto/README.md`](pacchetto/README.md).
+Al primo avvio, senza `data/gioco.db`, il backend copia il pacchetto iniziale `pacchetto/gioco.db` (senza immagini) e crea
+`partite.db` dal modello `pacchetto/partite-vuoto.db`. Le immagini arrivano importando un backup completo dei dati di gioco
+dall'app: vedi [`pacchetto/README.md`](pacchetto/README.md).
 
 Gestione dei server in `scripts/`: `start-be.sh`, `start-fe.sh`, `stop-be.sh`, `stop-fe.sh`, `restart-be.sh`, `restart-fe.sh`,
 `start-all.sh`, `stop-all.sh`, `restart-all.sh`. I log vanno in `BE.log` e `FE.log`, i PID in `.pids/`.
-Il backend gira in `tsx watch` e si riavvia da solo a ogni salvataggio in `server/`. Una migrazione nuova si applica subito ai
-dati di `data/`, dopo la copia di avvio in `data/backups/`.
+Il backend gira in `tsx watch` e si riavvia da solo a ogni salvataggio in `server/`. Un cambio di struttura dei dati non si
+applica da solo: la procedura per i due file è in [`docs/DECISIONI.md`](docs/DECISIONI.md).
 
 ## Comandi
 
@@ -44,7 +46,7 @@ dati di `data/`, dopo la copia di avvio in `data/backups/`.
 | `npm run lint` | ESLint su tutto il repository |
 | `npm run build` | build del frontend in `dist/` |
 | `npm test` | Vitest (i test girano su richiesta, non a ogni modifica) |
-| `npm run pacchetto` | rigenera `pacchetto/gioco.db` e il pacchetto completo |
+| `npm run pacchetto` | rigenera `pacchetto/gioco.db` dai dati di gioco dell'istanza (`DATA_DIR/gioco.db`), senza immagini |
 | `npm run start:rilascio` | avvia il backend nella modalità di rilascio (sola lettura dei contenuti) |
 
 Documentazione dell'API: `/api/docs` (Swagger UI) e `/api/openapi.json` (OpenAPI 3.1), anche da Impostazioni → «Documentazione
@@ -54,12 +56,12 @@ delle API». Il documento si costruisce dalle rotte e dagli schemi zod; le descr
 ## Struttura
 
 ```
-server/     Express: config, bootstrap, middleware, db (migrazioni di gioco e delle partite), routes, services, schemas, openapi
+server/     Express: config, bootstrap, middleware, db (versioni dei due file, modello delle partite), routes, services, schemas, openapi
 shared/     tipi e regole pure condivise fra frontend e backend (nessun accesso a DB o DOM)
 src/        React: pages, components, stores, services/api, hooks, utils
 vite/       plugin di Vite (manifest degli asset grafici predefiniti)
 public/     asset grafici del compendio e dell'interfaccia, caratteri
-pacchetto/  gioco.db iniziale (in git, senza immagini)
+pacchetto/  gioco.db iniziale e modello partite-vuoto.db (in git; gioco.db senza immagini)
 scripts/    gestione dei server, generazione del pacchetto, verifica del bundle di rilascio, strumenti
 test/       aiuti condivisi dai test
 licenze/    copie delle licenze citate in NOTICE

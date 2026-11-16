@@ -7,7 +7,7 @@
 // è catturata vale per tutte le aree e i dedali»; «La cattura o meno delle Persona puoi valutarla dal compendio»; «I timbri come
 // le Persona devono essere banalmente un click». Una Persona è catturata se è registrata nel compendio della partita: il tocco
 // sulla piastrella la registra; toglierla dal compendio cancella livello, bonus e abilità che vi aveva registrati, e per questo
-// chiede conferma. Una Persona si incontra in più aree (migrazione 101).
+// chiede conferma. Una Persona si incontra in più aree.
 // Progetto approvato (pagina per formato): debolezze e scheda del compendio stanno in un riquadro che si apre da un solo segno
 // «i»; correggere, aggiungere e togliere una Persona (`ModuloPersona`) solo in «Modifica la guida».
 // L8: la piastrella, l'avviso di rimozione e le debolezze (dal compendio, mai dal testo della guida) sono quelli di tutte le viste

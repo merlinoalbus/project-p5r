@@ -14,7 +14,7 @@
 // ============================================================
 
 import { DOTI_SOCIALI, eDote } from './doti.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo, type TipoCondizione } from './condizioniSpillo.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo } from './condizioniSpillo.js';
 import { uidValido } from './spilli.js';
 import { RANGO_MASSIMO_CONFIDENTE } from './puntiConfidenti.js';
 
@@ -132,19 +132,6 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
     { chiave: 'non-segnata', nome: 'non segnata', campi: [campo('voce', 'voce-guida', 'Voce')] },
   ] },
 ];
-
-/**
- * L6 (R6-01): lo stato dell'editor di ogni tipo del vocabolario, che non è più un elenco parallelo: `Record` su tutti i tipi di
- * `condizioniSpillo.ts`, quindi un tipo nuovo senza il suo stato qui non compila. Gruppi e negazioni sono struttura, non stati.
- */
-export const STATO_DEL_TIPO: Record<Exclude<TipoCondizione, 'gruppo' | 'non'>, string> = {
-  data: 'data-gioco', intervallo: 'data-gioco', fascia: 'fascia', piove: 'meteo', meteo: 'meteo', 'giorno-settimana': 'giorno-settimana',
-  stagione: 'stagione', quartiere: 'quartiere', 'da-subito': 'da-subito', luogo: 'luogo', invito: 'invito', avviso: 'avviso', arco: 'arco',
-  'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', 'relazione-romantica': 'relazione-romantica', 'relazioni-romantiche': 'relazione-romantica', 'salvataggio-p5': 'salvataggio-p5', 'nuova-partita-plus': 'nuova-partita-plus', 'dlc-posseduto': 'dlc-posseduto', squadra: 'squadra', richiesta: 'richiesta', sblocco: 'sblocco', lettura: 'libro', articolo: 'articolo',
-  attivita: 'attivita', 'rango-cliente': 'rango-cliente', 'punti-negozio': 'punti-negozio', evento: 'evento', contatore: 'contatore',
-  'pesca-sessione':'pesca-sessione',
-  'persona-arcano': 'persona-arcano', 'persona-abilita': 'persona-abilita', spillo: 'spillo', 'voce-guida': 'voce-guida',
-};
 
 export type ValoriCondizione = Record<string, string | number | string[]>;
 export interface SceltaCondizione { stato: string; operatore: string; valori: ValoriCondizione }

@@ -16,6 +16,11 @@ import { httpErrors } from '../utils/httpError.js';
 
 let occupata: { cosa: string } | null = null;
 
+/** Vero mentre una sostituzione dei file è in corso: chi lavora in sottofondo sulla connessione (la copia periodica delle partite) salta il giro. */
+export function istanzaOccupata(): boolean {
+  return occupata !== null;
+}
+
 /** Prende il lucchetto per `cosa` (descrizione per il messaggio di rifiuto) e restituisce la funzione che lo rilascia, una volta
  *  sola. Se un'altra sostituzione è in corso risponde 409 `importazione-in-corso`, il codice che il frontend già conosce. */
 export function occupaIstanza(cosa: string): () => void {

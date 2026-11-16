@@ -44,7 +44,7 @@ export function giornoPrecedente(data: string | null | undefined): string | null
 }
 
 /** L13 (ondata 7, O7-4): il periodo di una settimana della guida dal suo primo e ultimo giorno («MM-GG»), «09/04 - 10/04»: la sola resa,
- *  letta dal Calendario e dalla migrazione 313 per confrontare il testo copiato. Null se manca una delle due date. */
+ *  letta dal Calendario. Null se manca una delle due date. */
 export function periodoDellaSettimana(dal: string | null | undefined, al: string | null | undefined): string | null {
   const gm = (d: string | null | undefined): string | null => (giornoDellaSettimana(d) === null ? null : `${d!.slice(3, 5)}/${d!.slice(0, 2)}`);
   const a = gm(dal), b = gm(al);

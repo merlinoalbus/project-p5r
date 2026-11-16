@@ -51,7 +51,7 @@ describe('condizione «Pin di una mappa»', () => {
     dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Pin condizionati' })).body.data as { id: number }).id;
     // una planimetria di un Palazzo con una porta del gioco (nativa): un elemento fisso, che dal 2026-10-09 le condizioni nascondono come ogni pin
-    // (di un Palazzo davvero: fino al 2026-10-31, quando la migrazione 322 le ha tolte, la prima porta nativa stava sulle «aree fisse» dei
+    // (di un Palazzo davvero, non dei
     // Memento; il filtro resta perché nei Memento, dove dal 2026-10-11 le voci sono solo
     // Persona e Trama e non si possono creare le voci Meccanismo e Stanza sicura che i test collegano ai pin)
     const palazzi = palazzoDiOgniMappa();
@@ -332,7 +332,7 @@ describe('condizione «Pin di una mappa»', () => {
       expect(condizioniDi('Porta che cita la stanza sbagliata')).toEqual([]);
     });
 
-    it('un pacchetto senza il campo della voce (di prima della 094): la voce del pin reinserito vale lo stesso', async () => {
+    it('un pacchetto senza il campo della voce (un pacchetto vecchio): la voce del pin reinserito vale lo stesso', async () => {
       const sicura = await prepara('Stanza sicura senza voce nel pacchetto', 'Porta del pacchetto senza voce');
       const pacchetto = soloQuesta(structuredClone(esportaMappe(mappa)), 'Porta del pacchetto senza voce');
       for (const s of pacchetto.mappe.flatMap((m) => m.spilli)) { delete s.voci; delete s.voce; }

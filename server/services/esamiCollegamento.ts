@@ -2,7 +2,7 @@
 // esamiCollegamento — quali righe di `domanda` appartengono a quale esame (L11 · R11-15/7, dopo R9-18)
 // ============================================================
 //
-// Le domande e i giorni d'esame stanno solo nelle righe di `domanda` di tipo `esame-medio` / `esame-finale` (migrazione 191). L'esame si collega
+// Le domande e i giorni d'esame stanno solo nelle righe di `domanda` di tipo `esame-medio` / `esame-finale`. L'esame si collega
 // alle sue righe per tipo (dal nome: «metà» → esame-medio, altrimenti esame-finale) e per data: le righe di quel tipo dopo i risultati
 // dell'esame precedente dello stesso tipo e fino ai suoi. Una regola sola, usata dalla lettura (`domandeService.esami`) e dai controlli di
 // Modifica: correggere il nome o la data dei risultati di un esame, o la data e il tipo di una domanda d'esame, non deve spostare nessuna

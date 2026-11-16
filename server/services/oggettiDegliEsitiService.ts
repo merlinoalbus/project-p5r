@@ -6,7 +6,7 @@
 // gli esiti con un trofeo e con premi come oggetti per chiave con quantità; serve anche ai distintivi della Big Bang Burger». L'esito lo
 // dichiara l'attività (`attivita.esiti_json`, campo `oggetti` di `shared/esitiAttivita.ts`: un solo punto, la Comet Burger vinta → «Distintivo
 // numero due» e 3 «Big Bang Burger»); chi registra il turno (la spunta della voce del Diario o il + del contatore, tutte e due passano da
-// `attivitaService.registraTurno`) sceglie l'esito, e gli oggetti entrano nel registro `utente.oggetto_esito_turno` (utente 053), una riga per
+// `attivitaService.registraTurno`) sceglie l'esito, e gli oggetti entrano nel registro `utente.oggetto_esito_turno`, una riga per
 // oggetto del turno con le copie. Non è uno stato sì/no ma un registro che somma, come gli oggetti ricevuti dalle voci
 // (`oggetto_ottenuto_partita`): la lettura unica degli oggetti ottenuti (`oggettiOttenutiService`) e le copie possedute (`copieOggetti`) li
 // sommano agli altri. Togliendo il turno (`togliTurno`, l'unica strada che cancella un turno) le righe se ne vanno.
@@ -15,11 +15,9 @@
 // (`shared/esitiAttivita.ts`): la stessa regola per gli oggetti dati e per quelli consumati.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haTabellaUtente } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
-import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { LIMITI_ESITI, oggettiDelTurno, type OggettoEsito } from '../../shared/esitiAttivita.js';
 
 /** 2026-10-27: gli oggetti dati (`dati`) o consumati (`consumati`) da un turno con l'esito e la quantità, già moltiplicati; un numero di copie oltre
@@ -33,24 +31,20 @@ export function oggettiDelTurnoVerificati(attivita: string, esito: string, quant
 
 /** Il nome del catalogo di un oggetto (la chiave se il catalogo non lo conosce più). */
 export function nomeOggettoCatalogo(chiave: string): string {
-  return (catalogoOggettiDisponibile() ? prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck().get(chiave) as string | undefined : undefined) ?? chiave;
+  return (prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave;
 }
 
 const TABELLA = 'oggetto_esito_turno';
-
-/** La tabella c'è? (Uno schema di prima della utente 053 non ha oggetti dagli esiti: niente da scrivere né da togliere.) */
-const conTabella = (): boolean => haTabellaUtente(getDb(), TABELLA);
 
 /**
  * Registrando il turno `ordine` dell'attività con l'esito `esito`: gli oggetti del catalogo che l'esito dà entrano fra quelli ottenuti.
  * Va chiamata dentro la transazione del turno. Le righe rimaste da un turno con lo stesso numero (tolto per un'altra strada) si tolgono prima.
  */
 export function segnaOggettiDelTurno(p: number, attivita: string, ordine: number, esito: string | null | undefined, quantita?: number): Array<{ nome: string; quantita: number }> {
-  if (!conTabella()) return [];
   togliOggettiDelTurno(p, attivita, ordine);
   if (!esito) return [];
   const oggetti = oggettiDelTurnoVerificati(attivita, esito, quantita, 'dati');
-  if (!oggetti.length || !catalogoOggettiDisponibile()) return [];
+  if (!oggetti.length) return [];
   const nelCatalogo = prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?');
   const inserisci = prepared(`INSERT INTO utente.${TABELLA} (partita_id, attivita_chiave, ordine, catalogo_chiave, quantita, esito_chiave, creato_il) VALUES (?, ?, ?, ?, ?, ?, ?)`);
   const adesso = new Date().toISOString();
@@ -61,6 +55,5 @@ export function segnaOggettiDelTurno(p: number, attivita: string, ordine: number
 
 /** Togliendo il turno `ordine` dell'attività: gli oggetti che aveva dato se ne vanno. Va chiamata dentro la transazione del turno. */
 export function togliOggettiDelTurno(p: number, attivita: string, ordine: number): void {
-  if (!conTabella()) return;
   prepared(`DELETE FROM utente.${TABELLA} WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?`).run(p, attivita, ordine);
 }

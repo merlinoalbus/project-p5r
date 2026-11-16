@@ -1,12 +1,17 @@
 // ============================================================
-// backupUtente — la copia dell'avanzamento nell'istanza di rilascio (L12, passo 4; progetto §6)
+// backupUtente — la copia periodica dell'avanzamento, nelle due istanze (L12, passo 4; progetto §6)
 // ============================================================
 //
-// Nel rilascio `gioco.db` è un file dell'edizione, uguale a quello che si ripubblica: non c'è nulla da salvare. Quello che non si
-// rifà è `partite.db`, l'avanzamento di chi gioca. Si copia solo lo schema `utente` (API di backup online, sicura con il WAL)
-// all'avvio e ogni 6 ore, in `config.backupDir` (un volume a parte: se si perde quello delle partite le copie restano), tenendo
-// le ultime `COPIE_DA_TENERE`. A differenza del backup di avvio della preparazione (`backupService`) non ha niente da proteggere
-// prima di una migrazione, perciò una copia fallita è un errore nel log e non ferma l'istanza: giocare è più importante.
+// Quello che non si rifà è `partite.db`, l'avanzamento di chi gioca. Si copia solo lo schema `utente` (API di backup online, sicura
+// con il WAL) all'avvio e ogni 6 ore, in `config.backupDir`, tenendo le ultime `COPIE_DA_TENERE`. Una copia fallita è un errore nel
+// log e non ferma l'istanza: giocare è più importante.
+//   - Rilascio: `gioco.db` è un file dell'edizione, uguale a quello che si ripubblica, e non c'è nulla da salvare; le copie vanno in
+//     un volume a parte (`BACKUP_DIR`): se si perde quello delle partite restano.
+//   - Preparazione: le copie vanno in `DATA_DIR/backups`, accanto a quelle fatte prima di «Importa» e del ripristino; `gioco.db` si
+//     salva a mano dal backup dell'istanza. Un giro non comincia mentre una sostituzione dei file è in corso (`salta`); uno già
+//     avviato quando la sostituzione chiude la connessione fallisce, toglie il suo file a metà e lo dice nel log. La copia
+//     dell'avvio si salta se l'ultima è recente (`recenteMs`): in sviluppo il backend riparte a ogni salvataggio, e senza questo le
+//     copie di pochi minuti scaccerebbero quelle dei giorni scorsi.
 // ============================================================
 
 import fs from 'node:fs';
@@ -52,19 +57,31 @@ export async function copiaUtente(cartella: string = config.backupDir): Promise<
   return destinazione;
 }
 
+/** Da quanti millisecondi è stata fatta l'ultima copia della cartella; `Infinity` se non ce ne sono o la cartella non si legge. */
+function etaUltimaCopiaMs(cartella: string): number {
+  try {
+    const ultima = fs.readdirSync(cartella).filter((f) => f.startsWith(PREFISSO) && f.endsWith('.db')).sort().at(-1);
+    return ultima ? Date.now() - fs.statSync(path.join(cartella, ultima)).mtimeMs : Infinity;
+  } catch {
+    return Infinity;
+  }
+}
+
 /**
  * Copia subito e poi ogni 6 ore. Il timer non tiene vivo il processo (`unref`) e salta il giro se la copia precedente è ancora in
- * corso. Restituisce la funzione che lo ferma.
+ * corso o se `salta` risponde vero (la connessione sta per essere chiusa e riaperta: il giro dopo copierà i file nuovi). Con
+ * `recenteMs` maggiore di zero la copia dell'avvio non si fa se l'ultima ha meno di quei millisecondi. Restituisce la funzione che
+ * lo ferma.
  */
-export function avviaCopieUtente(cartella: string = config.backupDir): () => void {
+export function avviaCopieUtente(cartella: string = config.backupDir, salta: () => boolean = () => false, recenteMs = 0): () => void {
   let incorso = false;
   const giro = async (): Promise<void> => {
-    if (incorso) return;
+    if (incorso || salta()) return;
     incorso = true;
     try { await copiaUtente(cartella); } finally { incorso = false; }
   };
   const lanciaGiro = (): void => { giro().catch((err: unknown) => logger.error({ err }, 'giro della copia dell\'avanzamento non riuscito')); };
-  lanciaGiro();
+  if (!(recenteMs > 0 && etaUltimaCopiaMs(cartella) < recenteMs)) lanciaGiro();
   const timer = setInterval(lanciaGiro, INTERVALLO_COPIA_MS);
   timer.unref();
   return () => clearInterval(timer);

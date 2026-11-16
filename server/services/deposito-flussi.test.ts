@@ -29,7 +29,9 @@ const lavoriRimasti = (): string[] => (fs.existsSync(path.join(dataDir, 'tmp')) 
 beforeAll(() => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-flussi-dati-'));
   deposito = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-flussi-deposito-'));
-  (config as { dataDir: string }).dataDir = dataDir;
+  // i due database stanno in `edizioneDir` e `partiteDir`, che senza le loro variabili d'ambiente valgono quanto `DATA_DIR` all'avvio:
+  // vanno portati nella cartella di prova insieme a `dataDir`, o la prova aprirebbe i file veri dell'istanza
+  Object.assign(config, { dataDir, edizioneDir: dataDir, partiteDir: dataDir });
   (config as { depositoDir: string }).depositoDir = deposito;
   caricaPacchetto(initDb());
 });

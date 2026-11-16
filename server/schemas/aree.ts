@@ -46,7 +46,7 @@ export const bodyAggiornaArea = z.object({
   daVerificare: z.literal(false).optional(),
 }).strict();
 
-/** La condizione propria di un'Area (303), in AND con quella del quartiere; un elenco vuoto la toglie. */
+/** La condizione propria di un'Area, in AND con quella del quartiere; un elenco vuoto la toglie. */
 export const bodySbloccoArea = z.object({ condizioni: z.array(condizioneSpillo).max(20) }).strict();
 
 /** L'ordine delle Aree del contenitore: tutti gli slug, una volta. */

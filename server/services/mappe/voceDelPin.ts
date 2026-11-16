@@ -1,5 +1,5 @@
 // ============================================================
-// Le voci della guida di un pin: la regola unica di lettura (094, 2026-10-01; più voci per pin dalla 098, 2026-10-09)
+// Le voci della guida di un pin: la regola unica di lettura (2026-10-01; più voci per pin dal 2026-10-09)
 // ============================================================
 //
 // Senza dipendenze da altri servizi, perché la leggono tutti — guida, mappe, Palazzi —, anche chi è letto dalle regole del
@@ -9,13 +9,12 @@
 // pin è fatto quando **tutte** le sue voci sono segnate (`fattoPerVoci`).
 // ============================================================
 
-import { getDb, prepared } from '../../db/dbService.js';
-import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
+import { prepared } from '../../db/dbService.js';
 import { sqlVoceDescrittiva } from '../../../shared/spilli.js';
 
 /**
  * Le voci della guida di un pin, in SQL: una sottoquery (fra parentesi) con una colonna, sul pin dell'alias dato. Sono le righe
- * di `spillo_voce` (098) e, per gli elementi della guida senza mappa che non le hanno (lo strato di prima, lasciato com'è), il
+ * di `spillo_voce` e, per gli elementi della guida senza mappa che non le hanno (lo strato di prima, lasciato com'è), il
  * riferimento «punto». È la regola unica: ogni lettore in SQL la usa, per esempio `? IN ${vociDelPinSql('s')}`.
  */
 export function vociDelPinSql(alias: string): string {
@@ -25,29 +24,21 @@ export function vociDelPinSql(alias: string): string {
 
 /**
  * Le voci della guida **gestite** in una partita, in SQL con un parametro (`partita_id`): quelle con uno stato in `punto_partita`,
- * tranne le voci descrittive («Altro» fuori dalle aree dei dedali, 099), che uno stato non lo hanno. È la regola unica con cui
+ * tranne le voci descrittive («Altro» fuori dalle aree dei dedali), che uno stato non lo hanno. È la regola unica con cui
  * le voci segnate segnano i pin che le citano: la usano il visore e le condizioni (`spilliSegnati`), la raccolta dei Palazzi (`raccoltaMappe`) e il loro completamento
  * (`palazziCompletati`). Prima le ultime due contavano anche uno stato rimasto su una voce descrittiva.
  */
 export const VOCI_GESTITE_SQL = `SELECT pp.punto_chiave FROM punto_partita pp JOIN punto_interesse pi ON pi.chiave = pp.punto_chiave
   WHERE pp.partita_id = ? AND NOT ${sqlVoceDescrittiva('pi')}`;
 
-/** Le colonne di `spillo` e se c'è `spillo_voce`: chi legge durante le migrazioni può trovare lo schema di prima. */
-function schemaVoci(): { tabella: boolean; colonna: boolean } {
-  const tabella = haTabellaMain(getDb(), 'spillo_voce');
-  const colonna = !tabella && haColonnaMain(getDb(), 'spillo', 'voce_chiave');
-  return { tabella, colonna };
-}
-
 /**
  * Le voci della guida di ogni pin che ne ha, per id, in ordine di chiave: la stessa regola di `vociDelPinSql`, letta una volta
- * per tutti i pin. Si adatta allo schema: prima della 098 vale `voce_chiave` (094), prima ancora il solo riferimento «punto».
+ * per tutti i pin.
  * Con `soloDaSegnare` restano le voci che si segnano: una descrittiva («Altro») non ha stato, e non può tenere un pin «da fare»
  * (le regole del collegamento non la ammettono, ma una scritta da prima può esserci).
  */
 export function vociDiOgniPin(soloDaSegnare = false): Map<number, string[]> {
-  const { tabella, colonna } = schemaVoci();
-  const righe = prepared(`SELECT v.id, v.voce FROM (${tabella ? 'SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION ' : ''}${colonna ? 'SELECT id, voce_chiave FROM spillo WHERE voce_chiave IS NOT NULL UNION ' : ''}
+  const righe = prepared(`SELECT v.id, v.voce FROM (SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION
     SELECT id, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave IS NOT NULL) v
     ${soloDaSegnare ? `JOIN punto_interesse pi ON pi.chiave = v.voce AND NOT ${sqlVoceDescrittiva('pi')}` : ''} ORDER BY 1, 2`).all() as Array<{ id: number; voce: string }>;
   const out = new Map<number, string[]>();

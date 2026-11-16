@@ -400,7 +400,7 @@ router.delete('/aree/:chiave', validate({ params: paramsChiaveGuida }), (req, re
   eliminaArea(String(req.params.chiave));
   res.status(204).end();
 });
-/* ---- Le aree dei dedali dei Memento (099, richiesta dell'utente del 2026-10-11): Dedalo → Aree → Elementi ---- */
+/* ---- Le aree dei dedali dei Memento (richiesta dell'utente del 2026-10-11): Dedalo → Aree → Elementi ---- */
 /** Un'area nuova in fondo al dedalo (la chiave è quella del dedalo, cioè della sua area della guida). */
 router.post('/dedali/:chiave/aree', validate({ params: paramsChiaveGuida, body: bodyNuovaAreaDedalo }), (req, res) => {
   res.status(201).json(creaAreaDedalo(String(req.params.chiave), req.body));
@@ -463,7 +463,7 @@ router.get('/domande', validate({ query: queryDomande }), (req, res) => {
 router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
 });
-/** Editor informativo (note, note generali, fonti: L13, migrazione 307) indipendente dal dettaglio, leggibile anche con fonti JSON storiche malformate. */
+/** Editor informativo (note, note generali, fonti: L13) indipendente dal dettaglio, leggibile anche con fonti JSON storiche malformate. */
 router.get('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(informazioniConfidente(String(req.params.chiave)));

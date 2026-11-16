@@ -5,7 +5,7 @@
 // «Come faccio a rendere una mappa censita come a sé e trasformarla in planimetria di un'altra mappa? E il
 // viceversa, prendere una planimetria gestita all'interno di una mappa ed eleggerla mappa individuale?»
 // `PUT /api/mappe/:chiave/stanza` con `con` (entra nella stanza di quella) o `con: null` (diventa una stanza a sé), in un'operazione
-// sola. Da L3 la «stanza» di una planimetria di un Palazzo è la sua **Area** (migrazione 110): la rotta vecchia sposta la versione fra
+// sola. Da L3 la «stanza» di una planimetria di un Palazzo è la sua **Area**: la rotta vecchia sposta la versione fra
 // le Aree (`PUT /api/aree/colloca`), e il nome della stanza è il nome dell'Area. I gruppi d'immagini non si scrivono più.
 // ============================================================
 

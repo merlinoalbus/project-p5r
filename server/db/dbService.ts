@@ -9,9 +9,9 @@
 // principale (compendio, guida, catalogo, mappe, immagini) e `partite.db` è attaccato come schema
 // `utente` con le tabelle delle partite. Così il DB di gioco si può esportare e sostituire senza
 // toccare l'avanzamento. Le query restano senza prefisso: SQLite risolve il nome della tabella
-// cercando prima in `main` e poi in `utente`, e i nomi sono tutti diversi. Solo le migrazioni e il
-// backup nominano lo schema. Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db`
-// al primo avvio; la migrazione 066 sposta poi le partite nel loro file.
+// cercando prima in `main` e poi in `utente`, e i nomi sono tutti diversi. Lo schema lo nomina chi
+// lavora su un file solo (copie, verifica delle versioni, creazione delle partite dal modello). La
+// connessione apre i due file così come sono: la versione attesa la verifica `versioneSchema.ts`.
 //
 // Pragma:
 //   - journal_mode=WAL     → letture concorrenti + scritture veloci
@@ -84,15 +84,6 @@ function percorsoPartiteDi(dbPath: string): string {
   return dbPath === resolveDbPath() ? resolvePartitePath() : path.join(path.dirname(dbPath), config.partiteFileName);
 }
 
-/** Il vecchio file unico, se esiste ancora e quello nuovo no: viene rinominato (con i suoi giornali). */
-function rinominaFileLegacy(dbPath: string): void {
-  if (dbPath !== resolveDbPath()) return;
-  const vecchio = path.join(config.dataDir, config.dbFileNameLegacy);
-  if (fs.existsSync(dbPath) || !fs.existsSync(vecchio)) return;
-  fs.renameSync(vecchio, dbPath);
-  for (const coda of ['-wal', '-shm']) if (fs.existsSync(`${vecchio}${coda}`)) fs.renameSync(`${vecchio}${coda}`, `${dbPath}${coda}`);
-}
-
 /**
  * Apre la connessione SQLite, crea la directory dati quando serve, attacca il file delle partite
  * e applica i pragma operativi. Chiamate successive restituiscono la stessa connessione.
@@ -101,16 +92,13 @@ export function initDb(dbPath: string = resolveDbPath(), opzioni: OpzioniDb = {}
   if (db) return db;
   const soloLettura = opzioni.soloLettura === true;
   if (soloLettura) {
-    // Edizione di rilascio: il file c'è già (lo ha prodotto «Prepara edizione») o l'avvio si ferma; niente cartelle da creare, niente
-    // rinomina del vecchio file unico, niente WAL su `main` (su un file in sola lettura non si aprirebbe: resta il giornale classico).
+    // Edizione di rilascio: il file c'è già (lo ha prodotto «Prepara edizione») o l'avvio si ferma; niente cartelle da creare,
+    // niente WAL su `main` (su un file in sola lettura non si aprirebbe: resta il giornale classico).
     if (dbPath === ':memory:' || !fs.existsSync(dbPath)) throw new Error(`edizione di gioco assente (${path.basename(dbPath)}): l'istanza di rilascio non crea né importa dati.`);
     db = new Database(dbPath, { fileMustExist: true });
     giocoInSolaLettura = true;
   } else {
-    if (dbPath !== ':memory:') {
-      fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-      rinominaFileLegacy(dbPath);
-    }
+    if (dbPath !== ':memory:') fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     db = new Database(dbPath);
     db.pragma('journal_mode = WAL');
   }
@@ -122,7 +110,8 @@ export function initDb(dbPath: string = resolveDbPath(), opzioni: OpzioniDb = {}
   if (dbPath !== ':memory:') {
     db.pragma('mmap_size = 268435456');
   }
-  // Il file delle partite: attaccato sempre, così ogni query lo vede e il runner delle migrazioni lo versiona.
+  // Il file delle partite: attaccato sempre, così ogni query lo vede. Se non ha tabelle, chi apre lo fa nascere dal modello
+  // (`creaPartiteDalModelloSeMancano`).
   const partitePath = percorsoPartiteDi(dbPath);
   // in rilascio le partite devono esistere già (le crea `assicuraPartiteIniziali`): un ATTACH le creerebbe vuote, senza schema
   if (soloLettura && !fs.existsSync(partitePath)) {
@@ -135,7 +124,7 @@ export function initDb(dbPath: string = resolveDbPath(), opzioni: OpzioniDb = {}
   if (dbPath !== ':memory:') {
     db.pragma('utente.journal_mode = WAL');
     // L5-10: il WAL non ha un limite di suo; dopo un checkpoint che lo azzera, SQLite lo riporta a questa dimensione invece di lasciarlo
-    // grande quanto il picco di una migrazione o di un caricamento di immagini. Il WAL di `main` in rilascio non esiste (giornale classico).
+    // grande quanto il picco di un caricamento di immagini. Il WAL di `main` in rilascio non esiste (giornale classico).
     if (!soloLettura) db.pragma(`main.journal_size_limit = ${LIMITE_WAL_BYTE}`);
     db.pragma(`utente.journal_size_limit = ${LIMITE_WAL_BYTE}`);
     if (!soloLettura) pianificaOttimizzazione();
@@ -146,15 +135,15 @@ export function initDb(dbPath: string = resolveDbPath(), opzioni: OpzioniDb = {}
 
 /** La dimensione a cui SQLite riporta il WAL di ciascun file dopo un checkpoint che lo azzera (L5-10). */
 const LIMITE_WAL_BYTE = 64 * 1024 * 1024;
-/** L'ottimizzazione delle statistiche si fa una volta poco dopo l'avvio (migrazioni e indici nuovi comprese) e poi a intervalli. */
+/** L'ottimizzazione delle statistiche si fa una volta poco dopo l'avvio e poi a intervalli. */
 const RITARDO_PRIMA_OTTIMIZZAZIONE_MS = 60_000;
 const INTERVALLO_OTTIMIZZAZIONE_MS = 6 * 60 * 60 * 1000;
 let timerOttimizzazione: NodeJS.Timeout | null = null;
 
 /**
- * `PRAGMA optimize` e un checkpoint passivo (mai bloccante) del WAL. Prima `optimize` girava solo alla chiusura, e un server che resta acceso
- * per giorni non aggiornava mai le statistiche del pianificatore. Come alla chiusura: nessun `analysis_limit`, perché `optimize` analizza
- * solo ciò che serve; best effort, non solleva mai.
+ * `PRAGMA optimize` e un checkpoint passivo (mai bloccante) del WAL: un server che resta acceso per giorni aggiorna così le statistiche
+ * del pianificatore senza aspettare la chiusura. Come alla chiusura: nessun `analysis_limit`, perché `optimize` analizza solo ciò che
+ * serve; best effort, non solleva mai.
  */
 export function ottimizzaDb(): void {
   if (!db || giocoInSolaLettura) return;

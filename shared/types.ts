@@ -18,7 +18,7 @@ import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
 import type { OmbraRiferimentoDto } from './ombre.js';
-import type { PiazzamentoEsame, PremioPiazzamentoEsame, ReazioneRegalo, RequisitoConoscenzaEsame } from './puntiConfidenti.js';
+import type { PiazzamentoEsame, ReazioneRegalo, RequisitoConoscenzaEsame } from './puntiConfidenti.js';
 import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
@@ -34,7 +34,7 @@ import type { StatoAcquistiArticoloDto } from './acquisti.js';
 import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce, StatoEffettoDiStatoDto, ApplicazioneStatoPartitaDto } from './effettiVoce.js';
 
 /** F6: una nota storica della fonte (discordanza documentale, G-034), non una fotografia dei prezzi pagati o dell'istanza importata. Vive
- *  in `nota_storica` (migrazione 139) e si modifica dall'app; la copia della guida (`seed_json`) dice se è «modificata». */
+ *  in `nota_storica` e si modifica dall'app; la copia della guida (`seed_json`) dice se è «modificata». */
 export interface NotaStoricaOfferta {
   id: string;
   versione: number;
@@ -234,7 +234,7 @@ export type RequisitoRango = Condizione & {
   testo: string;
 };
 /* L6 (R6-01, R6-01b): un requisito è una condizione del vocabolario unico (`Condizione`, `shared/condizioniSpillo.ts`) con la sua frase;
- * niente più elenco parallelo e niente `manuale` («niente condizioni manuali», 2026-09-05; migrazione 090). Un'avvertenza da controllare
+ * niente più elenco parallelo e niente `manuale` («niente condizioni manuali», 2026-09-05). Un'avvertenza da controllare
  * nel gioco è un `avviso`, che non blocca mai. */
 
 /** L6 (§6.1): i requisiti di un Confidente per rango, per l'editor della sua pagina («Modifica requisiti»). */
@@ -291,7 +291,7 @@ export interface InvitoDto {
   /** Con partita: l'invito è registrato. */
   registrato: boolean | null;
   nota: string;
-  /** L13 (O7-4, migrazione 313): quando arriva il messaggio dell'invito (MM-GG e fascia), se la guida lo dice; la frase la genera la pagina. */
+  /** L13 (O7-4): quando arriva il messaggio dell'invito (MM-GG e fascia), se la guida lo dice; la frase la genera la pagina. */
   messaggio: { data: string; fascia: 'giorno' | 'sera' } | null;
   fonte: string;
   /** R9-07c: un invito della guida cambiato dall'utente (il chip «Modificato»). */
@@ -334,7 +334,7 @@ export interface SceltaDialogoDto {
   testo: string;
   /** Note ♪ (1–3) secondo la guida, 0 = nessun punto; null se la guida non ne dà. */
   punti: number | null;
-  /** Solo dove la guida dà un valore diverso nel ramo amore (migrazione 309); altrimenti null. */
+  /** Solo dove la guida dà un valore diverso nel ramo amore; altrimenti null. */
   puntiAmore: number | null;
   romantica: boolean;
   avviso: string | null;
@@ -381,7 +381,7 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   regali: RegaloConfidenteDto[];
   /** Ondata 5: il Confidente riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae). */
   regalabile: boolean;
-  /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (scelta romantica nel dialogo del rango 9, migrazioni 324-325). */
+  /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (scelta romantica nel dialogo del rango 9). */
   romanzabile: boolean;
   /** Oggetti ricevuti dal Confidente, distinti dai regali che gli si possono consegnare. */
   oggettiRicompensa?: RicompensaOggettoDto[];
@@ -613,7 +613,7 @@ export interface PartitaDto {
   nuovaPartitaPlus: boolean;
   /** I set di contenuti scaricabili posseduti (`dlc_set.id`): li leggono la Fusione e le condizioni `dlc-posseduto`. */
   dlcPosseduti: number[];
-  /** C'è il salvataggio di Persona 5 (`partita.salvataggio_p5`, utente 061): lo legge la condizione `salvataggio-p5`. */
+  /** C'è il salvataggio di Persona 5 (`partita.salvataggio_p5`): lo legge la condizione `salvataggio-p5`. */
   salvataggioP5: boolean;
   allarmeAttivo: boolean;
   createdAt: string;
@@ -781,7 +781,7 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** Ondata 5 (RG-11): il Confidente riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae): solo allora c'è «Regala».
    *  Si regala un qualunque oggetto regalo del catalogo, con la reazione della guida (+1 se non è nell'elenco del Confidente). */
   regalabile: boolean;
-  /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (`confidente.romanzabile`, migrazioni 324-325): solo allora
+  /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (`confidente.romanzabile`): solo allora
    *  `relazioneRomantica` si segna (dalla scheda o con la scelta romantica alla spunta del rango 9). */
   romanzabile: boolean;
   /** L13 (O10-2): la relazione romantica iniziata in questa partita (sempre falsa per un Confidente non romanzabile). La leggono scheda,
@@ -929,7 +929,7 @@ export interface PersonaPossedutaDto {
 
 /**
  * La capienza della scorta (la «riserva di Personae» della Stanza di Velluto) nella partita. Viene da un dato solo, il blocco di gioco
- * `dati_guida.capienza-scorta`: il valore di partenza e i gradini (L8-05, migrazione 336: il rango di Igor da cui la riserva sale a N posti;
+ * `dati_guida.capienza-scorta`: il valore di partenza e i gradini (L8-05: il rango di Igor da cui la riserva sale a N posti;
  * prima si leggevano dal testo delle abilità). `abilita` è il nome dell'abilità di Igor a quel rango. Senza il valore di partenza nei dati,
  * prima del primo gradino `capienza` è `null` e l'app mostra la scorta senza tacche.
  */
@@ -1150,7 +1150,7 @@ export interface PianoSalvatoDto {
 
 export interface DomandaDto {
   id: number;
-  /** Chiave del catalogo (il giorno): serve a correggere la riga, `null` finché la migrazione non l'ha assegnata. */
+  /** Chiave del catalogo (il giorno): serve a correggere la riga, `null` se non è assegnata. */
   chiave: string | null;
   /** Data di gioco «MM-GG». */
   data: string;
@@ -1158,7 +1158,7 @@ export interface DomandaDto {
   chi: string;
   domanda: string;
   /** Risposte corrette in ordine (più passi per le domande a catena). */
-  /** `domanda` = il quesito, quando la riga ne raccoglie più d'uno (gli esami, migrazione 078). */
+  /** `domanda` = il quesito, quando la riga ne raccoglie più d'uno (gli esami). */
   risposte: Array<{ ordine: number | null; testo: string; domanda?: string }>;
   ricompensa: string;
   oggettiRicompensa?: RicompensaOggettoDto[];
@@ -1177,8 +1177,6 @@ export interface DomandaDto {
 
 /** L13 (ondata 7, O7-2): il premio di un piazzamento con i nomi, come lo mostra la pagina («Primi 10 · Fascino ♪♪♪»). */
 export interface PremioEsameDto { piazzamento: PiazzamentoEsame; nome: string; doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3 }>; trofeo: { chiave: string; nome: string } | null }
-/** I premi per piazzamento letti dalla colonna, prima dei nomi (per chi li applica). */
-export type PremiEsame = PremioPiazzamentoEsame[];
 
 export interface EsameDto {
   chiave: string;
@@ -1243,7 +1241,7 @@ export interface OggettiGuidaDto {
   consumabili: Array<IdentitaOggettoGuida & { nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
   chiaveEMateriali: Array<IdentitaOggettoGuida & { nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
   fabbricazione: { introduzione: string; sblocco: string; regole: string[]; fonte: string; ricette: Array<{ attrezzo: string; effetto: string; materiali: Array<{ nome: string; quantita: number | null }>; prodotti: number | null; sblocco: string | null; fonte: string; verificato: boolean; prodottiCatalogo?: RicompensaOggettoDto[]; materialiCatalogo?: ContenutoOggettoDto[];
-    /** L8-03 (migrazione 340): quando l'attrezzo si può fabbricare, nel vocabolario unico (JSON, «[]» = nessuna); con la frase in `condizioni`. */
+    /** L8-03: quando l'attrezzo si può fabbricare, nel vocabolario unico (JSON, «[]» = nessuna); con la frase in `condizioni`. */
     condizioniJson?: string; condizioni?: CondizioneSpilloDto[] }> };
   /** L8-03: `confidente` è il Confidente della personalizzazione (Iwai) letto dal DB, con le condizioni del suo rango 1 (`confidente_requisito`,
    *  il punto unico dei requisiti dei Confidenti) e la condizione di ogni rango della progressione, per lo stato nella partita. */
@@ -1299,7 +1297,7 @@ export interface BattagliaSfidaDto {
   oggettiRicompensa?: RicompensaOggettoDto[];
   strategia: string;
   livelloConsigliato: string | null;
-  /** L8-03 (migrazione 340): il livello consigliato più basso, come numero, da confrontare col livello della partita; null se la guida non lo dà. */
+  /** L8-03: il livello consigliato più basso, come numero, da confrontare col livello della partita; null se la guida non lo dà. */
   livelloMinimo?: number | null;
   fonte: string;
   verificato: boolean;
@@ -1311,7 +1309,7 @@ export interface BossSegretoDto {
   dove: string;
   quando: string;
   requisiti: string[];
-  /** L8-03 (migrazione 340): i requisiti che la partita sa valutare, nel vocabolario unico (JSON; «[]» = nessuno). I testi `requisiti` restano. */
+  /** L8-03: i requisiti che la partita sa valutare, nel vocabolario unico (JSON; «[]» = nessuno). I testi `requisiti` restano. */
   condizioniJson?: string;
   /** Le stesse condizioni con la loro frase, lette dal server. */
   condizioni?: CondizioneSpilloDto[];
@@ -1366,13 +1364,13 @@ export type ConteggioSfidaCovo =
   /** Il livello della Persona posseduta più alta. */
   | { tipo: 'persona-livello'; obiettivo: number };
 
-/** Una sfida del Covo dei Ladri. `conteggio` (ondata 5, migrazione 258): quello che la sfida conta, se l'app lo sa contare; `progresso`: a
+/** Una sfida del Covo dei Ladri. `conteggio` (ondata 5): quello che la sfida conta, se l'app lo sa contare; `progresso`: a
  *  che punto è la partita chiesta (solo con una partita). */
 export interface SfidaCovoDto {
   nome: string;
   requisito: string;
   medaglie: number | null;
-  /** L8-03 (migrazione 340): che cosa la sfida conta, dagli stati che la partita tiene. Senza `obiettivo` (dove la guida dice «tutti») il totale
+  /** L8-03: che cosa la sfida conta, dagli stati che la partita tiene. Senza `obiettivo` (dove la guida dice «tutti») il totale
    *  lo ricava il server dal DB a ogni lettura (`completamentoService.progressoDelConteggio`). */
   conteggio?: ConteggioSfidaCovo;
   /** `unita`: che cosa si conta, al plurale e al singolare («regali», «volte», «libri letti»…), dopo i numeri; `prima`, se c'è, va davanti
@@ -1388,7 +1386,7 @@ export interface TrofeoDto {
   descrizione: string;
   come: string;
   mancabile: boolean | null;
-  /** Quando si ottiene: la frase generata dalle `condizioni` (L13 O7-4, migrazione 313); il testo della guida solo dove non ci sono. */
+  /** Quando si ottiene: la frase generata dalle `condizioni` (L13 O7-4); il testo della guida solo dove non ci sono. */
   quando: string | null;
   /** Le condizioni del «quando», con la loro frase (vocabolario unico; non si valutano: nessuna assegnazione automatica). */
   condizioni: CondizioneSpilloDto[];
@@ -1401,7 +1399,7 @@ export interface TrofeoDto {
 export interface CompletamentoDto {
   trofei: TrofeoDto[];
   ottenuti: number;
-  /** L8-03 (migrazione 340): `condizioniJson` sono i requisiti che la partita sa valutare (vocabolario unico; «[]» = nessuno) ed `entro` il giorno
+  /** L8-03: `condizioniJson` sono i requisiti che la partita sa valutare (vocabolario unico; «[]» = nessuno) ed `entro` il giorno
    *  «MM-GG» entro cui devono valere; `requisiti` le stesse condizioni con la frase, lette dal server; `giorniAllEntro` (solo con la partita
    *  e con `entro`) i giorni di gioco che restano, negativo se il giorno è passato. I testi `condizioni` e `date` restano. */
   finali: Array<{ chiave: string; nome: string; condizioni: string[]; condizioniJson?: string; entro?: string | null; requisiti?: CondizioneSpilloDto[]; giorniAllEntro?: number | null; date: string[]; descrizione: string; fonte: string }>;
@@ -1460,7 +1458,7 @@ export interface EffettiAzioneDto {
      *  Assenti se nessuno e nelle ricevute di prima. */
     oggetti?: Array<{ nome: string; quantita: number }>;
     consumati?: Array<{ nome: string; quantita: number }> }>;
-  /** Aperture dei Dedali dichiarate in una visita ai Memento, solo nelle ricevute di prima della 305: restano com'erano ma non decidono più
+  /** Aperture dei Dedali dichiarate in una visita ai Memento, solo nelle ricevute vecchie: restano com'erano ma non decidono più
    *  nulla (le aperture si calcolano dai Palazzi conclusi, `condizioni/valutatore.ts`), e non si chiedono più. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
   /** L13 (ondata 7, O7-2): i risultati di un esame segnati dalla spunta (effetto «esame»): il piazzamento scelto, quello che c'era prima
@@ -1472,7 +1470,7 @@ export interface EffettiAzioneDto {
    *  diventata (`dopo`): togliendo la spunta torna `prima`, solo se nella partita vale ancora `dopo`. Assente se la spunta non l'ha cambiata. */
   relazione?: { confidente: string; nome: string; prima: boolean; dopo: boolean;
     /** L13 (O11-1): il giorno d'inizio della relazione di prima (MM-GG, null senza relazione o senza giorno), per rimetterlo togliendo la spunta;
-     *  manca nelle ricevute scritte prima della migrazione utente 060 (vale null). */
+     *  manca nelle ricevute vecchie (vale null). */
     primaDal?: string | null };
 }
 
@@ -1525,7 +1523,7 @@ export interface StatoAzioneDto {
 export type GenereVoce = 'azione' | 'promemoria';
 
 /**
- * Una voce della giornata (`voce_giornata`, file di gioco, dalla migrazione 092): azione della guida, cosa da fare o promemoria
+ * Una voce della giornata (`voce_giornata`, file di gioco): azione della guida, cosa da fare o promemoria
  * aggiunti dall'utente sono la stessa cosa e sono canone, per tutte le partite (richiesta dell'utente, 2026-09-30). Le voci di
  * una fascia arrivano nel loro ordine esatto.
  */
@@ -1557,7 +1555,7 @@ export interface AzionePercorsoDto {
   avvisiDisponibilita?: Array<{ tipo: 'fuori-giorno' | 'fuori-fascia'; testo: string }>;
   /** R9-06: il nome di adesso del Confidente, solo quando il testo salvato nella voce (`riferimentoTesto`) cita un nome diverso: da mostrare accanto al testo, che non si riscrive. */
   riferimentoNomeAttuale?: string;
-  /** L13 (ondata 9, O9-3, migrazione 320): quando la voce è dovuta («Si fa solo se»), solo se ne ha; senza, la voce si fa sempre. */
+  /** L13 (ondata 9, O9-3): quando la voce è dovuta («Si fa solo se»), solo se ne ha; senza, la voce si fa sempre. */
   condizioni?: RequisitoSpillo[];
   /** L13 (O9-3): nella partita la voce NON è dovuta (le sue condizioni sono false al suo giorno): non si spunta e non blocca l'avanzamento.
    *  Solo su una voce non spuntata (una voce già spuntata resta com'è); `motivo` è la condizione che manca, in parole. */
@@ -1643,7 +1641,7 @@ export interface AzionePercorsoDto {
    *  o l'ingresso del Palazzo). Null senza Palazzo, per un dungeon che non è di tipo Palazzo (i Memento: il cartellino apre la loro
    *  scheda, 2026-10-30) o se il Palazzo non ha mappe (allora porta alla sua scheda). Assente vale come null. */
   atterraggio?: { mappa: string; spillo: number | null } | null;
-  /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (migrazione 105), con `oggi` vero
+  /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata, con `oggi` vero
    *  se il giorno della voce è uno dei giorni del quiz. Assente o vuoto: nessun quiz. */
   quiz?: QuizVoceDto[];
   /** Solo nella risposta di una spunta: era l'ultima attività della sera del giorno corrente (senza decisioni aperte) e la partita è passata al giorno dopo. */
@@ -1905,16 +1903,16 @@ export interface NegozioRiassuntoDto {
   tipo: 'armi' | 'protezioni' | 'accessori' | 'oggetti' | 'regali' | 'abiti' | 'cibo' | 'online' | 'ambulante' | 'distributore' | 'materiali' | 'misto' | 'altro';
   gestore: string | null;
   confidente: { chiave: string; nome: string } | null;
-  /** Gli orari come valori (migrazione 069): sono l'unica disponibilità del negozio e del suo pin. */
+  /** Gli orari come valori: sono l'unica disponibilità del negozio e del suo pin. */
   orariStrutturati: OrariNegozio;
   /** La frase generata dagli orari strutturati: una sola per ogni valore uguale. */
   orariTesto: string;
-  /** Il luogo della città dove sta il negozio (migrazione 072); null per chi non ha una sede (online, TV, dentro un Palazzo). */
+  /** Il luogo della città dove sta il negozio; null per chi non ha una sede (online, TV, dentro un Palazzo). */
   sedeChiave: string | null;
   sedeNome: string | null;
-  /** Il programma punti dichiarato (migrazione 076), se il negozio ne ha uno. */
+  /** Il programma punti dichiarato, se il negozio ne ha uno. */
   programmaPunti: { nome: string; unita: string; calcolo: 'manuale' | 'rango-cliente' } | null;
-  /** Chiusura dell'ondata 5: lo sconto legato al rango di un Confidente (`negozio.sconto_json`, migrazione 254), con il nome del Confidente;
+  /** Chiusura dell'ondata 5: lo sconto legato al rango di un Confidente (`negozio.sconto_json`), con il nome del Confidente;
    *  null se il negozio non ne ha. */
   sconto?: { confidente: string; confidenteNome: string; rango: number; percentuale: number } | null;
   articoli: number;
@@ -1972,7 +1970,7 @@ export interface ArticoloDto {
   oggettoFonte: string | null;
   oggettoChiave: string | null;
   disponibileDal: string | null;
-  /** Non più valorizzato (L11, migrazione 187): la frase dell'offerta è nell'archivio, la condizione è in `condizioni`. */
+  /** Non più valorizzato (L11): la frase dell'offerta è nell'archivio, la condizione è in `condizioni`. */
   condizione?: string | null;
   nota: string | null;
   verificato: boolean;
@@ -2015,7 +2013,7 @@ export interface NegozioDettaglioDto extends NegozioRiassuntoDto {
   note: string | null;
   articoliElenco: ArticoloDto[];
   acquistati: number;
-  /** La guida del quiz delle attività che si svolgono nella sede del negozio (migrazione 105: il lavoro al Triple Seven), con
+  /** La guida del quiz delle attività che si svolgono nella sede del negozio (il lavoro al Triple Seven), con
    *  `oggi` vero se il giorno corrente della partita è uno dei giorni del quiz. Vuoto senza sede o senza quiz. */
   quiz: QuizVoceDto[];
 }
@@ -2062,7 +2060,7 @@ export interface CruciverbaTuttiDto {
 
 export type { DoteChiave } from './doti.js';
 
-/** L'ingresso di un quartiere: la planimetria (chiave pubblica e nome del percorso), il punto e lo zoom; dalla 109 (L2) anche l'Area
+/** L'ingresso di un quartiere: la planimetria (chiave pubblica e nome del percorso), il punto e lo zoom; con le Aree (L2) anche l'Area
  *  della planimetria (slug e nome), null se la planimetria non ne ha una. */
 export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number;
   /** L'Area della planimetria d'ingresso, con l'etichetta di versione della planimetria (il nome completo è «Area · etichetta»). */
@@ -2072,7 +2070,7 @@ export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:n
  *  (radici dei Palazzi), che le viste mostrano già come segno: l'illustrazione allora c'è solo se caricata. */
 export interface IllustrazioneDto { immagineUrl: string | null; asset: string | null }
 
-// ---- Le Aree (L2, migrazione 109): Città → Quartiere → Area → Planimetrie → Luoghi ----
+// ---- Le Aree (L2): Città → Quartiere → Area → Planimetrie → Luoghi ----
 // Un'Area è la stessa cosa nel quartiere, nella città (lo staff, da verificare) e — da L3 — nel Palazzo: i contratti sono generici
 // sul contenitore da subito, così L3 non li cambia. La «casa» è l'indirizzo dell'unica pagina che mostra una mappa: la calcola il
 // server (`casaMappa.ts`), l'interfaccia non ricostruisce la regola.
@@ -2238,7 +2236,7 @@ export interface QuartiereRiassuntoDto {
   aree: number;
   chiave: string;
   nome: string;
-  /** Non più valorizzato (L11, migrazione 188): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
+  /** Non più valorizzato (L11): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
   sblocco?: string | null;
   descrizione: string;
   luoghi: number;
@@ -2265,11 +2263,11 @@ export interface LuogoDto {
   giorniTesto: string;
   sblocco: string | null;
   confidenti: Array<{ chiave: string; nome: string }>;
-  /** Le attività della guida che si svolgono qui (`attivita.sede_chiave`, migrazione 072). */
+  /** Le attività della guida che si svolgono qui (`attivita.sede_chiave`). */
   attivita: Array<{ chiave: string; nome: string }>;
   /** I negozi che hanno qui la loro sede (`negozio.sede_chiave`). */
   negozi: Array<{ chiave: string; nome: string }>;
-  /** Riga della guida o dell'utente (migrazione 071). */
+  /** Riga della guida o dell'utente. */
   origine: 'seed' | 'utente';
   piatti: Array<{ nome: string; prezzo: number | null; effetto: string }> | null;
   note: string | null;
@@ -2338,7 +2336,7 @@ export interface QuartiereDettaglioDto {
   ingresso?:IngressoQuartiereDto|null;
   chiave: string;
   nome: string;
-  /** Non più valorizzato (L11, migrazione 188): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
+  /** Non più valorizzato (L11): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
   sblocco?: string | null;
   descrizione: string;
   fonte: string;
@@ -2349,7 +2347,7 @@ export interface QuartiereDettaglioDto {
   illustrazione: IllustrazioneDto;
   /** Le Aree del quartiere, nel loro ordine (L2). */
   aree: AreaRiassuntoDto[];
-  /** L5: i luoghi del quartiere senza Area (da collocare con «Colloca»), con l'area proposta se la migrazione ne ha dedotta una. */
+  /** L5: i luoghi del quartiere senza Area (da collocare con «Colloca»), con l'area proposta se i dati ne hanno una. */
   luoghiDaCollocare?: Array<LuogoDto & { areaProposta: { slug: string; nome: string } | null }>;
   /** L6: lo sblocco strutturato, come nel riassunto («Modifica sblocco» dalla pagina del quartiere). */
   sbloccoCondizione?: SbloccoDto;
@@ -2393,28 +2391,28 @@ export interface AttivitaDto {
   sblocco: string | null;
   /** Round richiesti per completare un videogioco; null per le altre attività. */
   sessioni: number | null;
-  /** Paga in yen a turno e massimo dichiarato (migrazione 075); solo per i lavori. */
+  /** Paga in yen a turno e massimo dichiarato; solo per i lavori. */
   pagaYen: number | null;
   pagaMassima: number | null;
-  /** Come funziona, premi, altri effetti e note sulle Doti, in un testo solo (migrazione 075). */
+  /** Come funziona, premi, altri effetti e note sulle Doti, in un testo solo. */
   dettagli: string | null;
-  /** Gli effetti dichiarati (migrazione 074) e le loro frasi. */
+  /** Gli effetti dichiarati e le loro frasi. */
   effetti: VoceEffettoDto[];
   effettiTesto: string[];
   /** Come la partita conta l'attività: per niente, per volte svolte o per sessioni. */
   tracciamento: 'nessuno' | 'svolta' | 'sessioni';
   /** R10-27/3: quante volte l'attività risulta svolta nella partita (solo se contata per volte e con una partita); assente altrimenti. */
   volteSvolte?: number;
-  /** La guida del quiz (migrazione 105: i codici a barre del Triple Seven); null se l'attività non ne ha. */
+  /** La guida del quiz (i codici a barre del Triple Seven); null se l'attività non ne ha. */
   quiz: QuizAttivita | null;
-  /** Il luogo della città dove si svolge (migrazione 072). */
+  /** Il luogo della città dove si svolge. */
   sedeChiave: string | null;
   sedeNome: string | null;
   /** Orari ereditati dalla sede, con origine dichiarata; null senza sede risolta. */
   orariSede?: OrariDelLuogo | null;
   orariSedeTesto?: string | null;
   verificato: boolean;
-  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+  /** La disponibilità scritta dalla guida, tradotta in regola: «dal 18 aprile»,
    *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
   condizioni: CondizioneSpilloDto[] | null;
   /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
@@ -2434,7 +2432,7 @@ export interface LibroDto {
   daSegnare?: DoteDaSegnareDto[];
   chiave: string;
   nome: string;
-  /** L13 (O7-4, migrazione 313): «dove», «disponibile dal», Dote e sblocco in prosa non ci sono più: li dicono `negozi`, `ricompensaDi`,
+  /** L13 (O7-4): «dove», «disponibile dal», Dote e sblocco in prosa non ci sono più: li dicono `negozi`, `ricompensaDi`,
    *  `posizioni`, `condizioni` ed `effetti`. Il prezzo viene dall'articolo. */
   prezzo: number | null;
   /** Le Richieste che danno il libro in ricompensa (`ricompensa_oggetto`). */
@@ -2448,10 +2446,10 @@ export interface LibroDto {
   apre?: Array<Omit<PostoApertoDto, 'tipo'> & { tipo: 'luogo' | 'quartiere' }>;
   sessioni: number | null;
   dettagli: string | null;
-  /** Gli effetti dichiarati (migrazione 074) e le loro frasi: la Dote che alza, che cosa apre. */
+  /** Gli effetti dichiarati e le loro frasi: la Dote che alza, che cosa apre. */
   effetti: VoceEffettoDto[];
   effettiTesto: string[];
-  /** Dove si compra: gli articoli collegati al libro (migrazione 073), con il negozio e il prezzo. */
+  /** Dove si compra: gli articoli collegati al libro, con il negozio e il prezzo. */
   negozi: Array<{ articolo: string; negozio: string; negozioNome: string; prezzo: number | null }>;
   verificato: boolean;
   /** Provenienze mappabili verificate; può essere vuoto quando il premio non ha un luogo fisico. */
@@ -2462,7 +2460,7 @@ export interface LibroDto {
   progresso: number;
   /** Completamento canonico nella partita: non deriva dal solo progresso. */
   fatto: boolean;
-  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+  /** La disponibilità scritta dalla guida, tradotta in regola: «dal 18 aprile»,
    *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
   condizioni: CondizioneSpilloDto[] | null;
   /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
@@ -2493,10 +2491,10 @@ export interface FilmDto {
   chiave: string;
   nome: string;
   dove: 'cinema' | 'dvd';
-  /** L13 (O7-4, migrazione 313): Dote, note e «rivederlo» li dicono solo gli `effetti` (la prima visione e le voci `ripetuto`). */
+  /** L13 (O7-4): Dote, note e «rivederlo» li dicono solo gli `effetti` (la prima visione e le voci `ripetuto`). */
   prezzo: number | null;
   dettagli: string | null;
-  /** Gli effetti dichiarati (migrazione 074): la prima visione e, con `ripetuto`, quelle successive. */
+  /** Gli effetti dichiarati: la prima visione e, con `ripetuto`, quelle successive. */
   effetti: VoceEffettoDto[];
   effettiTesto: string[];
   verificato: boolean;
@@ -2509,7 +2507,7 @@ export interface FilmDto {
   iniziato: boolean;
   /** Fruizione completata: una visione al cinema o tutte le sessioni richieste da un DVD. */
   fatto: boolean;
-  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+  /** La disponibilità scritta dalla guida, tradotta in regola: «dal 18 aprile»,
    *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
   condizioni: CondizioneSpilloDto[] | null;
   /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
@@ -2535,7 +2533,7 @@ export interface VideogiocoDto extends AttivitaDto {
   /** Solo nella risposta di un avanzamento: le Doti che il gioco completato dà (o toglie), da segnare nelle Doti. */
   daSegnare?: DoteDaSegnareDto[];
   tipo: 'videogioco';
-  /** Dove si compra: gli articoli collegati (migrazione 073). */
+  /** Dove si compra: gli articoli collegati. */
   negozi: Array<{ articolo: string; negozio: string; negozioNome: string; prezzo: number | null }>;
   totaleRound: number;
   progresso: number;
@@ -2614,13 +2612,13 @@ export interface BattagliaDto {
   assaltoEHoldUp: { urlFonte: string; rapina: string; assalto: string; holdUp: string };
   tecnico: { urlFonte: string; stati: Array<{ stato: string; elementi: string[] }> };
   staffetta: { urlFonte: string; cosaE: string; disponibilita: string; effetto: string; livelli: string; indicatoriVisivi: string; ranghi: Array<{ rango: number; bonus: string }>; moltiplicatori: string; effettoSpeciale: string };
-  /** L8-03 (migrazione 340): lo sblocco di uno Speciale nel vocabolario unico (`condizioniJson`, con la frase in `condizioni`); `sbloccoFrase` è
+  /** L8-03: lo sblocco di uno Speciale nel vocabolario unico (`condizioniJson`, con la frase in `condizioni`); `sbloccoFrase` è
    *  la frase generata dalle condizioni, o il testo della guida `sblocco` dove le condizioni non ci sono. */
   speciali: { urlFonte: string; meccanica: string; attivazione: string; proprietaDanno: string; elenco: Array<{ nome: string; personaggi: string[]; sblocco: string; condizioniJson?: string; condizioni?: CondizioneSpilloDto[]; sbloccoFrase?: string }> };
   negoziazione: {
     urlFonti: string[]; quandoSiPuoNegoziare: string; opzioniHoldUp: Array<{ opzione: string; effetto: string }>; comeVerificarePersonalita: string;
     personalita: Array<{ nome: string; descrizione: string; risposteEfficaci: string[]; risposteDaEvitare: string[] }>; regole: string[]; incertezze: string;
-    /** Da dove vengono le domande e come sono state rese in italiano (migrazione 083). */
+    /** Da dove vengono le domande e come sono state rese in italiano. */
     fonteDomande?: { titolo: string; autori: string[]; url: string; urlOriginale: string; nota: string };
     /** Le domande dell'Ombra con, per ogni risposta, il verdetto di ciascuna personalità: una
      *  risposta può essere buona per un carattere e cattiva per un altro. Una personalità che non
@@ -2628,11 +2626,11 @@ export interface BattagliaDto {
     domande?: NegoziazioneDomandaDto[];
   };
   ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string;
-    /** L13-04 (migrazione 369): le Ombre sciagura per Palazzo e per Dedalo, come nella tabella della guida; `null` finché la 369 non è applicata. */
+    /** L13-04: le Ombre sciagura per Palazzo e per Dedalo, come nella tabella della guida; `null` se il dato manca. */
     elenco: OmbreSciaguraLuogoDto[] | null;
-    /** L13-04 (migrazione 369): l'oggetto raro che ogni Ombra sciagura rilascia, nell'ordine della guida; assente finché la 369 non è applicata. */
+    /** L13-04: l'oggetto raro che ogni Ombra sciagura rilascia, nell'ordine della guida; assente se il dato manca. */
     ricompenseElenco?: OmbreSciaguraRicompensaDto[]; incertezze: string };
-  /** `livelloMinimo` (L8-03, migrazione 340): il livello consigliato più basso come numero, da confrontare col livello della partita. */
+  /** `livelloMinimo` (L8-03): il livello consigliato più basso come numero, da confrontare col livello della partita. */
   mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; livelloMinimo?: number | null; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };
   demoniTesoro: { categoria: string; urlFonte: string; cosaSono: string; comeCompaiono: string; primaComparsa: string; comportamento: string; resistenzeGenerali: string; tecnicheConsigliate: string[]; elenco: Array<{ nome: string; livello: number; arcano: string; dove: string }> };
   ombre: OmbraDto[];
@@ -2643,7 +2641,7 @@ export interface BattagliaDto {
 export type StatoRichiesta = 'accettata' | 'completata';
 
 export interface RichiestaDto {
-  /** Gli oggetti della ricompensa, per chiave del catalogo. L10-01 (migrazione 381): i testi di prima (`ricompense`) non ci sono più. */
+  /** Gli oggetti della ricompensa, per chiave del catalogo. L10-01: i testi di prima (`ricompense`) non ci sono più. */
   oggettiRicompensa?: RicompensaOggettoDto[];
   chiave: string;
   nome: string;
@@ -2660,12 +2658,12 @@ export interface RichiestaDto {
      * nome salvato (vuoto), che il modulo rimanda così com'è.
      */
     daOmbra?: { livello: boolean; affinita: boolean; nome: boolean; propri: { nome: string; livello: number | null; debolezze: string[]; resistenze: string[] } } };
-  /** Il Confidente collegato. L10-01 (migrazione 381): niente più rango (colonna vuota in 33/33): un rango richiesto è una condizione di sblocco. */
+  /** Il Confidente collegato. L10-01: niente più rango (colonna vuota in 33/33): un rango richiesto è una condizione di sblocco. */
   confidente: { chiave: string; nome: string } | null;
   /** Il dedalo dei Memento (`dungeon_area`) in cui si svolge, e la sua posizione nel percorso. */
   areaNome: string | null;
   areaOrdine: number | null;
-  /** L'area del dedalo in cui sta la Richiesta (099: è un elemento di quell'area) e il suo nome; null = da collocare. */
+  /** L'area del dedalo in cui sta la Richiesta (è un elemento di quell'area) e il suo nome; null = da collocare. */
   areaDedalo: string | null;
   areaDedaloNome: string | null;
   note: string;
@@ -2698,8 +2696,8 @@ export interface RichiestaDto {
 
 /** L13: lo stato di una Richiesta nella partita, calcolato da condizioni, scadenza e stato segnato (il client mostra, non valuta). */
 export interface StatoCalcolatoRichiestaDto {
-  /** L10-05: niente più «da verificare» (nasceva dai testi di sblocco e di scadenza della guida, tolti dalla 337: il server non lo produceva
-   *  più); una condizione che non si sa valutare resta «disponibile» e si dice fra i motivi. */
+  /** L10-05: niente «da verificare» (il server non lo produce: i testi di sblocco e di scadenza della guida non ci
+   *  sono); una condizione che non si sa valutare resta «disponibile» e si dice fra i motivi. */
   stato: 'bloccata' | 'disponibile' | 'accettata' | 'completata' | 'scaduta';
   /** Che cosa manca (bloccata), perché è scaduta, o (disponibile) che cosa resta da verificare nel gioco. */
   motivi: string[];
@@ -2802,7 +2800,7 @@ export interface RichiesteDto {
   dedali: Array<{ chiave: string; nome: string; ordine: number; totale: number; completate: number }>;
   completate: number;
   totale: number;
-  /** Dove si può mettere una Richiesta (modulo, 2026-10-11): tutti i dedali dei Memento, in ordine, con le loro aree (099). */
+  /** Dove si può mettere una Richiesta (modulo, 2026-10-11): tutti i dedali dei Memento, in ordine, con le loro aree. */
   collocazioni: Array<{ chiave: string; nome: string; aree: Array<{ chiave: string; nome: string }> }>;
 }
 
@@ -2842,16 +2840,16 @@ export interface PuntoInteresseDto {
   stato: StatoPunto | null;
   /** I pin delle planimetrie collegati al punto (2026-10-01): lo stato del punto è il loro. Vuoto = non collegato. */
   pin: PinDelPuntoDto[];
-  /** L'Enigma di cui la voce è un passo (095), o null. I passi stanno nella stessa area, ordinati fra loro; l'Enigma che ne ha
+  /** L'Enigma di cui la voce è un passo, o null. I passi stanno nella stessa area, ordinati fra loro; l'Enigma che ne ha
    *  è risolto quando i passi che si segnano sono tutti fatti, e non ha pin suoi. */
   contenitore: string | null;
-  /** L'area del dedalo a cui la voce appartiene (099), o null fuori dai Memento. Nelle aree dei dedali ogni voce ha uno stato
+  /** L'area del dedalo a cui la voce appartiene, o null fuori dai Memento. Nelle aree dei dedali ogni voce ha uno stato
    *  e conta per il completamento dell'area. Una Persona di un dedalo non ha un'area sola (null): le sue sono `areeDedalo`. */
   areaDedalo: string | null;
   /** Per una voce «Persona»: la Persona del compendio della sua maschera (`dettagli.maschera`), per l'immagine e la scheda
    *  (2026-10-11); null se la maschera manca o il compendio non la conosce, e per gli altri tipi. */
   persona: PersonaDellaMascheraDto | null;
-  /** Per una Persona di un dedalo (migrazione 101): le aree del dedalo in cui si incontra, in ordine di area (una Persona sta in
+  /** Per una Persona di un dedalo: le aree del dedalo in cui si incontra, in ordine di area (una Persona sta in
    *  più aree; la sua `areaDedalo` è null). Vuoto per le altre voci. */
   areeDedalo: string[];
   /** L8 (B6): per una voce Persona collegata a un'Ombra, l'Ombra; `catturabile` falso (Babau/Bugs) = l'incontro non espone il gesto di cattura. Assente per le altre voci. */
@@ -2864,7 +2862,7 @@ export interface PuntoInteresseDto {
   carattereScelto?: boolean;
   /** La chiave dell'oggetto permanente (la chiave minima delle sue voci) se la voce ne divide uno con altre voci, altrimenti null. */
   oggetto?: string | null;
-  /** Vero se nella partita la voce ha un pin fatto «da verificare» (divergenza conservata dalla migrazione utente 022). */
+  /** Vero se nella partita la voce ha un pin fatto «da verificare» (una divergenza conservata). */
   daVerificare?: boolean;
   /** §8.11: per una voce permanente o rigenerabile con pin, quanti dei suoi pin sono fatti (k/N, «In corso · 2/8»); null per una voce
    *  senza pin o senza partita. Il segno di ogni pin sta in `pin[].fatto`. */
@@ -2912,7 +2910,7 @@ export interface PinDelPuntoDto { id: number; nome: string; tipo: string; mappa:
    *  infiltrazione). Assente senza partita e per i dedali. */
   fatto?: boolean }
 
-/** Una voce della guida che si può collegare a un pin dall'editor delle mappe (098): del Palazzo del pin, da segnare, non ancora sua. */
+/** Una voce della guida che si può collegare a un pin dall'editor delle mappe: del Palazzo del pin, da segnare, non ancora sua. */
 export interface VoceCollegabileDto { chiave: string; nome: string; tipo: string; area: string; areaNome: string; /** L'Enigma di cui è un passo, o null. */ enigma: string | null }
 
 export interface AreaDungeonDto {
@@ -2942,7 +2940,7 @@ export interface AreaDungeonDto {
    *  resta quella di prima, R3-12, NR3-1). */
   areePalazzo?: Array<{ chiave: string; slug: string; nome: string; planimetriaIniziale: string | null }>;
   punti: PuntoInteresseDto[];
-  /** Solo per i dedali dei Memento: le aree del dedalo con i loro elementi e il completamento (099); null per i Palazzi. */
+  /** Solo per i dedali dei Memento: le aree del dedalo con i loro elementi e il completamento; null per i Palazzi. */
   dedalo: DedaloDto | null;
   /** L4 (§1.5): gli oggetti permanenti delle sue voci e quanti fatti; `completata` con la regola unica (senza niente da contare mai,
    *  R4-22). Null senza partita. Per i Palazzi; assente per i dedali dei Memento. */
@@ -2967,9 +2965,9 @@ export interface RichiestaDelDedaloDto {
 }
 
 /**
- * Un'area di un dedalo dei Memento (099, richiesta dell'utente del 2026-10-11): nome, dettagli e i suoi elementi — le voci della
+ * Un'area di un dedalo dei Memento (richiesta dell'utente del 2026-10-11): nome, dettagli e i suoi elementi — le voci della
  * guida (in `AreaDungeonDto.punti`, con `areaDedalo` uguale a questa chiave) e le Richieste. Completata quando tutti i suoi elementi
- * lo sono; un'area senza elementi è completata (scelta dell'utente). L10-02 (Q8 A, migrazione 382): i timbri non sono più dell'area,
+ * lo sono; un'area senza elementi è completata (scelta dell'utente). L10-02 (Q8 A): i timbri non sono più dell'area,
  * la guida li dà per dedalo (`DedaloDto.timbri`).
  */
 export interface AreaDedaloDto {
@@ -2984,13 +2982,13 @@ export interface AreaDedaloDto {
   completata: boolean | null;
 }
 
-/** Un dedalo dei Memento (099): le sue aree, le Richieste ancora da collocare in un'area, i timbri, il conteggio e il completamento. */
+/** Un dedalo dei Memento: le sue aree, le Richieste ancora da collocare in un'area, i timbri, il conteggio e il completamento. */
 export interface DedaloDto {
   aree: AreaDedaloDto[];
   /** Le Richieste del dedalo senza area (la loro area è stata eliminata): si vedono, non contano finché non si collocano. */
   daCollocare: RichiestaDelDedaloDto[];
   /**
-   * L10-02 (Q8 A, migrazione 382): i timbri del dedalo, come la guida li dà (`dungeon_area.timbri_totale`); null = la guida non dà un numero,
+   * L10-02 (Q8 A): i timbri del dedalo, come la guida li dà (`dungeon_area.timbri_totale`); null = la guida non dà un numero,
    * niente da contare. `raccolti` null senza partita, altrimenti entro il totale. Contano uno per timbro, una volta sola, nel dedalo.
    */
   timbri: { totale: number; raccolti: number | null } | null;
@@ -3013,7 +3011,7 @@ export interface DungeonRiassuntoDto {
   sovrano: string;
   arcanaSovrano: string;
   arcanaSovranoNome: string;
-  /** L13 O6-3 (migrazione 308): le date del Palazzo da una fonte sola, in MM-GG del calendario di gioco — apertura e scadenza dalla
+  /** L13 O6-3: le date del Palazzo da una fonte sola, in MM-GG del calendario di gioco — apertura e scadenza dalla
    *  finestra (`dungeon.finestra_dal`/`finestra_al`), il termine della lettera di sfida (`lettera_entro`) e il furto consigliato
    *  (`furto_consigliato_data`). Null dove la guida non le dà (Iweleth e i Memento non scadono, e non hanno furto né lettera). Prima
    *  erano tre frasi della guida; quel che dicevano in più delle date sta nelle `note`. L9-08: `letteraEntro` senza una data scritta è la
@@ -3024,7 +3022,7 @@ export interface DungeonRiassuntoDto {
    *  il Palazzo sulla mappa **solo quando c'è**. `al` manca dove il gioco non fissa una scadenza: Iweleth e i Memento, una volta
    *  aperti, restano. */
   finestra: { dal: string; al: string | null } | null;
-  /** L8-04 (migrazione 335, D5): il livello consigliato minimo e massimo di Royal; null = la fonte non lo dice. Il confronto delle fonti
+  /** L8-04 (D5): il livello consigliato minimo e massimo di Royal; null = la fonte non lo dice. Il confronto delle fonti
    *  (il testo di prima) è la nota storica del Palazzo (`DungeonDettaglioDto.noteLivello`). */
   livelloConsigliato: { min: number | null; max: number | null };
   aree: number;
@@ -3082,7 +3080,7 @@ export interface DivergenzaDto {
   voceNome: string;
   infiltrazione: string;
   infiltrazioneNome: string;
-  /** Quando la migrazione l'ha rilevata. */
+  /** Quando è stata rilevata. */
   rilevataIl: string;
 }
 
@@ -3276,8 +3274,8 @@ export interface MappaRiassuntoDto {
   /** La versione della planimetria dentro la sua stanza (l'Area): etichetta e ordine (`mappa.versione_*`, L11 · B9: sostituisce il gruppo
    *  d'immagini). Null se la mappa non ha né etichetta né ordine di versione. */
   versione: { etichetta: string | null; ordine: number } | null;
-  /** `nome` l'ha scritto una persona nell'editor, non l'estrazione: vince sui contesti
-   * (082). Solo il salvataggio del nome lo accende; l'importazione di un pacchetto lo spegne. */
+  /** `nome` l'ha scritto una persona nell'editor, non l'estrazione: vince sui contesti.
+   * Solo il salvataggio del nome lo accende; l'importazione di un pacchetto lo spegne. */
   nomeRivisto: boolean;
   nomeCompleto?: string;
   genitoreNome?: string|null;
@@ -3315,7 +3313,7 @@ export interface DettaglioSpilloDto {
   /** La mappa di destinazione (L2): l'Area che la contiene (il nome che il pin di passaggio mostra, se c'è) e la sua casa (un passaggio
    *  porta alla pagina che la mostra). */
   mappa?: { chiave: string; nome: string; tipo: TipoMappa; area: { nome: string; versioneEtichetta?: string | null } | null; casa: string };
-  punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; /** L'area del dedalo (099), o null fuori dai Memento: lì ogni voce ha uno stato. */ areaDedalo: string | null; stato: string | null;
+  punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; /** L'area del dedalo, o null fuori dai Memento: lì ogni voce ha uno stato. */ areaDedalo: string | null; stato: string | null;
     /** L4 (§3.1), per le voci dei Palazzi (assenti per i dedali): il carattere effettivo, l'infiltrazione della voce (lo stato di una
      *  rigenerabile è quello della sua infiltrazione), «da verificare» nella partita. Con L4 `stato` è quello con cui la voce risulta. */
     carattere?: CarattereVoce | null; infiltrazione?: { chiave: string; nome: string }; daVerificare?: boolean;
@@ -3435,7 +3433,7 @@ export interface SpilloDto {
   notaPin?: string | null;
   /** L5: la presenza del luogo del pin (o della sede del negozio), con la funzione unica; assente per gli altri pin. */
   presenza?: PresenzaLuogoDto;
-  /** Le voci della guida a cui il pin appartiene, ognuna col suo stato nella partita (2026-10-01; più d'una dalla 098, 2026-10-09:
+  /** Le voci della guida a cui il pin appartiene, ognuna col suo stato nella partita (2026-10-01; più d'una dal 2026-10-09:
    *  «Voci indipendenti»), in ordine di chiave: separate dal riferimento, così un passaggio porta alla sua mappa *e* fa parte di
    *  una voce. Vuoto = il pin non è di nessuna voce. */
   voci: VoceDelPinDto[];
@@ -3482,8 +3480,8 @@ export interface MappaDto extends MappaRiassuntoDto {
    * (i propri spilli): senza questo elenco un collegamento a senso unico — si entra e non si torna
    * indietro — non si vede da nessuna parte, e chi cura l'atlante non sa nemmeno chi lo cita. */
   arrivi: Array<{ spilloId: number; tipo: TipoSpillo; nome: string; mappa: string; mappaNome: string }>;
-  /** I pezzi della planimetria (102): zone dell'immagine scelte dall'utente, cancellate dall'immagine di base e posate altrove,
-   *  ognuna in una o più copie (103). */
+  /** I pezzi della planimetria: zone dell'immagine scelte dall'utente, cancellate dall'immagine di base e posate altrove,
+   *  ognuna in una o più copie. */
   pezzi: PezzoMappaDto[];
 }
 
@@ -3491,8 +3489,8 @@ export interface MappaDto extends MappaRiassuntoDto {
 export type RotazionePezzo = 0 | 90 | 180 | 270;
 
 /**
- * Un pezzo di una planimetria (102, richiesta dell'utente del 2026-10-14): il **ritaglio**, una zona rettangolare dell'immagine
- * scelta col mouse, sempre cancellata dall'immagine di base. Dal 2026-10-15 (103: «vorrei poter usare un pezzo una volta recuperato
+ * Un pezzo di una planimetria (richiesta dell'utente del 2026-10-14): il **ritaglio**, una zona rettangolare dell'immagine
+ * scelta col mouse, sempre cancellata dall'immagine di base. Dal 2026-10-15 («vorrei poter usare un pezzo una volta recuperato
  * e definito per inserirlo più volte nella mappa») si posa in una o più `copie`, ognuna con posizione, rotazione, specchio e
  * condizioni proprie. Tutto in **pixel dell'immagine**.
  */
@@ -3508,7 +3506,7 @@ export interface PezzoMappaDto {
   copie: CopiaPezzoDto[];
 }
 
-/** Una copia posata di un pezzo (103): dove sta, come, quando si vede. */
+/** Una copia posata di un pezzo: dove sta, come, quando si vede. */
 export interface CopiaPezzoDto {
   id: number;
   uid: string;
@@ -3556,21 +3554,21 @@ export interface DatiAggiornaCopiaPezzo extends DatiCopiaPezzo {
   nomePezzo?: string;
 }
 
-/** Un pezzo nel pacchetto delle mappe (103): il ritaglio con le sue copie. */
+/** Un pezzo nel pacchetto delle mappe: il ritaglio con le sue copie. */
 export interface PezzoPacchetto {
   uid?: string; nome: string; sorgente: { x: number; y: number; larghezza: number; altezza: number }; ordine: number;
   copie: Array<{ uid?: string; etichetta?: string; posizione: { x: number; y: number }; rotazione: RotazionePezzo; specchio: { orizzontale: boolean; verticale: boolean }; condizioni?: RequisitoSpillo[]; ordine: number }>;
 }
 
-/** Un pezzo come lo scriveva il pacchetto della 102 (una posa sola, accanto alla zona): l'importazione lo legge ancora come una copia. */
+/** Un pezzo nella forma vecchia del pacchetto (una posa sola, accanto alla zona): l'importazione lo legge ancora come una copia. */
 export interface PezzoPacchetto102 {
   uid?: string; nome: string; sorgente: { x: number; y: number; larghezza: number; altezza: number }; posizione: { x: number; y: number }; rotazione: RotazionePezzo; specchio: { orizzontale: boolean; verticale: boolean }; condizioni?: RequisitoSpillo[]; ordine: number;
 }
 
 /** Pacchetto di esportazione/importazione delle mappe (versione 1): il file `mappe-editor.json` che l'editor scarica e reimporta. */
 /** Un'Area nel pacchetto delle mappe (L2): il contenitore (uno solo fra quartiere, Palazzo e città), lo slug, il nome, l'ordine, la
- *  planimetria predefinita (chiave pubblica) e lo stato. Un pacchetto di prima della 109 non ha il campo `aree`: l'importazione allora
- *  assegna le Aree con la regola della migrazione. */
+ *  planimetria predefinita (chiave pubblica) e lo stato. Un pacchetto vecchio non ha il campo `aree`: l'importazione allora
+ *  assegna le Aree con la sua regola. */
 export interface AreaPacchetto { chiave: string; quartiere: string | null; dungeon: string | null; citta: string | null; slug: string; nome: string; nomeRivisto: boolean;
   ordine: number; predefinita: string | null; origine: 'seed' | 'utente'; seedJson: string | null; daVerificare: boolean;
   /** L3: l'ultima modifica, che l'import conserva (andata e ritorno identica). Un pacchetto di prima non l'ha. */
@@ -3584,7 +3582,7 @@ export interface EsportazioneMappeDto {
   ingressi?:Array<{quartiere:string;mappa:string;x:number;y:number;zoom:number;area?:string|null}>;
   versione: 1;
   esportato?: string;
-  /** Le Aree delle planimetrie esportate (L2, migrazione 109). */
+  /** Le Aree delle planimetrie esportate (L2). */
   aree?: AreaPacchetto[];
   /** L3: i legami infiltrazione ↔ area delle Aree esportate. Un pacchetto senza il campo (di prima) lega le infiltrazioni dal campo
    *  `aree` di ogni mappa all'Area della planimetria. */
@@ -3608,13 +3606,13 @@ export interface EsportazioneMappeDto {
     entita?: { tipo: string; chiave: string } | null; note: string;
     /** Tutte le aree della guida contenute nella planimetria, in ordine di guida (2026-09-29); un pacchetto di prima non ha questo campo. */
     aree?: string[];
-    /** I pezzi della planimetria (102), ognuno con le sue copie (103). Un pacchetto di prima della 102 non ha il campo: i pezzi della
-     *  mappa restano com'erano; uno della 102 porta la posa accanto alla zona, e si legge come un pezzo con una copia. */
+    /** I pezzi della planimetria, ognuno con le sue copie. Un pacchetto senza il campo lascia i pezzi della
+     *  mappa com'erano; uno nella forma vecchia (`PezzoPacchetto102`) porta la posa accanto alla zona, e si legge come un pezzo con una copia. */
     pezzi?: Array<PezzoPacchetto | PezzoPacchetto102>;
-    spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean;
+    spilli: Array<{ /** Identità stabile dello spillo: la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean;
       /** L3 (andata e ritorno identica): origine, ultima modifica, identità del seed e prove native com'erano salvate (`nativoJson`, il
        *  testo: `nativo` è la forma dei pacchetti del seed). Assenti in un pacchetto di prima. */
-      origine?: 'seed' | 'utente'; updatedAt?: string; seedIdentita?: string | null; nativoJson?: string | null; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; /** Le voci della guida del pin (098); un pacchetto di prima porta `voce` (094), o un riferimento «punto». */ voci?: string[]; /** La voce di un pacchetto della 094-097: si legge ancora, non si scrive più. */ voce?: string | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
+      origine?: 'seed' | 'utente'; updatedAt?: string; seedIdentita?: string | null; nativoJson?: string | null; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; /** Le voci della guida del pin; un pacchetto vecchio porta `voce`, o un riferimento «punto». */ voci?: string[]; /** La voce di un pacchetto vecchio: si legge ancora, non si scrive più. */ voce?: string | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */
@@ -3626,7 +3624,7 @@ export interface EsportazioneMappeDto {
 /** Stato dell'istanza locale: versioni, dimensioni su disco, conteggi. */
 export interface StatoIstanzaDto {
   versioneSchema: number;
-  /** Versione dello schema del file delle partite (partite.db, migrazioni «utente»). */
+  /** Versione del file delle partite (partite.db, `PRAGMA utente.user_version`). */
   versioneSchemaPartite: number;
   versioneApp: string;
   /** Il file dei dati di gioco (gioco.db). */
@@ -3637,9 +3635,9 @@ export interface StatoIstanzaDto {
   caratteri: { file: number; byte: number };
   partite: number;
   copieDiSicurezza: number;
-  /** Nessun dato di gioco (tabella `persona` vuota): l'istanza è nata senza pacchetto e aspetta l'importazione. */
+  /** Nessun dato di gioco (tabella `persona` vuota). */
   vuota: boolean;
-  /** Il pacchetto completo è stato importato: almeno un'immagine con contenuto (l'iniziale del primo avvio non ne ha). */
+  /** Un backup completo dei dati di gioco è stato importato: almeno un'immagine con contenuto (il pacchetto del primo avvio non ne ha). */
   completo: boolean;
 }
 
@@ -3652,7 +3650,7 @@ export interface EsitoRipristinoDto {
   database: boolean;
   /** Il file delle partite è stato sostituito. */
   partite: boolean;
-  immagini: number;
+  /** Quanti file dei caratteri ha portato lo ZIP dell'istanza (0 per un database solo). */
   caratteri: number;
   copiaDiSicurezza: string;
   stato: StatoIstanzaDto;
@@ -3660,7 +3658,7 @@ export interface EsitoRipristinoDto {
 
 // ---- Pacchetto di gioco: esportazione, anteprima, importazione (voce 10) ----
 //
-// Il pacchetto è un solo file, `gioco.db`, con dentro anche le immagini (migrazione 079): non c'è
+// Il pacchetto è un solo file, `gioco.db`, con dentro anche le immagini: non c'è
 // manifesto, la versione è `PRAGMA user_version` e i conteggi si leggono dal file stesso.
 
 /** Un riferimento delle partite che non trova più la sua riga nei dati di gioco. */
@@ -3682,16 +3680,17 @@ export interface OrfanoPartiteDto {
 export interface AnteprimaPacchettoDto {
   /** `PRAGMA user_version` del file caricato. */
   versioneSchema: number;
-  /** Versione dello schema che il codice sa leggere (ultima migrazione dei dati di gioco). */
+  /** La versione dei dati di gioco che il codice legge (`VERSIONE_GIOCO`): l'unica che si importa. */
   versioneSchemaCodice: number;
   versioneSchemaIstanza: number;
   databaseByte: number;
-  /** Falso quando il pacchetto è più nuovo del codice: non si importa. */
+  /** Falso quando il pacchetto è di una versione diversa da quella che il codice legge: non si importa. */
   importabile: boolean;
+  /** Perché non si importa (null se `importabile`). */
   motivo: string | null;
   /** Le sole tabelle con conteggi diversi fra istanza e pacchetto. */
   differenze: Array<{ tabella: string; istanza: number; pacchetto: number }>;
-  /** Tabelle dell'istanza assenti nel pacchetto (le migrazioni le ricreano vuote). */
+  /** Tabelle dell'istanza assenti nel pacchetto. */
   tabelleAssenti: string[];
   /** R11-05/3: le strutture del pacchetto che questa versione non usa più (sempre popolato dal server); non si importano e restano nella copia di sicurezza. */
   scarti?: ScartoPacchettoDto[];
@@ -3765,14 +3764,12 @@ export interface EsitoImportazionePacchettoDto {
   /** Nome della cartella della copia di sicurezza, dove sta anche `riepilogo-scarti.json`. */
   riepilogoSalvatoIn?: string;
   copiaDiSicurezza: string;
+  /** La versione del file importato e quella dell'istanza dopo l'importazione: coincidono (si importa solo la versione che il codice legge). */
   versioneSchemaPacchetto: number;
   versioneSchema: number;
-  migrazioniApplicate: number;
   /** Immagini con contenuto nei dati di gioco dopo l'importazione. */
   immagini: number;
   orfani: OrfanoPartiteDto[];
-  /** L6: righe del backup con condizioni legacy `manuale` recuperate come avvisi; nessun contenuto delle note. */
-  condizioniConvertite?: string[];
   stato: StatoIstanzaDto;
 }
 
@@ -3781,14 +3778,12 @@ export interface EsitoImportazionePacchettoDto {
 /** Tipi di riga del catalogo che l'utente può aggiungere o correggere. */
 /** I tipi di riga del catalogo che si possono aggiungere, correggere o nascondere dall'interfaccia.
  *
- * Erano due — negozio e articolo — perche' erano le uniche tabelle con le colonne `origine`,
- * `nascosto` e `seed_json`. Dalla migrazione 051 le hanno anche libri, film e attivita', e le
- * pagine nuove possono finalmente offrire l'aggiunta invece di essere di sola lettura.
+ * Sono le tabelle con le colonne `origine`, `nascosto` e `seed_json`: negozi, articoli, libri, film
+ * e attivita', le cui pagine offrono l'aggiunta invece di essere di sola lettura.
  *
- * Dalla 055 ci sono anche le **domande in classe** e il **cruciverba**: sono le due cose che si
+ * Ci sono anche le **domande in classe** e il **cruciverba**: sono le due cose che si
  * consultano mentre il gioco aspetta una risposta, e quelle in cui un errore si scopre nel modo
- * peggiore — hai risposto come diceva l'app e il gioco ti ha dato torto. Fino a ieri quell'errore
- * non si poteva correggere. */
+ * peggiore — hai risposto come diceva l'app e il gioco ti ha dato torto. */
 export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita', 'luogo', 'domanda', 'cruciverba'] as const;
 
 /** Un luogo della città come voce da scegliere (sede di un negozio o di un'attività). */
@@ -3813,7 +3808,7 @@ export interface ElenchiRegoleDto {
   attivita: Array<{ chiave: string; nome: string }>;
   /** Con il programma punti: «punti negozio» va solo ai programmi manuali, «grado cliente» solo a chi ha il rango. */
   negozi: Array<{ chiave: string; nome: string; programma: 'manuale' | 'rango-cliente' | null }>;
-  /** `calcolato`: l'evento si legge dalla squadra della partita o, per un'apertura di un Dedalo dei Memento, dai Palazzi conclusi (305), e non si segna a mano. */
+  /** `calcolato`: l'evento si legge dalla squadra della partita o, per un'apertura di un Dedalo dei Memento, dai Palazzi conclusi, e non si segna a mano. */
   eventi: Array<{ chiave: string; nome: string; calcolato: boolean }>;
   contatori: Array<{ chiave: string; nome: string }>;
   /** L6: i luoghi (condizione `luogo`), col quartiere come gruppo. */
@@ -3886,7 +3881,7 @@ export interface ProgressiPartitaDto {
   contatori: Array<{ chiave: string; nome: string; valore: number; daVoci?: VoceDiProvenienzaDto[] }>;
 }
 
-/** I timbri raccolti in un dedalo dei Memento (L10-02, migrazione 382: `dedalo` è la chiave del dedalo, `dungeon_area.chiave`), per partita. */
+/** I timbri raccolti in un dedalo dei Memento (L10-02: `dedalo` è la chiave del dedalo, `dungeon_area.chiave`), per partita. */
 export interface TimbriDedaloDto { dedalo: string; raccolti: number; totale: number; completato: boolean }
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
@@ -3949,7 +3944,7 @@ export interface RiepilogoCatalogoDto {
   perTipo: Array<{ tipo: TipoCatalogo; creati: number; modificati: number; nascosti: number; totale: number }>;
 }
 
-// ---- Il cestino (migrazioni 104 e utente 021, 2026-10-16): ciò che si elimina dalla guida e dalle mappe si può rimettere ----
+// ---- Il cestino (2026-10-16): ciò che si elimina dalla guida e dalle mappe si può rimettere ----
 
 /** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo, un'Area
  *  con le sue planimetrie (`area-fisica`, L2: il quartiere o la città che la contiene). */
@@ -4061,10 +4056,9 @@ export interface OggettoDettaglioDto extends CatalogoOggettoDto {
   } | null;
 }
 
-/** Ondata 5: una consegna di un regalo nella partita (una riga di `regalo_partita`). `id` è null su un file delle partite di prima della 052;
- *  `catalogo` è null per un regalo segnato per nome senza oggetto del catalogo. */
+/** Ondata 5: una consegna di un regalo nella partita (una riga di `regalo_partita`). `catalogo` è null per un regalo segnato per nome senza oggetto del catalogo. */
 export interface ConsegnaRegaloDto {
-  id: number | null;
+  id: number;
   catalogo: string | null;
   /** Il nome storico della consegna (resta quello anche se l'oggetto si rinomina). */
   nome: string;

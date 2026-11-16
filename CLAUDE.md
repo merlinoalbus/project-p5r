@@ -25,14 +25,16 @@ Aggiornarli nello stesso cambiamento che li rende falsi, in forma attuale: nient
 Dove documento e codice dissentono, vale il codice.
 
 ## Convenzioni tecniche
-- **Fonte dei dati**: il DB dell'istanza. Le correzioni ai dati di gioco si applicano con migrazioni dirette e conservative.
+- **Fonte dei dati**: il DB dell'istanza. Le correzioni ai dati di gioco si applicano con l'app o con un intervento diretto e verificato sul database, e il pacchetto si rifà da lì (`npm run pacchetto`).
   «Importa» sostituisce esplicitamente `gioco.db` con un backup scelto dalla cartella d'appoggio del server, dopo anteprima e
   conferma: non è un aggiornamento automatico né un'unione, e non tocca `partite.db`. I nomi tecnici `PacchettoGioco` e
   `/pacchetto` restano per compatibilità.
-- **Boot del backend** (`server/index.ts`): `assicuraPacchettoIniziale` (al primo avvio copia `pacchetto/gioco.db`, senza
-  immagini) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `runBootBackup` → `runMigrations` (due
-  sequenze append-only: `server/db/migrations/` per il gioco, `server/db/migrazioniUtente/` per le partite, registrate nei
-  rispettivi `index.ts`) → `regoleAllAvvio` → `listen`. Le migrazioni sono append-only: non si modificano quelle registrate.
+- **Boot del backend** (`server/index.ts`): `assicuraPacchettoIniziale` (se `gioco.db` manca, lo copia da `pacchetto/gioco.db`,
+  senza immagini) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `creaPartiteDalModelloSeMancano` (un
+  `partite.db` senza tabelle nasce da `pacchetto/partite-vuoto.db`) → `verificaVersioni` (i due file devono essere alle versioni
+  `VERSIONE_GIOCO` e `VERSIONE_PARTITE` di `server/db/versioneSchema.ts`, altrimenti l'avvio si ferma) → censimento delle partite
+  (avviso nel log) → `regoleAllAvvio` → effetti di stato mai applicati (proposte nell'elenco da approvare) → `listen` → copia di `partite.db` in `data/backups` (subito e ogni 6 ore). Nessuna
+  conversione automatica dei dati: un cambio di struttura si applica a mano (vedi `docs/DECISIONI.md`).
 - Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/`.
 - Risposte API: successo `{ data }`, errore `{ error: { code, message, details? }, requestId }`; 404 JSON su `/api/*`.
 - Frontend: pagine in `src/pages/`, componenti in `src/components/<area>/`, stato in `src/stores/` (zustand), chiamate in
@@ -47,7 +49,7 @@ Dove documento e codice dissentono, vale il codice.
 npm install && cp .env.example .env
 bash scripts/start-all.sh      # BE 3101 + FE 5273 (log in BE.log / FE.log)
 bash scripts/restart-be.sh     # solo se il BE si è fermato: gira in `tsx watch` e si riavvia a ogni salvataggio in server/
-                               # una migrazione nuova si applica subito ai dati di data/ (copia di avvio in data/backups)
+                               # un cambio di struttura dei dati non si applica da solo: vedi docs/DECISIONI.md
 npm run typecheck && npm run lint && npm run build
 ```
 
@@ -88,8 +90,8 @@ npm run typecheck && npm run lint && npm run build
   spunta del Diario, con annullo.
 - L'app è per Persona 5 Royal: in caso di discrepanza prevale il dato Royal documentato; il dato superato resta come nota storica
   separata, senza medie né fusioni di versioni.
-- Bonificare vuol dire consolidare i dati con migrazioni verificate; nessuna sezione di riconciliazione, proposta o conferma senza
-  un sì esplicito dell'utente. Le migrazioni non distruggono il lavoro validato dall'utente (Diario validato, Palazzi completati).
+- Bonificare vuol dire consolidare i dati con correzioni dirette e verificate; nessuna sezione di riconciliazione, proposta o conferma senza
+  un sì esplicito dell'utente. Una correzione dei dati non distrugge il lavoro validato dall'utente (Diario validato, Palazzi completati).
 - Due voci del Diario sono la stessa solo con stesso testo, stessi pin e stessa infiltrazione; le fusioni solo su elenco approvato.
 - Prove sui dati reali: su una partita di prova creata apposta o su una copia, con il confronto prima di ogni ripristino; mai
   ripristinare alla cieca. Le verifiche si scrivono con conteggi e id, non a parole. I dati di prova si tolgono dopo.

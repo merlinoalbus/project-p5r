@@ -73,7 +73,7 @@ function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () =>
 
 /** I boss segreti, una carta ciascuno con il ritratto (le Gemelle Custodi ne hanno due, Caroline e Justine), dove, quando, requisiti, mosse, debolezze, resistenze, strategia, ricompense e statistiche; in fondo il rimando al Mietitore e ai Demoni del Tesoro. */
 function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
-  // L8-03 (migrazione 340): i requisiti che la partita sa valutare, accanto ai testi dei requisiti, in una richiesta sola
+  // L8-03: i requisiti che la partita sa valutare, accanto ai testi dei requisiti, in una richiesta sola
   const gruppi = useMemo(() => d.bossSegreti.map((b) => ({ chiave: b.chiave, condizioni: b.condizioni ?? [] })), [d.bossSegreti]);
   const esiti = useEsitiNellaPartita(gruppi);
   return (

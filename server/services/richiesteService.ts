@@ -19,7 +19,7 @@ import { statoDisponibilitaPartita, type StatoDisponibilita } from './disponibil
 import { esitoAperturaDelDedalo, valutaInsieme } from './condizioni/valutatore.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { slug } from '../../shared/slug.js';
-import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { dettaglioNegozio } from './negoziService.js';
 import { profiliOmbre } from './ombreService.js';
 import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
@@ -27,16 +27,16 @@ import { riallineaYenRichiesta, statoYenRichiesta, yenPropostiInSospeso } from '
 import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, eChiaveElemento, eCodiceAffinita } from '../../shared/elementi.js';
 import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
-// L8-09 (migrazione 337): `disponibile_dal` e `scadenza` (testi della guida mai convertiti, vuoti in tutte le righe) e `area` (il nome del
-// dedalo, copia di `area_chiave`) non ci sono più: lo sblocco e la scadenza sono le condizioni e le date strutturate, il dedalo è `area_nome`.
-// L10-01 (migrazione 381): nemmeno `ricompense_json` (vuota in 33/33: le ricompense sono gli oggetti, gli yen e i PE) e `confidente_rango`
-// (vuota in 33/33: un rango che serve è una condizione di sblocco).
+// L8-09: `disponibile_dal` e `scadenza` (testi della guida) e `area` (il nome del
+// dedalo, copia di `area_chiave`) non ci sono: lo sblocco e la scadenza sono le condizioni e le date strutturate, il dedalo è `area_nome`.
+// L10-01: nemmeno `ricompense_json` (le ricompense sono gli oggetti, gli yen e i PE) e `confidente_rango`
+// (un rango che serve è una condizione di sblocco).
 interface RigaRichiesta {
   chiave: string; ordine: number; nome: string; committente: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null;
   piano: string; bersaglio_json: string; confidente_chiave: string | null; note: string;
   fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null;
   condizioni_json: string | null; scadenza_data: string | null; proroga_data: string | null; proroga_condizioni_json: string | null; ombra_chiave: string | null; ombra_nome: string | null; yen: number | null; esperienza: number | null;
-  /** L13 (ondata 7, migrazione 310): le condizioni proprie per completarla e l'area in cui il bersaglio si sposta durante la proroga (col suo Dedalo). */
+  /** L13 (ondata 7): le condizioni proprie per completarla e l'area in cui il bersaglio si sposta durante la proroga (col suo Dedalo). */
   completamento_condizioni_json: string | null; proroga_area_dedalo_chiave: string | null; proroga_area_nome: string | null; proroga_dedalo_chiave: string | null; proroga_dedalo_nome: string | null }
 
 const SQL = `SELECT r.*, c.nome AS confidente_nome, a.nome AS area_nome, a.ordine AS area_ordine, ad.nome AS area_dedalo_nome, o.nome AS ombra_nome,
@@ -94,7 +94,7 @@ function prorogaValida(r: RigaRichiesta, st: StatoDisponibilita, nomi: ReturnTyp
 /**
  * L13 (ondata 7, O7-1): dove sta il bersaglio oggi e se la Richiesta si può COMPLETARE. Il bersaglio sta nel Dedalo della Richiesta; passata la
  * scadenza, se la proroga vale e dice un'area (`proroga_area_dedalo_chiave`), si è spostato lì (la guida: «lo ritroverete nel Dedalo di Da'at
- * durante il terzo semestre»). Si completa solo col Dedalo di oggi aperto nella partita (la sua condizione d'apertura, migrazione 305, con lo
+ * durante il terzo semestre»). Si completa solo col Dedalo di oggi aperto nella partita (la sua condizione d'apertura, con lo
  * stesso valutatore) e senza condizioni proprie di completamento false (`completamento_condizioni_json`). Un Dedalo senza condizione d'apertura
  * e una condizione grigia non bloccano: il dato che manca non impedisce di registrare quel che è successo nel gioco. Accettare non lo chiede.
  */
@@ -217,7 +217,7 @@ export function richieste(partitaId?: number): Congelato<RichiesteDto> {
     if (r.stato === 'completata') d.completate += 1;
   }
   const fonteJose = datiGuidaCorretti<JoseDto>('jose');
-  const jose = fonteJose && catalogoOggettiDisponibile() ? { ...fonteJose, scambi: [],
+  const jose = fonteJose ? { ...fonteJose, scambi: [],
     listino: prepared("SELECT 1 FROM negozio WHERE chiave = 'jose' AND nascosto = 0").get() ? dettaglioNegozio('jose', partitaId) : null } : fonteJose;
   return { richieste: lista, jose, dedali, completate: lista.filter((r) => r.stato === 'completata').length, totale: lista.length, collocazioni: collocazioni() };
 }
@@ -256,7 +256,7 @@ export function motiviCompletamentoRichieste(partitaId: number, chiavi: readonly
   return out;
 }
 
-/** Tutti i dedali dei Memento, nell'ordine di percorrenza, con le loro aree (099): dove il modulo può mettere una Richiesta. */
+/** Tutti i dedali dei Memento, nell'ordine di percorrenza, con le loro aree: dove il modulo può mettere una Richiesta. */
 function collocazioni(): RichiesteDto['collocazioni'] {
   const dedali = (prepared("SELECT a.chiave, a.nome FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE d.tipo = 'mementos' ORDER BY a.ordine").all() as Array<{ chiave: string; nome: string }>)
     .map((d) => ({ ...d, aree: [] as Array<{ chiave: string; nome: string }> }));
@@ -295,7 +295,7 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
     else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = CASE WHEN richiesta_partita.stato = excluded.stato THEN richiesta_partita.updated_at ELSE excluded.updated_at END')
       .run(partitaId, chiave, stato, adesso);
     if (stato === 'completata' && prima !== 'completata') {
-      // il posto: il Dedalo e la sua area (310: il `piano` in testo resta solo dove non è il nome dell'area)
+      // il posto: il Dedalo e la sua area (il `piano` in testo resta solo dove non è il nome dell'area)
       const dove = r.area_nome ?? '';
       const piano = r.area_dedalo_nome || r.piano;
       registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${dove}${piano ? ` (${piano})` : ''} · bersaglio ${nomeDelBersaglio(r)}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
@@ -541,10 +541,9 @@ const TABELLE_CON_CONDIZIONI: ReadonlyArray<{ tabella: string; cosa: string; col
   { tabella: 'richiesta', cosa: 'Richiesta', colonne: ['condizioni_json', 'proroga_condizioni_json', 'completamento_condizioni_json'] },
 ];
 
-// Le azioni della giornata sono le righe di `voce_giornata` (migrazione 092): `giorno_percorso.azioni_json` era rimasta come copia
-// storica della guida d'origine e nessuno la legge più, quindi non si contava (rilievo del validatore, 2026-10-11: contarla diceva
-// «2 azioni» per una sola); la tabella è stata tolta (L11, migrazione 189) e la copia storica è in
-// `dati_guida.archivio-giorno-percorso-azioni-l11`.
+// Le azioni della giornata sono le righe di `voce_giornata`, l'unica fonte del conteggio (rilievo del validatore, 2026-10-11:
+// una seconda copia faceva dire «2 azioni» per una sola); la copia storica della guida d'origine sta in
+// `dati_guida.archivio-giorno-percorso-azioni-l11` (L11).
 
 /** Chi cita la Richiesta, per l'avviso prima di eliminarla: partite con uno stato, pin, condizioni, requisiti, azioni della giornata. */
 export function citazioniRichiesta(chiave: string): CitazioniRichiestaDto {

@@ -15,8 +15,8 @@ import { logger as rootLogger, withRequestId } from '../utils/logger.js';
 import type { AvanzamentoGiornataDto } from '../../shared/types.js';
 
 /**
- * Il proprietario delle partite quando l'identità non è verificata (L12, passo 3): tutte le partite esistenti prima della migrazione
- * utente 045 hanno questo valore, e in preparazione (senza Cloudflare Access) ogni richiesta lo porta. Stesso valore del DEFAULT
+ * Il proprietario delle partite quando l'identità non è verificata (L12, passo 3): le partite senza un utente
+ * riconosciuto hanno questo valore, e in preparazione (senza Cloudflare Access) ogni richiesta lo porta. Stesso valore del DEFAULT
  * della colonna `partita.proprietario`.
  */
 export const PROPRIETARIO_UNICO = 'proprietario-unico';
@@ -41,8 +41,8 @@ export interface RequestContext {
 const storage = new AsyncLocalStorage<RequestContext>();
 
 /**
- * Il proprietario della richiesta corrente. Fuori da una richiesta (avvio, migrazioni, test dei servizi) è `PROPRIETARIO_UNICO`:
- * i servizi delle partite funzionano identici a prima.
+ * Il proprietario della richiesta corrente. Fuori da una richiesta (avvio, test dei servizi) è `PROPRIETARIO_UNICO`:
+ * i servizi delle partite funzionano allo stesso modo.
  */
 export function getProprietario(): string {
   return storage.getStore()?.proprietario ?? PROPRIETARIO_UNICO;

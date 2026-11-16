@@ -1,6 +1,6 @@
 // ============================================================
-// I pezzi delle planimetrie (102): zone dell'immagine scelte dall'utente, posate altrove con condizioni (2026-10-14), in una o più
-// copie (103, 2026-10-15)
+// I pezzi delle planimetrie: zone dell'immagine scelte dall'utente, posate altrove con condizioni (2026-10-14), in una o più
+// copie (2026-10-15)
 // ============================================================
 //
 // Richiesta dell'utente: «in alcune mappe ci sono dei pezzi che sono previsti originariamente per posizionarli sopra il resto come
@@ -37,7 +37,7 @@ function intestazionePng(larghezza: number, altezza: number): Buffer {
 /** Una copia del pacchetto, ferma (senza rotazione né specchio). */
 const copiaPacchetto = (x: number, y: number, extra: Partial<PezzoPacchetto['copie'][number]> = {}): PezzoPacchetto['copie'][number] =>
   ({ posizione: { x, y }, rotazione: 0, specchio: { orizzontale: false, verticale: false }, ordine: 0, ...extra });
-/** I pezzi del pacchetto di una mappa nella forma della 103 (l'esportazione scrive solo quella). */
+/** I pezzi del pacchetto di una mappa nella forma di oggi (l'esportazione scrive solo quella). */
 const della103 = (m: EsportazioneMappeDto['mappe'][number]): PezzoPacchetto[] => (m.pezzi ?? []) as PezzoPacchetto[];
 
 describe('pezzi delle planimetrie', () => {
@@ -107,7 +107,7 @@ describe('pezzi delle planimetrie', () => {
     expect(await codice(aggiungiCopia(99999, {}))).toEqual([404, 'pezzo-non-trovato']);
     expect(await codice(correggiCopia(99999, { etichetta: 'x' }))).toEqual([404, 'copia-non-trovata']);
     expect(await codice(request(app).delete('/api/mappe/pezzi/copie/99999'))).toEqual([404, 'copia-non-trovata']);
-    // il contratto della 102 (la posa mandata al ritaglio, o il ritaglio mandato alla copia) è un 400, non un 200 che perde i campi
+    // il contratto vecchio (la posa mandata al ritaglio, o il ritaglio mandato alla copia) è un 400, non un 200 che perde i campi
     expect(await codice(request(app).put(`/api/mappe/pezzi/${muro.id}`).send({ posizione: { x: 1, y: 1 } }))).toEqual([400, 'validation-error']);
     expect((await crea({ sorgente: { x: 0, y: 0, larghezza: 4, altezza: 4 }, posizione: { x: 1, y: 1 } })).status).toBe(400);
     expect((await correggiCopia(c3.id, { sorgente: { x: 0, y: 0, larghezza: 4, altezza: 4 } })).status).toBe(400);
@@ -224,7 +224,7 @@ describe('pezzi delle planimetrie', () => {
     expect(pezzi[1].copie[0]).toMatchObject({ etichetta: 'In alto' });
     expect(pezzi[0].copie[0]).not.toHaveProperty('etichetta');
     expect(pezzi[3].copie.map((c) => c.condizioni?.length ?? 0)).toEqual([0, 1, 0]);
-    // la vecchia forma della 102 non si scrive più
+    // la forma vecchia non si scrive
     expect(pezzi.every((p) => !('posizione' in p))).toBe(true);
     // ogni mappa dice i suoi pezzi, anche nessuno
     expect(esportate.every((m) => Array.isArray(m.pezzi))).toBe(true);
@@ -241,7 +241,7 @@ describe('pezzi delle planimetrie', () => {
     const copie = prepared('SELECT uid, x, condizioni_json FROM copia_pezzo WHERE pezzo_id = ? ORDER BY ordine, id').all(dopo[0].id) as Array<{ uid: string; x: number; condizioni_json: string | null }>;
     expect(copie.map((c) => [c.uid, c.x])).toEqual([[pezzi[0].copie[0].uid, 500], [pezzi[0].copie[2].uid, 1500]]);
     expect(copie[0].condizioni_json).toBeNull();
-    // un pacchetto di prima della 102, senza il campo: i pezzi restano
+    // un pacchetto senza il campo: i pezzi restano
     const { pezzi: _tolti, ...senzaPezzi } = pacchettoMappa;
     importaMappe({ versione: 1, mappe: [senzaPezzi], immagini: {} }, { sovrascrivi: true });
     expect([contaPezzi(), contaCopie()]).toEqual([2, 3]);
@@ -257,7 +257,7 @@ describe('pezzi delle planimetrie', () => {
     expect([contaPezzi(), contaCopie()]).toEqual([2, 3]);
   });
 
-  it('un pacchetto della 102 (la posa accanto alla zona) si importa ancora: ogni pezzo diventa un pezzo con una copia', () => {
+  it('un pacchetto nella forma vecchia (la posa accanto alla zona) si importa ancora: ogni pezzo diventa un pezzo con una copia', () => {
     const pacchettoMappa = esportaMappe().mappe.find((m) => della103(m).some((p) => p.nome === 'Muro importato'))!;
     const vecchio: PezzoPacchetto102 = { uid: 'c'.repeat(32), nome: 'Dalla 102', sorgente: { x: 20, y: 20, larghezza: 30, altezza: 10 }, posizione: { x: 600, y: 400 }, rotazione: 90, specchio: { orizzontale: false, verticale: true }, condizioni: [{ tipo: 'fascia', fascia: 'sera' }], ordine: 0 };
     const esito = importaMappe({ versione: 1, mappe: [{ ...pacchettoMappa, pezzi: [vecchio] }], immagini: {} }, { sovrascrivi: true });

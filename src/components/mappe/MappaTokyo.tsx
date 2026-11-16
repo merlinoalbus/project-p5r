@@ -59,8 +59,8 @@ interface Props {
   dungeon?: DungeonRiassuntoDto[];
   /** Data della partita in MM-GG. Senza, si mostra il mondo intero. */
   dataGioco?: string | null;
-  /** Il Covo dei Ladri nella partita, dall'esito della sua Area (`useCovoNellaPartita`; la data — dal 5 maggio — sta nei dati, migrazione
-   *  303): `undefined` finché non è arrivato (la fermata non si disegna), `null` se l'Area non c'è (nessuna data: la fermata c'è). */
+  /** Il Covo dei Ladri nella partita, dall'esito della sua Area (`useCovoNellaPartita`; la data — dal 5 maggio — sta nei
+   *  dati): `undefined` finché non è arrivato (la fermata non si disegna), `null` se l'Area non c'è (nessuna data: la fermata c'è). */
   covo?: CovoNellaPartita | null;
   /** La chiave accesa: si illumina d'oro e passa davanti alle vicine. La stessa che accende la
    *  scheda corrispondente, perché mappa e schede sono **una** selezione vista in due modi. */
@@ -467,7 +467,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
     }
     // Il Covo dei Ladri: nel gioco si apre dal menu, dal 5 maggio, e non si raggiunge in metro (registro dell'Esperto della guida, G-004;
     // L2), quindi la fermata porta alla pagina delle sfide. C'è **quando c'è la sua Area** nella partita (richiesta dell'utente del
-    // 2026-10-29: «far sì che compaia in mappa solo da quella data in poi»): la data sta una volta nei dati, sull'Area (migrazione 303), e
+    // 2026-10-29: «far sì che compaia in mappa solo da quella data in poi»): la data sta una volta nei dati, sull'Area, e
     // qui arriva solo l'esito, come per quartieri e Palazzi; prima della data va fra le mete «non ancora nel mondo», col suo perché.
     // Finché l'esito non è arrivato non si disegna. Il segno è la voce 4 di `docs/grafica/fabbisogno.md`: senza il file resta la targa.
     if (covo !== undefined) {

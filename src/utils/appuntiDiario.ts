@@ -62,7 +62,7 @@ function gruppi(a: AppuntiDiario): Array<{ giorno: string; fascia: 'giorno' | 's
 /** Le frasi di «Spuntando succede» di ogni voce (dal server, `produceTesto` della voce), per il testo leggibile; facoltative. */
 export type FrasiDelleVoci = ReadonlyMap<string, readonly string[]>;
 /** L13 (ondata 7, O7-3): il nome del collegamento di ogni voce come la voce lo mostra (`riferimentoTesto` del Diario: il nome scritto o, se
- *  manca, quello dell'elemento). Il blocco degli appunti porta il solo nome scritto, che la migrazione 312 svuota dove ripeteva l'elemento. */
+ *  manca, quello dell'elemento). Il blocco degli appunti porta il solo nome scritto, vuoto dove ripeterebbe l'elemento. */
 export type NomiDelleVoci = ReadonlyMap<string, string | null>;
 
 /** Il nome del collegamento della voce nel testo leggibile: quello scritto, altrimenti quello che la voce mostra. */

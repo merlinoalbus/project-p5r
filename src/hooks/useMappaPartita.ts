@@ -115,7 +115,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
       // gli elementi della guida senza mappa portano la voce anche nel dettaglio del riferimento: si aggiornano insieme
       const dettaglio = s.dettaglio?.tipo === 'punto' && s.dettaglio.punto?.chiave === punto.chiave ? { ...s.dettaglio, punto: voce } : s.dettaglio;
       aggiorna({ ...s, raccolto: voci.every((v) => v.stato !== null), voci, dettaglio });
-      // con più voci si dice quale (098)
+      // con più voci si dice quale
       const chi = s.voci.length > 1 ? `«${s.nome}» — «${punto.nome}»` : `«${s.nome}»`;
       notifica('success', stato === null ? `${chi} riaperto.` : `${chi} segnato come ${stato}.`);
       opz.onCambiato?.();

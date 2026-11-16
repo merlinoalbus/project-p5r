@@ -3,8 +3,6 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabella } from '../db/colonne.js';
-import { haColonnaMain, haColonnaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { getProprietario, getProprietarioEmail, PROPRIETARIO_UNICO } from '../middleware/requestContext.js';
 import { partitaNonTrovata } from './verificaPartita.js';
@@ -38,12 +36,9 @@ import type {
 interface RigaPartita {
   id: number; nome: string; note: string; attiva: number; livello_protagonista: number; data_gioco: string | null; fascia_gioco: FasciaGioco; difficolta: Difficolta;
   nuova_partita_plus: number; dlc_posseduti_json: string; allarme_attivo: number; created_at: string; updated_at: string;
-  /** Dalla migrazione utente 061: il salvataggio di Persona 5 (0/1); assente su uno schema di prima (vale «no»). */
+  /** Il salvataggio di Persona 5 (0/1). */
   salvataggio_p5?: number;
 }
-
-/** La colonna del salvataggio di Persona 5 c'è (migrazione utente 061)? Su uno schema di prima il dato non si scrive e vale «no». */
-const conSalvataggioP5 = (): boolean => haColonnaUtente(getDb(), 'partita', 'salvataggio_p5');
 
 /** Una riga della tabella `partita` per l'API: flag booleani, DLC posseduti dal JSON, fascia («sera» o «giorno») e meteo del momento. */
 function partitaDto(r: RigaPartita): PartitaDto {
@@ -124,14 +119,13 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     // di un altro utente, nell'istanza di rilascio) riceverebbe lo stesso id, e il ripristino dal cestino andrebbe in conflitto
     // («identità già presente») per sempre. Il cestino delle partite (`utente.cestino_partite.partita_id`, e il vecchio `main.cestino`
     // di tipo `partita`, la cui chiave è l'id) ricorda l'id della partita eliminata anche se la riga non c'è più: si sceglie un id
-    // maggiore sia del massimo in `partita` sia del massimo citato nel cestino. Vale in entrambe le modalità. L11-04 (utente 064): la
+    // maggiore sia del massimo in `partita` sia del massimo citato nel cestino. Vale in entrambe le modalità. L11-04: la
     // tabella ha AUTOINCREMENT e il suo contatore (`sqlite_sequence`) ricorda il più alto id mai dato, anche di una partita il cui posto
     // nel cestino è stato svuotato o rimasta solo nell'archivio degli acquisti: entra nel massimo, così un id non torna mai.
     const maxPartita = (prepared('SELECT COALESCE(MAX(id), 0) AS m FROM partita').get() as { m: number }).m;
     const maxCestino = (prepared("SELECT COALESCE(MAX(partita_id), 0) AS m FROM utente.cestino_partite WHERE partita_id IS NOT NULL").get() as { m: number }).m;
     const maxCestinoGioco = (prepared("SELECT COALESCE(MAX(CAST(chiave AS INTEGER)), 0) AS m FROM main.cestino WHERE tipo = 'partita'").get() as { m: number }).m;
-    const conContatore = haTabella(getDb(), 'sqlite_sequence', 'utente');
-    const contatore = conContatore ? (prepared("SELECT COALESCE(MAX(seq), 0) AS m FROM utente.sqlite_sequence WHERE name = 'partita'").get() as { m: number }).m : 0;
+    const contatore = (prepared("SELECT COALESCE(MAX(seq), 0) AS m FROM utente.sqlite_sequence WHERE name = 'partita'").get() as { m: number }).m;
     const idNuovo = Math.max(maxPartita, maxCestino, maxCestinoGioco, contatore) + 1;
     const info = prepared(`INSERT INTO partita (id, nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at, proprietario, proprietario_email)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
@@ -139,8 +133,8 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
       dati.nuovaPartitaPlus ? 1 : 0, JSON.stringify(dati.dlcPosseduti ?? []), dati.allarmeAttivo ? 1 : 0, adesso, adesso, proprietario, getProprietarioEmail(),
     );
     const id = Number(info.lastInsertRowid);
-    // il salvataggio di Persona 5 (utente 061): «no» dal valore predefinito della colonna, si scrive solo se indicato
-    if (dati.salvataggioP5 && conSalvataggioP5()) prepared('UPDATE partita SET salvataggio_p5 = 1 WHERE id = ?').run(id);
+    // il salvataggio di Persona 5: «no» dal valore predefinito della colonna, si scrive solo se indicato
+    if (dati.salvataggioP5) prepared('UPDATE partita SET salvataggio_p5 = 1 WHERE id = ?').run(id);
     // Doti sociali a zero e Confidenti non sbloccati: righe esplicite così il tracking parte completo.
     for (const d of prepared('SELECT chiave FROM dote_sociale').all() as Array<{ chiave: string }>) {
       prepared('INSERT INTO dote_sociale_partita (partita_id, dote_chiave, punti, updated_at) VALUES (?, ?, 0, ?)').run(id, d.chiave, adesso);
@@ -179,9 +173,8 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
       dati.dlcPosseduti ? JSON.stringify(dati.dlcPosseduti) : r.dlc_posseduti_json,
       dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,
     );
-    // il salvataggio di Persona 5 (utente 061): solo se indicato; su uno schema senza la colonna non c'è dove scriverlo (409, mai in silenzio)
+    // il salvataggio di Persona 5: solo se indicato
     if (dati.salvataggioP5 !== undefined) {
-      if (!conSalvataggioP5()) throw httpErrors.conflict('schema-partite-vecchio', 'Il file delle partite non ha ancora il salvataggio di Persona 5: riavvia il server per applicare le migrazioni.');
       prepared('UPDATE partita SET salvataggio_p5 = ? WHERE id = ?').run(dati.salvataggioP5 ? 1 : 0, id);
     }
     // le impostazioni dei contenuti cambiate: gli effetti con condizioni delle voci già spuntate diventati validi (o tornati non validi) seguono
@@ -238,7 +231,7 @@ export { puntiDaNote };
 /** I ranghi di una Dote sociale in ordine, con il nome italiano e la soglia di punti. */
 function ranghiDote(chiave: string): RangoDoteDto[] {
   return (prepared('SELECT rango, nome, soglia FROM dote_sociale_rango WHERE dote_chiave = ? ORDER BY rango').all(chiave) as Array<{ rango: number; nome: string; soglia: number }>)
-    .map((r) => ({ rango: r.rango, nome: r.nome, soglia: r.soglia })); // L11 · B11: il nome è la colonna (migrazione 178), non più la traduzione
+    .map((r) => ({ rango: r.rango, nome: r.nome, soglia: r.soglia })); // L11 · B11: il nome è la colonna, non la traduzione
 }
 
 /** Rango raggiunto con `punti` e distanza dal successivo. */
@@ -310,7 +303,7 @@ export function puntiConfidente(mod: ModificaConfidente, confidente?: string, pi
   return puntiDelModulo({ confidente, noteRisposta: mod.noteRisposta, regalo: mod.regalo, reazioneRegalo: mod.reazioneRegalo, uscita: mod.uscita, bonusArcano: mod.bonusArcano, invito: mod.invito, piazzamento });
 }
 
-/** La soglia in punti del rango per il Confidente: > 0 solo dove il rango sale a punti (`modo = 'punti'`, migrazione 161); 0 altrove. */
+/** La soglia in punti del rango per il Confidente: > 0 solo dove il rango sale a punti (`modo = 'punti'`); 0 altrove. */
 export function sogliaAPunti(chiave: string, rango: number): number {
   const r = prepared('SELECT punti_necessari AS soglia, modo FROM confidente_rango WHERE confidente_chiave = ? AND rango = ?').get(chiave, rango) as { soglia: number | null; modo: string } | undefined;
   return r && r.modo === 'punti' && r.soglia !== null && r.soglia > 0 ? r.soglia : 0;
@@ -348,12 +341,9 @@ export function ranghiConfidenti(partitaId: number): Map<string, number> {
   return new Map(righe.map((r) => [r.chiave, r.rango]));
 }
 
-/** Ondata 5 (RG-11): le chiavi dei Confidenti che ricevono regali; senza la colonna della 255 quelli con un elenco di regali. */
+/** Ondata 5 (RG-11): le chiavi dei Confidenti che ricevono regali. */
 export function confidentiRegalabili(): string[] {
-  if (haColonnaMain(getDb(), 'confidente', 'regalabile')) {
-    return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
-  }
-  return prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo').pluck().all() as string[];
+  return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
 }
 
 /** I regali consegnati, per Confidente, in una lettura sola (prima una query per Confidente: rilievo P1' della verifica). */
@@ -382,8 +372,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
   // valutatore, con i ranghi di TUTTI i Confidenti
   const stato = { ...statoDisponibilitaPartita(partitaId), ranghiConfidenti: ranghi };
   const esame = esameCorrente(partitaId);
-  // ondata 5 (RG-11): i Confidenti che ricevono regali (`confidente.regalabile`, migrazioni 255-256); su un file di gioco più vecchio quelli
-  // con un elenco di regali, come prima
+  // ondata 5 (RG-11): i Confidenti che ricevono regali (`confidente.regalabile`)
   const regalabili = new Set<string>(confidentiRegalabili());
   // L13 (decisione 18): gli oggetti che regalati adesso non scalano il prezzo (consegna di prima ridata nello stesso momento), letti una volta
   const regaliGiaNelSaldo = regaliConYenGiaNelSaldo(partitaId);
@@ -539,7 +528,7 @@ export function annullaEffetti(partitaId: number, e: EffettiAzioneDto): void {
 
 // ---- Compendio personale ----
 
-/** Colonne dei valori reali osservati (migrazione 032), presenti su `persona_posseduta` e `compendio_partita`. */
+/** Colonne dei valori reali osservati, presenti su `persona_posseduta` e `compendio_partita`. */
 interface ColonneOsservate {
   osservate_livello: number | null; osservate_forza: number | null; osservate_magia: number | null; osservate_resistenza: number | null; osservate_agilita: number | null; osservate_fortuna: number | null;
 }
@@ -825,7 +814,7 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, personaId, livello, bonus.forza, bonus.magia, bonus.resistenza, bonus.agilita, bonus.fortuna,
       trattoSkillId, dati.inSquadra === false ? 0 : 1, carica ? 1 : 0, dati.note ?? '', ...colonneOsservate(osservate), adesso, adesso);
     const id = Number(info.lastInsertRowid);
-    // utente 073: la prima entrata di una Persona DLC nella scorta spende il suo richiamo gratuito; la riga resta anche se l'esemplare se ne va
+    // la prima entrata di una Persona DLC nella scorta spende il suo richiamo gratuito; la riga resta anche se l'esemplare se ne va
     // o si cancella la voce dello storico (la toglie solo l'annullo della spunta che aveva aggiunto proprio questo esemplare)
     prepared('INSERT OR IGNORE INTO utente.primo_richiamo_speso (partita_id, persona_id, posseduta_id, speso_il) SELECT ?, id, ?, ? FROM persona WHERE id = ? AND dlc = 1')
       .run(partitaId, id, adesso, personaId);

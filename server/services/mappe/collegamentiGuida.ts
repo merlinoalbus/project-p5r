@@ -5,16 +5,15 @@
 // «Che ci siano elementi raccoglibili sui palazzi che siano slegati dai pin non è corretto... lo stato di questi punti deve
 // essere integrato (ove possibile) con gli elementi in mappa.» Poi: «lascia i punti come sono senza fare riconciliazioni...
 // li sistemo io via via a mano». Quindi niente abbinamenti automatici: il collegamento lo fa l'utente dalla guida
-// (`collegaPinAlPunto`) o dall'editor delle mappe: uno o più pin per punto e, dalla 098, una o più voci per pin (`spillo_voce`;
-// prima era il campo `voce_chiave` della 094, e prima ancora il riferimento, che i pin con una destinazione o un Confidente
-// avevano già occupato). Da lì gli stati si legano: segnare il punto segna i suoi pin, raccogliere tutti i pin segna il punto
+// (`collegaPinAlPunto`) o dall'editor delle mappe: uno o più pin per punto e una o più voci per pin (`spillo_voce`,
+// non il riferimento del pin, che i pin con una destinazione o un Confidente
+// hanno già occupato). Da lì gli stati si legano: segnare il punto segna i suoi pin, raccogliere tutti i pin segna il punto
 // (`impostaRaccolto`, `impostaStatoPunto`); un pin con più voci è fatto quando tutte le sue voci sono segnate, e ogni voce si
 // segna da sola (scelta dell'utente, 2026-10-09: «Voci indipendenti»).
 // ============================================================
 
 import type { AppDatabase } from '../../db/dbService.js';
 import { getDb, prepared } from '../../db/dbService.js';
-import { haTabellaUtente } from '../../db/schemaMemo.js';
 import { httpErrors, type HttpError } from '../../utils/httpError.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
 import { palazzoDiOgniMappa } from '../palazziService.js';
@@ -29,7 +28,7 @@ export { allineaEnigma, allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, alli
  * Le regole del collegamento di un pin a una voce, le stesse per ogni strada che lo scrive — la guida (`collegaPinAlPunto`),
  * l'editor delle mappe, il pacchetto delle mappe (rilievo della revisione, 2026-10-01): la voce esiste, non è descrittiva e non
  * è un Enigma con i suoi passi, e il pin sta su una planimetria del Palazzo della voce. Un pin che ha già altre voci si collega
- * anche a questa (098, scelta dell'utente del 2026-10-09: prima si rifiutava con «già collegato»).
+ * anche a questa (scelta dell'utente del 2026-10-09).
  * Restituisce l'errore da lanciare, o `null` se il collegamento è ammesso (chi importa un pacchetto lo scarta e lo conta).
  */
 export function erroreVoceDelPin(pin: { nome: string; mappa: string | null }, puntoChiave: string): HttpError | null {
@@ -47,12 +46,6 @@ export function erroreVoceDelPin(pin: { nome: string; mappa: string | null }, pu
   return null;
 }
 
-/** Le partite ci sono (il file `utente` è attaccato, con le sue tabelle)? Senza, chi allinea gli stati non fa niente. */
-function conPartite(db: AppDatabase): boolean {
-  if (!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()) return false;
-  return haTabellaUtente(db, 'punto_partita') && haTabellaUtente(db, 'spillo_partita') && haTabellaUtente(db, 'partita');
-}
-
 /**
  * Quando un punto riceve i suoi pin, i due stati che fino a quel momento vivevano separati si uniscono, in ogni partita:
  *   - un punto già segnato segna i pin che hanno solo lui; un pin con altre voci è fatto quando lo sono tutte;
@@ -60,10 +53,8 @@ function conPartite(db: AppDatabase): boolean {
  *     suo Enigma lo segue). Un pin con altre voci non conta: il suo «raccolto» parla di quelle (voci indipendenti, 2026-10-09),
  *     e segue le sue voci, tra cui ora questa ancora da fare. È la stessa regola di `impostaRaccolto`.
  * Un pin che ha solo questo punto, raccolto o no, non perde niente.
- * Va eseguita con il file delle partite attaccato (`utente`); senza, non fa niente.
  */
 export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string): void {
-  if (!conPartite(db)) return;
   // L4 (§8.11): per una voce con un carattere (permanente, rigenerabile, racconto) gli stati li riallinea chi collega
   // (`riallineaStati`: il pin tiene il suo segno, la voce si calcola dai suoi pin). Resta la regola di prima per le voci senza
   // carattere (dedali dei Memento, Persona: R4-30).
@@ -91,7 +82,7 @@ export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string
  * il pin è fatto). Senza più voci resta com'era, come quando si scollegava l'unica voce.
  */
 export function allineaPinScollegato(db: AppDatabase, pin: { id: number; uid: string | null }, adesso: string): void {
-  if (!pin.uid || !conPartite(db)) return;
+  if (!pin.uid) return;
   // L4: solo i pin delle sole voci senza carattere (dedali dei Memento) hanno un segno che segue le voci; gli altri lo calcolano
   const voci = modelloAvanzamento(db).pin.get(pin.id);
   if (!voci || voci.contano.length > 0 || voci.altre.length === 0) return;

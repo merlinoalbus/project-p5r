@@ -2,12 +2,12 @@
 // tanakaDecisione — lo stato del listino di Tanaka in un file di gioco (L7-TANAKA-IMPORT)
 // ============================================================
 //
-// Il listino di Tanaka è portato ai dati Royal dalla migrazione 142 (BON-08); la decisione unitaria con consenso dell'utente non c'è più.
-// Resta il tipo con cui import ed export dicono che listino porta un file di gioco e se il suo registro è integro.
+// Il listino di Tanaka ha i dati Royal (BON-08), senza una decisione unitaria con consenso dell'utente.
+// Qui sta il tipo con cui import ed export dicono che listino porta un file di gioco e se il suo registro è integro.
 
 /** IMPORT: lo stato del listino di Tanaka e del registro delle decisioni in un file di gioco (istanza o pacchetto). */
 export interface StatoTanakaFileDto {
-  /** Il registro (migrazione 141) c'è. */
+  /** Il registro c'è. */
   registro: boolean;
   decisioni: number;
   attiva: string | null;

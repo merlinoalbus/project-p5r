@@ -30,7 +30,7 @@ export function noteAParole(n: number): string {
 /** «nessuna ♪»: zero note (a voce «nessuna nota», vedi `pezziTestoNote`). */
 export const NESSUNA_NOTA = `nessuna ${SIMBOLO_NOTA}`;
 
-// ---- Le scelte dei dialoghi di rango (L13, ondata 6, lotto O6-4, migrazione 309) ----
+// ---- Le scelte dei dialoghi di rango (L13, ondata 6, lotto O6-4) ----
 //
 // I punti di una scelta sono SOLO numerici: `punti` (null = la guida non ne dà; 0 = nessun punto, detto dalla guida) e, dove la guida dà un
 // valore diverso nel ramo amore, `puntiAmore`. Prima accanto al numero c'era il testo della guida («+3», «♪♪», «+0 (amicizia) / +2 (amore)»)
@@ -58,19 +58,6 @@ export function puntiAmoreDiversi(s: PuntiScelta): boolean {
 export function resaPuntiScelta(s: PuntiScelta): string {
   if (puntiAmoreDiversi(s)) return `${resaPunti(s.punti ?? 0)} (amicizia) · ${resaPunti(s.puntiAmore ?? 0)} (amore)`;
   return resaPunti(s.punti);
-}
-
-/**
- * Vero se toccare la scelta alla spunta della voce dice da sé le note ottenute: il valore non dipende dal ramo (amicizia o amore) ed è
- * nessuno o da una a tre note. Una scelta senza punti nella guida dà «nessun punto», come oggi.
- */
-export function sceltaToccabile(s: PuntiScelta): boolean {
-  return !puntiAmoreDiversi(s) && (s.punti === null || (Number.isInteger(s.punti) && s.punti >= 0 && s.punti <= 3));
-}
-
-/** Le note che la scelta dà alla spunta (1–3; null = nessun punto). Solo per le scelte toccabili (`sceltaToccabile`). */
-export function noteDellaScelta(s: PuntiScelta): 1 | 2 | 3 | null {
-  return s.punti === 1 || s.punti === 2 || s.punti === 3 ? s.punti : null;
 }
 
 /** «5 punti», «1 punto», «−3 punti»; `segno`: anche il «+» davanti ai punti in più. */
@@ -139,8 +126,8 @@ const CONTEGGIO_A_PAROLE = /(?<![\d.,])(?:\+\s?)?[1-4](?!\d)(?:(?:\s*[/,–-]\s*
 
 /**
  * Il nome di una Dote seguito da «+N» senza unità («Conoscenza +1 nota, Fascino +1» delle domande in classe, «Perizia +2» delle voci
- * della guida): nei testi della GUIDA «+N» dopo una Dote è un numero di note (la convenzione «+N = N note», la stessa con cui
- * `server/db/conversioneEffettiAzione.ts` ne ha ricavato gli effetti). Non prende «Perizia +2 punti», «+1 rango», «+10%». Fuori dalla
+ * della guida): nei testi della GUIDA «+N» dopo una Dote è un numero di note (la convenzione «+N = N note», la stessa degli
+ * effetti strutturati delle voci). Non prende «Perizia +2 punti», «+1 rango», «+10%». Fuori dalla
  * guida non vale: nelle ricevute che il server scriveva nello storico prima del 2026-10-26 («Fascino +3 (♪♪) da segnare nelle Doti»,
  * «Incontro con X: Coraggio +2») il numero sono punti (`d.delta`), e scriverlo come note direbbe il falso. Dal 2026-10-26 le frasi nuove
  * dicono note e punti insieme (`testoDoteInPunti`: «Fascino ♪♪ · 3 punti», «Coraggio +2 punti»), che questa regola non tocca.
@@ -150,7 +137,7 @@ const DOTE_PIU = new RegExp(`\\b(${DOTI_SOCIALI.map((d) => d.nome).join('|')}) \
 /**
  * Le note che un testo libero scrive a parole («Fino a 3 note», «1 nota base per sessione; fino a 3 note», «+1/+2/+3 note», «1, 2 o 3
  * note», «Conoscenza +1 nota») mostrate come simboli («Fino a ♪♪♪», «♪/♪♪/♪♪♪», «♪, ♪♪ o ♪♪♪», «Conoscenza ♪»). Solo per la vista: il
- * testo salvato non cambia (nessuna migrazione). Il risultato si mostra con `TestoNote`, che dice le file di ♪ a parole ai lettori di
+ * testo salvato non cambia. Il risultato si mostra con `TestoNote`, che dice le file di ♪ a parole ai lettori di
  * schermo.
  *
  * Due ampiezze, perché lo stesso «+N» non vuol dire ovunque la stessa cosa:

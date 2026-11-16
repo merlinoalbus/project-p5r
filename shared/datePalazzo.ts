@@ -2,7 +2,7 @@
 // datePalazzo — la regola delle date di un Palazzo, una sola per il server e per il modulo che le modifica (L13 O6-3)
 // ============================================================
 //
-// Le date di un Palazzo (o dei Memento) sono giorni del calendario di gioco, MM-GG, da una fonte sola (migrazione 308): l'apertura e la
+// Le date di un Palazzo (o dei Memento) sono giorni del calendario di gioco, MM-GG, da una fonte sola: l'apertura e la
 // scadenza (la finestra), il furto consigliato e il termine della lettera di sfida. La regola:
 //   - l'apertura c'è sempre; la scadenza può mancare («senza fine») solo dove il gioco non ne fissa una (i Memento e i Palazzi col boss dei
 //     Memento, Iweleth); furto e lettera possono mancare (la guida non li dà);

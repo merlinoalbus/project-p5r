@@ -369,7 +369,7 @@ export function eseguiIsolamento(partitaId: number, dati: DatiIsolamento): Esito
     const eventoId = registraEvento(partitaId, 'isolamento', `Isolamento: ${t('persona', p.nome)} per ${dati.giorni} ${dati.giorni === 1 ? 'giorno' : 'giorni'}`,
       [incenso ? `${nomeOggetto ?? incenso.nome}: +${guadagno.puntiPerStatistica} a ${stat.join(', ')}${info.allarme ? ' (Allarme ×2)' : ''}` : 'senza incenso', nomeSkill ? `appresa ${nomeSkill}` : 'nessuna skill di resistenza'].join(' · ') + '.',
       { possedutaId: p.id, incenso: incenso?.chiave ?? null, oggetto: delCatalogo?.oggetto ?? null, giorni: dati.giorni, statistiche: stat, punti: guadagno.puntiPerStatistica, skillId, allarme: info.allarme }, p.persona_id);
-    // Ondata 5 (lotto F-bis): la copia dell'incenso bruciata esce da quelle possedute (registro dei consumi, utente 054)
+    // Ondata 5 (lotto F-bis): la copia dell'incenso bruciata esce da quelle possedute (registro dei consumi)
     if (delCatalogo) registraConsumoIsolamento(partitaId, delCatalogo.oggetto, eventoId);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, p.persona_id);

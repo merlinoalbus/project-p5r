@@ -439,7 +439,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
           </>
         }
       >
-        <textarea className="form-input min-h-[140px]" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Promemoria: prossimi eventi, regali graditi, risposte migliori…" />
+        <textarea className="form-input min-h-[140px]" aria-label="Note sul Confidente" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Promemoria: prossimi eventi, regali graditi, risposte migliori…" />
       </Modal>
     </>
   );

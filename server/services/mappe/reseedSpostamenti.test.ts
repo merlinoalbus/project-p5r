@@ -5,8 +5,8 @@
 // dipendenti, senza sopprimere punti diversi né scegliere un erede quando l'identità è ambigua.
 // ============================================================
 
-import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
+import { closeDb } from '../../db/dbService.js';
+import { dbDiProvaSenzaMappe } from '../../../test/dbDiProva.js';
 import { importaMappe, aggiornaSpillo } from './mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 /** Nodo di mappa generico per il pacchetto di prova, senza immagine né entità, con un solo spillo nota «Seed unico» alla posizione (x, 30). */
@@ -14,7 +14,7 @@ const nodo=(chiave:string,x=20):EsportazioneMappeDto['mappe'][number]=>({chiave,
 describe('reseed di spilli trasferiti',()=>{
  afterEach(()=>closeDb());
  it('conserva ID, posizione scelta e dipendenti dopo trasferimento e due ricaricamenti',()=>{
-  const db=initDb(':memory:');runMigrations(db);
+  const db=dbDiProvaSenzaMappe();
   const p={versione:1 as const,mappe:[nodo('sorgente'),{...nodo('destinazione'),spilli:[]}]};
   importaMappe(p,{origine:'seed'});
   const id=(db.prepare('SELECT id FROM spillo').get() as {id:number}).id;
@@ -31,7 +31,7 @@ describe('reseed di spilli trasferiti',()=>{
   expect(db.pragma('foreign_key_check')).toEqual([]);
  });
  it('non sopprime un altro punto con posizione diversa né sorgenti uguali in pacchetti distinti',()=>{
-  const db=initDb(':memory:');runMigrations(db);
+  const db=dbDiProvaSenzaMappe();
   const p={versione:1 as const,mappe:[nodo('sorgente'),{...nodo('destinazione'),spilli:[]}]};
   importaMappe(p,{origine:'seed'});const id=(db.prepare('SELECT id FROM spillo').get() as {id:number}).id;
   aggiornaSpillo(id,{mappa:'destinazione',x:70,y:80});
@@ -43,7 +43,7 @@ describe('reseed di spilli trasferiti',()=>{
   expect(db.prepare("SELECT count(*) n FROM spillo WHERE mappa_chiave='altra-sorgente'").get()).toEqual({n:1});
  });
  it('non sceglie un erede quando due righe utente hanno la stessa identità storica',()=>{
-  const db=initDb(':memory:');runMigrations(db);
+  const db=dbDiProvaSenzaMappe();
   const p={versione:1 as const,mappe:[nodo('sorgente'),{...nodo('destinazione'),spilli:[]}]};
   importaMappe(p,{origine:'seed'});const id=(db.prepare('SELECT id FROM spillo').get() as {id:number}).id;
   aggiornaSpillo(id,{mappa:'destinazione'});

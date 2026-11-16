@@ -18,9 +18,9 @@ const EFFETTO_OFFERTA: EffettoNotaStorica = {
   modifica: 'È una nota sulla fonte: non cambia il prezzo dell’offerta né gli acquisti registrati.',
 };
 
-/** La nota documentale è separata dalle note personali e dal prezzo letto dall'offerta. F6: è un dato (migrazione 139), che si
- *  modifica da qui; lo stesso dato si vede in negozi, catalogo e confronto Tanaka. Dalla 335
- *  (L8-04) è anche il confronto delle fonti sul livello consigliato di un Palazzo (`effetto` dice che cosa la nota non cambia). */
+/** La nota documentale è separata dalle note personali e dal prezzo letto dall'offerta. F6: è un dato, che si
+ *  modifica da qui; lo stesso dato si vede in negozi, catalogo e confronto Tanaka.
+ *  L8-04: è anche il confronto delle fonti sul livello consigliato di un Palazzo (`effetto` dice che cosa la nota non cambia). */
 export function NoteStoricheOfferta({ note, onLegamiCambiati, effetto = EFFETTO_OFFERTA }: { note?: readonly NotaStoricaOfferta[]; onLegamiCambiati?: () => void | Promise<void>; effetto?: EffettoNotaStorica }) {
   if (!note?.length) return null;
   return <div className="flex min-w-0 flex-col gap-2 testo-12">{note.map(n => <NotaStorica key={n.id} nota={n} onLegamiCambiati={onLegamiCambiati} effetto={effetto} />)}</div>;

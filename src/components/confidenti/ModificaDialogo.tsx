@@ -6,8 +6,8 @@
 // «Annulla» e «Salva», conferma prima di chiudere con modifiche non salvate. Per ogni scelta: testo, punti come scelta a
 // pulsanti (Nessun punto · ♪ · ♪♪ · ♪♪♪, i soli valori della guida), l'interruttore «Punti diversi nel ramo amore» che mostra la stessa
 // scelta per il ramo amore, «romantica» e avviso; le scelte si aggiungono, si tolgono e si spostano (il server le rinumera da 1).
-// L13 (ondata 6, lotto O6-4, migrazione 309): prima c'erano un numero da 0 a 100 e il testo libero «Punti come li scrive la guida»; i punti
-// ora sono solo numerici e la resa è unica (`resaPuntiScelta`). «Nessun punto» vale anche per la scelta di cui la guida non dà punti: la si
+// L13 (ondata 6, lotto O6-4): i punti
+// sono solo numerici e la resa è unica (`resaPuntiScelta`). «Nessun punto» vale anche per la scelta di cui la guida non dà punti: la si
 // lascia com'è finché non si sceglie un'altra nota; scelto dopo una nota, lo scrive come zero.
 // Si inviano solo i campi cambiati: un dialogo non toccato non prende una fotografia (che dà il chip «Modificato»).
 // Rotta: PUT `/api/compendio/confidenti/:chiave/dialoghi/:id`.

@@ -1,5 +1,5 @@
 // ============================================================
-// regoleNegoziService — la regola comune di un genere di punto vendita (L4-01, migrazione 372): pezzi, rifornimento e condizioni
+// regoleNegoziService — la regola comune di un genere di punto vendita (L4-01): pezzi, rifornimento e condizioni
 // ============================================================
 //
 // Oggi una sola regola, quella dei distributori («lunedì, 2 pezzi, non col caldo»). Un'offerta che la segue (`articolo.regola_comune` = 1) ha
@@ -22,12 +22,6 @@ import type { RegolaTipoNegozioDto } from '../../shared/types.js';
 
 interface RigaRegola { tipo: string; quantita: number | null; rifornimento_json: string | null; condizioni_json: string | null; fonte: string }
 
-/** La tabella c'è (gioco.db migrato alla 372): prima, nessuna regola e nessun segno. */
-function conRegole(): boolean {
-  return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'regola_tipo_negozio'").get()
-    && !!prepared("SELECT 1 FROM pragma_table_info('articolo', 'main') WHERE name = 'regola_comune'").get();
-}
-
 /** Un JSON con le chiavi degli oggetti in ordine (l'ordine degli elenchi conta): due regole uguali scritte in ordine diverso coincidono. */
 export function jsonCanonico(json: string | null | undefined): string | null {
   if (json === null || json === undefined) return null;
@@ -38,7 +32,7 @@ export function jsonCanonico(json: string | null | undefined): string | null {
 
 /** La regola del genere di punto vendita, o null se non ne ha. */
 export function regolaDelTipo(tipo: string | null | undefined): RigaRegola | null {
-  if (!tipo || !conRegole()) return null;
+  if (!tipo) return null;
   return (prepared('SELECT tipo, quantita, rifornimento_json, condizioni_json, fonte FROM main.regola_tipo_negozio WHERE tipo = ?').get(tipo) as RigaRegola | undefined) ?? null;
 }
 
@@ -74,7 +68,6 @@ export function completaConLaRegola(dati: Record<string, unknown>): Record<strin
 
 /** Ricalcola il segno «segue la regola» di un'offerta dopo una scrittura (dentro la transazione di chi chiama). */
 export function allineaSegnoRegola(articolo: string): void {
-  if (!conRegole()) return;
   const a = prepared('SELECT negozio_chiave, quantita, rifornimento_json, condizioni_json, regola_comune FROM main.articolo WHERE chiave = ?').get(articolo) as
     { negozio_chiave: string; quantita: number | null; rifornimento_json: string | null; condizioni_json: string | null; regola_comune: number } | undefined;
   if (!a) return;
@@ -85,13 +78,11 @@ export function allineaSegnoRegola(articolo: string): void {
 
 /** Ricalcola il segno di tutte le offerte di un punto vendita (il suo genere è cambiato). */
 export function allineaSegnoDelNegozio(negozio: string): void {
-  if (!conRegole()) return;
   for (const a of prepared('SELECT chiave FROM main.articolo WHERE negozio_chiave = ?').pluck().all(negozio) as string[]) allineaSegnoRegola(a);
 }
 
-/** Il segno di un'offerta, per l'editor (false prima della 372). */
+/** Il segno di un'offerta, per l'editor. */
 export function segueRegolaComune(articolo: string): boolean {
-  if (!conRegole()) return false;
   return (prepared('SELECT regola_comune FROM main.articolo WHERE chiave = ?').pluck().get(articolo) as number | undefined) === 1;
 }
 
@@ -106,7 +97,6 @@ function testoDellaRegola(r: RigaRegola): string {
 
 /** Le regole comuni, per genere, con quante offerte le seguono. */
 export function regoleDeiTipi(): Record<string, RegolaTipoNegozioDto> {
-  if (!conRegole()) return {};
   const out: Record<string, RegolaTipoNegozioDto> = {};
   for (const r of prepared('SELECT tipo, quantita, rifornimento_json, condizioni_json, fonte FROM main.regola_tipo_negozio ORDER BY tipo').all() as RigaRegola[]) {
     const offerte = prepared(`SELECT COUNT(*) FROM main.articolo a JOIN main.negozio n ON n.chiave = a.negozio_chiave WHERE n.tipo = ? AND a.regola_comune = 1`).pluck().get(r.tipo) as number;

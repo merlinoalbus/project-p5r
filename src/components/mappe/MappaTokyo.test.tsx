@@ -67,7 +67,7 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
   });
 });
 
-// richiesta dell'utente del 2026-10-29: «far sì che compaia in mappa solo da quella data in poi» (il Covo dal 5 maggio, dati della 303)
+// richiesta dell'utente del 2026-10-29: «far sì che compaia in mappa solo da quella data in poi» (il Covo dal 5 maggio, dai dati)
 describe('MappaTokyo — il Covo dei Ladri segue la sua Area', () => {
   /** La fermata del Covo sulla mappa (il cartellino, non il chip dell'elenco), o null se non è disegnata. */
   const fermata = () => document.querySelector('a.spillo-tokyo[href="/guida/covo"]');

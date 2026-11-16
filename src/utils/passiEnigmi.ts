@@ -1,5 +1,5 @@
 // ============================================================
-// passiEnigmi — i passi degli Enigmi (095) raggruppati sotto il loro Enigma, per la scheda del Palazzo e la guida del visore
+// passiEnigmi — i passi degli Enigmi raggruppati sotto il loro Enigma, per la scheda del Palazzo e la guida del visore
 // ============================================================
 
 /** Quel che serve di una voce: la sua chiave e l'Enigma di cui è un passo (null se non lo è). */

@@ -68,8 +68,12 @@ const giornoDellaPartita = (partitaId: number): string | null => (prepared('SELE
 export function accendiFortunaDaVoce(partitaId: number, voceUid: string, dote: DoteChiave): void {
   const prima = leggiFortuna(partitaId);
   const riga = prepared('SELECT da_voce, prima_json FROM utente.fortuna_partita WHERE partita_id = ?').get(partitaId) as { da_voce: string | null; prima_json: string | null } | undefined;
-  // rispuntando la stessa voce lo stato «di prima» resta quello originale
-  const memoria = riga?.da_voce === voceUid ? riga.prima_json : prima.attiva && prima.dote ? JSON.stringify({ dote: prima.dote, giorno: prima.giorno }) : null;
+  // rispuntando la stessa voce lo stato «di prima» resta quello originale; lo stato di prima porta con sé la voce che l'aveva acceso e
+  // il suo «prima», così togliere la spunta a quella voce lo scioglie dalla catena anche quando un'altra voce l'ha già coperto.
+  // Una voce coperta che si riaccende (il suo effetto è cambiato mentre un'altra voce era in vigore) esce prima dalla catena: una voce
+  // vi compare una volta sola, altrimenti togliere le due spunte lascerebbe accesa la sua Fortuna di prima
+  const memoria = riga?.da_voce === voceUid ? riga.prima_json
+    : prima.attiva && prima.dote ? JSON.stringify({ dote: prima.dote, giorno: prima.giorno, daVoce: riga?.da_voce ?? null, prima: senzaLaVoce(leggiPrima(riga?.prima_json ?? null), voceUid).catena } satisfies StatoPrimaFortuna) : null;
   const oggi = giornoDellaPartita(partitaId);
   prepared('INSERT INTO utente.fortuna_partita (partita_id, dote, giorno, acceso_il, da_voce, prima_json) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(partita_id) DO UPDATE SET dote = excluded.dote, giorno = excluded.giorno, acceso_il = excluded.acceso_il, da_voce = excluded.da_voce, prima_json = excluded.prima_json')
     .run(partitaId, dote, oggi, nowIso(), voceUid, memoria);
@@ -87,20 +91,55 @@ export function fortunaAccesaDallaVoce(partitaId: number, voceUid: string): { do
   return riga && eDote(riga.dote) && riga.giorno === giornoDellaPartita(partitaId) ? { dote: riga.dote, accesoIl: riga.acceso_il } : null;
 }
 
-/** Togliendo la spunta della voce che l'aveva accesa, la Fortuna torna com'era (accesa su un'altra Dote lo stesso giorno, oppure spenta). */
-export function spegniFortunaDaVoce(partitaId: number, voceUid: string): void {
-  const riga = prepared('SELECT dote, prima_json FROM utente.fortuna_partita WHERE partita_id = ? AND da_voce = ?').get(partitaId, voceUid) as { dote: string; prima_json: string | null } | undefined;
-  if (!riga) return;
-  let prima: { dote?: unknown; giorno?: unknown } | null;
-  try { prima = riga.prima_json ? JSON.parse(riga.prima_json) as { dote?: unknown; giorno?: unknown } : null; } catch { prima = null; }
+/** Lo stato della Fortuna di prima di un'accensione da voce: la Dote e il giorno, la voce che l'aveva accesa (null: a mano) e il suo «prima». */
+interface StatoPrimaFortuna { dote: DoteChiave; giorno: string | null; daVoce: string | null; prima: StatoPrimaFortuna | null }
+
+/** Legge `prima_json` (anche nella forma senza voce, `{ dote, giorno }`); un valore illeggibile o senza una Dote valida vale «niente prima». */
+function leggiPrima(json: string | null): StatoPrimaFortuna | null {
+  if (!json) return null;
+  let grezzo: unknown;
+  try { grezzo = JSON.parse(json) as unknown; } catch { return null; }
+  const normalizza = (x: unknown): StatoPrimaFortuna | null => {
+    if (typeof x !== 'object' || x === null) return null;
+    const o = x as { dote?: unknown; giorno?: unknown; daVoce?: unknown; prima?: unknown };
+    if (!eDote(o.dote)) return null;
+    return { dote: o.dote, giorno: typeof o.giorno === 'string' ? o.giorno : null, daVoce: typeof o.daVoce === 'string' ? o.daVoce : null, prima: normalizza(o.prima) };
+  };
+  return normalizza(grezzo);
+}
+
+/** La catena degli stati «di prima» senza quello acceso dalla voce: al suo posto resta il «prima» di quella voce. */
+function senzaLaVoce(catena: StatoPrimaFortuna | null, voceUid: string): { catena: StatoPrimaFortuna | null; tolta: boolean } {
+  if (!catena) return { catena: null, tolta: false };
+  if (catena.daVoce === voceUid) return { catena: catena.prima, tolta: true };
+  const sotto = senzaLaVoce(catena.prima, voceUid);
+  return sotto.tolta ? { catena: { ...catena, prima: sotto.catena }, tolta: true } : { catena, tolta: false };
+}
+
+/** Togliendo la spunta della voce che l'aveva accesa, la Fortuna torna com'era (accesa su un'altra Dote lo stesso giorno, oppure spenta).
+ *  Restituisce vero se la voce aveva una Fortuna da togliere (quella in vigore, o una coperta da un'altra accensione). */
+export function spegniFortunaDaVoce(partitaId: number, voceUid: string): boolean {
+  const riga = prepared('SELECT dote, da_voce, prima_json FROM utente.fortuna_partita WHERE partita_id = ?').get(partitaId) as { dote: string; da_voce: string | null; prima_json: string | null } | undefined;
+  if (!riga) return false;
+  if (riga.da_voce !== voceUid) {
+    // la Fortuna di questa voce è stata coperta da un'altra accensione: esce dalla catena degli stati «di prima», e chi la copre,
+    // quando verrà tolto, tornerà a ciò che c'era prima di questa voce (non a un effetto ormai annullato)
+    const catena = leggiPrima(riga.prima_json);
+    const sciolta = senzaLaVoce(catena, voceUid);
+    if (sciolta.tolta) prepared('UPDATE utente.fortuna_partita SET prima_json = ? WHERE partita_id = ?').run(sciolta.catena ? JSON.stringify(sciolta.catena) : null, partitaId);
+    return sciolta.tolta;
+  }
+  const prima = leggiPrima(riga.prima_json);
   const oggi = giornoDellaPartita(partitaId);
-  if (prima && eDote(prima.dote) && (prima.giorno ?? null) === oggi) {
-    prepared('UPDATE utente.fortuna_partita SET dote = ?, giorno = ?, da_voce = NULL, prima_json = NULL WHERE partita_id = ?').run(prima.dote, oggi, partitaId);
+  if (prima && (prima.giorno ?? null) === oggi) {
+    prepared('UPDATE utente.fortuna_partita SET dote = ?, giorno = ?, da_voce = ?, prima_json = ? WHERE partita_id = ?')
+      .run(prima.dote, oggi, prima.daVoce ?? null, prima.prima ? JSON.stringify(prima.prima) : null, partitaId);
     registraEvento(partitaId, 'fortuna', `Fortuna di nuovo su ${nomeDote(prima.dote)}`, 'Tolta la spunta della voce che l’aveva accesa su un’altra Dote.', { dote: prima.dote, giorno: oggi, voce: voceUid });
   } else {
     prepared('DELETE FROM utente.fortuna_partita WHERE partita_id = ?').run(partitaId);
     registraEvento(partitaId, 'fortuna', 'Fortuna spenta', `Tolta la spunta della voce che l’aveva accesa su ${nomeDote(riga.dote)}.`, { dote: riga.dote, voce: voceUid });
   }
+  return true;
 }
 
 /** Il giorno di gioco è cambiato: la Fortuna accesa finisce (la riga si toglie, con un evento). Chiamata da `cambiaGiornoPartita`. */

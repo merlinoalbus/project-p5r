@@ -116,7 +116,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     if (!partitaId || scrittura.current) return;
     if (pendente) { if (acquisti || pesche) throw new Error('Questa voce ha già un’operazione da completare: chiudila dall’elenco «Operazioni da completare».'); return; }
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { apriSceltaNote(); return; }
-    // 2026-10-30: la visita ai Memento non chiede più quali Dedali hai aperto: le aperture si calcolano dai Palazzi conclusi (migrazione 305)
+    // 2026-10-30: la visita ai Memento non chiede più quali Dedali hai aperto: le aperture si calcolano dai Palazzi conclusi
     // L13: l'esito ottenuto (o «senza punti») si sceglie prima di salvare: una scelta non fatta non lascia la spunta (decisione A1)
     if (fatta && !a.fatta && a.scelteEsito?.length && esiti === undefined) {
       setChiediNote(false); setChiediEsiti({ noteRisposta, senzaPunti, relazioneRomantica }); return;

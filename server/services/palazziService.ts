@@ -22,7 +22,7 @@
 // solo continua a non bastare.
 // Il boss **finale**, non uno qualsiasi: Shido ha Akechi e il Mastino prima dell'Aula magna, Maruki Sumire
 // prima della fine (rilievo della revisione). Dal 2026-10-20 (L4 §8.14, O4-1 e G-027) è una **voce dichiarata** per Palazzo
-// (`dungeon.voce_boss_finale`, migrazione 112, «Modifica › Boss finale» della scheda): fatto quando è fatta quella voce (§8.11: dai suoi
+// (`dungeon.voce_boss_finale`, «Modifica › Boss finale» della scheda): fatto quando è fatta quella voce (§8.11: dai suoi
 // pin, se ne ha), e nessun altro pin `boss` conta. Prima un'euristica (le voci `boss` dell'ultima infiltrazione, ne bastava una; in un
 // Palazzo con boss in una sola infiltrazione qualunque pin `boss`, anche quello del tutorial di Kamoshida). Senza voce dichiarata il
 // Palazzo non si conclude. L'euristica è tolta (L11, R11-02b/2): né i Memento (i dedali ammettono solo Persona e Trama, nessun «boss») né
@@ -30,12 +30,11 @@
 //
 // Il boss finale della Guida **non si segna più da solo** raccogliendo il Tesoro o il boss (scelta dell'utente del
 // 2026-10-04, «Togli l'automatismo»: il segno automatico del 2026-09-30 faceva risultare il boss sconfitto senza che
-// l'utente l'avesse detto; utente 017 toglie quelli rimasti). Restano le scelte del 2026-09-30: l'ingresso al Palazzo
+// l'utente l'avesse detto). Restano le scelte del 2026-09-30: l'ingresso al Palazzo
 // **sparisce** dalla mappa a Palazzo completato, e gli archi restano legati alla data.
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
 import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
 import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
@@ -58,20 +57,19 @@ export function palazzoDiOgniMappa(): Map<string, string> {
   return new Map(righe.map((r) => [r.chiave, r.dungeon]));
 }
 
-/** La voce del boss finale dichiarata per ogni Palazzo (`dungeon.voce_boss_finale`, migrazione 112; L4 §8.14); vuota su uno schema
- *  di prima. Un Palazzo senza voce non c'è nella mappa. */
+/** La voce del boss finale dichiarata per ogni Palazzo (`dungeon.voce_boss_finale`; L4 §8.14).
+ *  Un Palazzo senza voce non c'è nella mappa. */
 export function vociBossFinale(): Map<string, string> {
-  if (!haColonnaMain(getDb(), 'dungeon', 'voce_boss_finale')) return new Map();
   return new Map((prepared('SELECT chiave, voce_boss_finale FROM dungeon WHERE voce_boss_finale IS NOT NULL').all() as Array<{ chiave: string; voce_boss_finale: string }>).map((r) => [r.chiave, r.voce_boss_finale]));
 }
 
-interface SpilloCollezionabile { id: number; uid: string | null; tipo: string; mappa: string; /** Le voci della guida del pin che si segnano (`vociDiOgniPin(true)`, una o più dalla 098). */ voci: string[] }
+interface SpilloCollezionabile { id: number; uid: string | null; tipo: string; mappa: string; /** Le voci della guida del pin che si segnano (`vociDiOgniPin(true)`, una o più). */ voci: string[] }
 
 /** I collezionabili sulle planimetrie di ogni Palazzo. */
 function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, SpilloCollezionabile[]> {
   const out = new Map<string, SpilloCollezionabile[]>();
-  // l'uid c'è dalla 067; le voci che si segnano le legge `vociDiOgniPin`, che si adatta allo schema (098, 094, o il solo riferimento «punto»)
-  const righe = prepared(`SELECT id, ${haColonnaMain(getDb(), 'spillo', 'uid') ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ id: number; uid: string | null; tipo: string; mappa_chiave: string }>;
+  // le voci che si segnano le legge `vociDiOgniPin`
+  const righe = prepared('SELECT id, uid, tipo, mappa_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL').all() as Array<{ id: number; uid: string | null; tipo: string; mappa_chiave: string }>;
   const voci = vociDiOgniPin(true);
   for (const r of righe) {
     const dungeon = palazzi.get(r.mappa_chiave);
@@ -94,10 +92,8 @@ export interface StatoPalazzo { concluso: string | null; mancaPerConcludere: str
    *  requisiti e condizioni): `palazziConclusi` e i semafori lo saltano. */
   senzaEffetti?: true }
 
-/** La regola del boss di ogni dungeon (`dungeon.regola_boss`, migrazione 113): i Palazzi con la regola dei Memento; vuota su uno schema
- *  di prima. */
+/** La regola del boss di ogni dungeon (`dungeon.regola_boss`): i Palazzi con la regola dei Memento. */
 function palazziColBossDellaGuida(): Set<string> {
-  if (!haColonnaMain(getDb(), 'dungeon', 'regola_boss')) return new Set();
   return new Set(prepared("SELECT chiave FROM dungeon WHERE tipo = 'palazzo' AND regola_boss = 'memento'").pluck().all() as string[]);
 }
 
@@ -194,9 +190,7 @@ export function ingressoDelPalazzo(dungeon: string, giorno?: string, opzioni: { 
   const radice = radiceDelPalazzo(dungeon);
   if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(radice)) return null;
   const palazzi = palazzoDiOgniMappa();
-  const destinazioni = haTabellaMain(getDb(), 'spillo_destinazione')
-    ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
-    : new Map<number, string>();
+  const destinazioni = new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]));
   const spilli = prepared('SELECT id, mappa_chiave, riferimento_tipo, riferimento_chiave, seed_identita_json, condizioni_json FROM spillo WHERE mappa_chiave IS NOT NULL ORDER BY id')
     .all() as Array<{ id: number; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null; seed_identita_json: string | null; condizioni_json: string | null }>;
   const ingressi = spilli.filter((s) => palazzoDiIngresso(s, destinazioni.get(s.id) ?? null, palazzi) === dungeon);
@@ -231,7 +225,7 @@ export function destinazionePalazzo(dungeon: string, giorno?: string | null): { 
  * Strutture che i Memento riusano si può rimuovere»): per un dungeon di altro tipo (i Memento, i cui piani si generano a ogni discesa:
  * le strutture fisse che riusano non sono un posto dove si arriva) vale solo una destinazione vera — la regola d'atterraggio del giorno
  * o uno spillo d'ingresso —, mai il ripiego sulla prima planimetria; senza, `null` e la voce non mostra «Sulla mappa». La regola è il
- * tipo del dungeon, non il nome delle planimetrie. Dal 2026-10-31 le strutture fisse non ci sono più (migrazione 322) e la stessa regola
+ * tipo del dungeon, non il nome delle planimetrie. Dal 2026-10-31 le strutture fisse non ci sono e la stessa regola
  * vale per l'atterraggio dalla mappa di Tokyo (`atterraggioDelPalazzo`).
  */
 export function destinazioneDellaVoce(dungeon: string, giorno?: string | null): { chiave: string; spilloId: number | null } | null {

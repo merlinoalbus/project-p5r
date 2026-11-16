@@ -2,7 +2,7 @@
 // Registro dei tipi di spillo delle mappe (Fase 13): icona, colore, collezionabile per default, corrispondenze dai tipi esistenti
 // ============================================================
 //
-// Condiviso fra server (migrazione dei marcatori, importazione) e frontend (visore, editor, legenda). L'icona è l'asset
+// Condiviso fra server (importazione) e frontend (visore, editor, legenda). L'icona è l'asset
 // `ui/spillo-<tipo>` (prompt §18) con riserva SVG in codice (`IconaSpillo`).
 // I tipi della città seguono le etichette che la mappa del gioco dà ai punti di interesse («Bevande», «Sigarette», «Cercalavoro»…);
 // quelli dei Palazzi e dei Mementos seguono i punti della guida più i meccanismi, il rampino e le porte di Royal (15.24).
@@ -118,7 +118,7 @@ export function statoDelTipo(tipo: string): string | null {
  * La parola dello stato con cui un pin si può citare in una condizione «Pin di una mappa»: quella del suo tipo o, per un pin senza
  * stato proprio collegato a una voce della guida che non sia descrittiva (un Confidente, una stanza sicura con la sua voce),
  * «ottenuto», lo stato della voce (richiesta dell'utente, 2026-10-03). `voceDaSegnare`: il pin ha almeno una voce non descrittiva
- * (`puntoDescrittivo`, che conta anche l'area del dedalo, 099). null = non citabile.
+ * (`puntoDescrittivo`, che conta anche l'area del dedalo). null = non citabile.
  */
 export function statoCitabile(tipo: string, voceDaSegnare: boolean): string | null {
   return statoDelTipo(tipo) ?? (voceDaSegnare ? 'ottenuto' : null);
@@ -158,8 +158,8 @@ export function gruppoConteggioSpillo(tipo: string): GruppoConteggioSpillo {
 export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
   return TIPI_SPILLO.filter((t) => CATEGORIA_PER_TIPO[t] === categoria);
 }
-/** A che cosa può collegarsi uno spillo di quella categoria (`null` è sempre ammesso). NON usarla nel codice vivo: serve solo alla migrazione 065
- *  (registrata, quindi invariata); il codice vivo legge `RIFERIMENTI_AMMESSI_PER_CATEGORIA`.
+/** A che cosa può collegarsi uno spillo di quella categoria (`null` è sempre ammesso). È la base di
+ *  `RIFERIMENTI_AMMESSI_PER_CATEGORIA`, che è la lista da leggere.
  *
  * Uno spostamento **porta** a una mappa (la destinazione), ma può anche **essere** un luogo o un
  * punto della Guida — la stazione è un luogo di tipo `trasporto`, la scorciatoia un punto — ed è
@@ -174,7 +174,7 @@ export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRif
 
 /** I riferimenti che un pin può avere OGGI, per categoria: come `RIFERIMENTI_PER_CATEGORIA` ma senza `attivita` (un'attività sta in un luogo,
  *  `attivita.sede_chiave`, e il pin punta al luogo; un pin vecchio che ancora cita `attivita` si legge, `TIPI_RIFERIMENTO`, ma non si scrive più).
- *  È la lista del codice vivo: `RIFERIMENTI_PER_CATEGORIA` qui sopra resta invariata perché serve solo alla migrazione 065, che è registrata. */
+ *  È la lista che il codice legge. */
 export const RIFERIMENTI_AMMESSI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRiferimento[]> = {
   ...RIFERIMENTI_PER_CATEGORIA,
   citta: ['negozio', 'luogo', 'confidente'],
@@ -342,7 +342,7 @@ export function puntoDaCollegare(tipoPunto: string): boolean {
 /**
  * Un punto della guida senza pin né stato: si legge, non si segna. Solo «Altro» (scelta dell'utente, 2026-10-01: «altro
  * niente pin»); Persona e Storia si collegano a qualunque pin e hanno lo stato.
- * Nelle aree dei dedali dei Memento (099) non ci sono voci descrittive: ogni elemento ha uno stato, anche «Altro» (scelta
+ * Nelle aree dei dedali dei Memento non ci sono voci descrittive: ogni elemento ha uno stato, anche «Altro» (scelta
  * dell'utente, 2026-10-11: «Tutti con stato»). Per questo conta anche l'area del dedalo della voce.
  * Una voce «Altro» a cui l'utente ha dato un carattere con uno stato («Permanente» o «Si ripropone», `CARATTERI_CON_STATO`) non è
  * descrittiva: si segna, ha i suoi pin e conta nel completamento come le altre (2026-10-31). Prima il carattere la metteva fra gli
@@ -356,7 +356,7 @@ export const TIPO_PUNTO_DESCRITTIVO = 'altro';
 export function puntoDescrittivo(tipoPunto: string, areaDedalo: string | null, carattere: string | null | undefined): boolean {
   return tipoPunto === TIPO_PUNTO_DESCRITTIVO && !areaDedalo && !carattereConStato(carattere);
 }
-/** La stessa regola in SQL, per la voce di `punto_interesse` con l'alias dato (colonne `tipo`, `area_dedalo_chiave`, `carattere`, 111):
+/** La stessa regola in SQL, per la voce di `punto_interesse` con l'alias dato (colonne `tipo`, `area_dedalo_chiave`, `carattere`):
  *  vera se è descrittiva. */
 export const sqlVoceDescrittiva = (alias: string): string => `(${alias}.tipo = '${TIPO_PUNTO_DESCRITTIVO}' AND ${alias}.area_dedalo_chiave IS NULL
   AND (${alias}.carattere IS NULL OR ${alias}.carattere NOT IN (${CARATTERI_CON_STATO.map((c) => `'${c}'`).join(', ')})))`;

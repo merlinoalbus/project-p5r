@@ -9,8 +9,8 @@
 // Che cosa produce, in una cartella dell'edizione dentro la cartella d'appoggio (`DEPOSITO_DIR`):
 //   - `gioco.db`        i dati di gioco chiusi: regole sui dati applicate e a zero, uid di tutti gli spilli, miniature di tutte le immagini a tutte
 //                       le larghezze, controlli di integrità superati, `VACUUM INTO` (nessun giornale WAL: `journal_mode = DELETE`), tabella `edizione`;
-//   - `partite-vuoto.db` il file delle partite con la sola struttura, ottenuto applicando le migrazioni utente a un file vuoto (nel rilascio nessun
-//                       esecutore di migrazioni: la struttura è questa e basta), con l'impronta dello schema nel manifesto;
+//   - `partite-vuoto.db` il file delle partite con la sola struttura: una copia del modello `pacchetto/partite-vuoto.db`, verificata (versione,
+//                       integrità), con l'impronta dello schema nel manifesto;
 //   - `font/`            i caratteri caricati dall'utente (nel rilascio si leggono dal volume dell'edizione);
 //   - `chiavi.json`      le chiavi di gioco che le partite citano (serve all'edizione SUCCESSIVA per il confronto di compatibilità);
 //   - `compatibilita.json` il report di compatibilità con l'edizione precedente: le chiavi citate dalle partite che non esistono più;
@@ -29,7 +29,8 @@
 //
 // **Cosa blocca l'edizione** (non viene depositata, il report dice perché): controllo di integrità non superato; i BLOCCANTI dei contenuti (condizioni
 // illeggibili o non riconosciute, JSON malformati, chiavi che non esistono comprese le violazioni delle chiavi esterne, spilli senza uid); regole sui
-// dati che alla seconda passata fanno ancora qualcosa; immagini rimaste su disco non assorbite; schema di gioco diverso da quello del codice.
+// dati che alla seconda passata fanno ancora qualcosa; una cartella «immagini» nella cartella dati (le immagini stanno nel database: quelle su disco
+// l'edizione non le porterebbe); dati di gioco a una versione diversa da quella che il codice legge.
 // Tutto il resto (regole di pesca con puntiBase diverso da 2, immagini citate e assenti, correzioni che la guida non accoglie più, chiavi sparite rispetto
 // all'edizione precedente, orfani delle partite) è un avviso: lo decide l'utente.
 //
@@ -46,10 +47,10 @@ import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { copiaSchema, getDb, nowIso, resolveDbPath } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { migrazioniUtente } from '../db/migrazioniUtente/index.js';
+import { FILE_MODELLO_PARTITE, percorsoModelloPartite } from '../db/partiteVuote.js';
+import { VERSIONE_PARTITE } from '../db/versioneSchema.js';
 import { ALGORITMO_IMPRONTA_SCHEMA, improntaSchema } from '../db/improntaSchema.js';
-import { traduciNomiSpilli } from '../db/migrations/053_nomi_spilli_in_italiano.js';
+import { traduciNomiSpilli } from './mappe/nomiSpilli.js';
 import { riallineaSpilliLuoghi } from './mappe/riallineaSpilliLuoghi.js';
 import { assegnaUidMancanti } from './mappe/identitaSpillo.js';
 import { miniaturaDi, pulisciMiniatureOrfane } from './miniatureService.js';
@@ -330,7 +331,7 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     throw err;
   }
   const versioneSchemaGioco = getDb().pragma('main.user_version', { simple: true }) as number;
-  if (versioneSchemaGioco !== versioneSchemaCodice()) bloccanti.push(`Lo schema dei dati di gioco è alla versione ${versioneSchemaGioco}, il codice conosce la ${versioneSchemaCodice()}: l'edizione deve nascere da un'istanza migrata.`);
+  if (versioneSchemaGioco !== versioneSchemaCodice()) bloccanti.push(`I dati di gioco sono alla versione ${versioneSchemaGioco}, il codice legge la ${versioneSchemaCodice()}: l'edizione deve nascere da dati alla versione del codice.`);
 
   // ---- 2. regole sui dati, sulla copia; 3. miniature di tutte le immagini ----
   let regole: EsitoEdizioneDto['regole'];
@@ -343,8 +344,7 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     lavoro.pragma('busy_timeout = 5000');
 
     avanza('regole');
-    // Le stesse regole che l'avvio applica, MA una per una: `assorbiImmaginiSuDisco` guarda la cartella dati VERA dell'istanza e la sposterebbe
-    // (qui non è ammesso toccare l'istanza); la sua condizione si verifica sotto, senza agire.
+    // Le stesse regole che l'avvio applica (`regoleAllAvvio`), una per una sulla copia.
     const passata = () => ({
       spilliTradotti: traduciNomiSpilli(lavoro),
       spilliRiallineati: riallineaSpilliLuoghi(lavoro),
@@ -355,7 +355,7 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     const seconda = passata();
     if (Object.values(seconda).some((n) => n > 0)) bloccanti.push(`Le regole sui dati non sono a zero alla seconda passata (${JSON.stringify(seconda)}): i dati non sono stabili.`);
     if (Object.values(regole).some((n) => n > 0)) avvisi.push(`Le regole sui dati hanno corretto la copia (${JSON.stringify(regole)}): nella preparazione verranno rifatte al prossimo avvio.`);
-    if (fs.existsSync(path.join(config.dataDir, 'immagini'))) bloccanti.push('Nella cartella dati dell\'istanza c\'è ancora la cartella «immagini» (immagini su disco non assorbite nel database): l\'edizione non le conterrebbe. Riavvia la preparazione perché le assorba.');
+    if (fs.existsSync(path.join(config.dataDir, 'immagini'))) bloccanti.push('Nella cartella dati dell\'istanza c\'è una cartella «immagini»: le immagini dell\'app stanno nel database e quelle su disco l\'edizione non le conterrebbe. Carica dall\'app le immagini che servono e togli la cartella.');
 
     // R12-04: le correzioni della guida dentro i blocchi (tabella delle correzioni a zero) e fuori le fotografie della guida. Solo sulla copia.
     avanza('correzioni');
@@ -364,7 +364,7 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     // L13 (ondata 4a): le proposte «da completare» sono uno strumento della preparazione; nel rilascio il meccanismo non esiste. Solo sulla copia.
     if (haTabella(lavoro, 'proposta_conversione_voce')) {
       const aperte = (lavoro.prepare("SELECT COUNT(*) AS n FROM main.proposta_conversione_voce WHERE stato = 'aperta'").get() as { n: number }).n;
-      // La tabella è append-only (migrazione 237): sulla copia di lavoro si svuota con la funzione dedicata, che toglie e rimette il trigger.
+      // La tabella è append-only: sulla copia di lavoro si svuota con la funzione dedicata, che toglie e rimette il trigger.
       svuotaProposteConversione(lavoro);
       if (aperte > 0) avvisi.push(`${aperte} proposte «da completare» sono ancora aperte nella preparazione: l'edizione esce senza (le voci restano come sono).`);
     }
@@ -393,9 +393,9 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     if (modo !== 'delete') bloccanti.push(`Il file dell'edizione non è in modalità «delete» (${String(modo)}): il rilascio, su un volume in sola lettura, non lo aprirebbe.`);
     if ((finale.pragma('main.user_version', { simple: true }) as number) !== versioneSchemaGioco) bloccanti.push('La versione dello schema non è sopravvissuta alla compattazione.');
 
-    // ---- 5. partite-vuoto.db: le migrazioni utente su un file vuoto ----
+    // ---- 5. partite-vuoto.db: la copia verificata del modello ----
     avanza('partite-vuoto');
-    const vuoto = await creaPartiteVuoto(gioco, path.join(dir, 'partite-vuoto.db'));
+    const vuoto = await creaPartiteVuoto(path.join(dir, FILE_MODELLO_PARTITE));
 
     // ---- 6. tabella `edizione`, poi i controlli sul file finito ----
     avanza('controlli');
@@ -535,37 +535,33 @@ async function preparaMiniature(db: Database.Database): Promise<EsitoEdizioneDto
 }
 
 /**
- * Crea `partite-vuoto.db`: le migrazioni utente applicate a un file vuoto. Servono i dati di gioco accanto (alcune migrazioni li leggono), ma
- * su una COPIA scartabile dell'edizione: l'edizione stessa non viene toccata. Restituisce versione e impronta dello schema.
+ * Crea il `partite-vuoto.db` dell'edizione: una copia del modello del repository (`pacchetto/partite-vuoto.db`), verificata sulla copia
+ * stessa, aperta in sola lettura: versione uguale a `VERSIONE_PARTITE`, giornale classico (il volume dell'edizione è in sola lettura: un
+ * file in WAL non si aprirebbe), controllo di integrità. Restituisce versione e impronta dello schema.
  */
-async function creaPartiteVuoto(gioco: string, destinazione: string): Promise<{ versione: number; impronta: string }> {
-  const scartabile = `${destinazione}.main.db`;
-  await fsp.copyFile(gioco, scartabile);
-  const db = new Database(scartabile);
+async function creaPartiteVuoto(destinazione: string): Promise<{ versione: number; impronta: string }> {
+  const modello = percorsoModelloPartite();
+  if (!fs.existsSync(modello)) throw new Error(`Il modello del file delle partite manca (${modello}): l'edizione non può portare ${FILE_MODELLO_PARTITE}.`);
+  await fsp.rm(destinazione, { force: true });
+  await fsp.copyFile(modello, destinazione);
+  const db = new Database(destinazione, { readonly: true, fileMustExist: true });
   try {
-    db.pragma('foreign_keys = ON');
-    await fsp.rm(destinazione, { force: true });
-    db.prepare('ATTACH DATABASE ? AS utente').run(destinazione);
-    db.pragma('utente.journal_mode = DELETE');
-    // nessuna migrazione dei dati di gioco: si applicano soltanto quelle delle partite
-    runMigrations(db, [], migrazioniUtente);
-    const versione = db.pragma('utente.user_version', { simple: true }) as number;
-    const ultimo = migrazioniUtente.reduce((massimo, m) => Math.max(massimo, m.id), 0);
-    if (versione !== ultimo) throw new Error(`Le migrazioni delle partite si sono fermate alla ${versione} su ${ultimo}.`);
+    const versione = db.pragma('user_version', { simple: true }) as number;
+    if (versione !== VERSIONE_PARTITE) throw new Error(`Il modello del file delle partite è alla versione ${versione}, il codice legge la ${VERSIONE_PARTITE}: l'edizione non può nascere da un modello di un'altra versione.`);
+    const giornale = db.pragma('journal_mode', { simple: true });
+    if (giornale !== 'delete') throw new Error(`Il modello del file delle partite è in modalità «${String(giornale)}» invece di «delete»: il rilascio, su un volume in sola lettura, non lo aprirebbe.`);
     // L11-04: sullo schema completo delle partite, ciò che il censimento non classifica si dice nel log (avviso, non blocca l'edizione)
     try {
-      avvisaCensimentoPartite(db);
+      avvisaCensimentoPartite(db, 'main');
     } catch (err) {
       logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'censimento delle partite non riuscito (l\'edizione prosegue)');
     }
-    const controllo = db.pragma('utente.integrity_check') as Array<{ integrity_check: string }>;
+    const controllo = db.pragma('integrity_check') as Array<{ integrity_check: string }>;
     if (controllo.length !== 1 || controllo[0].integrity_check !== 'ok') throw new Error('Il file delle partite vuoto non supera il controllo di integrità.');
-    return { versione, impronta: improntaSchema(db, 'utente') };
+    // aperto da solo, il file delle partite è lo schema `main` della connessione: l'impronta dipende dal testo di creazione, non dal nome dello schema
+    return { versione, impronta: improntaSchema(db, 'main') };
   } finally {
     db.close();
-    await fsp.rm(scartabile, { force: true });
-    await fsp.rm(`${scartabile}-wal`, { force: true });
-    await fsp.rm(`${scartabile}-shm`, { force: true });
   }
 }
 

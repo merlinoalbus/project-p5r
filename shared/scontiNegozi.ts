@@ -3,9 +3,9 @@
 // ============================================================
 //
 // Il caso della guida: la Clinica di Takemi vende tutto a metà prezzo quando il Confidente della Morte arriva al rango indicato. Il prezzo
-// resta uno solo, quello dell'offerta (`articolo.prezzo`); lo sconto è un dato del negozio (`negozio.sconto_json`, migrazione 254) e il prezzo
-// scontato si calcola, non si scrive: prima della migrazione 269 era copiato a mano nelle descrizioni del catalogo («sconto 1.700¥»), e gli
-// yen automatici (decisione 18) non lo applicavano. Un solo punto lo legge per tutti: il server per gli yen e per i listini, l'interfaccia
+// resta uno solo, quello dell'offerta (`articolo.prezzo`); lo sconto è un dato del negozio (`negozio.sconto_json`) e il prezzo
+// scontato si calcola, non si scrive: le descrizioni del catalogo non lo riportano e gli
+// yen automatici (decisione 18) lo applicano. Un solo punto lo legge per tutti: il server per gli yen e per i listini, l'interfaccia
 // per dirlo accanto al prezzo.
 // ============================================================
 

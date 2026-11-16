@@ -3,25 +3,18 @@
 // ============================================================
 //
 // Da L3 un'infiltrazione (`dungeon_area`) tocca delle **Aree** del Palazzo (tabella `area` con `dungeon_chiave`), molti a molti, in
-// `infiltrazione_area` (migrazione 110): l'ordine delle aree dentro l'infiltrazione e la versione da aprire (`planimetria_iniziale`,
+// `infiltrazione_area`: l'ordine delle aree dentro l'infiltrazione e la versione da aprire (`planimetria_iniziale`,
 // null = la predefinita dell'area). È l'unica fonte del legame: `mappa_entita` di tipo area, le colonne `mappa.entita_*` e i gruppi
-// d'immagini non ci sono più (tolti da L11 · B9, migrazione 177; prima nessuno li leggeva, R3-09). «Le planimetrie di un'infiltrazione» sono quelle delle
+// d'immagini non ci sono (L11 · B9, R3-09). «Le planimetrie di un'infiltrazione» sono quelle delle
 // sue aree, nell'ordine dei legami e poi delle versioni (modifiche §1.2).
 //
 // Il modulo dipende solo dal database e dai percorsi pubblici: lo usano la scheda del Palazzo, le Aree, la guida sulle mappe,
-// l'accesso dal mondo e il pacchetto, senza richiamarsi in cerchio. Su uno schema prima della 110 (test fermi a una migrazione) la
-// tabella non c'è e le letture tornano vuote.
+// l'accesso dal mondo e il pacchetto, senza richiamarsi in cerchio.
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
-import { haTabellaMain } from '../../db/schemaMemo.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { idMappa } from './percorsiMappe.js';
-
-/** Vero se la tabella dei legami c'è (dalla 110). */
-export function conLegami(): boolean {
-  return haTabellaMain(getDb(), 'infiltrazione_area');
-}
 
 /** Un'infiltrazione che tocca un'Area. */
 export interface InfiltrazioneDellArea { chiave: string; nome: string; ordine: number }
@@ -29,7 +22,6 @@ export interface InfiltrazioneDellArea { chiave: string; nome: string; ordine: n
 /** Le infiltrazioni di ogni Area dei Palazzi (di un Palazzo solo, o di tutti), nell'ordine delle infiltrazioni nel Palazzo. */
 export function infiltrazioniDelleAree(dungeon?: string): Map<string, InfiltrazioneDellArea[]> {
   const out = new Map<string, InfiltrazioneDellArea[]>();
-  if (!conLegami()) return out;
   const righe = prepared(`SELECT ia.area_chiave AS area, i.chiave, i.nome, i.ordine FROM infiltrazione_area ia JOIN dungeon_area i ON i.chiave = ia.infiltrazione_chiave
     ${dungeon === undefined ? '' : 'WHERE i.dungeon_chiave = ?'} ORDER BY i.ordine, i.chiave`).all(...(dungeon === undefined ? [] : [dungeon])) as Array<{ area: string } & InfiltrazioneDellArea>;
   for (const r of righe) out.set(r.area, [...(out.get(r.area) ?? []), { chiave: r.chiave, nome: r.nome, ordine: r.ordine }]);
@@ -42,7 +34,6 @@ export interface AreaDellInfiltrazione { chiave: string; slug: string; nome: str
 /** Le Aree di ogni infiltrazione di un Palazzo (o di tutti), nell'ordine dei legami. */
 export function areeDelleInfiltrazioni(dungeon?: string): Map<string, AreaDellInfiltrazione[]> {
   const out = new Map<string, AreaDellInfiltrazione[]>();
-  if (!conLegami()) return out;
   const righe = prepared(`SELECT ia.infiltrazione_chiave AS inf, a.chiave, a.slug, a.nome, ia.ordine, ia.planimetria_iniziale, a.planimetria_predefinita
     FROM infiltrazione_area ia JOIN area a ON a.chiave = ia.area_chiave JOIN dungeon_area i ON i.chiave = ia.infiltrazione_chiave
     ${dungeon === undefined ? '' : 'WHERE i.dungeon_chiave = ?'} ORDER BY ia.infiltrazione_chiave, ia.ordine, a.ordine, a.chiave`).all(...(dungeon === undefined ? [] : [dungeon])) as
@@ -56,7 +47,6 @@ export function areeDelleInfiltrazioni(dungeon?: string): Map<string, AreaDellIn
 /** Le planimetrie (chiavi interne) di ogni infiltrazione di un Palazzo: tutte quelle delle sue aree, nell'ordine dei legami e delle versioni. */
 export function planimetrieDelleInfiltrazioni(dungeon: string): Map<string, Array<{ chiave: string; area: string }>> {
   const out = new Map<string, Array<{ chiave: string; area: string }>>();
-  if (!conLegami()) return out;
   const righe = prepared(`SELECT ia.infiltrazione_chiave AS inf, m.chiave, m.area_chiave AS area
     FROM infiltrazione_area ia JOIN dungeon_area i ON i.chiave = ia.infiltrazione_chiave JOIN mappa m ON m.area_chiave = ia.area_chiave
     WHERE i.dungeon_chiave = ? ORDER BY ia.infiltrazione_chiave, ia.ordine, ia.area_chiave, m.versione_ordine, m.chiave`).all(dungeon) as Array<{ inf: string; chiave: string; area: string }>;
@@ -66,7 +56,6 @@ export function planimetrieDelleInfiltrazioni(dungeon: string): Map<string, Arra
 
 /** Le infiltrazioni di una planimetria: quelle della sua Area, nell'ordine del Palazzo (vuoto senza Area o senza legami). */
 export function infiltrazioniDellaMappa(mappaInterna: string): InfiltrazioneDellArea[] {
-  if (!conLegami()) return [];
   return prepared(`SELECT i.chiave, i.nome, i.ordine FROM mappa m JOIN infiltrazione_area ia ON ia.area_chiave = m.area_chiave
     JOIN dungeon_area i ON i.chiave = ia.infiltrazione_chiave WHERE m.chiave = ? ORDER BY i.ordine, i.chiave`).all(mappaInterna) as InfiltrazioneDellArea[];
 }
@@ -74,7 +63,6 @@ export function infiltrazioniDellaMappa(mappaInterna: string): InfiltrazioneDell
 /** Le infiltrazioni di ogni planimetria con Area (chiave interna → infiltrazioni), per gli elenchi e il pacchetto. */
 export function infiltrazioniDelleMappe(): Map<string, InfiltrazioneDellArea[]> {
   const out = new Map<string, InfiltrazioneDellArea[]>();
-  if (!conLegami()) return out;
   const righe = prepared(`SELECT m.chiave AS mappa, i.chiave, i.nome, i.ordine FROM mappa m JOIN infiltrazione_area ia ON ia.area_chiave = m.area_chiave
     JOIN dungeon_area i ON i.chiave = ia.infiltrazione_chiave ORDER BY m.chiave, i.ordine, i.chiave`).all() as Array<{ mappa: string } & InfiltrazioneDellArea>;
   for (const r of righe) out.set(r.mappa, [...(out.get(r.mappa) ?? []), { chiave: r.chiave, nome: r.nome, ordine: r.ordine }]);
@@ -160,7 +148,6 @@ export function impostaLegamiInfiltrazione(dati: { infiltrazione: string; aree: 
  * righe e posizioni com'erano). Una voce che l'aveva due volte (N2) perde tutte e due le posizioni.
  */
 export function staccaInfiltrazioneDalleVoci(infiltrazione: string): void {
-  if (!conLegami()) return;
   for (const tabella of ['voce_infiltrazione', 'proposta_infiltrazione_voce'] as const) {
     const voci = prepared(`SELECT DISTINCT voce_uid FROM ${tabella} WHERE infiltrazione_chiave = ?`).pluck().all(infiltrazione) as string[];
     prepared(`DELETE FROM ${tabella} WHERE infiltrazione_chiave = ?`).run(infiltrazione);
@@ -175,7 +162,6 @@ export function staccaInfiltrazioneDalleVoci(infiltrazione: string): void {
 
 /** Toglie un'area da ogni infiltrazione e ricompatta l'ordine delle aree rimaste in ciascuna (dentro la transazione di chi chiama). */
 export function staccaAreaDalleInfiltrazioni(area: string): void {
-  if (!conLegami()) return;
   const toccate = prepared('SELECT infiltrazione_chiave FROM infiltrazione_area WHERE area_chiave = ?').pluck().all(area) as string[];
   prepared('DELETE FROM infiltrazione_area WHERE area_chiave = ?').run(area);
   for (const inf of toccate) {

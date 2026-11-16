@@ -32,7 +32,7 @@ const dettaglioPunto = z.union([
 ]);
 
 export const paramsChiaveGuida =z.object({ chiave: z.string().min(1).max(200) });
-/** Le date di un Palazzo (L13 O6-3, migrazione 308): giorni del calendario di gioco; `al`, furto e lettera null = la guida non li dà
+/** Le date di un Palazzo (L13 O6-3): giorni del calendario di gioco; `al`, furto e lettera null = la guida non li dà
  *  (l'esistenza del giorno e l'ordine apertura ≤ furto ≤ lettera ≤ scadenza li controlla `impostaFinestra`). */
 const consigliPalazzo = { furtoConsigliato: dataGioco.nullable(), letteraEntro: dataGioco.nullable() };
 /** Un livello di gioco (1–99). */
@@ -47,7 +47,7 @@ export const bodyDungeon = z.object({
   /** L4 §8.14: la voce del boss finale del Palazzo («Modifica › Boss finale»), una voce `boss` del Palazzo; null = nessuna. */
   voceBossFinale: z.string().min(1).max(200).nullable().optional(),
 });
-/** Un'area della guida (infiltrazione o dedalo); L10-02 (382): per un dedalo dei Memento anche il totale dei timbri, un intero da 0 al tetto o
+/** Un'area della guida (infiltrazione o dedalo); L10-02:per un dedalo dei Memento anche il totale dei timbri, un intero da 0 al tetto o
  *  null (la guida non dà un numero); per un'infiltrazione il servizio lo rifiuta (`non-un-dedalo`). */
 export const bodyArea = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional(),
@@ -56,13 +56,13 @@ export const bodyArea = z.object({
 export const bodyPunto = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.punto.descrizione).optional(),
   tipo: z.enum(TIPI_PUNTO).optional(), esauribile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(),
-  /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
+  /** L'Enigma di cui la voce è un passo; null = voce dell'area. */
   contenitore: z.string().min(1).max(200).nullable().optional(),
-  /** L'area del dedalo della voce (099): solo nei dedali dei Memento. */
+  /** L'area del dedalo della voce: solo nei dedali dei Memento. */
   areaDedalo: z.string().min(1).max(200).optional(),
   /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): la sua maschera diventa il nome italiano di quella Persona. */
   persona: z.number().int().positive().optional(),
-  /** Le aree del dedalo di una Persona di un dedalo (101): si incontra in più aree. */
+  /** Le aree del dedalo di una Persona di un dedalo: si incontra in più aree. */
   areeDedalo: z.array(z.string().min(1).max(200)).max(100).optional(),
   /** L'area del Palazzo in cui spostare la voce (2026-10-12): un'altra area dello stesso Palazzo; non nei Memento. */
   area: z.string().min(1).max(200).optional(),
@@ -88,12 +88,12 @@ export const querySchedaDungeon = z.object({ partita: idParam.optional(), infilt
 // nasce dalla regola (si sceglie correggendola)
 export const bodyNuovoPunto = bodyPunto.omit({ area: true, dettagli: true, carattere: true }).extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 
-/** Un'area di un dedalo dei Memento da correggere (099): nome e dettagli. L10-02 (382): i timbri sono del dedalo (`bodyArea`); un
+/** Un'area di un dedalo dei Memento da correggere: nome e dettagli. L10-02:i timbri sono del dedalo (`bodyArea`); un
  *  `timbriTotale` qui è un campo sconosciuto e si rifiuta (400), invece di sparire in silenzio. */
 export const bodyAreaDedalo = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.areaDedalo.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.areaDedalo.descrizione).optional(),
 }).strict();
-/** Un'area nuova di un dedalo (099): nasce in fondo. */
+/** Un'area nuova di un dedalo: nasce in fondo. */
 export const bodyNuovaAreaDedalo = bodyAreaDedalo.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.areaDedalo.nome) });
 /** Una sezione nuova della guida: dove va (`dopo` un'area, `null` in cima, assente in fondo) e, se c'è, la planimetria che la contiene. */
 export const bodyNuovaArea = z.object({
@@ -156,7 +156,7 @@ export const bodyRichiesta = z.object({
   // L8-09: niente più testi di sblocco e di scadenza della guida (`disponibileDal`, `scadenza`): valgono `condizioni` e `scadenzaData`
   dedalo: z.string().min(1).max(200).nullable().optional(), areaDedalo: z.string().min(1).max(200).nullable().optional(),
   piano: z.string().trim().max(R.breve).optional(), bersaglio: bersaglio.optional(),
-  // L10-01 (381): niente più ricompense in testo né rango del Confidente (il rango che serve è una condizione di sblocco)
+  // L10-01: niente ricompense in testo né rango del Confidente (il rango che serve è una condizione di sblocco)
   confidente: z.string().min(1).max(200).nullable().optional(),
   note: z.string().trim().max(R.note).optional(),
   // L13 (ondata 3): sblocco con il vocabolario unico (la forma la verifica `normalizzaCondizioniSpillo`), scadenza e proroga come date di

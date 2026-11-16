@@ -21,7 +21,7 @@ const voce = (tipo: string) => ({ chiave: 'futaba-02/0', tipo, nome: 'Tesoro avv
 const elemento = (tipoPunto: string): SchedaContenutoGuidaDto => ({
   id: 48, uid: 'u48', tipo: 'nota', tipoNome: 'Nota', nome: 'Tesoro avvistato', colore: '#ececf1', descrizione: 'Visibile da lontano.', riferimento: { tipo: 'punto', chiave: 'futaba-02/0' },
   collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, condizioni: [], immagini: [], updatedAt: '', areaGuida: 'futaba-02',
-  // il server dà la voce sia nel dettaglio del riferimento (strato di prima) sia fra le `voci` (098): la scheda legge `voci`
+  // il server dà la voce sia nel dettaglio del riferimento (strato di prima) sia fra le `voci`: la scheda legge `voci`
   dettaglio: { tipo: 'punto', punto: voce(tipoPunto) }, voci: [voce(tipoPunto)],
 } as unknown as SchedaContenutoGuidaDto);
 

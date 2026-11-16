@@ -74,7 +74,7 @@ function conti(covo: Covo) {
 }
 
 /** La riga del progresso di una sfida nella partita: «7 di 15 cruciverba risolti in questa partita», «Persona più alta: livello 23 di 99
- *  in questa partita». Le parole vengono dal server (`unita`); senza, sono regali (il conteggio della migrazione 258). */
+ *  in questa partita». Le parole vengono dal server (`unita`); senza, sono regali (il conteggio della sfida «Benefattore»). */
 function rigaProgresso(p: NonNullable<CompletamentoDto['covo']['sfide'][number]['progresso']>): string {
   const u = p.unita ?? { una: 'regalo', tante: 'regali' };
   const dopo = p.obiettivo === 1 ? u.una : u.tante;
@@ -108,8 +108,8 @@ export function CovoPage() {
   // ondata 5 (decisione 21 b): con una partita attiva le sfide che l'app sa contare (Benefattore: i regali) dicono a che punto è la partita
   const partitaId = usePartitaStore((s) => s.attiva?.id ?? null);
   const dati = useCarica(() => getCompletamento(partitaId ?? undefined), [partitaId]);
-  // la carta verso l'Area del Covo solo quando il Covo è nel mondo della partita (dal 5 maggio, dalla condizione della sua Area,
-  // migrazione 303: richiesta dell'utente del 2026-10-29); prima dice perché. Finché l'esito non arriva la carta resta com'era.
+  // la carta verso l'Area del Covo solo quando il Covo è nel mondo della partita (dal 5 maggio, dalla condizione della sua Area:
+  // richiesta dell'utente del 2026-10-29); prima dice perché. Finché l'esito non arriva la carta resta com'era.
   const attiva = usePartitaStore((s) => s.attiva);
   const covoNelMondo = useCovoNellaPartita(partitaId, attiva);
   const covoChiuso = covoNelMondo ? !covoNelMondo.disponibile : false;

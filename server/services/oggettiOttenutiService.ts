@@ -12,17 +12,15 @@
 //   - Ondata 5 (lotto G): i turni delle attività registrati con un esito che dà oggetti (la sfida della Big Bang Burger vinta: il distintivo e i
 //     panini), una riga per oggetto del turno (`utente.oggetto_esito_turno`, scritta registrando il turno e tolta togliendolo,
 //     `oggettiDegliEsitiService`).
-//   - Ondata 5 (lotto F-bis): i doni dei Confidenti che la partita ha meritato, dal rango e dal giorno (`doniConfidenti`, regola scritta dalla
-//     migrazione 295): letti dallo stato, come le Richieste, mai copiati.
-// Le copie dello stesso oggetto si sommano nei totali. Ondata 5 (lotto F-bis): accanto, le copie USATE (`consumo_oggetto_partita`, utente 054:
-// turni con un esito che consuma e incensi dell'Isolamento; 2026-10-28, utente 055: copie restituite o vendute da una voce), con la loro origine, e per ogni oggetto le cifre delle copie (comprate, regalate,
+//   - Ondata 5 (lotto F-bis): i doni dei Confidenti che la partita ha meritato, dal rango e dal giorno (`doniConfidenti`, con la regola
+//     di ogni dono): letti dallo stato, come le Richieste, mai copiati.
+// Le copie dello stesso oggetto si sommano nei totali. Ondata 5 (lotto F-bis): accanto, le copie USATE (`consumo_oggetto_partita`:
+// turni con un esito che consuma e incensi dell'Isolamento; 2026-10-28: copie restituite o vendute da una voce), con la loro origine, e per ogni oggetto le cifre delle copie (comprate, regalate,
 // cedute, rimaste) dalla stessa lettura della scelta dell'esito e di «Regala» (`dettaglioCopie`). Sola lettura: nessuna scrittura, anche nel rilascio.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haTabellaUtente } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { verificaPartita } from './verificaPartita.js';
-import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
 import type { OggettiOttenutiDto, OggettoConsumatoDto, OggettoOttenutoDto } from '../../shared/types.js';
 import { doniConfidentiOttenuti } from './doniConfidenti.js';
@@ -32,26 +30,20 @@ import { dettaglioCopie } from './copieOggetti.js';
 /** Gli oggetti ottenuti nella partita: le righe per origine (in ordine di giorno, poi le Richieste) e i totali per oggetto. */
 export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
   verificaPartita(partitaId);
-  const catalogo = catalogoOggettiDisponibile();
-  const nome = catalogo ? 'c.nome' : 'NULL';
-  const categoria = catalogo ? 'c.categoria' : 'NULL';
-  const unisciCatalogo = (colonna: string) => (catalogo ? `LEFT JOIN main.catalogo_oggetto c ON c.chiave = ${colonna}` : '');
-  const daVoci = prepared(`SELECT o.catalogo_chiave, o.quantita, o.voce_uid, v.data, v.azione, ${nome} AS nome, ${categoria} AS categoria
-    FROM utente.oggetto_ottenuto_partita o LEFT JOIN main.voce_giornata v ON v.uid = o.voce_uid ${unisciCatalogo('o.catalogo_chiave')}
+  const daVoci = prepared(`SELECT o.catalogo_chiave, o.quantita, o.voce_uid, v.data, v.azione, c.nome AS nome, c.categoria AS categoria
+    FROM utente.oggetto_ottenuto_partita o LEFT JOIN main.voce_giornata v ON v.uid = o.voce_uid LEFT JOIN main.catalogo_oggetto c ON c.chiave = o.catalogo_chiave
     WHERE o.partita_id = ? ORDER BY v.data IS NULL, v.data, v.fascia = 'sera', v.ordine, o.creato_il, o.effetto_uid`).all(partitaId) as
     Array<{ catalogo_chiave: string; quantita: number; voce_uid: string; data: string | null; azione: string | null; nome: string | null; categoria: string | null }>;
-  const daRichieste = catalogo ? prepared(`SELECT ro.catalogo_chiave, COALESCE(ro.quantita, 1) AS quantita, r.chiave, r.nome AS richiesta_nome, c.nome, c.categoria
+  const daRichieste = prepared(`SELECT ro.catalogo_chiave, COALESCE(ro.quantita, 1) AS quantita, r.chiave, r.nome AS richiesta_nome, c.nome, c.categoria
     FROM utente.richiesta_partita rp JOIN main.richiesta r ON r.chiave = rp.richiesta_chiave
-    JOIN main.ricompensa_oggetto ro ON ro.fonte_tipo = 'richiesta' AND ro.fonte_chiave = r.chiave ${unisciCatalogo('ro.catalogo_chiave')}
+    JOIN main.ricompensa_oggetto ro ON ro.fonte_tipo = 'richiesta' AND ro.fonte_chiave = r.chiave LEFT JOIN main.catalogo_oggetto c ON c.chiave = ro.catalogo_chiave
     WHERE rp.partita_id = ? AND rp.stato = 'completata' ORDER BY r.ordine, ro.ordine, ro.catalogo_chiave`).all(partitaId) as
-    Array<{ catalogo_chiave: string; quantita: number; chiave: string; richiesta_nome: string; nome: string | null; categoria: string | null }> : [];
+    Array<{ catalogo_chiave: string; quantita: number; chiave: string; richiesta_nome: string; nome: string | null; categoria: string | null }>;
   // i turni con un esito che dà oggetti: il nome dell'attività e dell'esito si leggono da dove vivono (l'esito tolto dall'elenco resta con la chiave)
-  const daTurni = haTabellaUtente(getDb(), 'oggetto_esito_turno')
-    ? prepared(`SELECT o.catalogo_chiave, o.quantita, o.attivita_chiave, o.ordine, o.esito_chiave, a.nome AS attivita_nome, ${nome} AS nome, ${categoria} AS categoria
-      FROM utente.oggetto_esito_turno o LEFT JOIN main.attivita a ON a.chiave = o.attivita_chiave ${unisciCatalogo('o.catalogo_chiave')}
-      WHERE o.partita_id = ? ORDER BY o.creato_il, o.attivita_chiave, o.ordine, o.catalogo_chiave`).all(partitaId) as
-      Array<{ catalogo_chiave: string; quantita: number; attivita_chiave: string; ordine: number; esito_chiave: string; attivita_nome: string | null; nome: string | null; categoria: string | null }>
-    : [];
+  const daTurni = prepared(`SELECT o.catalogo_chiave, o.quantita, o.attivita_chiave, o.ordine, o.esito_chiave, a.nome AS attivita_nome, c.nome AS nome, c.categoria AS categoria
+    FROM utente.oggetto_esito_turno o LEFT JOIN main.attivita a ON a.chiave = o.attivita_chiave LEFT JOIN main.catalogo_oggetto c ON c.chiave = o.catalogo_chiave
+    WHERE o.partita_id = ? ORDER BY o.creato_il, o.attivita_chiave, o.ordine, o.catalogo_chiave`).all(partitaId) as
+    Array<{ catalogo_chiave: string; quantita: number; attivita_chiave: string; ordine: number; esito_chiave: string; attivita_nome: string | null; nome: string | null; categoria: string | null }>;
   const nomeEsito = (attivita: string, esito: string): string => esitiDellAttivita(attivita)?.esiti?.esiti.find((e) => e.chiave === esito)?.nome ?? esito;
   // i doni dei Confidenti valutati una volta sola per tutta la lettura: le righe e le copie di ogni oggetto (revisione di O11-1, prestazioni)
   const doni = doniConfidentiOttenuti(partitaId);
@@ -76,7 +68,7 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
   }
   // Ondata 5 (lotto F-bis): le copie usate, con la loro origine; un oggetto usato che la partita non ha ricevuto (comprato: il concime, gli
   // incensi, i materiali) compare comunque nei totali. Un Isolamento si annulla da qui (l'uso di un turno si toglie togliendo il turno)
-  // 2026-10-28: le copie restituite o vendute da una voce del Diario (utente 055), con il testo della voce; si annullano togliendo la spunta
+  // 2026-10-28: le copie restituite o vendute da una voce del Diario, con il testo della voce; si annullano togliendo la spunta
   const voceDi = (uid: string | null): string | null => (uid ? (prepared('SELECT azione FROM main.voce_giornata WHERE uid = ?').pluck().get(uid) as string | undefined) ?? null : null);
   const origineConsumo = (c: ReturnType<typeof consumiDellaPartita>[number]): string => {
     if (c.fonte === 'isolamento') return 'Isolamento nella Stanza di Velluto';
@@ -99,9 +91,9 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
   return { righe, totali: [...totali.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it')), consumi };
 }
 
-/** Nome e categoria di una scheda del catalogo (la chiave, se il catalogo non c'è o l'oggetto non c'è più). */
+/** Nome e categoria di una scheda del catalogo (la chiave, se l'oggetto non c'è più). */
 function scheda(chiave: string): { nome: string; categoria: string | null } {
-  const r = catalogoOggettiDisponibile() ? prepared('SELECT nome, categoria FROM main.catalogo_oggetto WHERE chiave = ?').get(chiave) as { nome: string; categoria: string } | undefined : undefined;
+  const r = prepared('SELECT nome, categoria FROM main.catalogo_oggetto WHERE chiave = ?').get(chiave) as { nome: string; categoria: string } | undefined;
   return { nome: r?.nome ?? chiave, categoria: r?.categoria ?? null };
 }
 const nomeConfidente = (chiave: string): string => (prepared('SELECT nome FROM main.confidente WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave;

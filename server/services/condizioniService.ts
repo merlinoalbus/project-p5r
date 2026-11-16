@@ -44,7 +44,7 @@ function negoziConProgramma() {
 /** Le attività che si contano per volte svolte: le sole che una condizione «svolta almeno n volte» può leggere. */
 function attivitaConteggiabili() {
   // contata per volte come la intendono i turni (`attivitaConTurni`): un valore fuori catalogo vale quello del tipo
-  // `SELECT *`: su uno schema di prima della 233 `esiti_json` non c'è (nessun esito); si portano fuori solo i campi dichiarati
+  // si portano fuori solo i campi dichiarati
   return (prepared('SELECT * FROM attivita WHERE nascosto = 0 ORDER BY nome').all() as Array<{
     chiave: string; nome: string; tipo: string; tracciamento: string; effetti_json: string | null; esiti_json?: string | null;
     confidente_chiave?: string | null; pesca_regola_chiave?: string | null

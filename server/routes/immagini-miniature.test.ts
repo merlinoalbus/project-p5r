@@ -10,7 +10,7 @@ import Database from 'better-sqlite3';
 import sharp from 'sharp';
 import request from 'supertest';
 import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
+import { VERSIONE_GIOCO } from '../db/versioneSchema.js';
 import { createApp } from '../bootstrap.js';
 import { eliminaImmagine, eliminaImmaginiAmbito, leggiImmagine, manifestoPredefinite, salvaImmagine } from '../services/immaginiService.js';
 import { miniaturaDi, pulisciMiniatureOrfane, riscaldaMiniature, versioneMiniatura } from '../services/miniatureService.js';
@@ -212,31 +212,26 @@ describe('miniature delle immagini del database', () => {
   });
 
   it('10 — il pacchetto porta lo schema delle miniature ma mai le righe', async () => {
-    // un pacchetto dalla 108 in su con una miniatura dentro (lo script del pacchetto le svuota: qui si prova che anche una rimasta
-    // non entra). La copia del pacchetto dei test si porta allo schema di oggi con le migrazioni vere. Prima si fingeva la 108 creando a
-    // mano la sola tabella delle miniature: così le migrazioni fino alla 108 restavano saltate (fra queste la 99), e quelle dalla 111 in
-    // poi, che leggono le colonne aggiunte dalla 99, fallivano
+    // un pacchetto con una miniatura dentro (lo script del pacchetto le svuota: qui si prova che anche una rimasta non entra), su una
+    // copia del pacchetto dei test
     const cartella = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-miniature-'));
     const file = path.join(cartella, 'gioco.db');
     try {
       fs.copyFileSync(percorsoPacchettoDb(), file);
       const p = new Database(file);
-      p.exec("ATTACH DATABASE ':memory:' AS utente");
-      runMigrations(p);
-      p.exec('DETACH DATABASE utente');
       // una miniatura «valida» (sorgente con contenuto, stessa versione): la pulizia delle orfane non la toglierebbe, quindi se
       // manca dopo il caricamento è perché le righe non sono entrate
       const sorgente = p.prepare('SELECT id, created_at FROM immagine ORDER BY id LIMIT 1').get() as { id: number; created_at: string };
       p.prepare("UPDATE immagine SET contenuto = x'01' WHERE id = ?").run(sorgente.id);
       p.prepare("INSERT INTO immagine_miniatura VALUES (?, 160, ?, 'image/webp', 1, 1, 1, x'00', 'x')").run(sorgente.id, versioneMiniatura(sorgente.created_at));
-      expect(p.pragma('user_version', { simple: true })).toBeGreaterThanOrEqual(108);
+      expect(p.prepare('SELECT COUNT(*) FROM immagine_miniatura').pluck().get()).toBe(1);
       p.close();
       closeDb();
       const db = initDb(':memory:');
       caricaPacchetto(db, file, { conImmagini: true });
       expect(db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'immagine_miniatura'").get()).toBeTruthy();
       expect(db.prepare('SELECT COUNT(*) FROM immagine_miniatura').pluck().get()).toBe(0);
-      expect(db.pragma('user_version', { simple: true })).toBeGreaterThanOrEqual(108);
+      expect(db.pragma('user_version', { simple: true })).toBe(VERSIONE_GIOCO);
     } finally {
       closeDb();
       fs.rmSync(cartella, { recursive: true, force: true });

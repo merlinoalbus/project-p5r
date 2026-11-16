@@ -25,13 +25,13 @@ describe('API città e attività', () => {
     // compare piu' in questo elenco — si raggiungono dalla pagina dei Memento, che e' il posto
     // giusto. Il totale e' salito da 82 a 84 con l'area del Tokyo Skytree (Asakusa) e Takenoko
     // Street (Harajuku): due libri dichiaravano di sbloccarle e nel catalogo non c'erano, quindi
-    // leggere il libro non poteva far comparire niente. Da 84 a 91 con i sette posti che la
-    // migrazione 072 ha aggiunto come sedi di negozi e distributori che non ne avevano una.
+    // leggere il libro non poteva far comparire niente. Sono 91, con i sette posti
+    // che fanno da sede a negozi e distributori.
     expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(91);
     expect(q.some((x) => x.chiave === 'mementos')).toBe(false);
     expect(q.every((x) => x.luoghi > 0 && x.verificati <= x.luoghi)).toBe(true);
     const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
-    // 22 della guida + Taisho Store, il venditore ambulante e il distributore del sottopasso (072)
+    // 22 della guida + Taisho Store, il venditore ambulante e il distributore del sottopasso
     expect(s.luoghi).toHaveLength(25);
     const u = s.luoghi.find((l) => l.nome === 'Untouchable')!;
     expect(u).toMatchObject({ chiave: 'shibuya/untouchable', tipo: 'negozio', orari: expect.objectContaining({ fasce: ['sera'] }), verificato: true });
@@ -91,7 +91,7 @@ describe('API città e attività', () => {
     expect(a.film).toHaveLength(30);
     expect(a.attivita.find((x) => x.chiave === 'freccette')).toMatchObject({ quartiereChiave: 'kichijoji', fascia: 'sera', costo: 800, verificato: true });
     expect(a.lavori.every((x) => x.tipo === 'lavoro')).toBe(true);
-    // L13 (O7-4, migrazione 313): la Dote di un libro la dicono gli effetti
+    // L13 (O7-4): la Dote di un libro la dicono gli effetti
     const conDote = (l: LibroDto) => l.effetti.some((e) => e.effetto.famiglia === 'dote');
     expect(a.libri.filter(conDote).length).toBeGreaterThanOrEqual(20);
     expect(a.libri.every((l) => !l.fatto)).toBe(true);

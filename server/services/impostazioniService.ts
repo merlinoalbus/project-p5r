@@ -2,21 +2,20 @@
 // impostazioniService — backup e ripristino dell'istanza (Fase 15.29)
 // ============================================================
 //
-// Esportazione: il file SQLite dei dati di gioco (`getDb().backup()`, l'unica API consistente con il WAL attivo, la stessa del backup
-// di avvio; dalla 079 con dentro anche le immagini) oppure l'ISTANZA COMPLETA in uno ZIP (i due database + i caratteri), perché i
-// caratteri vivono su disco in DATA_DIR e le partite in un file a parte.
-// Reimportazione: il file SOSTITUISCE l'istanza. Prima si valida (intestazione SQLite, integrity_check, schema riconoscibile),
-// poi si salva una copia di sicurezza di ciò che c'è ora, si chiude la connessione, si mettono al loro posto i file, si riapre e si
-// rieseguono le migrazioni (e si assorbono le immagini rimaste su disco dai backup di prima della 079). Se qualcosa fallisce
-// dopo la chiusura, la copia di sicurezza viene ripristinata e l'app resta utilizzabile. Da L13-01 la riapertura è la stessa di «Importa»
-// (`riapriDopoSostituzione`): conversione delle condizioni `manuale` e regole dell'avvio se cambia il file di gioco, effetti di stato mai
-// applicati fra le proposte, specchio dei pin, registro Tanaka.
+// Esportazione: il file SQLite dei dati di gioco (`getDb().backup()`, l'unica API consistente con il WAL attivo; ha dentro anche
+// le immagini) oppure l'ISTANZA COMPLETA in uno ZIP (i due database + i caratteri), perché i caratteri vivono su disco in DATA_DIR
+// e le partite in un file a parte.
+// Reimportazione: il file SOSTITUISCE l'istanza. Prima si valida (intestazione SQLite, integrity_check, contenuto riconoscibile,
+// **versione uguale a quella che il codice legge**: un backup di un'altra versione dell'app non si ripristina, nessuna conversione),
+// poi si salva una copia di sicurezza di ciò che c'è ora, si chiude la connessione, si mettono al loro posto i file e si riapre. Se
+// qualcosa fallisce dopo la chiusura, la copia di sicurezza viene ripristinata e l'app resta utilizzabile. La riapertura è la stessa
+// di «Importa» (`riapriDopoSostituzione`): regole dell'avvio se cambia il file di gioco,
+// effetti di stato mai applicati fra le proposte, specchio dei pin, registro Tanaka.
 //
-// **Tutto passa da file, mai da buffer interi** (rilievi F19/P3' della verifica completa, 2026-10-03). Prima un ripristino teneva in
-// memoria il file letto, poi ogni voce dello ZIP, e riscriveva il database due volte (una copia per verificarlo, una per installarlo):
-// con ~300 MB voleva dire più di un GB in memoria e minuti di disco. Ora il file arriva una volta sola in una cartella di lavoro
-// locale (`data/tmp`), lì si estraggono le voci a flusso e si verificano, e il database verificato prende il posto di quello
-// dell'istanza con un `rename` (stesso disco: atomico, nessuna copia in più).
+// **Tutto passa da file, mai da buffer interi** (rilievi F19/P3' della verifica completa, 2026-10-03): con ~300 MB tenere in memoria
+// il file e le voci dello ZIP vorrebbe dire più di un GB. Il file arriva una volta sola in una cartella di lavoro locale (`data/tmp`),
+// lì si estraggono le voci a flusso e si verificano, e il database verificato prende il posto di quello dell'istanza con un `rename`
+// (stesso disco: atomico, nessuna copia in più).
 // ============================================================
 
 import fs from 'node:fs';
@@ -28,17 +27,15 @@ import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { closeDb, copiaSchema, getDb, initDb, nowIso, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { haTabella } from '../db/colonne.js';
-import { runMigrations, type Migration } from '../db/migrationRunner.js';
-import { verificaArchivioLegacy, type OrigineContinuita } from '../db/acquistiLegacy.js';
+import { creaPartiteDalModelloSeMancano } from '../db/partiteVuote.js';
+import { VERSIONE_GIOCO, VERSIONE_PARTITE, messaggioVersioneDiversa, verificaVersioni, type FileVersionato } from '../db/versioneSchema.js';
+import { verificaArchivioLegacy } from '../db/acquistiLegacy.js';
 import { statoTanakaDi } from './tanakaStatoListino.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
 import { verificaCollegamentiPescaImportati } from './vincoliAttivitaPesca.js';
-import { migrations } from '../db/migrations/index.js';
-import { migrazioniUtente } from '../db/migrazioniUtente/index.js';
-import { assorbiImmaginiSuDisco, regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
-import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
+import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
 import { proponiStatiMancanti } from './statiMancantiService.js';
 import { riallineaStati } from './mappe/statiGuida.js';
 import { ESTENSIONI_BACKUP, copiaDalDeposito, elencaDeposito as elencaCartella } from './depositoService.js';
@@ -48,16 +45,15 @@ import type { EsitoRipristinoDto, StatoIstanzaDto } from '../../shared/types.js'
 
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
-/** I due file dell'istanza dentro lo ZIP; il terzo è il vecchio file unico, che si accetta ancora in ripristino. */
+/** I due file dell'istanza dentro lo ZIP. */
 const NOME_DB_NELLO_ZIP = 'database/gioco.db';
 const NOME_PARTITE_NELLO_ZIP = 'database/partite.db';
-const NOME_DB_LEGACY_NELLO_ZIP = 'database/project-p5r.db';
 
-/** Che cosa contiene un file SQLite dell'app: solo dati di gioco, solo partite, o il vecchio file unico. */
-export type ContenutoDatabase = 'gioco' | 'partite' | 'unico';
+/** Che cosa contiene un file SQLite dell'app: i dati di gioco oppure le partite (mai tutti e due: stanno in due file). */
+export type ContenutoDatabase = FileVersionato;
 
 /** Il percorso di una cartella dell'istanza dentro `DATA_DIR` (non la crea). */
-export function cartella(nome: 'immagini' | 'font' | 'backups'): string {
+export function cartella(nome: 'font' | 'backups'): string {
   return path.join(config.dataDir, nome);
 }
 
@@ -79,11 +75,11 @@ export function statoIstanza(): StatoIstanzaDto {
   const dbPath = resolveDbPath();
   const partitePath = resolvePartitePath();
   const inMemoria = !fs.existsSync(dbPath);
-  // le immagini stanno nel database (079): si contano le righe con contenuto
+  // le immagini stanno nel database: si contano le righe con contenuto
   const immagini = getDb().prepare('SELECT COUNT(*) AS file, COALESCE(SUM(byte), 0) AS byte FROM immagine WHERE contenuto IS NOT NULL').get() as { file: number; byte: number };
   const caratteri = fileDellaCartella(cartella('font'));
   const partite = (getDb().prepare('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n;
-  // snapshot di avvio (file .db) e copie di ripristino (cartelle): l'utente le vede come un'unica riserva
+  // copie sciolte (file .db) e copie di ripristino (cartelle): l'utente le vede come un'unica riserva
   const copie = fs.existsSync(cartella('backups')) ? fs.readdirSync(cartella('backups'), { withFileTypes: true }).filter((v) => (v.isFile() && v.name.endsWith('.db') && !v.name.endsWith('.partite.db')) || (v.isDirectory() && v.name.startsWith('prima-del-ripristino-'))).length : 0;
   return {
     versioneSchema: getDb().pragma('main.user_version', { simple: true }) as number,
@@ -198,15 +194,15 @@ function testaDelFile(percorso: string, n: number): Buffer {
 }
 
 /** Il file è un database SQLite riconoscibile? Solo controlli sul contenuto, nessun effetto sul file. Esportata per i test e per
- *  l'importazione del pacchetto. Restituisce che cosa contiene: dati di gioco, partite, o il vecchio file unico (entrambi). */
+ *  l'importazione del pacchetto. Restituisce che cosa contiene: dati di gioco oppure partite. */
 export function verificaDatabase(percorso: string): ContenutoDatabase {
   return esaminaDatabase(percorso).tipo;
 }
 
 /**
- * Come `verificaDatabase`, con in più la versione dello schema (`user_version`) del file. Il file si apre dov'è, in sola lettura:
- * prima se ne scriveva una copia in un temporaneo solo per poterlo aprire. Aprire un database in WAL può creare i suoi giornali:
- * si tolgono quelli che prima non c'erano.
+ * Come `verificaDatabase`, con in più la versione (`user_version`) del file. Il file si apre dov'è, in sola lettura. Aprire un
+ * database in WAL può creare i suoi giornali: si tolgono quelli che prima non c'erano. Un file che contiene sia i dati di gioco sia
+ * le partite non è un file di questa app (stanno in due file): 400.
  */
 function esaminaDatabase(percorso: string): { tipo: ContenutoDatabase; versione: number } {
   const testa = testaDelFile(percorso, 100);
@@ -224,9 +220,10 @@ function esaminaDatabase(percorso: string): { tipo: ContenutoDatabase; versione:
       if (!gioco && !partite) {
         throw httpErrors.badRequest('database-estraneo', 'Il database caricato non è un\'istanza di project-p5r: mancano le tabelle di base.');
       }
-      const versione = db.pragma('user_version', { simple: true }) as number;
-      if (versione < 1) throw httpErrors.badRequest('database-estraneo', 'Il database caricato non ha uno schema riconoscibile (nessuna migrazione applicata).');
-      return { tipo: gioco && partite ? 'unico' : gioco ? 'gioco' : 'partite', versione };
+      if (gioco && partite) {
+        throw httpErrors.badRequest('database-gioco-e-partite', 'Il database caricato contiene insieme i dati di gioco e le partite: questa versione dell\'app li tiene in due file (gioco.db e partite.db) e un file unico non si può ripristinare né importare.');
+      }
+      return { tipo: gioco ? 'gioco' : 'partite', versione: db.pragma('user_version', { simple: true }) as number };
     } finally {
       db.close();
     }
@@ -250,33 +247,28 @@ function svuotaCartella(dir: string): void {
 /** Copie di ripristino conservate in `data/backups` (le più recenti). */
 const COPIE_DI_RIPRISTINO = 3;
 
-/** Copia di sicurezza dell'istanza attuale prima di sostituirla (database + immagini + caratteri); tiene solo le ultime copie. */
+/** Copia di sicurezza dell'istanza attuale prima di sostituirla (i due database, con le immagini dentro quello di gioco, e i caratteri); tiene solo le ultime copie. */
 export async function copiaDiSicurezza(): Promise<string> {
   const dir = path.join(cartella('backups'), `prima-del-ripristino-${timbro()}`);
   fs.mkdirSync(dir, { recursive: true });
   await copiaSchema(getDb(), path.join(dir, config.dbFileName), 'main');
   await copiaSchema(getDb(), path.join(dir, config.partiteFileName), 'utente');
-  for (const nome of ['immagini', 'font'] as const) {
-    const base = cartella(nome);
-    if (fs.existsSync(base)) fs.cpSync(base, path.join(dir, nome), { recursive: true });
-  }
+  if (fs.existsSync(cartella('font'))) fs.cpSync(cartella('font'), path.join(dir, 'font'), { recursive: true });
   const vecchie = fs.readdirSync(cartella('backups'), { withFileTypes: true })
     .filter((v) => v.isDirectory() && v.name.startsWith('prima-del-ripristino-')).map((v) => v.name).sort().reverse();
   for (const stale of vecchie.slice(COPIE_DI_RIPRISTINO)) fs.rmSync(path.join(cartella('backups'), stale), { recursive: true, force: true });
   return dir;
 }
 
-/** Rimette l'istanza salvata prima del ripristino: database (con i suoi giornali) e cartelle dei file. La copia resta dov'è. */
+/** Rimette l'istanza salvata prima del ripristino: i due database (senza i giornali di quelli sostituiti) e la cartella dei caratteri. La copia resta dov'è. */
 async function ripristinaCopiaDiSicurezza(dir: string): Promise<void> {
   const dbSalvato = path.join(dir, config.dbFileName);
   if (fs.existsSync(dbSalvato)) await installaDatabase(dbSalvato, resolveDbPath(), 'copia');
   const partiteSalvate = path.join(dir, config.partiteFileName);
   if (fs.existsSync(partiteSalvate)) await installaDatabase(partiteSalvate, resolvePartitePath(), 'copia');
-  for (const nome of ['immagini', 'font'] as const) {
-    svuotaCartella(cartella(nome));
-    const salvata = path.join(dir, nome);
-    if (fs.existsSync(salvata)) fs.cpSync(salvata, cartella(nome), { recursive: true });
-  }
+  svuotaCartella(cartella('font'));
+  const caratteriSalvati = path.join(dir, 'font');
+  if (fs.existsSync(caratteriSalvati)) fs.cpSync(caratteriSalvati, cartella('font'), { recursive: true });
 }
 
 /** Porta su disco il contenuto di un file già scritto (un `rename` dopo un crash non deve lasciare un file vuoto). */
@@ -326,38 +318,34 @@ export async function installaDatabase(sorgente: string, dbPath: string, modo: '
   for (const coda of ['-wal', '-shm']) await fsp.rm(`${dbPath}${coda}`, { force: true });
 }
 
-/** Toglie un file di database con i suoi giornali. */
-function rimuoviDatabase(dbPath: string): void {
-  for (const coda of ['', '-wal', '-shm']) fs.rmSync(`${dbPath}${coda}`, { force: true });
-}
-
-/** Riapre la connessione e riporta l'app in servizio: migrazioni, immagini rimaste su disco (backup di prima della 079), cache in memoria. */
-export function riapriIstanza(origine: OrigineContinuita = 'continuita-migrazione'): void {
+/**
+ * Riapre la connessione e riporta l'app in servizio: un file delle partite senza tabelle nasce dal modello, i due file devono essere
+ * alla versione che il codice legge (altrimenti lancia: chi chiama torna alla copia di sicurezza), poi i vincoli fra attività e
+ * la cache in memoria.
+ */
+export function riapriIstanza(): void {
   const db = initDb();
-  runMigrations(db, undefined, undefined, origine);
+  creaPartiteDalModelloSeMancano(db);
+  verificaVersioni(db);
   verificaCollegamentiAttivitaImportati(db);
   verificaCollegamentiPescaImportati(db);
-  assorbiImmaginiSuDisco(db);
   invalidaCacheDiGioco();
 }
 
 /**
  * L13-01: la via unica con cui un file di gioco o di partite messo al posto di quello di prima entra in servizio, per «Importa» (solo il file
- * di gioco, `pacchettoGiocoService`) e per il ripristino dell'istanza da un backup (qui sotto). Prima il ripristino si fermava alla riapertura
- * e al controllo del registro Tanaka: un backup vecchio teneva le condizioni `manuale` non convertite, e regole dell'avvio, effetti di stato
- * mai applicati e specchio dei pin aspettavano il riavvio successivo.
- *  - riapertura con le migrazioni (`riapriIstanza`);
- *  - se è cambiato il file di gioco: le condizioni `manuale` rimaste nei backup convertite in avvisi e le regole dell'avvio, rigide (un errore
- *    riporta alla copia di sicurezza, come all'importazione; solo all'avvio sono tolleranti);
+ * di gioco, `pacchettoGiocoService`) e per il ripristino dell'istanza da un backup (qui sotto):
+ *  - riapertura con la verifica delle versioni (`riapriIstanza`);
+ *  - se è cambiato il file di gioco: le regole dell'avvio, rigide (un errore riporta alla copia di sicurezza, come all'importazione; solo
+ *    all'avvio sono tolleranti);
  *  - gli effetti di stato mai applicati fra le proposte delle partite, tollerante come all'avvio (il prossimo avvio li riprova);
  *  - lo specchio delle voci con pin rifatto con la funzione unica;
  *  - il registro delle decisioni Tanaka integro, o errore (e chi chiama torna alla copia di sicurezza).
- * Restituisce le condizioni convertite. Chiamata a connessione chiusa, con il lucchetto dell'istanza in mano.
+ * Chiamata a connessione chiusa, con il lucchetto dell'istanza in mano.
  */
-export function riapriDopoSostituzione({ origine, gioco, operazione }: { origine: OrigineContinuita; gioco: boolean; operazione: 'importazione' | 'ripristino' }): string[] {
-  riapriIstanza(origine);
+export function riapriDopoSostituzione({ gioco, operazione }: { gioco: boolean; operazione: 'importazione' | 'ripristino' }): void {
+  riapriIstanza();
   const db = getDb();
-  const condizioniConvertite = gioco ? convertiCondizioniDatabaseImportato(db) : [];
   if (gioco) regoleAllAvvio(db, 'rigido');
   // L13 (decisione 19): gli effetti di stato del gioco sulle voci già spuntate e mai applicati entrano nell'elenco da approvare delle partite (mai
   // applicati da soli). Servizio accessorio: il censimento è una transazione sola, e un suo errore non annulla la sostituzione; il log lo dice
@@ -375,15 +363,14 @@ export function riapriDopoSostituzione({ origine, gioco, operazione }: { origine
   // L7-TANAKA-IMPORT: il registro delle decisioni arriva integro, o si torna alla copia di sicurezza (un registro rotto non si installa)
   const tanaka = statoTanakaDi(db);
   if (!tanaka.registroIntegro) throw httpErrors.conflict('registro-tanaka-non-integro', `Il registro delle decisioni Tanaka ${operazione === 'importazione' ? 'del pacchetto' : 'del backup'} non è integro: ${tanaka.problemi.join(' ')}`);
-  return condizioniConvertite;
 }
 
 /**
- * Destinazione di una voce dello ZIP dentro la cartella dati, oppure null se il nome porta fuori.
- * Il controllo è sul percorso RISOLTO, non sul nome: su Windows anche «\» separa, quindi «immagini/..\..\fuori» uscirebbe.
+ * Destinazione di una voce `font/…` dello ZIP dentro la cartella dei caratteri, oppure null se il nome porta fuori.
+ * Il controllo è sul percorso RISOLTO, non sul nome: su Windows anche «\» separa, quindi «font/..\..\fuori» uscirebbe.
  */
-function destinazioneSicura(prefisso: 'immagini' | 'font', nome: string): string | null {
-  const base = cartella(prefisso);
+function destinazioneSicura(nome: string): string | null {
+  const base = cartella('font');
   const risolto = path.resolve(config.dataDir, nome.replace(/\\/g, '/'));
   const relativo = path.relative(base, risolto);
   if (!relativo || relativo.startsWith('..') || path.isAbsolute(relativo)) return null;
@@ -429,9 +416,9 @@ function richiediIstanzaSuDisco(): void {
 }
 
 /**
- * Sostituisce l'istanza con un file locale (database `.db` o ZIP dell'istanza) e riapre l'app sui dati nuovi: le migrazioni
- * vengono rieseguite, le cache in memoria invalidate. In caso di errore si ripristina la copia di sicurezza. Il file `sorgente`
- * resta com'è: se ne lavora una copia.
+ * Sostituisce l'istanza con un file locale (database `.db` o ZIP dell'istanza) e riapre l'app sui dati nuovi, con le cache in
+ * memoria invalidate. I database devono essere alla versione che il codice legge. In caso di errore si ripristina la copia di
+ * sicurezza. Il file `sorgente` resta com'è: se ne lavora una copia.
  */
 export async function ripristinaIstanza(sorgente: string): Promise<EsitoRipristinoDto> {
   return ripristinaDaCopia((file) => fsp.copyFile(sorgente, file));
@@ -460,11 +447,12 @@ async function ripristinaDaCopia(copia: (destinazione: string) => Promise<void>)
   }
 }
 
-/** Uno schema più nuovo di quello che il codice conosce non si ripristina: le migrazioni non farebbero nulla e il codice girerebbe su
- *  tabelle che non sa leggere. È la stessa regola dell'importazione del pacchetto (`pacchetto-troppo-nuovo`). */
-function schemaNonPiuNuovo(versione: number, elenco: readonly Migration[], quale: string): void {
-  const codice = elenco.reduce((max, m) => Math.max(max, m.id), 0);
-  if (versione > codice) throw httpErrors.badRequest('database-troppo-nuovo', `Il database ${quale} ha lo schema ${versione}, più nuovo di quello che questa versione dell'app sa leggere (${codice}): aggiorna l'app prima di ripristinarlo.`);
+/** Si ripristina solo un database alla versione che il codice legge: un backup di un'altra versione dell'app (più vecchia o più nuova)
+ *  porterebbe tabelle che il codice non sa leggere, e nessuna conversione lo porta a quella attesa. È la stessa regola dell'importazione
+ *  del pacchetto (`pacchetto-di-altra-versione`). */
+function richiediVersioneAttesa(versione: number, file: FileVersionato): void {
+  const attesa = file === 'gioco' ? VERSIONE_GIOCO : VERSIONE_PARTITE;
+  if (versione !== attesa) throw httpErrors.badRequest('database-di-altra-versione', `Il backup è di un'altra versione dell'app e non si può ripristinare. ${messaggioVersioneDiversa(file, versione, attesa)}`);
 }
 
 /** Estrae una voce dello ZIP; un archivio danneggiato è un errore dell'utente (400), non del server. */
@@ -482,13 +470,9 @@ async function estraiOppure400(zip: string, voce: VoceIndiceZip, destinazione: s
  */
 async function ripristinaDaFileDiLavoro(file: string, lavoro: string): Promise<EsitoRipristinoDto> {
   const zip = eZip(file);
-  // Che cosa arriva: il file di gioco, quello delle partite, o il vecchio file unico (che la
-  // migrazione 066 divide al primo avvio: per questo il file delle partite esistente va tolto,
-  // altrimenti le partite del file unico non avrebbero dove andare). Sono percorsi nella cartella di lavoro.
+  // Che cosa arriva: il file di gioco, quello delle partite, o tutti e due (lo ZIP). Sono percorsi nella cartella di lavoro.
   let gioco: string | null = null;
   let partite: string | null = null;
-  let unico: string | null = null;
-  let immagini: VoceIndiceZip[] = [];
   let caratteri: VoceIndiceZip[] = [];
   if (zip) {
     let voci: VoceIndiceZip[];
@@ -499,37 +483,28 @@ async function ripristinaDaFileDiLavoro(file: string, lavoro: string): Promise<E
     }
     const voceGioco = voci.find((v) => v.nome === NOME_DB_NELLO_ZIP);
     const vocePartite = voci.find((v) => v.nome === NOME_PARTITE_NELLO_ZIP);
-    const voceUnico = voci.find((v) => v.nome === NOME_DB_LEGACY_NELLO_ZIP) ?? (voceGioco || vocePartite ? undefined : voci.find((v) => v.nome.startsWith('database/') && v.nome.endsWith('.db')));
-    if (!voceGioco && !vocePartite && !voceUnico) throw httpErrors.badRequest('zip-senza-database', 'Lo ZIP caricato non contiene il database dell\'istanza.');
-    for (const [voce, nome] of [[voceGioco, 'gioco.db'], [vocePartite, 'partite.db'], [voceUnico, 'unico.db']] as const) {
-      if (!voce) continue;
-      const destinazione = path.join(lavoro, nome);
-      await estraiOppure400(file, voce, destinazione);
-      if (nome === 'gioco.db') gioco = destinazione; else if (nome === 'partite.db') partite = destinazione; else unico = destinazione;
-    }
-    // le voci che porterebbero fuori dalla cartella dati vengono scartate, con qualunque separatore
-    immagini = voci.filter((v) => v.nome.startsWith('immagini/') && destinazioneSicura('immagini', v.nome) !== null);
-    caratteri = voci.filter((v) => v.nome.startsWith('font/') && destinazioneSicura('font', v.nome) !== null);
-  }
-  if (zip) {
-    if (gioco) {
+    if (!voceGioco && !vocePartite) throw httpErrors.badRequest('zip-senza-database', `Lo ZIP caricato non contiene i database dell'istanza (${NOME_DB_NELLO_ZIP}, ${NOME_PARTITE_NELLO_ZIP}).`);
+    if (voceGioco) {
+      gioco = path.join(lavoro, 'gioco.db');
+      await estraiOppure400(file, voceGioco, gioco);
       const e = esaminaDatabase(gioco);
-      if (e.tipo === 'partite') throw httpErrors.badRequest('database-estraneo', 'Il file dei dati di gioco dello ZIP contiene solo partite.');
-      schemaNonPiuNuovo(e.versione, migrations, 'dei dati di gioco');
+      if (e.tipo !== 'gioco') throw httpErrors.badRequest('database-estraneo', 'Il file dei dati di gioco dello ZIP contiene solo partite.');
+      richiediVersioneAttesa(e.versione, 'gioco');
     }
-    if (partite) {
+    if (vocePartite) {
+      partite = path.join(lavoro, 'partite.db');
+      await estraiOppure400(file, vocePartite, partite);
       const e = esaminaDatabase(partite);
-      if (e.tipo === 'gioco') throw httpErrors.badRequest('database-estraneo', 'Il file delle partite dello ZIP contiene solo dati di gioco.');
-      schemaNonPiuNuovo(e.versione, migrazioniUtente, 'delle partite');
+      if (e.tipo !== 'partite') throw httpErrors.badRequest('database-estraneo', 'Il file delle partite dello ZIP contiene solo dati di gioco.');
+      richiediVersioneAttesa(e.versione, 'partite');
     }
-    // il file unico di prima della 066 segue la numerazione dei dati di gioco
-    if (unico) schemaNonPiuNuovo(esaminaDatabase(unico).versione, migrations, 'dell\'istanza');
+    // le voci che porterebbero fuori dalla cartella dei caratteri vengono scartate, con qualunque separatore
+    caratteri = voci.filter((v) => v.nome.startsWith('font/') && destinazioneSicura(v.nome) !== null);
   } else {
-    // un database solo: un esame decide che cosa contiene e se lo schema si può leggere
+    // un database solo: un esame decide che cosa contiene e a che versione è
     const e = esaminaDatabase(file);
-    if (e.tipo === 'gioco') { gioco = file; schemaNonPiuNuovo(e.versione, migrations, 'dei dati di gioco'); }
-    else if (e.tipo === 'partite') { partite = file; schemaNonPiuNuovo(e.versione, migrazioniUtente, 'delle partite'); }
-    else { unico = file; schemaNonPiuNuovo(e.versione, migrations, 'dell\'istanza'); }
+    richiediVersioneAttesa(e.versione, e.tipo);
+    if (e.tipo === 'gioco') gioco = file; else partite = file;
   }
 
   const salvataggio = await copiaDiSicurezza();
@@ -538,38 +513,28 @@ async function ripristinaDaFileDiLavoro(file: string, lavoro: string): Promise<E
   verificaArchivioLegacy(getDb());
   closeDb();
   try {
-    if (unico) {
-      await installaDatabase(unico, resolveDbPath(), 'sposta');
-      rimuoviDatabase(resolvePartitePath());
-    } else {
-      if (gioco) await installaDatabase(gioco, resolveDbPath(), 'sposta');
-      if (partite) await installaDatabase(partite, resolvePartitePath(), 'sposta');
-    }
-    // lo ZIP è una copia completa dell'istanza: caratteri (e immagini, nei backup di prima della 079: alla riapertura entrano nel database)
-    // vengono sostituiti in blocco, anche quando il backup non ne aveva
+    if (gioco) await installaDatabase(gioco, resolveDbPath(), 'sposta');
+    if (partite) await installaDatabase(partite, resolvePartitePath(), 'sposta');
+    // lo ZIP è una copia completa dell'istanza: i caratteri vengono sostituiti in blocco, anche quando il backup non ne aveva
     if (zip) {
-      for (const [prefisso, voci] of [['immagini', immagini], ['font', caratteri]] as const) {
-        svuotaCartella(cartella(prefisso));
-        for (const v of voci) {
-          const destinazione = destinazioneSicura(prefisso, v.nome);
-          if (!destinazione) continue;
-          await fsp.mkdir(path.dirname(destinazione), { recursive: true });
-          await estraiVoce(file, v, destinazione);
-        }
+      svuotaCartella(cartella('font'));
+      for (const v of caratteri) {
+        const destinazione = destinazioneSicura(v.nome);
+        if (!destinazione) continue;
+        await fsp.mkdir(path.dirname(destinazione), { recursive: true });
+        await estraiVoce(file, v, destinazione);
       }
     }
-    // L13-01: la stessa riapertura dell'importazione (migrazioni, conversione e regole se cambia il file di gioco, proposte, specchio dei pin, Tanaka)
-    const condizioniConvertite = riapriDopoSostituzione({ origine: 'continuita-importazione', gioco: !!(gioco || unico), operazione: 'ripristino' });
-    if (condizioniConvertite.length) logger.info({ condizioniConvertite: condizioniConvertite.length }, 'ripristino: condizioni «manuale» del backup convertite in avvisi');
+    // L13-01: la stessa riapertura dell'importazione (verifica delle versioni, regole se cambia il file di gioco, proposte, specchio dei pin, Tanaka)
+    riapriDopoSostituzione({ gioco: !!gioco, operazione: 'ripristino' });
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'ripristino-fallito', 'Ripristino');
   }
-  logger.info({ formato: zip ? 'istanza' : 'database', gioco: !!(gioco || unico), partite: !!(partite || unico), salvataggio }, 'istanza ripristinata da file');
+  logger.info({ formato: zip ? 'istanza' : 'database', gioco: !!gioco, partite: !!partite, salvataggio }, 'istanza ripristinata da file');
   return {
     formato: zip ? 'istanza' : 'database',
-    database: !!(gioco || unico),
-    partite: !!(partite || unico),
-    immagini: immagini.length,
+    database: !!gioco,
+    partite: !!partite,
     caratteri: caratteri.length,
     copiaDiSicurezza: path.basename(salvataggio),
     stato: statoIstanza(),

@@ -18,13 +18,13 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Uso durante la partita: layout tablet-first, ottimizzato anche per telefono (375 px) e desktop, bersagli touch ≥ 44 px.
 
 ## 2. Dati e fonti
-- **La fonte è il DB dell'istanza.** Le correzioni ai dati si applicano con migrazioni dirette, conservative e verificate su Royal.
+- **La fonte è il DB dell'istanza.** Le correzioni ai dati si applicano direttamente, in modo conservativo e verificate su Royal.
   Niente pannelli di riconciliazione, approvazione o «da rivedere» senza un sì esplicito dell'utente: bonificare vuol dire consolidare.
 - **Un dato, un punto di modifica**, letto da tutte le viste; niente copie a frase. Una frase che ripete una condizione strutturata
   si toglie (con archivio); quella che racconta altro resta come nota.
 - **Le condizioni sono stati della partita, mai frasi**: un vocabolario unico strutturato (`shared/condizioniSpillo.ts`) per negozi,
   articoli, spilli, luoghi, quartieri, Richieste, voci del Diario e doni; ciò che l'app non sa calcolare non si scrive come condizione.
-- Le migrazioni non distruggono il lavoro validato dall'utente: il Diario validato fino al 1° giugno e i Palazzi completati non si
+- Le correzioni non distruggono il lavoro validato dall'utente: il Diario validato fino al 1° giugno e i Palazzi completati non si
   riscrivono. Le correzioni delle voci del periodo validato si applicano direttamente, salvo (a) quelle incerte («probabile», «da
   verificare»), (b) quelle che dipendono da una scelta che solo l'utente conosce, (c) quelle che cambierebbero ciò che è già registrato
   nelle partite: queste restano proposte da decidere in «Da completare».
@@ -67,8 +67,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   vecchie sono tutte allineate («Sì, allineali tutti»); il blocco storico delle finestre della guida resta com'era. La lettera a Kamoshida e il furto sono due eventi del calendario («Separo i due eventi»): «Invio della lettera di sfida a
   Kamoshida» il 21 aprile, il giorno della voce che la invia, e «Furto del Tesoro di Kamoshida» il 22, con il confronto e la voce del furto
   (le voci validate non cambiano). «Medicina amara» si sblocca dal rango 7 di Takemi («Dal rango 7 di Takemi»): l'effetto di sblocco sta
-  sulla voce del 28 maggio, che non cambia in nient'altro, e le partite che l'avevano già spuntata ricevono lo sblocco come dalla spunta
-  («Migrazione automatica», utente 066); il rango 8 di Kawakami (voce del 19 luglio) sblocca «Le fatiche di una maid in
+  sulla voce del 28 maggio, che non cambia in nient'altro, e le partite che l'avevano già spuntata ricevono lo sblocco come dalla spunta; il rango 8 di Kawakami (voce del 19 luglio) sblocca «Le fatiche di una maid in
   cattedra» («Sì: sblocca la maid»). Il rango 1 di Akechi è una voce del Diario del 10 giugno, sera, dopo la trasmissione («Sì, aggiungi la voce»); il rango 10
   di Igor è una voce del 24 dicembre, con Impeto dell'Arcano supremo e la fusione di Vishnu («Sì, aggiungi»); l'abilità del rango 6 di Igor
   si chiama «Impeto dell'Arcano superiore», per distinguerla dal «supremo» del 10. Il Biliardo si sblocca al rango 2 di Akechi («Sì, rango 2
@@ -78,8 +77,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   19 settembre) e delle elezioni restano quelle della trama («per il momento lascia quella della trama»); le date di apertura e di scadenza
   dei Palazzi si modificano da interfaccia, in «Correggi la scheda» del Palazzo.
 - **Requisiti, date e prezzi della guida (L8-03, D4 dell'utente: «Solo i campi che l'app può usare: requisiti, date, prezzi»)**: dei testi
-  liberi di Sfide, Aiuto in battaglia, Trofei e finali e Oggetti diventano campi strutturati solo quelli che la partita sa valutare
-  (migrazione 340): lo sblocco degli Speciali (le condizioni, la frase generata; il testo della guida si vede solo dove le condizioni non ci
+  liberi di Sfide, Aiuto in battaglia, Trofei e finali e Oggetti diventano campi strutturati solo quelli che la partita sa valutare: lo sblocco degli Speciali (le condizioni, la frase generata; il testo della guida si vede solo dove le condizioni non ci
   sono), le condizioni dei boss segreti (Nuova Partita+, una nuova condizione del vocabolario letta da Partita → Modifica), i requisiti dei
   finali con il giorno entro cui valgono (il finale Royal chiede il rango 9 di Maruki entro il 17 novembre; il rango 8 di Akechi non è un
   requisito, perché la guida dice che aggiunge solo una scena), le ricette con l'arco dei Palazzi, il livello consigliato come numero (confrontato col livello della
@@ -94,27 +92,33 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   e i prezzi della pagina Oggetti diversi dal listino restano note storiche, con il listino com'è (l'utente, 01/11: «Lascia la nota»).
 - Dataset del compendio: chinhodado/persona5_calculator (Apache-2.0) con verifica incrociata su aqiu384/megaten-fusion-tool,
   attribuzioni in `NOTICE`. Il foglio Royal della negoziazione (raccolta joyce-chen, senza licenza dichiarata) è copiato nel
-  repository per scelta dell'utente, con attribuzione in `NOTICE`.
+  database di gioco per scelta dell'utente, con attribuzione in `NOTICE`.
 
 ## 3. Persistenza, pacchetto e istanze
+- **Niente migrazioni: i due file si aprono alla versione attesa**. `gioco.db` e `partite.db` portano ciascuno la propria versione
+  (`PRAGMA user_version`), e il codice ne legge una sola per file: `VERSIONE_GIOCO` e `VERSIONE_PARTITE` in
+  `server/db/versioneSchema.ts`. Un file di un'altra versione fa fermare l'avvio, con un messaggio che dice quale file e che cosa
+  fare; «Importa» e il ripristino lo rifiutano. Non c'è conversione automatica dei dati. L'avanzamento (`partite.db`) si
+  copia da solo all'avvio e ogni 6 ore in `data/backups` (le ultime 40); `gioco.db` si salva dal backup dell'istanza. Un'istanza nuova nasce dal
+  pacchetto: `pacchetto/gioco.db` per i dati di gioco (senza immagini) e `pacchetto/partite-vuoto.db` per il file delle partite. Un
+  cambio di struttura o di dati si applica a mano sui dati dell'istanza, e nello stesso cambiamento si aggiornano le due costanti e i
+  due file del pacchetto (`npm run pacchetto` rifà `gioco.db`; `partite-vuoto.db` si aggiorna a mano).
 - Dati di gioco in `gioco.db`, partite in `partite.db`, sulla stessa connessione (schema `utente`): sostituire il DB di gioco non
   tocca l'avanzamento.
 - Le immagini vivono in `gioco.db` (tabella `immagine`), tranne quelle del compendio e di `ui/`, che stanno in `public/asset/`.
 - **«Importa» sostituisce `gioco.db`** con un backup scelto dalla cartella d'appoggio del server, dopo anteprima e conferma, con una
   copia di sicurezza (ne restano 3); non unisce e non tocca `partite.db`. Il file non passa dal browser. L'esportazione
   dell'istanza deve essere sempre reimportabile **(24/10)**.
-- Il ripristino dell'istanza da un backup e «Importa» mettono in servizio il file con la stessa riapertura: migrazioni; se cambia
-  il file di gioco, le condizioni `manuale` dei backup convertite in avvisi e le regole dell'avvio, che fermano la sostituzione se non
+- Il ripristino dell'istanza da un backup e «Importa» mettono in servizio il file con la stessa riapertura, che verifica le versioni; se cambia
+  il file di gioco, le regole dell'avvio, che fermano la sostituzione se non
   riescono (si torna alla copia di sicurezza); poi gli effetti di stato mai applicati fra le proposte delle partite, lo specchio dei pin e il
   registro Tanaka integro. Il Cestino ha un solo motore di ripristino per le voci di gioco e per quelle personali.
-- Le copie di avvio di gioco e partite sono al più 7 e occupano al più 2 GiB: con file da circa 415 MB ne restano 5. Le 2 più recenti
-  con il file di gioco non vuoto restano sempre, anche sopra il tetto; l'età non toglie copie, perché dopo mesi di pausa cancellerebbe quelle utili.
-- Il pacchetto completo (con le immagini) resta fuori da git per il limite di dimensione di GitHub; niente LFS per ora.
-- **Un id di partita non si riusa (L11-04, 01/11)**: `partita` ha AUTOINCREMENT (utente 064) e il suo contatore parte dal più alto id che
+- Il backup completo dei dati di gioco (con le immagini) resta fuori da git per il limite di dimensione di GitHub; niente LFS per ora.
+- **Un id di partita non si riusa (L11-04, 01/11)**: `partita` ha AUTOINCREMENT e il suo contatore parte dal più alto id che
   il file conosca (partite, ogni colonna `partita_id`, Cestino); la partita nuova prende un id oltre anche quello. Una partita nel Cestino
   si può ripristinare anche dopo averne create altre, e l'archivio degli acquisti senza chiave esterna non si mescola con una partita nuova.
   L'archivio resta immutabile; l'unica eccezione sono le 15 righe della partita 3, che non c'era più né fra le partite né nel Cestino, tolte
-  una volta dalla utente 065 (l'utente, 01/11: «Toglile»).
+  una volta (l'utente, 01/11: «Toglile»).
 - **Censimento delle partite, solo come avviso (L11-04, decisione dell'utente del 01/11: «al massimo warning»)**: ogni tabella del file
   delle partite e ogni sua colonna dal nome di riferimento va classificata, come riferimento ai dati di gioco (`RIFERIMENTI_PARTITE`,
   controllato dall'anteprima dell'«Importa») o con il motivo per cui non lo è (`CENSIMENTO_PARTITE`). Una tabella o una colonna non
@@ -122,7 +126,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   blocca niente, e non c'è un controllo in CI.
 - **Due istanze dallo stesso codice**: preparazione (scrittura dei contenuti, un solo proprietario) e rilascio (contenuti in sola lettura,
   partite per utente). La modalità è fissata nella build (punto d'avvio `server/rilascio.ts`, `VITE_MODALITA=rilascio`), mai in una
-  variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non migra e si ferma se l'edizione non
+  variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non converte i dati e si ferma se l'edizione non
   coincide con il manifesto.
 - **Provenienza dei dati nel rilascio (D10, 01/11)**: chi gioca non vede da dove viene un dato né le note per chi lo corregge (collegamenti
   alle fonti, «da fonte secondaria», «Da verificare» delle aree, incertezze delle fonti, provenienze degli esiti della negoziazione,
@@ -162,7 +166,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   nelle rotte.
 - **Righe del server entro 300 caratteri (L11-02, 01/11)**: il codice compattato si riformatta senza cambiare l'AST (prova: confronto
   dell'albero sintattico senza posizioni e delle parole dei commenti). Restano più lunghe solo le righe fatte da un letterale (SQL,
-  messaggi, descrizioni dell'API, DDL di base); le migrazioni registrate e i test non si toccano.
+  messaggi, descrizioni dell'API, DDL di base); i test non si toccano.
 - Il client ripete da solo solo le letture (GET, HEAD, OPTIONS); nessuna scrittura si ripete in automatico, salvo `maxRetries`
   esplicito dove il servizio è provato idempotente (31/10: un acquisto ripetuto dopo una risposta persa si registrava due volte).
 - Gli errori arrivano all'utente in italiano e senza codici tecnici (offline, server che non risponde, errore del server); il dettaglio
@@ -172,14 +176,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   né il comportamento né l'aspetto; dove l'omissione o il gesto sono voluti (un valore che fa solo rileggere, un campo che prende il fuoco
   all'apertura, una finestra che raccoglie i tasti) resta una disattivazione sulla riga con il motivo, mai una regola spenta per tutti.
 - I test restano nel repository ma girano solo su richiesta, sul percorso indicato; non girano nella pipeline a ogni push.
-- Il numero di una migrazione non si riserva: si prende il primo libero al momento del commit. I test che chiamano funzioni tolte su
+- I test che chiamano funzioni tolte su
   decisione dell'utente diventano `it.skip` con un commento, non si cancellano. **(24/10)**
-- **Migrazioni registrate: una sola eccezione all'append-only (10/11)**. Una migrazione registrata si corregge solo nel ramo che non si è mai
-  potuto completare: una migrazione che si annulla non avanza `user_version` (il runner controlla le chiavi esterne dentro la transazione,
-  prima di avanzarlo), quindi nessun file ha i dati di quel ramo. È il caso, finora unico, della utente 068 (segno «ottenuto» spostato senza
-  la sua associazione: violazione di chiave esterna, avvio fermo); i suoi rami che si completavano restano identici e il loro difetto lo
-  corregge una migrazione nuova (utente 072). Ogni altra correzione va in una migrazione nuova. I timbri della utente 020 dopo la gioco 382 sono un
-  caso a sé, non una regola: il passo sta nel runner, nella transazione della 020, come quello della 015 per `produce_json`.
 - Immagini caricate: PNG, JPEG, WEBP, GIF, SVG; una per entità, la nuova sostituisce; servite con rivalidazione ETag e URL versionato,
   così una sostituzione si vede subito. Un SVG esce con una CSP `sandbox` senza script e come allegato: nell'app si vede come `<img>`,
   aperto da solo non esegue nulla (L9-01).
@@ -305,11 +303,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   disponibilità dei Confidenti, costo dei regali, note storiche, righe del catalogo, oggetti del catalogo, affinità, traduzioni). Una
   correzione si cambia con un'altra correzione; dove la copia della guida ha ancora un lettore resta come informazione (il segno
   «Modificato» o «corretta da te», «Guida: …» sotto il campo corretto, il censimento delle condizioni), e i dati che servivano solo al
-  ritorno alla guida sono tolti dalla migrazione 388, con archivio. `DELETE /api/catalogo/:tipo/:chiave` elimina solo le righe create
+  ritorno alla guida sono tolti, con archivio. `DELETE /api/catalogo/:tipo/:chiave` elimina solo le righe create
   dall'utente (luoghi e negozi vanno nel Cestino come prima): una riga della guida, corretta o no, si nasconde («Nascondi dagli
-  elenchi»). Solo una riga della guida ha la copia della guida: un'offerta che non è della guida (creata dall'utente o da una
-  migrazione con origine utente) resta tale anche quando le si collega un oggetto, e quindi si elimina come ogni riga aggiunta; la migrazione 389 ha tolto
-  la copia scritta per errore a ogni offerta la cui copia era la fotografia di una riga con origine utente. Restano il Cestino,
+  elenchi»). Solo una riga della guida ha la copia della guida: un'offerta che non è della guida (creata dall'utente) resta tale anche quando le si collega un oggetto, e quindi si elimina come ogni
+  riga aggiunta. Restano il Cestino,
   «Importa», il ripristino dell'istanza, l'annullo delle spunte del Diario, lo «Storico e ripristino» delle versioni delle Informazioni
   dei Confidenti, «Rimetti il precedente» di una voce da rivedere e il carattere di una voce dei Palazzi che torna alla regola del tipo:
   non sono un ritorno al valore della guida.
@@ -329,10 +326,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Primo richiamo delle Persona DLC gratuito (guida, «Palazzo di Kamoshida» e settimana 1), per ogni Persona DLC mai entrata in scorta nella
   partita: vale 0 nei piani (una volta sola per piano, anche se la partita non l'ha registrata: la Persona del pacchetto si evoca da sé) e
   nelle ricette. I cicli restano a prezzo pieno: il loro costo è per giro e si ripete. «Mai entrata in scorta» lo dice una riga sua
-  (`primo_richiamo_speso`, utente 073), scritta alla prima entrata e tolta solo dall'annullo della spunta che aveva aggiunto proprio
+  (`primo_richiamo_speso`), scritta alla prima entrata e tolta solo dall'annullo della spunta che aveva aggiunto proprio
   quell'esemplare: fondere o rimuovere la Persona, o cancellare la sua voce dello storico, non rende di nuovo gratuito il richiamo. Le righe
-  ricostruite dalla 073 senza l'esemplare d'ingresso (la Persona era entrata prima dell'esemplare di oggi, o è solo nello storico) restano
-  anche all'annullo; le voci dello storico già cancellate prima della 073 non si ricostruiscono.
+  ricostruite senza l'esemplare d'ingresso (la Persona era entrata prima dell'esemplare di oggi, o è solo nello storico) restano
+  anche all'annullo; le voci dello storico già cancellate non si ricostruiscono.
 - Una Persona registrata senza livello (Diario, cattura, registrazione a mano) si rievoca dal Registro al livello base, con le skill apprese
   fino a lì; il Registro non cambia.
 - I cicli si cercano e si salvano fino a 15 anelli (`shared/limitiFusione.ts`). I piani arrivano a 4 fusioni di profondità, con un tetto
@@ -373,8 +370,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   di rango 1 valgono solo se la guida le dichiara come sblocco. I requisiti non verificabili diventano eventi della partita da segnare.
 - **Un Confidente ha una data di avvio sola**: «Disponibile dal» è il requisito di rango 1 di tipo data (18 Confidenti su 23), letto dalla
   disponibilità e dalla scheda. La frase del requisito si genera dalla condizione; la colonna `testo` tiene solo ciò che la condizione non dice
-  (la nota) e, per un avviso, l'avviso stesso. Le note della guida di prima della 359 stanno nell'archivio `archivio-frasi-l11`
-  (migrazione 388): nessuna pagina le legge.
+  (la nota) e, per un avviso, l'avviso stesso. Le note della guida già sostituite stanno nell'archivio `archivio-frasi-l11`:
+  nessuna pagina le legge.
 - **Date fisse di un rango**: l'eccezione `solo-date-rango` dice in quali giorni un rango si può fare, al posto dei giorni della settimana. La
   usa il Rango 7 di Ryuji, con le 24 date del suo messaggio nella guida. L'avvio del Rango 10 di Kawakami («il primo giorno di scuola dopo il
   Rango 9») non si sa calcolare: resta nelle note, e il calcolo non cambia.
@@ -490,7 +487,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   calcolato in lettura, mai salvato, con un solo punto di calcolo (`letteraDelPalazzo`, `shared/datePalazzo.ts`). Il termine scritto prevale
   sempre (Madarame). Shido ha il 12/12 scritto, perché la guida fa cadere lettera e furto nello stesso giorno; Maruki non ha lettera, perché la
   guida non la nomina. **(09/11)**
-- **Pin e voci dei Palazzi non validati**: un pin si collega a una voce con una migrazione solo se l'abbinamento è univoco nei due versi e
+- **Pin e voci dei Palazzi non validati**: un pin si collega a una voce solo se l'abbinamento è univoco nei due versi e
   riscontrato sulla guida, e mai se una partita ha già uno stato su quel pin o su quella voce; gli altri restano all'editor con il motivo
   annotato. Una voce doppia della guida diventa «Racconto» invece di essere fusa. **(09/11)**
 - Iweleth è un dedalo, ma i suoi forzieri e mini-boss tengono il tipo che avevano da Palazzo; le altre voci convertite restano Trama. **(09/11)**
@@ -504,7 +501,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - **Voci di racconto con pin**: una voce «Storia» (o con il carattere «Racconto» su un tipo che ha uno stato) collegata a dei pin ha lo stato
   dei suoi pin, come le voci permanenti e quelle che si ripropongono: segnarla letta li raccoglie, raccoglierli tutti la segna letta,
   riaprire l'una riapre gli altri. Continua a non contare nel completamento. Il segno è uno solo, quello del pin (`voceDaiPin` in
-  `server/services/mappe/statiGuida.ts`). Dove i due stati erano in disaccordo (utente 074) la voce letta ha segnato raccolti i suoi pin, e
+  `server/services/mappe/statiGuida.ts`). Dove i due stati erano in disaccordo la voce letta ha segnato raccolti i suoi pin, e
   la voce con i pin già tutti raccolti è risultata letta; una voce non letta con solo una parte dei pin raccolti resta «in corso». Dopo
   un'importazione o un ripristino delle partite vale il segno dei pin, come per le altre voci con pin. **(13/11)**
 - **Elenchi dell'editor delle mappe a partire dal posto in cui si è**: nelle condizioni di un pin, in una mappa di un Palazzo (o dei
@@ -552,9 +549,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   per cui la guida non dà un numero (Qimranut, Chemdah, Iweleth) non contano i timbri e lo dicono, senza valori inventati. Nessun totale
   generale si impone: la scheda dei Memento dice una volta, come informazione, la somma dei dedali (153) e il totale dichiarato (123); il 150
   della guida sta solo nel blocco `timbri-dei-dedali` e nella sfida del Covo «Timbri ovunque», che lo chiede per il premio. I timbri contano nel completamento del dedalo, uno per timbro, e nessuna voce di Trama ripete il loro numero.
-  I raccolti per area di un file delle partite rimasto indietro passano al dedalo senza perdite: anche prima della utente 020, quelli delle
-  aree che un totale l'avevano (il runner li porta al dedalo nella transazione della 020, che toglie solo quelli che toglieva già).
-- **Eligor nei Memento (scelta dell'utente del 10/11: «Solo a Chemdah»)**: il Cavaliere bellicoso sta solo nel Dedalo di Chemdah, come la «Guida
+ - **Eligor nei Memento (scelta dell'utente del 10/11: «Solo a Chemdah»)**: il Cavaliere bellicoso sta solo nel Dedalo di Chemdah, come la «Guida
   ai Memento» (r.287); la pagina di Aiyatsbus che lo elenca (r.125) non vale. Il Palazzo di Kamoshida non cambia.
 - **Requisiti di Palazzo delle Richieste (Q9, 09/11)**: valgono le pagine dei Dedali; il Palazzo serve a raggiungere il bersaglio, quindi sta fra
   le condizioni per completare la Richiesta, non fra quelle che la sbloccano. La pagina «Richieste nei Memento» dà solo date e ranghi.
@@ -571,7 +566,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   pannello dell'Area né «Schermate di riferimento» nell'editor.
 - Posizionare un luogo su una planimetria dà l'Area solo a un luogo che non ne ha una. Un luogo che sta in un'altra Area dello stesso
   quartiere non si sposta: il server risponde `luogo-di-altra-area` e l'Area si cambia dal modulo del luogo.
-- Un luogo si colloca da una migrazione solo se tutti i suoi pin indicano una sola Area del suo quartiere. Libreria Nagiuri, Odaiba Seaside Park
+- Un luogo si colloca solo se tutti i suoi pin indicano una sola Area del suo quartiere. Libreria Nagiuri, Odaiba Seaside Park
   e Stazione di Shibuya restano da collocare: il pin della prima sta sull'illustrazione del quartiere, le altre due non hanno pin.
 - Lo sblocco di un quartiere è solo la sua condizione (`quartiere.condizioni_json`) con gli inviti (decisione dell'utente del 9/11).
   Nella conversione delle frasi un quartiere conta come datato se la sua condizione contiene una data: Ikebukuro, Odaiba e Maihama non
@@ -580,8 +575,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 ## 11. Negozi, oggetti, regali e attività
 - **Magatama psichico**: il Magatama da 150 danni psicocinetici (6.000 ¥ da Tanaka) si chiama «Magatama psichico», come nel gioco e
   nella pagina del Palazzo di Kaneshiro; «Magatama divino», il nome della pagina Oggetti della guida (da cui è nata la scheda) e del
-  listino dei negozi speciali, resta come nome alternativo della stessa scheda, e la ricerca la trova con entrambi (migrazione
-  390). **(15/11)**
+  listino dei negozi speciali, resta come nome alternativo della stessa scheda, e la ricerca la trova con entrambi. **(15/11)**
 - **Listino a gruppi**: un listino con più di 12 articoli non è un elenco solo, e non si pagina: «che cosa sto guardando» si sceglie
   in un punto solo per livello (uno corto resta l'elenco con i filtri: tessere delle categorie, «Per chi», stato e disponibilità).
   Lungo o corto lo decide il listino intero, non ciò che resta dopo un filtro. In alto la ricerca e, con una partita, il segmento
@@ -629,8 +623,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   «Altro» da scegliere per un negozio).
 - Eccezione dichiarata al «nessun riferimento» delle strutture del listino condiviso (L2-08): i nomi di `negozio_luogo_extra`,
   `negozio_sede_spillo` e `negozio_sede_foto` restano solo nel registro delle fonti tolte (`server/db/fontiTolte.ts`) e fra le etichette
-  del Cestino (`cestinoService.ts`), oltre che nelle migrazioni registrate, perché li leggono le voci
-  del Cestino registrate prima della 354 e l'anteprima di «Importa» di un backup vecchio, che porta quelle tabelle con le loro righe (il
+  del Cestino (`cestinoService.ts`), perché li leggono le voci
+  del Cestino già registrate con quei nomi e l'anteprima di «Importa» di un backup vecchio, che porta quelle tabelle con le loro righe (il
   backup del 7/11: 4, 4 e 62 righe, mostrate come «sedi del listino», «sedi confermate dei pin», «copie di partenza delle sedi dei
   listini»). Il ripristino dal Cestino salta le loro righe con il registro delle fonti tolte; nessun servizio le legge né le scrive.
 - Luogo, punti vendita e listini si modificano in una finestra sola, «Il posto», aperta da «Modifica» del luogo (anche dalla sua carta
@@ -655,20 +649,19 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   Confidenti, yen, Fortuna, letture, consumi, sblocchi), modellati con i tipi di effetto dell'app.
 - Scorta dei negozi: l'offerta torna secondo la regola di rifornimento dell'articolo (dalla guida o, dove la guida tace, dell'utente);
   si barra solo il pezzo unico. Per i distributori pezzi, rifornimento e condizioni («2 pezzi, il lunedì, non con l'ondata di calore né
-  con la notte torrida», col segno «da verificare» e l'origine della guida) sono una **regola comune** in un punto solo (`regola_tipo_negozio`,
-  migrazione 372), modificata da «Il posto»: un'offerta che la segue la cambia con lei (e, se era un dato della guida, diventa
+  con la notte torrida», col segno «da verificare» e l'origine della guida) sono una **regola comune** in un punto solo (`regola_tipo_negozio`), modificata da «Il posto»: un'offerta che la segue la cambia con lei (e, se era un dato della guida, diventa
   «corretta», con l'originale conservato); un'offerta che ha valori propri è un'eccezione della sua riga, e torna alla regola con un
   gesto. Che un'offerta segua la regola lo dice l'uguaglianza dei valori: un'eccezione con gli stessi valori della regola la segue.
   Un'offerta nuova di un distributore prende dalla regola solo i campi che non dice: pezzi o rifornimento mandati vuoti (nessun limite
   dichiarato, nessuna regola) restano vuoti e l'offerta nasce eccezione, come la scelta «Fai un'eccezione» e la copia di un'eccezione.
-- Un acquisto fatto in una sede aggiuntiva di un distributore è della macchina che quella sede è diventata (utente 068): la riga del
-  registro, e il segno «ottenuto» con la sua valutazione durevole se lo portava. La macchina con acquisti e senza segno lo riceve (utente 072):
+- Un acquisto fatto in una sede aggiuntiva di un distributore è della macchina che quella sede è diventata: la riga del
+  registro, e il segno «ottenuto» con la sua valutazione durevole se lo portava. La macchina con acquisti e senza segno lo riceve:
   un'offerta con acquisti è sempre ottenuta.
 - Gli orari di un punto vendita con sede sono quelli del suo luogo; un punto vendita ha orari propri solo come eccezione (oggi il negozio
   del Palazzo di Niijima, senza sede). Gli orari scritti sui negozi e non letti (Untouchable, Big Bang Burger, Mercante Sakai) sono in
-  archivio (373).
+  archivio.
 - Un'offerta collegata a un oggetto del catalogo ne prende nome, categoria e «per chi»: le sue colonne restano vuote (nome vuoto,
-  categoria «altro»), anche collegando un'offerta che aveva i suoi; valgono solo per un'offerta senza legame (376, con i valori di prima
+  categoria «altro»), anche collegando un'offerta che aveva i suoi; valgono solo per un'offerta senza legame (con i valori di prima
   in archivio). Un'offerta che perde il legame (scollegata, o con l'oggetto eliminato) tiene il nome, la categoria e il «per chi» che
   mostrava, presi dall'oggetto in quel momento: da lì sono suoi.
 - Un legame fra una fonte (voce, ricompensa, ricetta, regalo, offerta) e un oggetto si applica subito: non esistono proposte di
@@ -700,8 +693,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   Bonus a caso o senza note documentate (bagno con la pioggia, Coraggio in biblioteca, Caffè bollente e Sandwich al Diner) restano in
   parole; il bagno vale per giorno della settimana, salvo l'esito dichiarato dalla voce.
 - Voci del Diario e attività: una voce si collega all'attività quando ne nomina una sola; due attività in alternativa («X o Y») restano
-  senza collegamento, due fatte entrambe hanno un turno ciascuna. Delle 38 voci lasciate dalla 312: 7 collegate, 4 già collegate, 27
-  senza collegamento (gru, alternative, elementi che non sono attività), ognuna con il motivo nell'audit della migrazione 333.
+  senza collegamento, due fatte entrambe hanno un turno ciascuna. Le voci senza collegamento (gru, alternative, elementi che non sono attività) restano così.
 - Doni dei Confidenti: arrivano da soli nella partita quando la loro regola vale (rango massimo, relazione romantica), letti dalla regola
   anche nelle partite già avviate. I doni «se fidanzata» (pegni del 24 dicembre, cioccolati del 14 febbraio, dolci) arrivano solo
   con la relazione con quella Confidente; i giri choco del 15 febbraio con il rango massimo e senza relazione con lei («restare amici»).
@@ -714,7 +706,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Big Bang Burger: le voci si collegano all'articolo della sfida; la frase di sblocco resta come nota dell'attività. **(24/10)**
 - Lavori con il quiz o il bouquet (Triple Seven, Rafflesia): le Doti e la paga stanno solo negli esiti, come a Ore no Beko; l'esito si sceglie
   alla spunta di una voce nuova, le spunte già date non cambiano. Il «dove» di un'attività nel registro è il nome della sede. Vale anche
-  per un'installazione nuova dal pacchetto iniziale (Triple Seven con `origine = 'seed'`, migrazione 387).
+  per un'installazione nuova dal pacchetto iniziale (Triple Seven con `origine = 'seed'`).
 - Dove le due pagine della guida concordano sulle date, un articolo le segue (Razione militare: dal 17/4 al 14/8 e dal 7/12 al 19/12). Requisiti e
   clienti del Crossroads restano come sono finché non si verifica in gioco. Un piatto senza dati non dice che i dati mancano: la colonna Prezzo
   ed Effetto compaiono solo se almeno un piatto li ha.

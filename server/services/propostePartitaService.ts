@@ -41,8 +41,8 @@ export function leggiOggettoRegistro(raw:string,contesto='registro'):Record<stri
   const x=leggiJsonRegistro<unknown>(raw,contesto);if(!x||typeof x!=='object'||Array.isArray(x))throw httpErrors.conflict('registro-non-valido',`Il ${contesto} non contiene un oggetto riconoscibile: nessun dato viene azzerato.`);return x as Record<string,unknown>;
 }
 
-/** L13 (decisione 3, utente 047): `richiesta` = gli yen di una Richiesta completata, `chiave` = la chiave della Richiesta. */
-/** R12-01/7 (utente 062): `turno` = le Doti di un turno registrato con il + del contatore, `chiave` = «<attività>:<uid del turno>». */
+/** L13 (decisione 3): `richiesta` = gli yen di una Richiesta completata, `chiave` = la chiave della Richiesta. */
+/** R12-01/7:`turno` = le Doti di un turno registrato con il + del contatore, `chiave` = «<attività>:<uid del turno>». */
 type Causa = { tipo: 'acquisto' | 'voce' | 'pesca' | 'richiesta' | 'turno'; chiave: string };
 /** La chiave di una Richiesta come la scrive `richiesteService` (slug, al più 200 caratteri). */
 const CHIAVE_RICHIESTA = /^[a-z0-9][a-z0-9._-]{0,199}$/i;
@@ -108,7 +108,7 @@ function noteDellaRicevuta(legacy: unknown, chiave: string, delta: number): 1 | 
 
 function targetCausa(partita: number, causa: Causa): Target[] {
   if(causa.tipo==='turno'){
-    // R12-01/7 (utente 062): le Doti del turno registrato con il + del contatore, attive finché il turno c'è (`turno_partita.uid` della causa):
+    // R12-01/7:le Doti del turno registrato con il + del contatore, attive finché il turno c'è (`turno_partita.uid` della causa):
     // i punti sono quelli che il turno ha registrato (`effetto_lettura_partita`, con la Fortuna del momento). Tolto il turno con il −, i benefici
     // restano descritti dalle righe di prima, non più attivi: la proposta non decisa si chiude, quella applicata ha la sua inversa (come le voci)
     const {attivita,uid}=parteTurno(causa.chiave);

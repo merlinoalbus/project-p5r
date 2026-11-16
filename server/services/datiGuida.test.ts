@@ -2,7 +2,6 @@
 // Test datiGuida — i blocchi della guida analizzati una volta, condivisi, congelati e buttati quando i dati cambiano (F22/R1)
 // ============================================================
 
-import Database from 'better-sqlite3';
 import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { bloccoGuidaDi, datiGuida, finestreDaDati, finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
@@ -48,7 +47,7 @@ describe('datiGuida', () => {
     expect(ombre().filter((o) => o.areaChiave === conArea.areaChiave)).toEqual([]);
   });
 
-  it('le finestre dei Palazzi sono quelle con un inizio; una trascrizione illeggibile vale «nessuna finestra»', () => {
+  it('le finestre dei Palazzi sono quelle con un inizio; un blocco della guida illeggibile vale null', () => {
     const f = finestreDungeon();
     expect(f.get('kamoshida')?.dal).toMatch(/^\d{2}-\d{2}$/);
     expect(finestreDungeon()).toBe(f);
@@ -58,24 +57,10 @@ describe('datiGuida', () => {
     const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").pluck().get() as string;
     prepared("UPDATE dati_guida SET json = '{rotto' WHERE chiave = 'finestre-dungeon'").run();
     try {
-      invalidaDatiGuida();
-      expect(finestreDungeon().size).toBe(0);
       expect(bloccoGuidaDi(getDb(), 'finestre-dungeon')).toBeNull();
     } finally {
       prepared("UPDATE dati_guida SET json = ? WHERE chiave = 'finestre-dungeon'").run(riga);
       invalidaDatiGuida();
-    }
-  });
-
-  it('bloccoGuidaDi legge da un database qualunque, anche senza la tabella', () => {
-    const vuoto = new Database(':memory:');
-    try {
-      expect(bloccoGuidaDi(vuoto, 'finestre-dungeon')).toBeNull();
-      vuoto.exec("CREATE TABLE dati_guida (chiave TEXT PRIMARY KEY, json TEXT); INSERT INTO dati_guida VALUES ('x', '{\"a\":1}')");
-      expect(bloccoGuidaDi(vuoto, 'x')).toEqual({ a: 1 });
-      expect(bloccoGuidaDi(vuoto, 'y')).toBeNull();
-    } finally {
-      vuoto.close();
     }
   });
 });

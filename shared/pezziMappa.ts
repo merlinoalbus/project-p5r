@@ -1,5 +1,5 @@
 // ============================================================
-// pezziMappa (condiviso) — la geometria dei pezzi delle planimetrie (102), uguale per server e visore
+// pezziMappa (condiviso) — la geometria dei pezzi delle planimetrie, uguale per server e visore
 // ============================================================
 //
 // Un pezzo è una zona rettangolare dell'immagine (`sorgente`, in pixel) posata altrove (`posizione`: l'angolo in alto a sinistra

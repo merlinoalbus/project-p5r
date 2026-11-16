@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Due oggetti «a riga» del registro delle correzioni (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne `origine`,
-// `seed_json`, `updated_at` della migrazione 213), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
+// `seed_json`, `updated_at`), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
 //   - `persona` (259 righe, chiave = id): il livello, l'Arcano, le cinque statistiche di base e le skill con i loro livelli. Le skill viaggiano fra registro e
 //     editor come testi «<nome della skill> @ <livello>» (livello 0 = innata) oppure «<nome> @ risveglio|rango|terza-forma» (le skill che non si imparano a un
 //     livello): è una codifica di trasporto che l'utente non vede mai (`skillPersonaLogica`). Si riscrive l'elenco intero in `persona_skill`. Le affinità si correggono dal loro editor (`affinitaPersonaService`) e non stanno qui; non si correggono l'identità
@@ -116,8 +116,8 @@ function idDeiNomiPersona(nomi: ValoreCampoCorrezione | undefined): number[] {
 
 // ---- Compatibilità con le fotografie salvate dal codice precedente ----
 // Fino alla decisione «Solo da Traduzioni» la skill aveva un campo `effetto_it` (la resa italiana): nelle fotografie già salvate si ignora
-// (`normalizzaGuida`), perché non è più un campo e la scheda non lo mostra. La traccia `~traduzioni` di allora serviva solo al ritorno ai valori
-// della guida, che non c'è più (decisione dell'utente del 10/11): la migrazione 388 la toglie dalle fotografie, con archivio.
+// (`normalizzaGuida`), perché non è più un campo e la scheda non lo mostra. Non c'è una traccia `~traduzioni`: serviva solo al ritorno ai valori
+// della guida, che non esiste (decisione dell'utente del 10/11).
 const CAMPO_ESCLUSO = 'effetto_it';
 
 const skill: DefRiga = {

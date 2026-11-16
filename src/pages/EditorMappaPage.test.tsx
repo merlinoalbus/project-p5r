@@ -19,9 +19,9 @@ const api = vi.hoisted(() => ({
   aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
 aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
-  // le voci della guida di un pin (098): quelle collegabili e il collegamento (lo stesso della guida)
+  // le voci della guida di un pin: quelle collegabili e il collegamento (lo stesso della guida)
   getVociCollegabili: vi.fn(), collegaPinAlPunto: vi.fn(),
-  // i pezzi della planimetria (102) e le loro copie (103)
+  // i pezzi della planimetria e le loro copie
   creaPezzoMappa: vi.fn(), eliminaPezzoMappa: vi.fn(), creaCopiaPezzoMappa: vi.fn(), aggiornaCopiaPezzoMappa: vi.fn(), eliminaCopiaPezzoMappa: vi.fn(),
 }));
 vi.mock('../services/api', (vero) => moduloApi(vero, {
@@ -327,7 +327,7 @@ describe('EditorMappaPage', () => {
     expect(vociSelettore('Al: giorno')).toHaveLength(30);
   });
 
-  it('«Voci della guida» (098): «Aggiungi voce» collega una voce del Palazzo, «Scollega» la toglie; ogni gesto si salva e rilegge la mappa', async () => {
+  it('«Voci della guida»: «Aggiungi voce» collega una voce del Palazzo, «Scollega» la toglie; ogni gesto si salva e rilegge la mappa', async () => {
     /** Una voce «Storia» di Kamoshida non segnata, con chiave e nome dati. */
     const voce = (chiave: string, nome: string) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', areaDedalo: null, stato: null });
     const pin: SpilloDto = { ...nota, id: 22, tipo: 'infiltrazione', tipoNome: 'Infiltrazione', nome: 'Punto di infiltrazione', voci: [voce('kamoshida-01/0', 'Infiltrati nel castello')] };
@@ -361,14 +361,14 @@ describe('EditorMappaPage', () => {
     expect(form.queryByRole('group', { name: /Voci della guida/ })).toBeNull();
   });
 
-  it('uno spostamento che è di una voce della Guida la mostra: la scheda non risulta modificata e il salvataggio non tocca la voce, che sta nel campo suo (094)', async () => {
+  it('uno spostamento che è di una voce della Guida la mostra: la scheda non risulta modificata e il salvataggio non tocca la voce, che sta nel campo suo', async () => {
     const scorciatoia: SpilloDto = { ...nota, id: 21, tipo: 'scorciatoia', tipoNome: 'Scorciatoia', nome: 'Condotto', voci: [{ chiave: 'kamoshida-04/5', tipo: 'scorciatoia', nome: 'Condotto', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', areaDedalo: null, stato: null }] };
     api.getMappa.mockResolvedValue({ ...base, spilli: [scorciatoia] });
     api.aggiornaSpillo.mockResolvedValue(scorciatoia);
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Scorciatoia: Condotto' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Condotto' }));
-    // le voci della guida del pin (098), con «Scollega»
+    // le voci della guida del pin, con «Scollega»
     expect(within(form.getByRole('list', { name: 'Voci della guida del pin' })).getByText('Condotto')).toBeInTheDocument();
     expect(form.getByRole('button', { name: 'Scollega la voce Condotto' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Salva spillo' })).toBeDisabled();
@@ -422,7 +422,7 @@ describe('EditorMappaPage', () => {
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Shibuya centro' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salva mappa' }));
     await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', { nome: 'Shibuya centro', tipo: 'quartiere', genitore: 'tokyo', ordine: 0, note: '' }));
-    // L11 (R11-02/8, migrazione 210): «Scarica dalla guida» non c'è più nemmeno sul quartiere (scarico tolto su decisione dell'utente);
+    // L11 (R11-02/8): «Scarica dalla guida» non c'è più nemmeno sul quartiere (scarico tolto su decisione dell'utente);
     // la sezione File esporta e importa il JSON delle mappe
     expect(screen.queryByRole('button', { name: 'Scarica dalla guida' })).toBeNull();
     fireEvent.click(screen.getByRole('button',{name:'File'}));
@@ -442,7 +442,7 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(api.eliminaMappa).toHaveBeenCalledWith('citta-shibuya'));
   });
 
-  // Superato dal lotto L11 (R11-02/8, migrazione 210): il pulsante e lo scarico della pianta del quartiere sono tolti su decisione dell'utente.
+  // Superato dal lotto L11 (R11-02/8): il pulsante e lo scarico della pianta del quartiere sono tolti su decisione dell'utente.
   it.skip('O9: su una planimetria d\'area «Scarica dalla guida» non c\'è (la rotta delle piante d\'area non esiste più); su un quartiere scarica la sua pianta', async () => {
     api.getMappa.mockResolvedValue({ ...base, chiave: 'kamoshida-02', nome: 'Sala centrale', tipo: 'area', genitore: null, radiceDi: null });
     monta();
@@ -547,14 +547,14 @@ describe('EditorMappaPage', () => {
     expect(palette.queryByRole('button', { name: 'Distributore' })).toBeNull();
   });
 
-  // ---- I pezzi della planimetria (102, 2026-10-14) ----
+  // ---- I pezzi della planimetria (2026-10-14) ----
   // In jsdom la tela misura 0×0 e lo zoom è 1: il punto (cx, cy) dello schermo è il pixel (cx + 500, cy + 250) della mappa 1000×500.
   const conImmagine: MappaDto = { ...base, immagineUrl: '/pianta.png' };
   type Copia = MappaDto['pezzi'][number]['copie'][number];
   /** Una copia del pezzo 31; `extra` sovrascrive. */
   const copia = (extra: Partial<Copia> = {}): Copia => ({ id: 41, uid: '4'.repeat(32), pezzoId: 31, etichetta: '', posizione: { x: 300, y: 200 }, rotazione: 0, specchio: { orizzontale: false, verticale: false }, condizioni: [], ordine: 0, updatedAt: 'u1', ...extra });
   const pezzo: MappaDto['pezzi'][number] = { id: 31, uid: '3'.repeat(32), nome: 'Muro mobile', sorgente: { x: 100, y: 450, larghezza: 120, altezza: 40 }, ordine: 0, updatedAt: 'u1', copie: [copia()] };
-  /** Lo stesso pezzo con due copie (103): la seconda ha un'etichetta, una rotazione e una condizione. */
+  /** Lo stesso pezzo con due copie: la seconda ha un'etichetta, una rotazione e una condizione. */
   const conDueCopie: MappaDto['pezzi'][number] = { ...pezzo, copie: [copia(), copia({ id: 42, uid: '5'.repeat(32), etichetta: 'Ala est', posizione: { x: 700, y: 100 }, rotazione: 90, ordine: 1, condizioni: [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }] })] };
   /** Apre la sezione «Pezzi» dell'editor. */
   const apriPezzi = async () => fireEvent.click(await screen.findByRole('button', { name: 'Pezzi' }));
@@ -638,7 +638,7 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(useNotificationStore.getState().notifications.map((n) => n.message)).toContain('Era l’ultima copia: il pezzo è stato eliminato e la sua zona torna visibile nella mappa.'));
   });
 
-  it('le copie (103): l\'elenco le raggruppa sotto il pezzo; «Aggiungi copia» ne posa una accanto, con rotazione, specchio e condizioni; si eliminano una copia o il pezzo intero, con conferma', async () => {
+  it('le copie: l\'elenco le raggruppa sotto il pezzo; «Aggiungi copia» ne posa una accanto, con rotazione, specchio e condizioni; si eliminano una copia o il pezzo intero, con conferma', async () => {
     api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [conDueCopie] });
     api.creaCopiaPezzoMappa.mockResolvedValue(copia({ id: 43, uid: '6'.repeat(32), posizione: { x: 724, y: 124 }, rotazione: 90, ordine: 2 }));
     api.eliminaCopiaPezzoMappa.mockResolvedValue({ pezzoEliminato: false });
@@ -743,7 +743,7 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Sostituire l’immagine di base?' })).toBeNull());
   });
 
-  // Superato dal lotto L11 (R11-02/8, migrazione 210): il pulsante e lo scarico della pianta del quartiere sono tolti su decisione dell'utente.
+  // Superato dal lotto L11 (R11-02/8): il pulsante e lo scarico della pianta del quartiere sono tolti su decisione dell'utente.
   it.skip('«Scarica dalla guida» su un quartiere con dei pezzi chiede la stessa conferma (L1, F5: 409): confermando scarica con «eliminaPezzi»', async () => {
     useNotificationStore.setState({ notifications: [] });
     api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [pezzo] });
@@ -904,8 +904,8 @@ it('«Apri l’arrivo» sta in cima al pannello dello spillo, prima dei campi', 
 
 // ---- Confermare il nome di una mappa mai rivista (2026-09-13) ----
 //
-// Chi il nome l'aveva già corretto prima della 082 non aveva più niente da cambiare: il testo era
-// già giusto, «Salva» restava spento e in alto continuava a leggersi il nome dell'estrazione.
+// Chi ha il nome già giusto deve poterlo confermare: senza, «Salva» resterebbe spento e in alto
+// continuerebbe a leggersi il nome dell'estrazione.
 const nonRivista: MappaDto = { ...base, nome: 'Sottopasso', nomeRivisto: false, area: { chiave: 'citta/shibuya/sottopasso', contenitore: { tipo: 'quartiere' as const, chiave: 'shibuya', nome: 'Shibuya' }, slug: 'sottopasso', nome: 'Sottopasso', versioneEtichetta: 'planimetria completa', versioneOrdine: 1, predefinita: false, casa: '/guida/citta/shibuya/sottopasso' }, versione: { etichetta: 'planimetria completa', ordine: 1 } };
 
 it('una mappa mai rivista dice quale nome si legge in alto e lascia «Salva» attivo per confermarlo', async () => {

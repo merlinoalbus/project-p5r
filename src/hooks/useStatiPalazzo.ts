@@ -28,7 +28,7 @@ export function useStatiPalazzo(dati: DatiScheda, chiave: string, partitaId: num
   const [versioneStati, setVersioneStati] = useState(0);
   const aggiornaPunto = (nuovo: PuntoInteresseDto) => {
     dati.imposta((attuale) => {
-      // nei Memento una voce è un elemento della sua area del dedalo (099): aree, dedalo e anello seguono subito
+      // nei Memento una voce è un elemento della sua area del dedalo: aree, dedalo e anello seguono subito
       const aree = attuale.aree.map((a) => (a.punti.some((p) => p.chiave === nuovo.chiave) ? ricalcolaDedalo({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) }, partitaId !== null) : a));
       return { ...attuale, aree, raccolta: attuale.tipo === 'mementos' ? raccoltaDeiDedali(aree, attuale.raccolta) : attuale.raccolta };
     });
@@ -105,12 +105,12 @@ export function useStatiPalazzo(dati: DatiScheda, chiave: string, partitaId: num
       return { ...attuale, planimetrie, aree, raccolta: { ...attuale.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.presi !== null && p.presi >= p.n).length } };
     });
     setVersioneStati((v) => v + 1);
-    // Il raccolto di un pin segna (o riapre) la sua voce della guida e, se è un passo, il suo Enigma (095): stati che qui non si
+    // Il raccolto di un pin segna (o riapre) la sua voce della guida e, se è un passo, il suo Enigma: stati che qui non si
     // possono dedurre. Si rilegge la scheda dal server, senza stato di caricamento, come dopo uno stato cambiato dalla guida.
     void rileggiInSilenzio().catch(() => { /* resta l'aggiornamento immediato */ });
   };
   /** Un dedalo cambiato dentro (stato di una Richiesta): le sue aree, il dedalo e l'anello dei Memento si ricalcolano con
-   *  la regola del server (`shared/dedali.ts`, 099). `cambia` riceve un'area del dedalo e la restituisce aggiornata. */
+   *  la regola del server (`shared/dedali.ts`). `cambia` riceve un'area del dedalo e la restituisce aggiornata. */
   const aggiornaAreeDedalo = (cambia: (a: AreaDedaloDto) => AreaDedaloDto) => {
     dati.imposta((attuale) => {
       const aree = attuale.aree.map((a) => (a.dedalo ? ricalcolaDedalo({ ...a, dedalo: { ...a.dedalo, aree: a.dedalo.aree.map(cambia) } }, partitaId !== null) : a));

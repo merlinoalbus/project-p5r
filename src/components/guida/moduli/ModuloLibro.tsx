@@ -3,8 +3,8 @@
 // ============================================================
 //
 // Un titolo solo (il nome italiano era uguale per tutti i 46 libri); «dove si compra» non si
-// scrive più: sono gli articoli delle librerie collegati al libro (migrazione 073). Che cosa fa
-// leggerlo — la Dote con le sue note, il quartiere che apre — è l'elenco degli effetti (074).
+// scrive più: sono gli articoli delle librerie collegati al libro. Che cosa fa
+// leggerlo — la Dote con le sue note, il quartiere che apre — è l'elenco degli effetti.
 // ============================================================
 
 import { EditorEffetti } from '../EditorEffetti';

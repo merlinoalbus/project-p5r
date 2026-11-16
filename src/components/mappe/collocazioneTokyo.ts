@@ -126,7 +126,7 @@ export const LINEE_TOKYO: Linea[] = [
  * non ce l'hanno nemmeno i quattro Palazzi del Meta-Nav qui sotto né il Covo, e stanno tutti sulla
  * mappa. L'utente li ha chiesti per nome — «il Covo dei Ladri e i mementos possono essere posizionati
  * in aree libere» — la loro finestra è nella voce `finestre-dungeon` di `dati_guida` (dal 7 maggio, e
- * non si chiude: migrazione 318) e la sagoma esiste. Stanno sul bordo, sotto i Palazzi del Meta-Nav,
+ * non si chiude) e la sagoma esiste. Stanno sul bordo, sotto i Palazzi del Meta-Nav,
  * che è il posto di ciò che si apre col Meta-Nav e non da una fermata. Le due domande (elenco dei
  * Palazzi e mappa) sono spiegate in `src/utils/palazzi.ts`. */
 export const RADICI_TOKYO: Record<string, Collocazione> = {

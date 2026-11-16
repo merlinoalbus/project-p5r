@@ -14,7 +14,7 @@ export function sfide(): Congelato<SfideDto> {
   const nomi = nomiCondizioniMemo();
   return { ...guida,
     battaglieSfida: { ...guida.battaglieSfida, elenco: guida.battaglieSfida.elenco.map((r) => ({ ...r, oggettiRicompensa: premi.get(r.chiave) ?? [] })) },
-    // L8-03 (migrazione 340): i requisiti che la partita sa valutare, con la loro frase; i testi dei requisiti restano
+    // L8-03: i requisiti che la partita sa valutare, con la loro frase; i testi dei requisiti restano
     bossSegreti: guida.bossSegreti.map((r) => ({ ...r, condizioni: condizioniDellaGuida(r.condizioniJson, nomi), oggettiRicompensa: premi.get(r.chiave) ?? [] })),
   };
 }

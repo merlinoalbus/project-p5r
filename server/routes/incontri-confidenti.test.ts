@@ -46,7 +46,7 @@ describe('API — gli incontri con un Confidente e la Dote del passaggio di rang
   const nota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }];
   const menoNota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: -2, note: 1 }];
 
-  it('la Dote degli incontri è un dato del Confidente per rango (088), e le azioni del passaggio non la danno più da sé', async () => {
+  it('la Dote degli incontri è un dato del Confidente per rango, e le azioni del passaggio non la danno più da sé', async () => {
     const takemi = (await request(app).get('/api/compendio/confidenti/takemi')).body.data as ConfidenteDettaglioDto;
     expect(takemi.dotiIncontro.find((r) => r.rango === 2)).toEqual({ rango: 2, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio ♪' });
     expect(takemi.dotiIncontro.find((r) => r.rango === 8)?.doti).toEqual([]);

@@ -25,10 +25,9 @@ export function richiestaRimozionePin(v: unknown): RichiestaRimozionePin | undef
   return { spilloUid: o.spilloUid, revisioneRimozioneAttesa: o.revisioneRimozioneAttesa };
 }
 
-/** Schema e righe SQL originali: assenza di tabella, NULL, JSON grezzo e BLOB restano distinti. */
+/** Schema e righe SQL originali: NULL, JSON grezzo e BLOB restano distinti. */
 function leggi(db: AppDatabase, schema: Schema, tabella: string, dove = '', valori: unknown[] = []) {
-  const t = db.prepare(`SELECT sql FROM ${schema}.sqlite_master WHERE type='table' AND name=?`).get(tabella) as { sql: string } | undefined;
-  if (!t) return { ddl: null, righe: [] as Riga[] };
+  const t = db.prepare(`SELECT sql FROM ${schema}.sqlite_master WHERE type='table' AND name=?`).get(tabella) as { sql: string };
   const colonne = db.prepare('SELECT name,pk FROM pragma_table_info(?,?) ORDER BY pk,cid').all(tabella, schema) as Array<{ name: string; pk: number }>;
   const pk = colonne.filter(c => c.pk > 0).map(c => quota(c.name));
   return { ddl: t.sql, righe: db.prepare(`SELECT * FROM ${schema}.${quota(tabella)}${dove ? ` WHERE ${dove}` : ''} ORDER BY ${pk.length ? pk.join(',') : 'rowid'}`).all(...valori) as Riga[] };
@@ -41,7 +40,6 @@ export function fotografiaRimozionePin(db: AppDatabase, id: number): {
   const pin = db.prepare('SELECT * FROM main.spillo WHERE id=?').get(id) as Riga | undefined;
   if (!pin) throw httpErrors.notFound('spillo-non-trovato', 'Il pin non è più presente.');
   if (!Number.isSafeInteger(id) || id < 1 || typeof pin.uid !== 'string' || !/^[0-9a-f]{32}$/.test(pin.uid) || typeof pin.nome !== 'string') throw conflitto('L’identità originale del pin non è riconoscibile: nessuna rimozione.');
-  if (!db.prepare("SELECT 1 FROM pragma_database_list WHERE name='utente'").get()) throw conflitto('Il file delle partite non è collegato: nessuna fotografia parziale.');
   const mappa = typeof pin.mappa_chiave === 'string' ? leggi(db, 'main', 'mappa', 'chiave=?', [pin.mappa_chiave]) : { ddl: null, righe: [] };
   const m = mappa.righe[0];
   const area = typeof m?.area_chiave === 'string' ? leggi(db, 'main', 'area', 'chiave=?', [m.area_chiave]) : { ddl: null, righe: [] };

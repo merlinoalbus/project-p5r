@@ -10,8 +10,7 @@
 // Le letture in blocco stanno in `lettureLuoghi`: una risposta con molti luoghi le fa una volta.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
@@ -32,7 +31,7 @@ import { descriviGiorni, descriviOrari, descriviOrariDelLuogo, leggiOrari, orari
 import type { LuogoDettaglioDto, LuogoDto, PresenzaLuogoDto } from '../../shared/types.js';
 import { ancoraPuntoVendita } from '../../shared/puntoVendita.js';
 
-/** Una riga di `luogo` (con le colonne della 115, assenti su uno schema di prima). */
+/** Una riga di `luogo` (con le colonne di L5). */
 export interface RigaLuogo {
   chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string;
   confidenti_json: string; piatti_json: string | null; note: string | null; fonte: string; verificato: number; origine: string;
@@ -107,11 +106,10 @@ export function lettureLuoghi(partitaId?: number, luogo?: string, stDato?: Stato
   const aree = contestoAree();
   const negozi = prepared('SELECT sede_chiave AS sede, chiave, nome FROM negozio WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ sede: string | null; chiave: string; nome: string }>;
   const sedi = negozi.flatMap((n) => n.sede !== null ? [{ ...n, sede: n.sede }] : []);
-  const conEccezione = haColonnaMain(getDb(), 'negozio', 'eccezione_orari_json');
   return {
     st: stDato !== undefined ? stDato : partitaId === undefined ? null : statoDisponibilitaPartita(partitaId),
     righe: new Map((prepared('SELECT * FROM luogo').all() as RigaLuogo[]).map((r) => [r.chiave, r])),
-    sediNegozi: new Map((prepared(`SELECT chiave, nome, sede_chiave, sblocco_json, ${conEccezione ? 'eccezione_orari_json' : 'NULL AS eccezione_orari_json'} FROM negozio`).all() as
+    sediNegozi: new Map((prepared(`SELECT chiave, nome, sede_chiave, sblocco_json, eccezione_orari_json FROM negozio`).all() as
       Array<{ chiave: string; nome: string; sede_chiave: string | null; eccezione_orari_json: string | null; sblocco_json: string | null }>)
       .map((n) => [n.chiave, { sede: n.sede_chiave, eccezione: n.eccezione_orari_json, nome: n.nome, sblocco: n.sblocco_json }])),
     nomiConfidenti: new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome])),
@@ -227,9 +225,8 @@ export function rigaLuogo(chiave: string): RigaLuogo | null {
   return (prepared('SELECT * FROM luogo WHERE chiave = ? AND nascosto = 0').get(chiave) as RigaLuogo | undefined) ?? null;
 }
 
-/** I luoghi di un'Area di L2 (`luogo.area_chiave`, non nascosti), nell'ordine, come DTO; vuoto su uno schema senza la colonna. */
+/** I luoghi di un'Area di L2 (`luogo.area_chiave`, non nascosti), nell'ordine, come DTO. */
 export function luoghiDellArea(area: string, l: LettureLuoghi): LuogoDto[] {
-  if (!haColonnaMain(getDb(), 'luogo', 'area_chiave')) return [];
   return (prepared('SELECT * FROM luogo WHERE area_chiave = ? AND nascosto = 0 ORDER BY ordine').all(area) as RigaLuogo[]).map((r) => luogoDto(r, l));
 }
 
@@ -240,10 +237,9 @@ export function luoghiDelQuartiere(quartiere: string, l: LettureLuoghi): LuogoDt
 
 /**
  * I luoghi del quartiere senza Area («da collocare», §4.3), con la proposta: l'unica Area del quartiere, se ne ha una sola (l'Area è dedotta,
- * non provata: si salva solo con «Colloca»). Vuoto su uno schema senza `luogo.area_chiave`.
+ * non provata: si salva solo con «Colloca»).
  */
 export function luoghiDaCollocare(quartiere: string, l: LettureLuoghi): Array<LuogoDto & { areaProposta: { slug: string; nome: string } | null }> {
-  if (!haColonnaMain(getDb(), 'luogo', 'area_chiave')) return [];
   const areeDelQuartiere = [...l.aree.aree.values()].filter((a) => a.quartiere_chiave === quartiere);
   const proposta = areeDelQuartiere.length === 1 ? { slug: areeDelQuartiere[0].slug, nome: areeDelQuartiere[0].nome } : null;
   return (prepared('SELECT * FROM luogo WHERE quartiere_chiave = ? AND nascosto = 0 AND area_chiave IS NULL ORDER BY ordine').all(quartiere) as RigaLuogo[])

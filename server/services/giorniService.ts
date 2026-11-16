@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Il giorno è la riga di `giorno` (R9-15): modificarla la segna «utente» (`origine`), e non c'è un ritorno al giorno della guida
-// (decisione dell'utente del 10/11: la fotografia `seed_json` è tolta dalla migrazione 388). Il giorno della settimana non si salva (R9-16).
+// (decisione dell'utente del 10/11: non c'è una fotografia `seed_json`). Il giorno della settimana non si salva (R9-16).
 // L8-02: anche gli avvisi del giorno (`avvisi_json`) si modificano da qui, l'unico punto di modifica (la scheda del giorno li legge da
 // `percorsoService`).
 // ============================================================

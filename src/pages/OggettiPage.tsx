@@ -50,7 +50,7 @@ function Secondaria({ v }: { v: boolean }) {
 /** La fabbricazione degli attrezzi: introduzione, sblocco, regole e fonte, poi la tabella delle ricette con i materiali e le loro quantità. */
 function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () => void }) {
   const f = d.fabbricazione;
-  // L8-03 (migrazione 340): quando si può fabbricare, nella partita attiva (le ricette con condizioni)
+  // L8-03: quando si può fabbricare, nella partita attiva (le ricette con condizioni)
   const gruppi = useMemo(() => f.ricette.map((r) => ({ chiave: r.attrezzo, condizioni: r.condizioni ?? [] })), [f.ricette]);
   const esiti = useEsitiNellaPartita(gruppi);
   return (

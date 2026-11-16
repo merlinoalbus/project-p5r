@@ -5,7 +5,7 @@
 // Richiesta dell'utente (2026-09-30): le voci aggiunte finivano sempre in fondo; ora si sceglie il punto esatto e si
 // spostano su e giù tutte le voci, azioni della guida comprese; e «le modifiche diventano nuovo canone a tutti gli
 // effetti quindi non sono mai singola partita... ma tutte devono alterare i dati iniziali». Le voci stanno nel file di
-// gioco (`voce_giornata`, migrazione 092): chi esporta il pacchetto le porta con sé. Azione della guida, cosa da fare ed
+// gioco (`voce_giornata`): chi esporta il pacchetto le porta con sé. Azione della guida, cosa da fare ed
 // promemoria sono la stessa cosa: tipo, collegamento verificato, rango atteso, effetti della spunta; i
 // promemoria si mostrano ma non si spuntano. L'ordine è `ordine` 0, 1, 2… dentro la fascia, senza buchi.
 // Le spunte stanno nel file delle partite (`spunta_voce_partita`) e si agganciano all'uid, che non cambia spostando,
@@ -28,7 +28,6 @@ import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { RIFERIMENTO_DI_TIPO, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione, type TipoAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto } from '../../shared/types.js';
 import { attivitaConQuiz, costoDelTurno, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
-import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
 import { dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
@@ -60,9 +59,9 @@ export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
   riferimento_tipo: string | null; riferimento_chiave: string | null; riferimento_testo: string | null; rango_atteso: number | null;
   indice_guida: number | null; created_at: string; updated_at: string;
-  /** L3 §1.4 (migrazione 110; assenti su uno schema di prima): voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
+  /** L3 §1.4: voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
   da_rivedere?: number; aggiunta_da?: string | null; testo_precedente_json?: string | null; motivo_revisione?: string | null;
-  /** L13 (O9-3, migrazione 320; assente su uno schema di prima): quando la voce è dovuta («Si fa solo se»), NULL = sempre (`voceDovuta`). */
+  /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»), NULL = sempre (`voceDovuta`). */
   condizioni_json?: string | null;
 }
 
@@ -298,8 +297,8 @@ interface DatiDiGiocoDelDiario { nomi: NomiEffettiAzione; quiz: Map<string, Atti
 let datiDiGioco: DatiDiGiocoDelDiario | null = null;
 registraCacheDiGioco(() => { datiDiGioco = null; });
 /** I dati di gioco del Diario dalla memoria; se una delle tre letture fallisce non si memorizza niente. Dentro una transazione si rileggono
- *  sempre e non si memorizzano (come il modello dei Palazzi e `schemaMemo`): una transazione che cambia i dati di gioco e poi rilegge una
- *  voce (le migrazioni 328, 330 e 331) non deve vedere quelli di prima, e un valore letto a metà non deve restare dopo un annullamento. */
+ *  sempre e non si memorizzano (come il modello dei Palazzi): una transazione che cambia i dati di gioco e poi rilegge una
+ *  voce non deve vedere quelli di prima, e un valore letto a metà non deve restare dopo un annullamento. */
 function datiDiGiocoDelDiario(): DatiDiGiocoDelDiario {
   const leggi = (): DatiDiGiocoDelDiario => ({ nomi: nomiEffetti(), quiz: attivitaConQuiz(), oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']) });
   if (getDb().inTransaction) return leggi();
@@ -328,7 +327,7 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz'], fonte: StatoEffettiV
  */
 export function avvisiDisponibilitaDellaVoce(r: Pick<RigaVoce, 'genere' | 'riferimento_tipo' | 'riferimento_chiave' | 'data' | 'fascia' | 'rango_atteso'>, relazioneRomantica: boolean | null = null): Pick<AzionePercorsoDto, 'avvisiDisponibilita'> {
   if (r.genere !== 'azione' || r.riferimento_tipo !== 'confidente' || !r.riferimento_chiave) return {};
-  // la pioggia dei requisiti del rango la legge il verdetto (fonte unica, migrazione 306), ma senza meteo non produce avvisi; un giorno del
+  // la pioggia dei requisiti del rango la legge il verdetto (fonte unica), ma senza meteo non produce avvisi; un giorno del
   // calendario escluso (`date`) è un avviso di giorno come quello della settimana
   const esito = verdettoDelConfidente(r.riferimento_chiave, { data: r.data, fascia: fasciaDi(r), festivo: eGiornoFestivo(r.data), piove: false, rango: r.rango_atteso !== null ? r.rango_atteso - 1 : null,
     // fino al rango della scelta romantica la relazione non c'era ancora; dopo, quella della partita (`relazioneAlRango`)
@@ -340,7 +339,7 @@ export function avvisiDisponibilitaDellaVoce(r: Pick<RigaVoce, 'genere' | 'rifer
 /**
  * R9-06: il nome dal vivo. Il testo salvato nella voce (`riferimentoTesto`) è come la guida chiamava il Confidente («Yoshida - Sole», «Palazzo di Sae Niijima»); se è
  * diverso dal nome di adesso («Toranosuke Yoshida - Sole») la voce porta anche il nome attuale, da mostrare accanto al testo. Il servizio non riscrive mai il
- * testo; l'unica eccezione è una correzione di dati con migrazione (la 232 ha messo gli accenti mancanti in tre testi), e il confronto è comunque senza accenti.
+ * testo, e il confronto è senza accenti.
  */
 function nomeAttualeDelRiferimento(r: RigaVoce, rif: RiferimentoAzioneDto | null): Pick<AzionePercorsoDto, 'riferimentoNomeAttuale'> {
   if (!rif || rif.tipo !== 'confidente' || !r.riferimento_testo) return {};
@@ -508,7 +507,7 @@ function campoDialogo(v: VoceBase, conf: Map<string, ConfidentePartitaDto> | nul
 function dialogoDelRango(chiave: string, rango: number): DialogoVoceDto | null {
   const r = prepared('SELECT note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? AND rango = ?').get(chiave, rango) as { note: string; scelte_json: string } | undefined;
   if (!r) return null;
-  // migrazione 309: le stesse scelte della scheda del Confidente, dall'unico lettore (punti solo numerici, con il ramo amore)
+  // le stesse scelte della scheda del Confidente, dall'unico lettore (punti solo numerici, con il ramo amore)
   const scelte = leggiScelteDialogo(r.scelte_json);
   if (scelte.length === 0) return null;
   return { confidente: chiave, rango, note: r.note, scelte: scelte.map((s) => ({ ...s, puntiAmore: s.puntiAmore ?? null })) };
@@ -517,9 +516,9 @@ function dialogoDelRango(chiave: string, rango: number): DialogoVoceDto | null {
 // ---- L3: il campo «Infiltrazioni» delle voci di Palazzo (lotti/L3/modifiche.md §2.1.6, §3.4, §4.4) ----
 //
 // Una voce può descrivere più infiltrazioni: il legame è un insieme **ordinato** (`voce_infiltrazione`, la chiave è la posizione), che
-// solo l'utente scrive (nessuna migrazione lo fa) e che non tocca testo, ordine, giorno, fascia, uid né spunte della voce. La stessa
+// solo l'utente scrive e che non tocca testo, ordine, giorno, fascia, uid né spunte della voce. La stessa
 // infiltrazione può tornare, mai in due posizioni di seguito. Accanto, una **proposta**: le righe di G-022 dell'Esperto della guida
-// (`proposta_infiltrazione_voce`, 110), oppure, per le voci scritte dopo, le due regole certe calcolate a richiesta.
+// (`proposta_infiltrazione_voce`), oppure, per le voci scritte dopo, le due regole certe calcolate a richiesta.
 
 /** Le infiltrazioni di un Palazzo, in ordine. */
 function infiltrazioniDelPalazzo(palazzo: string): Array<{ chiave: string; nome: string; ordine: number }> {
@@ -548,7 +547,6 @@ function ePalazzo(dungeon: string): boolean {
  * `dungeon:<k>`; altrimenti quello delle infiltrazioni già nell'insieme; altrimenti quello della sua proposta; altrimenti nessuno.
  */
 export function palazzoDellaVoce(r: Pick<RigaVoce, 'uid' | 'riferimento_tipo' | 'riferimento_chiave'>): string | null {
-  if (!conLegami()) return null;
   if (r.riferimento_tipo === 'dungeon' && r.riferimento_chiave && ePalazzo(r.riferimento_chiave)) return r.riferimento_chiave;
   const insieme = insiemeDellaVoce(r.uid);
   if (insieme.length > 0) return insieme[0].dungeon;
@@ -784,7 +782,7 @@ export function ingressiConclusiNascosti(partitaId: number): Array<{ uid: string
   const giorno = (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco;
   if (!giorno) return [];
   const conclusi = palazziConclusi(partitaId);
-  if (conclusi.size === 0 || !conLegami()) return [];
+  if (conclusi.size === 0) return [];
   const righe = prepared(`SELECT v.uid AS uid, v.data AS data, v.riferimento_chiave AS palazzo FROM voce_giornata v
     JOIN giorno g ON g.data = v.data
     LEFT JOIN spunta_voce_partita s ON s.voce_uid = v.uid AND s.partita_id = ?
@@ -1076,10 +1074,8 @@ export function eliminaVoce(uid: string): string[] {
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
     revocaEventiDellaVoceInOgniPartita(uid); // R10-22 (N5): come togliendo la spunta, gli eventi legati alla voce non restano nello Storico
     // L3: l'insieme d'infiltrazioni e la proposta della voce se ne vanno con lei (la chiave è l'uid, senza vincolo)
-    if (conLegami()) {
-      prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
-      prepared('DELETE FROM proposta_infiltrazione_voce WHERE voce_uid = ?').run(uid);
-    }
+    prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
+    prepared('DELETE FROM proposta_infiltrazione_voce WHERE voce_uid = ?').run(uid);
     compatta(r.data, r.fascia);
     return avvisi;
   });
@@ -1114,7 +1110,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       if (precedente) {
         if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length||opz.relazioneRomantica !== undefined)
           throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce (per cambiare l’esito togli e rimetti la spunta).');
-        return; // idempotente: non riapplica punti, letture o turni (dalla 305 la visita ai Memento non dichiara più aperture)
+        return; // idempotente: non riapplica punti, letture o turni (la visita ai Memento non dichiara aperture)
       }
       // L13 (O9-3, «in tal caso viene meno la consegna»): una voce non dovuta nella partita non si spunta (409 `voce-non-dovuta`, col motivo);
       // una già spuntata resta (sopra), e togliendole la spunta si annulla come sempre

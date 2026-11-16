@@ -1,10 +1,10 @@
 // ============================================================
-// disponibilitaStrutturataService — la disponibilità dei Confidenti come dato strutturato (R9-01, migrazione 163, fonte G-036)
+// disponibilitaStrutturataService — la disponibilità dei Confidenti come dato strutturato (R9-01, fonte G-036)
 // ============================================================
 //
 // Legge la struttura (modo, giorni, fasce, eccezioni, dal, motivo senza luogo) e i luoghi per chiave (L5: `luogo.confidenti_json`), dice se il
 // Confidente è disponibile adesso nella partita: è l'unica fonte di giorni, fasce, eccezioni e luoghi. Della prosa della riga restano solo
-// note e fonti, dall'editor informativo (`disponibilitaConfidentiService`; L13, migrazione 307). Le scritture sono in `disponibilitaStrutturataScritture`: questo
+// note e fonti, dall'editor informativo (`disponibilitaConfidentiService`; L13). Le scritture sono in `disponibilitaStrutturataScritture`: questo
 // modulo non dipende dal catalogo, così la scheda del Confidente e il Diario lo importano senza ciclo.
 // ============================================================
 
@@ -24,7 +24,7 @@ export const CHIAVE_SEED_DISPONIBILITA = (confidente: string) => `disponibilita-
 export interface RigaStruttura { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; motivo_senza_luogo: string; fonte: string | null }
 const COLONNE = 'modo, giorni_settimana_json, fasce_orarie_json, eccezioni_json, motivo_senza_luogo, fonte';
 
-/** L7-06 (Q14, migrazione 358): la data di un requisito di tipo «data» (`dati_json`), se è una data; la fonte unica di «Disponibile dal». */
+/** L7-06 (Q14): la data di un requisito di tipo «data» (`dati_json`), se è una data; la fonte unica di «Disponibile dal». */
 function dalDelRequisito(datiJson: string): string | null {
   try { const d = (JSON.parse(datiJson) as { dal?: unknown }).dal; return typeof d === 'string' && /^\d{2}-\d{2}$/.test(d) ? d : null; } catch { return null; }
 }
@@ -129,14 +129,14 @@ export function eGiornoFestivo(data: string): boolean {
 }
 
 /** La pioggia di un rango dai suoi requisiti: un obbligo («non deve piovere», anche in un gruppo «tutte») o, per ogni gruppo «almeno una» con la
- *  pioggia, gli altri rami (la pioggia blocca solo se sono tutti falsi; L13, ondata 8, migrazione 317: l'evento 7.5 di Takemi). */
+ *  pioggia, gli altri rami (la pioggia blocca solo se sono tutti falsi; L13, ondata 8: l'evento 7.5 di Takemi). */
 interface PioggiaDelRango { obbligo: boolean; alternative: RequisitoSpillo[][] }
 
 /** Lo stato di un ramo letto col valutatore unico sullo stato della partita (`valutatoreDelloStato` di semaforiService): lo passa chi ha la partita. */
 export type StatoDelRamo = (c: RequisitoSpillo) => 'verde' | 'rosso' | 'grigio';
 
 /**
- * L13 (ondata 6, migrazione 306): la pioggia di ogni rango di ogni Confidente, dalla sola fonte della pioggia, i requisiti di rango. Letta una
+ * L13 (ondata 6): la pioggia di ogni rango di ogni Confidente, dalla sola fonte della pioggia, i requisiti di rango. Letta una
  * volta e svuotata quando il DB di gioco cambia (anche le scritture dei requisiti lo dicono, `requisitiConfidentiService`).
  */
 let pioggiaPerRango: Map<string, Map<number, PioggiaDelRango>> | null = null;

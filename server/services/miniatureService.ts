@@ -3,7 +3,7 @@
 // ============================================================
 //
 // La rotta del file di un'immagine con `l` (una delle `LARGHEZZE_MINIATURA`) passa da qui: la miniatura si genera la prima volta
-// che serve, con sharp (libvips), e si tiene in `immagine_miniatura` (migrazione 108) legata alla versione della sorgente
+// che serve, con sharp (libvips), e si tiene in `immagine_miniatura` legata alla versione della sorgente
 // (`immagine.created_at`). Le regole:
 //   - formato WebP, qualità 80, `effort` 4, alfa conservato, metadati tolti, proporzioni mantenute e mai ingrandita;
 //   - **ritaglio sul disegno** (UX2-13): un'immagine con alfa e margini trasparenti (le planimetrie su tele native da 2048) si
@@ -24,7 +24,6 @@
 
 import type { Sharp, SharpOptions } from 'sharp';
 import { eGiocoInSolaLettura, getDb, nowIso, type AppDatabase } from '../db/dbService.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { logger } from '../utils/logger.js';
 import { GENERAZIONE_MINIATURE, LARGHEZZE_MINIATURA, versioneImmagine, type LarghezzaMiniatura } from '../../shared/miniature.js';
 import { caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe, immaginiCaricateDi } from './mappe/immagineMappa.js';
@@ -87,21 +86,16 @@ function originale(s: SorgenteMiniatura, l: LarghezzaMiniatura): RispostaMiniatu
   return { contenuto: s.contenuto, mime: s.mime, etag: etagMiniatura(s, l), esito: 'originale' };
 }
 
-/** Vero se la tabella delle miniature c'è (dalla 108; i test su uno schema di prima non l'hanno). */
-function conMiniature(db: AppDatabase): boolean {
-  return haTabellaMain(db, 'immagine_miniatura');
-}
-
 /** I metadati di una immagine, senza il contenuto: bastano a calcolare l'ETag e a cercare la miniatura in cache (R12-03). */
 export type MetadatiMiniatura = Omit<SorgenteMiniatura, 'contenuto'>;
 
 /**
- * La miniatura larga `l` già in cache per la versione e la generazione della sorgente, o null (da generare, o non ne ha: SVG e GIF, o
- * una tabella delle miniature che non c'è). Legge solo i metadati dell'immagine e la riga della miniatura: l'originale, che può
+ * La miniatura larga `l` già in cache per la versione e la generazione della sorgente, o null (da generare, o non ne ha: SVG e GIF).
+ * Legge solo i metadati dell'immagine e la riga della miniatura: l'originale, che può
  * pesare megabyte, non si carica dal database (R12-03: prima la rotta lo leggeva sempre, anche per un 304 o una miniatura in cache).
  */
 export function miniaturaInCache(m: MetadatiMiniatura, l: LarghezzaMiniatura, db: AppDatabase = getDb()): RispostaMiniatura | null {
-  if (SENZA_MINIATURA.has(m.mime) || !conMiniature(db)) return null;
+  if (SENZA_MINIATURA.has(m.mime)) return null;
   const inCache = db.prepare('SELECT mime, contenuto FROM immagine_miniatura WHERE immagine_id = ? AND larghezza = ? AND versione = ?').get(m.id, l, versioneMiniatura(m.createdAt)) as
     { mime: string; contenuto: Buffer } | undefined;
   return inCache ? { contenuto: inCache.contenuto, mime: inCache.mime, etag: etagMiniatura(m, l), esito: 'cache' } : null;
@@ -112,7 +106,7 @@ export function miniaturaInCache(m: MetadatiMiniatura, l: LarghezzaMiniatura, db
  * casi dell'intestazione. Non solleva mai per un problema del generatore.
  */
 export async function miniaturaDi(s: SorgenteMiniatura, l: LarghezzaMiniatura, db: AppDatabase = getDb()): Promise<RispostaMiniatura> {
-  if (SENZA_MINIATURA.has(s.mime) || !conMiniature(db)) return originale(s, l);
+  if (SENZA_MINIATURA.has(s.mime)) return originale(s, l);
   // niente da ridurre: l'originale subito, senza decodificare; non per i formati con l'alfa, che potrebbero avere margini
   // trasparenti da ritagliare (lo decide `genera`, che risponde con l'originale se non ce ne sono)
   const dim = dimensioniImmagine(s.contenuto);
@@ -200,7 +194,6 @@ async function riquadroDelDisegno(sharp: Generatore, contenuto: Buffer, canali: 
 
 /** Toglie le miniature di un'immagine (prima di sostituirla: l'`ON CONFLICT DO UPDATE` conserva l'id, e la cascata non scatta). */
 export function eliminaMiniatureDi(db: AppDatabase, ambito: string, chiave: string): void {
-  if (!conMiniature(db)) return;
   db.prepare('DELETE FROM immagine_miniatura WHERE immagine_id IN (SELECT id FROM immagine WHERE ambito = ? AND chiave = ?)').run(ambito, chiave);
 }
 
@@ -210,7 +203,6 @@ export function eliminaMiniatureDi(db: AppDatabase, ambito: string, chiave: stri
  * altre regole sui dati, e dopo una ricarica del pacchetto.
  */
 export function pulisciMiniatureOrfane(db: AppDatabase): number {
-  if (!conMiniature(db)) return 0;
   return db.prepare(`DELETE FROM immagine_miniatura WHERE NOT EXISTS (SELECT 1 FROM immagine i
     WHERE i.id = immagine_miniatura.immagine_id AND i.created_at || '~' || ? = immagine_miniatura.versione AND i.contenuto IS NOT NULL)`).run(GENERAZIONE_MINIATURE).changes;
 }
@@ -255,7 +247,6 @@ export async function riscaldaMiniature(immagini?: Array<{ ambito: string; chiav
   try {
     // anche il database si prende qui dentro: un riscaldamento partito tardi (a connessione chiusa) finisce senza errori
     const db = dbDato ?? getDb();
-    if (!conMiniature(db)) return { immagini: 0, generate: 0, ms: 0 };
     const elenco = immagini ?? immaginiDelleSchede(db);
     for (const { ambito, chiave } of elenco) {
       // R12-03: prima i soli metadati (`contenuto IS NULL` non carica il contenuto) e la cache: a ogni avvio le immagini già calde non

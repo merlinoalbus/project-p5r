@@ -91,7 +91,7 @@ describe('BackupIstanza', () => {
   });
 
   it('dalla cartella d’appoggio: elenca gli ZIP, li fa scegliere e il ripristino lo fa il server', async () => {
-    api.ripristinaIstanzaDaDeposito.mockResolvedValue({ formato: 'istanza', database: true, partite: true, immagini: 0, caratteri: 1, copiaDiSicurezza: 'prima-del-ripristino-2026', stato: { ...stato, partite: 1 } });
+    api.ripristinaIstanzaDaDeposito.mockResolvedValue({ formato: 'istanza', database: true, partite: true, caratteri: 1, copiaDiSicurezza: 'prima-del-ripristino-2026', stato: { ...stato, partite: 1 } });
     const finestra = await finoAllaConferma();
     expect(screen.getByRole('combobox', { name: /File in \/deposito \(2\)/ })).toHaveTextContent('project-p5r-istanza-2026-09-12.zip');
     expect(finestra.getByText(/«project-p5r-istanza-2026-09-12\.zip»/)).toBeInTheDocument();

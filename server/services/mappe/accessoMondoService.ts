@@ -73,7 +73,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
     } else {
       const riferimenti: Array<{ tipo: TipoAccessoMondo; chiave: string }> = [{ tipo, chiave }];
       if (tipo === 'luogo') {
-        // i negozi che hanno qui la loro sede (072)
+        // i negozi che hanno qui la loro sede
         for (const n of prepared('SELECT chiave FROM negozio WHERE sede_chiave = ? AND nascosto = 0 ORDER BY ordine').all(chiave) as Array<{ chiave: string }>) riferimenti.push({ tipo: 'negozio', chiave: n.chiave });
       }
       // Un'attività si svolge in un luogo: la sua sede. Il quartiere si ricava dal luogo (più sotto, se
@@ -95,7 +95,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
       }
       // Un punto di interesse sta in un'area della guida, e l'area — quando una planimetria la
       // dichiara — è un posto sulla mappa. È un'associazione registrata, non una somiglianza: il
-      // punto porta dove porta la sua area. I suoi pin sulle planimetrie (`spillo_voce`, 098) portano al posto esatto, più sotto;
+      // punto porta dove porta la sua area. I suoi pin sulle planimetrie (`spillo_voce`) portano al posto esatto, più sotto;
       // una voce senza pin, o con i soli elementi della guida senza mappa, arriva comunque alla sua area.
       if (tipo === 'punto') {
         const a = prepared('SELECT area_chiave FROM punto_interesse WHERE chiave = ?').get(chiave) as { area_chiave: string | null } | undefined;
@@ -105,7 +105,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
         const n = prepared('SELECT a.negozio_chiave FROM articolo a JOIN negozio n ON n.chiave=a.negozio_chiave WHERE a.chiave=? AND n.nascosto=0').get(chiave) as { negozio_chiave: string } | undefined;
         if (n) riferimenti.push({ tipo: 'negozio', chiave: n.negozio_chiave });
       }
-      // La sede del negozio (072) è un riferimento strutturato al catalogo.
+      // La sede del negozio è un riferimento strutturato al catalogo.
       for (const n of riferimenti.filter(r => r.tipo === 'negozio')) {
         const sede = prepared('SELECT sede_chiave FROM negozio WHERE chiave = ? AND sede_chiave IS NOT NULL').get(n.chiave) as { sede_chiave: string } | undefined;
         if (sede && !riferimenti.some((r) => r.tipo === 'luogo' && r.chiave === sede.sede_chiave)) riferimenti.push({ tipo: 'luogo', chiave: sede.sede_chiave });
@@ -123,7 +123,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
             .all(r.tipo, r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {
             aggiungi(s.mappa_chiave, s.id, nomeFonte ?? s.nome, 'riferimento-spillo', r);
           }
-          // i pin di una voce della guida la portano nel campo suo (094), non nel riferimento
+          // i pin di una voce della guida la portano nel campo suo, non nel riferimento
           if (r.tipo === 'punto') {
             for (const s of prepared('SELECT s.id,s.nome,s.mappa_chiave FROM spillo_voce sv JOIN spillo s ON s.id=sv.spillo_id JOIN mappa m ON m.chiave=s.mappa_chiave WHERE sv.voce_chiave=? ORDER BY s.mappa_chiave,s.ordine,s.id')
               .all(r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {

@@ -128,7 +128,7 @@ it('gli avvisi dicono la parola dello stato, e per toglierlo quella scelta per i
   await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', '«Leva»: non più azionato.'));
 });
 
-/** Componente di prova per un pin con più voci (098): un pulsante «Ottenuto» per ognuna, sul primo spillo. */
+/** Componente di prova per un pin con più voci: un pulsante «Ottenuto» per ognuna, sul primo spillo. */
 function ProvaVoci() {
   const m = useMappaPartita('a', 7);
   const primo = m.mappa?.spilli[0];
@@ -140,7 +140,7 @@ function ProvaVoci() {
   );
 }
 
-it('un pin con più voci (098): segnarne una non lo fa «segnato», segnarle tutte sì; l’avviso dice quale voce', async () => {
+it('un pin con più voci: segnarne una non lo fa «segnato», segnarle tutte sì; l’avviso dice quale voce', async () => {
   /** Una voce «Storia» non segnata con chiave e nome dati. */
   const voce = (chiave: string, nome: string) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', areaDedalo: null, stato: null });
   const pin: SpilloDto = { ...leva, id: 30, tipo: 'infiltrazione', tipoNome: 'Infiltrazione', nome: 'Infiltrazione', voci: [voce('k-01/1', 'Primo evento'), voce('k-02/1', 'Secondo evento')] };

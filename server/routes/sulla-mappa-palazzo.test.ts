@@ -74,7 +74,7 @@ describe('«Sulla mappa» di un Palazzo', () => {
     expect(ingressoDelPalazzo('madarame')).toEqual({ chiave: attesa, spilloId: null });
   });
 
-  // 2026-10-31 (O9-4, migrazione 322: «Planimetrie delle aree fisse dei Memento si possono rimuovere»): le otto strutture fisse non ci sono
+  // 2026-10-31 (O9-4: «Planimetrie delle aree fisse dei Memento si possono rimuovere»): le otto strutture fisse non ci sono
   // più; il ripiego dei Memento non ha una planimetria su cui cadere e resta sulla radice, mai su una mappa tolta. Un dungeon senza mappe non
   // porta da nessuna parte
   it('i Memento senza strutture fisse: il ripiego non cade su una mappa tolta; un dungeon senza mappe non porta da nessuna parte', () => {

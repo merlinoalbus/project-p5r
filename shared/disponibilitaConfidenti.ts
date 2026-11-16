@@ -1,6 +1,6 @@
 /**
  * Informazioni descrittive del Confidente: solo note e fonti. Giorni, fasce, eccezioni, luoghi e sblocco hanno una sola sede, la
- * disponibilità strutturata e i requisiti di rango (L13, ondata 6, lotto O6-2, migrazione 307): qui non si modificano.
+ * disponibilità strutturata e i requisiti di rango (L13, ondata 6, lotto O6-2): qui non si modificano.
  */
 export interface InformazioniConfidente {
   note: string;

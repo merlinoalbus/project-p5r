@@ -2,7 +2,7 @@
 // negoziazioneService — il lettore unico della negoziazione per umore (L8, B5; sola lettura)
 // ============================================================
 //
-// Una fonte sola (`negoziazione_*`, migrazione 172) letta da Battaglia, pagina Ombra e pagina negoziazione. Per ogni domanda (famiglia) e
+// Una fonte sola (`negoziazione_*`) letta da Battaglia, pagina Ombra e pagina negoziazione. Per ogni domanda (famiglia) e
 // per ogni umore richiesto, ogni risposta porta una cella valutata (`shared/negoziazione.ts`): l'esito principale quando Royal è
 // documentata, le alternative quando la fonte si contraddice, gli esiti dell'app come altra provenienza (mai cancellati) e l'avviso se un
 // esito viene dalla classe «unconfirmed» di Royal (ereditato da P5, non confermato). Nessuna scelta automatica del migliore o del peggiore;
@@ -12,8 +12,7 @@
 // riceve un umore dedotto da un nome del foglio Royal.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { filtroRicerca, paroleRicerca } from '../../shared/testo.js';
@@ -32,10 +31,9 @@ let cache: Corpus | null = null;
 export const invalidaNegoziazione = registraCacheDiGioco(() => { cache = null; });
 
 
-/** Le righe delle quattro tabelle, lette una volta (il DB di gioco cambia solo per migrazione o importazione, che svuotano la cache). */
+/** Le righe delle quattro tabelle, lette una volta (queste tabelle cambiano solo con un'importazione, che svuota la cache). */
 function corpus(): Corpus {
   if (cache) return cache;
-  if (!haTabellaMain(getDb(), 'negoziazione_domanda')) throw httpErrors.notFound('negoziazione-non-disponibile', 'La negoziazione per umore non è caricata in questo database di gioco.');
   const righe: RigheNegoziazione = {
     domande: prepared('SELECT chiave, ordine FROM negoziazione_domanda ORDER BY ordine').all() as RigaNegDomanda[],
     varianti: prepared('SELECT * FROM negoziazione_variante ORDER BY domanda_chiave, ordine').all() as RigaNegVariante[],
@@ -88,7 +86,6 @@ function famigliaContiene(c: Corpus, varianti: RigaNegVariante[], trova: (...tes
 }
 
 function carteDi(umori: ReadonlyArray<UmoreNegoziazione>): NegUmoreDto[] {
-  if (!haTabellaMain(getDb(), 'negoziazione_umore')) return [];
   const righe = prepared('SELECT umore, nome, descrizione, esempi_json, da_evitare_json, fonte FROM negoziazione_umore').all() as Array<{ umore: string; nome: string; descrizione: string; esempi_json: string; da_evitare_json: string; fonte: string }>;
   const leggi = (json: string): unknown => { try { return JSON.parse(json) as unknown; } catch { return null; } };
   return umori.flatMap((u) => {

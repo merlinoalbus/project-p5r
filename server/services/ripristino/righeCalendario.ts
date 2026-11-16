@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Due oggetti «a riga» del registro dei ripristini (`righe.ts`): il valore della guida è la fotografia `seed_json` presa alla prima correzione
-// (colonne `origine`, `seed_json`, `updated_at` della migrazione 199), che `ripristinoService` gestisce come per quartieri e trofei.
+// (colonne `origine`, `seed_json`, `updated_at`), che `ripristinoService` gestisce come per quartieri e trofei.
 //
 //   - `evento-calendario`: un evento di `evento_calendario` che il Calendario possiede (nessun'altra tabella lo dà): feste, trama, consigli e gli
 //     sblocchi «rango massimo». Si correggono titolo, dettaglio e fonte; la data, il tipo e l'ordine NON si correggono (la data governa i festivi

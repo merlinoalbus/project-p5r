@@ -152,7 +152,7 @@ describe('L4 — avanzamento unico', () => {
     await collega(f.chiave, pin[4].id);
     await collega(g.chiave, pin[6].id);
     await collega(g.chiave, pin[3].id);
-    // come le avrebbe lasciate la migrazione utente 022: il segno di prima del pin, la voce non segnata
+    // una divergenza conservata: il segno di prima del pin, la voce non segnata
     for (const [p, v] of [[pin[5], f.chiave], [pin[6], g.chiave]] as const) {
       prepared("INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, 1, 'x') ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = 1").run(partita, p.uid);
       prepared("INSERT INTO divergenza_partita (partita_id, spillo_uid, voce_chiave, rilevata_il) VALUES (?, ?, ?, 'x')").run(partita, p.uid, v);
@@ -331,7 +331,7 @@ describe('L4 — avanzamento unico', () => {
     await scollega(o.chiave, pin[3].id);
   });
 
-  it('eliminando una partita se ne vanno anche le sue divergenze e il suo stato per infiltrazione (utente 024: la cascata come le altre tabelle)', async () => {
+  it('eliminando una partita se ne vanno anche le sue divergenze e il suo stato per infiltrazione (la cascata come le altre tabelle)', async () => {
     const altra = ((await request(app).post('/api/partite').send({ nome: 'Da eliminare' })).body.data as { id: number }).id;
     prepared("INSERT INTO divergenza_partita (partita_id, spillo_uid, voce_chiave, rilevata_il) VALUES (?, ?, 'v', 'x')").run(altra, pin[0].uid);
     prepared("INSERT INTO spillo_partita_infiltrazione (partita_id, spillo_uid, infiltrazione_chiave, raccolto, updated_at) VALUES (?, ?, ?, 1, 'x')").run(altra, pin[0].uid, inf[1]);

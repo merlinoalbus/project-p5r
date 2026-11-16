@@ -31,7 +31,7 @@ describe('scarico da una fonte esterna (LAY-2)', () => {
   });
   afterAll(async () => { await new Promise<void>((ok) => server.close(() => ok())); closeDb(); });
 
-  // Superato dal lotto L11 (R11-02/8, migrazione 210): la rotta di scarico delle illustrazioni dei quartieri e `pianta_quartiere` sono tolte
+  // Superato dal lotto L11 (R11-02/8): la rotta di scarico delle illustrazioni dei quartieri e `pianta_quartiere` sono tolte
   // su decisione dell'utente; i test restano, da riscrivere sullo scarico da indirizzo (`/api/immagini/:ambito/:chiave/da-url`).
   it.skip('la fonte riceve uno User-Agent che dice chi è (project-p5r con la versione), e nessun Referer', async () => {
     stato = 200;

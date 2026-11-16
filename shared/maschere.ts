@@ -3,9 +3,8 @@
 // ============================================================
 //
 // La guida scrive la maschera delle Ombre in italiano o in inglese («Bicorno», «Pixie», «Jack-o'-lantern»). Il compendio ha il nome canonico
-// inglese e la resa italiana in `traduzione`. Questo file è l'unica regola di confronto per le scritture nuove (L8, R8-02): lo usano il
-// servizio `server/services/maschere.ts` e le migrazioni di L8. Le tre copie storiche (`maschere.ts` prima di L8, migrazioni 101 e utente 019)
-// restano com'erano, perché una migrazione applicata non si riscrive.
+// inglese e la resa italiana in `traduzione`. Questo file è l'unica regola di confronto per le scritture nuove (L8, R8-02): lo usa il
+// servizio `server/services/maschere.ts`.
 // ============================================================
 
 /** Forma di confronto di un nome: minuscolo, senza accenti (decomposizione NFD e rimozione dei segni diacritici), ogni sequenza di caratteri

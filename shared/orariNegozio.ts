@@ -2,9 +2,9 @@
 // orariNegozio — quando un negozio è aperto, come valori e non come frase
 // ============================================================
 //
-// La colonna `negozio.orari` portava ventuno frasi diverse per dire poche cose: i giorni della
-// settimana, la fascia (giorno o sera), la chiusura con la pioggia. Da qui in poi gli orari sono un
-// oggetto (`orari_json`, migrazione 069): liste vuote vogliono dire «sempre», e `nota` conserva ciò
+// Gli orari dicono poche cose: i giorni della
+// settimana, la fascia (giorno o sera), la chiusura con la pioggia. Sono un
+// oggetto (`orari_json`): liste vuote vogliono dire «sempre», e `nota` conserva ciò
 // che la guida dice e l'app non sa valutare («in date specifiche del calendario»). Le condizioni di
 // presenza che ne derivano (`orariComeCondizioni`) sono quelle che il visore già valuta.
 // ============================================================

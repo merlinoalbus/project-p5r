@@ -20,7 +20,7 @@ export function battaglia(): Congelato<BattagliaDto> {
   if (!seed) throw httpErrors.notFound('battaglia-non-disponibile', 'I dati della guida alla battaglia non sono caricati.');
   const idx = indiceMaschere();
   const ombre: Array<Congelato<OmbraDto>> = seed.ombre.map((o) => ({ ...o, personaCollegata: o.persona ? personaDellaMaschera(idx, o.persona) : null }));
-  // L8-03 (migrazione 340): lo sblocco degli Speciali è nelle condizioni; la frase la genera il server, il testo della guida resta dove mancano
+  // L8-03: lo sblocco degli Speciali è nelle condizioni; la frase la genera il server, il testo della guida resta dove mancano
   const nomi = nomiCondizioniMemo();
   const speciali = { ...seed.speciali, elenco: seed.speciali.elenco.map((e) => {
     const condizioni = condizioniDellaGuida(e.condizioniJson, nomi);

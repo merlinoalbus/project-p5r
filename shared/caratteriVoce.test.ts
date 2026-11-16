@@ -2,8 +2,7 @@
 // Test — il carattere delle voci della guida (L4 «Avanzamento unico», lotti/L4/modifiche.md §1.1, piano dei test §6.1 punto 1)
 // ============================================================
 
-import { CARATTERI, NOME_CARATTERE, carattereDaTipo, carattereDellaVoce, eCarattere, sqlCarattereVoce } from './caratteriVoce.js';
-import Database from 'better-sqlite3';
+import { CARATTERI, NOME_CARATTERE, carattereDaTipo, carattereDellaVoce, eCarattere } from './caratteriVoce.js';
 
 describe('carattere delle voci', () => {
   it('la regola del tipo: oggetti e Ombre sciagura si ripropongono (anche un «nemico» futuro), storia e altro sono racconto, il resto è permanente', () => {
@@ -30,19 +29,5 @@ describe('carattere delle voci', () => {
 
   it('i nomi per l’interfaccia', () => {
     expect(CARATTERI.map((c) => NOME_CARATTERE[c])).toEqual(['Permanente', 'Si ripropone', 'Racconto']);
-  });
-
-  it('la stessa regola in SQL dà lo stesso carattere della funzione, per ogni tipo, con e senza scelta e nei dedali', () => {
-    const db = new Database(':memory:');
-    db.exec('CREATE TABLE v (tipo TEXT, area_dedalo_chiave TEXT, carattere TEXT)');
-    const tipi = ['oggetto', 'ombra-sciagura', 'nemico', 'storia', 'altro', 'forziere', 'porta', 'boss', 'persona', 'trama'];
-    const scelte = [null, 'permanente', 'rigenerabile', 'descrittiva'];
-    for (const t of tipi) for (const d of [null, 'dedalo/1']) for (const c of scelte) db.prepare('INSERT INTO v VALUES (?, ?, ?)').run(t, d, c);
-    const righe = db.prepare(`SELECT tipo, area_dedalo_chiave, carattere, ${sqlCarattereVoce('v')} AS sql, ${sqlCarattereVoce('v', false)} AS senza FROM v`).all() as Array<{ tipo: string; area_dedalo_chiave: string | null; carattere: string | null; sql: string | null; senza: string | null }>;
-    for (const r of righe) {
-      expect(r.sql).toBe(carattereDellaVoce({ tipo: r.tipo, areaDedalo: r.area_dedalo_chiave, carattere: r.carattere }));
-      expect(r.senza).toBe(carattereDaTipo(r.tipo, r.area_dedalo_chiave));
-    }
-    db.close();
   });
 });

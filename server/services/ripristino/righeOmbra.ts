@@ -3,8 +3,8 @@
 // ============================================================
 //
 // Un oggetto «a riga» del registro dei ripristini (`righe.ts`): l'Ombra (`ombra`, una riga per Ombra). Il valore della guida è la fotografia
-// `seed_json` presa alla prima correzione (colonne `origine`, `seed_json`, `updated_at`, già della migrazione 166; la migrazione 206 porta la
-// fotografia di allora nella forma di questo registro), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
+// `seed_json` presa alla prima correzione (colonne `origine`, `seed_json`, `updated_at`, con la
+// fotografia nella forma di questo registro), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
 //
 // Si correggono: il nome, gli altri nomi, la maschera descrittiva (per le non reclutabili), la personalità, la catturabilità, la
 // negoziabilità, il livello, le note e le affinità PROPRIE dell'Ombra (le differenze rispetto alla sua Persona: per ognuno dei dieci elementi
@@ -13,7 +13,7 @@
 // dell'Ombra). I luoghi d'incontro e le voci della guida si correggono a parte, con i due tipi qui sotto (R11-17/1).
 // Nei dati non ci sono PV né oggetti lasciati dalle Ombre: l'Ombra ha solo il livello (3 Ombre su 131), e quello c'è.
 //
-// Gli altri due oggetti «a riga» di questo gruppo (colonne `origine`, `seed_json`, `updated_at` della migrazione 225):
+// Gli altri due oggetti «a riga» di questo gruppo (colonne `origine`, `seed_json`, `updated_at`):
 //   - `ombra-luogo` (`ombra_luogo`, chiave = id della riga): DOVE si incontra l'Ombra, cioè il posto (Palazzo, o Palazzo e infiltrazione, o Memento e dedalo). Si corregge il
 //     posto di una riga esistente, qualunque ne sia la fonte. NON si correggono l'Ombra della riga (è la sua identità) né la fonte (dice da dove viene la riga). Non si
 //     aggiungono né si tolgono righe: il registro corregge valori sul posto. Le righe con fonte «voce» nascono dal pin: se la voce passa a un'altra Ombra la sua riga di

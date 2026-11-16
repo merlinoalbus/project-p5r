@@ -4,7 +4,7 @@
 //
 // Una proposta dice come convertire una voce scritta a parole in dati: il collegamento («Quale»), eventualmente il tipo, gli effetti da
 // aggiungere (con i valori proposti) e quelli da togliere, con la certezza e il motivo. Vive in UNA tabella di gioco
-// (`main.proposta_conversione_voce`, migrazione 236): il contenuto non cambia mai (si scrive una volta, da una migrazione), la decisione
+// (`main.proposta_conversione_voce`): il contenuto non cambia mai, la decisione
 // la chiude («applicata» o «scartata») e ne registra l'esito. Applicarla scrive la voce con la STESSA funzione dell'editor
 // (`aggiornaVoce`), mai con SQL parallelo; le partite già spuntate ricevono le loro proposte «Applica» come per ogni modifica della voce,
 // e le ricevute salvate non si riscrivono. Esiste solo nella preparazione: nel rilascio rotte e interfaccia non ci sono.

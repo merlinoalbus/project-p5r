@@ -2,7 +2,7 @@
 // immaginiService — le immagini dell'istanza, dentro il database (tabella `immagine`)
 // ============================================================
 //
-// Decisione dell'utente (2026-09-12, migrazione 079): il contenuto delle immagini sta nella colonna
+// Decisione dell'utente (2026-09-12): il contenuto delle immagini sta nella colonna
 // `contenuto` di `immagine`, non su disco. Due gruppi di ambiti (`shared/immagini.ts`):
 // - caricamento (arcana, confidente, personaggio, persona, skill, mappa, spillo, dungeon, altro): una sola
 //   immagine per (ambito, chiave), il caricamento successivo sostituisce; precedenza sulla grafica
@@ -154,7 +154,7 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
   // `nome_file` resta per lo schema (NOT NULL) e come nome leggibile: un nome nuovo a ogni sostituzione
   const nomeFile = `${randomUUID()}.${estensione}`;
   getDb().transaction(() => {
-    // le miniature (108) erano dell'immagine di prima: l'`ON CONFLICT DO UPDATE` conserva l'id, e la cascata non scatta
+    // le miniature erano dell'immagine di prima: l'`ON CONFLICT DO UPDATE` conserva l'id, e la cascata non scatta
     eliminaMiniatureDi(getDb(), ambito, chiave);
     prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at, origine_url, contenuto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at, origine_url = excluded.origine_url, contenuto = excluded.contenuto`)
@@ -210,7 +210,7 @@ export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: strin
 
 /**
  * Rimuove le immagini caricate di un ambito, oppure (senza ambito) di tutti gli ambiti di caricamento: la grafica predefinita non si
- * tocca. Le mappe con pezzi (102) che perderebbero l'immagine che mostrano chiedono conferma (L1, F5 del validatore): senza
+ * tocca. Le mappe con pezzi che perderebbero l'immagine che mostrano chiedono conferma (L1, F5 del validatore): senza
  * `eliminaPezzi` 409 `mappa-con-pezzi` e niente si toglie; con la conferma i loro pezzi se ne vanno nella stessa transazione.
  */
 export function eliminaImmaginiAmbito(ambito?: string, opz: { eliminaPezzi?: boolean } = {}): number {

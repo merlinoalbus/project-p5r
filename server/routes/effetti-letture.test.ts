@@ -38,7 +38,7 @@ describe('API — il conseguimento dice le Doti, non le tocca', () => {
   beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
-  // L13 (O7-4, migrazione 313): Dote e note di libri e film le dicono solo gli effetti (prima volta e voci `ripetuto`)
+  // L13 (O7-4): Dote e note di libri e film le dicono solo gli effetti (prima volta e voci `ripetuto`)
   type ConEffetti = { effetti: Array<{ effetto: { famiglia: string; dote?: string; note?: number }; ripetuto?: boolean }> };
   const doteDi = (x: ConEffetti, ripetuto = false) => {
     const v = x.effetti.find((e) => e.effetto.famiglia === 'dote' && !!e.ripetuto === ripetuto);

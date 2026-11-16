@@ -2,9 +2,7 @@
 // effettiCatalogo — che cosa fa una lettura o un'attività, come elenco di effetti dichiarati
 // ============================================================
 //
-// Libri, film e attività portavano l'effetto spezzato in colonne di forme diverse: `dote` + `note`,
-// colonne di Doti e di effetto singolo che le migrazioni 313 e 362-363 hanno tolto.
-// Da qui in poi ogni riga ha `effetti_json`: un elenco di voci, ciascuna con un effetto dichiarato
+// Ogni libro, film e attività ha `effetti_json`: un elenco di voci, ciascuna con un effetto dichiarato
 // (`shared/effettiOggetto.ts`), se vale dalla seconda volta in poi e non alla prima (`ripetuto`, i
 // film al cinema e i turni) e le condizioni sotto cui scatta (`condizioni`, per esempio «piove» per lo studio al
 // Leblanc). I punti Dote di un conseguimento si calcolano da qui (`dotiDaEffetti`).

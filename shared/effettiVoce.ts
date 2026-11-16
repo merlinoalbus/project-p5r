@@ -131,7 +131,7 @@ export type NotePuntiConfidente = 1 | 2 | 3;
 export interface EffettoNotePuntiConfidente { tipo: 'puntiConfidente'; confidente: string; note: NotePuntiConfidente }
 /**
  * La forma scritta prima della correzione del 2026-10-28 («i punti rango andavano gestiti come note non come punti specifici»): `punti` fissi.
- * Non si cambia in silenzio: la migrazione di gioco 301 la porta in note solo se i punti sono esattamente 5, 10 o 15 (♪, ♪♪, ♪♪♪); le altre
+ * Non si cambia in silenzio: dove i punti non sono esattamente 5, 10 o 15 (♪, ♪♪, ♪♪♪) le voci
  * restano così, leggibili, e alla spunta danno i loro punti come scritti (nessun moltiplicatore), finché chi corregge la voce non sceglie le note.
  */
 export interface EffettoPuntiFissiConfidente { tipo: 'puntiConfidente'; confidente: string; punti: number }

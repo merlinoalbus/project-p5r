@@ -18,9 +18,8 @@
 //   - una scrittura HTTP riuscita sulle aree che toccano i dati di gioco: lo fa `middleware/cacheDiGiocoDopoScritture`, per tutte le cache
 //     registrate (e non solo per l'indice della ricerca), così uno scrittore che se ne dimentica non lascia letture vecchie;
 //   - uno scrittore che sa di cambiare dati di gioco può chiamarla da sé.
-// Oltre all'invalidazione, due cache si CONVALIDANO ogni volta che si leggono, perché non dipendono da chi scrive: `db/schemaMemo.ts`
-// (la struttura: `schema_version`) e il modello di avanzamento dei Palazzi (`mappe/statiGuida.ts`: `data_version`, `schema_version`,
-// `total_changes()`), che devono vedere anche le migrazioni e le scritture fuori dall'API. I nomi delle condizioni
+// Oltre all'invalidazione, il modello di avanzamento dei Palazzi (`mappe/statiGuida.ts`) si CONVALIDA ogni volta che si legge, perché non
+// dipende da chi scrive (`data_version`, `total_changes()`): deve vedere anche le scritture fuori dall'API. I nomi delle condizioni
 // (`condizioni/nomiCondizioni.ts`) si rileggono comunque dopo un secondo: la memoria serve solo a non rileggerli per ogni riga di un elenco.
 // ============================================================
 

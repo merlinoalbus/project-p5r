@@ -12,7 +12,6 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { config } from '../config.js';
 import { closeDb, getDb, initDb, prepared, resolvePartitePath } from '../db/dbService.js';
-import { migrations } from '../db/migrations/index.js';
 import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
 import { creaPartita } from './partiteService.js';
 import { copiaDatabase, copiaIstanza } from './impostazioniService.js';
@@ -68,7 +67,9 @@ function fileQualunque(testo: string): string {
 
 beforeAll(() => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-pacchetto-'));
-  (config as { dataDir: string }).dataDir = dataDir;
+  // i due database stanno in `edizioneDir` e `partiteDir`, che senza le loro variabili d'ambiente valgono quanto `DATA_DIR` all'avvio:
+  // vanno portati nella cartella di prova insieme a `dataDir`, o la prova aprirebbe i file veri dell'istanza
+  Object.assign(config, { dataDir, edizioneDir: dataDir, partiteDir: dataDir });
   const db = initDb();
   caricaPacchetto(db);
   prepared("INSERT OR REPLACE INTO immagine (ambito, chiave, nome_file, mime, byte, created_at, contenuto) VALUES ('mappe', 'tokyo', 'tokyo.png', 'image/png', 5, 'x', ?)").run(Buffer.from('tokyo'));
@@ -100,10 +101,6 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
     await expect(importaPacchetto(fileQualunque('ancora altro'))).rejects.toMatchObject({ code: 'pacchetto-non-valido' });
     // la cartella di lavoro dell'importazione non resta in data/tmp, nemmeno quando fallisce
     expect(fs.readdirSync(path.join(dataDir, 'tmp')).filter((f) => f.startsWith('importazione-'))).toEqual([]);
-  });
-
-  it('la versione dello schema che il codice sa leggere è l’ultima migrazione', () => {
-    expect(versioneSchemaCodice()).toBe(migrations[migrations.length - 1].id);
   });
 
   it('esporta il solo gioco.db, con le immagini dentro e senza partite', async () => {
@@ -147,14 +144,16 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
     expect(prepared("SELECT 1 FROM immagine WHERE ambito = 'sfondi' AND chiave = 'prova-anteprima'").get()).toBeTruthy();
   });
 
-  it('un pacchetto più nuovo del codice non è importabile; una tabella di gioco assente rende orfane le righe che la referenziano', async () => {
+  it('un pacchetto di un’altra versione, più nuova o più vecchia, non è importabile; una tabella di gioco assente rende orfane le righe che la referenziano', async () => {
     const contenuto = await pacchettoEsportato();
-    const nuovo = pacchettoModificato(contenuto, (db) => { db.pragma('user_version = 9999'); });
-    const a = anteprimaPacchetto(nuovo);
-    expect(a.importabile).toBe(false);
-    expect(a.motivo).toMatch(/schema 9999, più nuovo/);
-    expect(a.versioneSchema).toBe(9999);
-    await expect(importaPacchetto(nuovo)).rejects.toMatchObject({ code: 'pacchetto-troppo-nuovo' });
+    for (const versione of [9999, versioneSchemaCodice() - 1]) {
+      const altro = pacchettoModificato(contenuto, (db) => { db.pragma(`user_version = ${versione}`); });
+      const a = anteprimaPacchetto(altro);
+      expect(a.importabile).toBe(false);
+      expect(a.motivo).toContain(`è alla versione ${versione}, questa versione dell'app legge solo la ${versioneSchemaCodice()}`);
+      expect(a.versioneSchema).toBe(versione);
+      await expect(importaPacchetto(altro)).rejects.toMatchObject({ code: 'pacchetto-di-altra-versione' });
+    }
     const senzaArticoli = pacchettoModificato(contenuto, (db) => { db.exec('PRAGMA foreign_keys = OFF; DROP TABLE articolo;'); });
     const b = anteprimaPacchetto(senzaArticoli);
     expect(b.tabelleAssenti).toContain('articolo');
@@ -168,7 +167,7 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
     fs.rmSync(backup.percorso, { force: true });
     const contenuto = await pacchettoEsportato();
     const conPartite = pacchettoModificato(contenuto, (db) => { db.exec('CREATE TABLE partita (id INTEGER PRIMARY KEY)'); });
-    expect(() => anteprimaPacchetto(conPartite)).toThrowError(expect.objectContaining({ code: 'pacchetto-con-partite' }));
+    expect(() => anteprimaPacchetto(conPartite)).toThrowError(expect.objectContaining({ code: 'database-gioco-e-partite' }));
     const soloPartite = pacchettoModificato(contenuto, (db) => { db.exec('PRAGMA foreign_keys = OFF; DROP TABLE persona; CREATE TABLE partita (id INTEGER PRIMARY KEY)'); });
     expect(() => anteprimaPacchetto(soloPartite)).toThrowError(expect.objectContaining({ code: 'pacchetto-con-partite' }));
   });
@@ -180,7 +179,6 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
     const e = await importaPacchetto(contenuto);
     expect(e.versioneSchema).toBe(versioneSchemaCodice());
     expect(e.versioneSchemaPacchetto).toBe(versioneSchemaCodice());
-    expect(e.migrazioniApplicate).toBe(0);
     expect(e.immagini).toBe(1);
     expect(e.copiaDiSicurezza).toMatch(/^prima-del-ripristino-/);
     expect(fs.existsSync(path.join(dataDir, 'backups', e.copiaDiSicurezza, 'gioco.db'))).toBe(true);
@@ -207,8 +205,9 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
 
   it('se l’importazione fallisce a connessione chiusa, l’istanza torna com’era', async () => {
     const contenuto = await pacchettoEsportato();
-    // uno schema fermo alla 66 senza la tabella spillo: la 067 non può applicarsi, l'importazione deve tornare indietro
-    const rotto = pacchettoModificato(contenuto, (db) => { db.exec('PRAGMA foreign_keys = OFF; DROP TABLE spillo_immagine; DROP TABLE spillo_destinazione; DROP TABLE spillo'); db.pragma('user_version = 66'); });
+    // un pacchetto alla versione giusta con una condizione «manuale» illeggibile: alla riapertura la conversione delle condizioni si
+    // ferma, e l'importazione deve tornare indietro
+    const rotto = pacchettoModificato(contenuto, (db) => { expect(db.prepare("UPDATE spillo SET condizioni_json = '{manuale' WHERE id = (SELECT MIN(id) FROM spillo)").run().changes).toBe(1); });
     const articoliPrima = (prepared('SELECT COUNT(*) AS n FROM articolo').get() as { n: number }).n;
     await expect(importaPacchetto(rotto)).rejects.toMatchObject({ code: 'importazione-fallita' });
     expect((prepared('SELECT COUNT(*) AS n FROM articolo').get() as { n: number }).n).toBe(articoliPrima);

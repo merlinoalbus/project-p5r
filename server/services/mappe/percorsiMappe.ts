@@ -10,23 +10,20 @@
 import type Database from 'better-sqlite3';
 import type { AppDatabase } from '../../db/dbService.js';
 import { getDb } from '../../db/dbService.js';
-import { haColonna, haTabella } from '../../db/colonne.js';
 import { slug } from '../../../shared/slug.js';
 import { nomeCompletoPlanimetria } from '../../../shared/nomiPlanimetrie.js';
 import { httpErrors } from '../../utils/httpError.js';
 
 interface Nodo { chiave:string; nome:string; tipo:string; genitore_chiave:string|null;
-  /** Il percorso pubblico fissato (109, L2: il Covo spostato sotto Yongen-Jaya tiene `covo-dei-ladri`); null = dalla catena dei genitori. */
+  /** Il percorso pubblico fissato (L2: il Covo spostato sotto Yongen-Jaya tiene `covo-dei-ladri`); null = dalla catena dei genitori. */
   percorso_fisso?:string|null }
 
 // ---- Statement per connessione ----
 //
-// Queste funzioni ricevono la connessione (le migrazioni ne usano una loro) e sono chiamate per ogni mappa di ogni risposta: prima
-// compilavano lo statement e controllavano `sqlite_master` a ogni chiamata, un quarto del tempo dell'albero delle mappe (rilievo P2
-// della verifica, 2026-10-03). Gli statement restano per connessione (una connessione nuova ha i suoi). Della tabella dei percorsi
-// si ricorda solo che c'è: una migrazione può crearla dopo, sulla stessa connessione.
+// Queste funzioni ricevono la connessione e sono chiamate per ogni mappa di ogni risposta: compilare
+// lo statement a ogni chiamata costerebbe un quarto del tempo dell'albero delle mappe (rilievo P2
+// della verifica, 2026-10-03). Gli statement restano per connessione (una connessione nuova ha i suoi).
 const statementPerConnessione = new WeakMap<AppDatabase, Map<string, Database.Statement>>();
-const conPercorsi = new WeakSet<AppDatabase>();
 
 /** Lo statement di quella SQL su quella connessione: compilato la prima volta, poi ripreso dalla cache della connessione. */
 function stmt(db: AppDatabase, sql: string): Database.Statement {
@@ -37,22 +34,12 @@ function stmt(db: AppDatabase, sql: string): Database.Statement {
   return s;
 }
 
-/** Vero se la connessione ha la tabella `mappa_percorso`; il sì si ricorda, il no si ricontrolla (la tabella può arrivare dopo). */
-function haPercorsi(db: AppDatabase): boolean {
-  if (conPercorsi.has(db)) return true;
-  if (!haTabella(db, 'mappa_percorso')) return false;
-  conPercorsi.add(db);
-  return true;
-}
-
 /** La chiave storica è un'identità interna: URL, ricerca ed esportazioni usano il percorso. */
 export function idMappa(chiave:string,db:AppDatabase=getDb()):string {
-  if(!haPercorsi(db))return chiave;
   return (stmt(db,'SELECT mappa_chiave FROM mappa_percorso WHERE chiave=? UNION ALL SELECT mappa_chiave FROM mappa_alias WHERE chiave=? LIMIT 1').get(chiave,chiave) as {mappa_chiave:string}|undefined)?.mappa_chiave??chiave;
 }
 /** Il percorso pubblico di una mappa dalla sua chiave interna; la chiave stessa se non c'è (ancora) un percorso. */
 export function chiaveMappa(identita:string,db:AppDatabase=getDb()):string {
-  if(!haPercorsi(db))return identita;
   return (stmt(db,'SELECT chiave FROM mappa_percorso WHERE mappa_chiave=?').get(identita) as {chiave:string}|undefined)?.chiave??identita;
 }
 /**
@@ -60,7 +47,6 @@ export function chiaveMappa(identita:string,db:AppDatabase=getDb()):string {
  * (l'indice dei luoghi) senza una query per nodo. Una mappa senza percorso non c'è nella tabella: `chiaveMappa` darebbe l'identità stessa.
  */
 export function chiaviPubblicheDelleMappe(db:AppDatabase=getDb()):Map<string,string> {
-  if(!haPercorsi(db))return new Map();
   const righe=stmt(db,'SELECT mappa_chiave, chiave FROM mappa_percorso').all() as Array<{mappa_chiave:string;chiave:string}>;
   return new Map(righe.map(r=>[r.mappa_chiave,r.chiave]));
 }
@@ -68,17 +54,8 @@ export function chiaviPubblicheDelleMappe(db:AppDatabase=getDb()):Map<string,str
 export function nomePercorso(identita:string,db:AppDatabase=getDb()):string {
   return (stmt(db,'SELECT nome FROM mappa_percorso WHERE mappa_chiave=?').get(identita) as {nome:string}|undefined)?.nome??identita;
 }
-const conAreeVersionate = new WeakSet<AppDatabase>();
-/** Vero se la connessione ha le Aree con l'etichetta di versione; il sì si ricorda, il no si ricontrolla (arrivano con le migrazioni). */
-function haAreeVersionate(db:AppDatabase):boolean {
-  if(conAreeVersionate.has(db))return true;
-  if(!haTabella(db,'area')||!haColonna(db,'mappa','area_chiave')||!haColonna(db,'mappa','versione_etichetta'))return false;
-  conAreeVersionate.add(db);
-  return true;
-}
-/** L'Area e l'etichetta di versione di una planimetria; null se la mappa non sta in un'Area (o lo schema non ha ancora le Aree). */
+/** L'Area e l'etichetta di versione di una planimetria; null se la mappa non sta in un'Area. */
 function areaEdEtichetta(identita:string,db:AppDatabase):{area:string;etichetta:string|null}|null {
-  if(!haAreeVersionate(db))return null;
   return (stmt(db,'SELECT a.nome AS area, m.versione_etichetta AS etichetta FROM mappa m JOIN area a ON a.chiave=m.area_chiave WHERE m.chiave=?').get(identita) as {area:string;etichetta:string|null}|undefined)??null;
 }
 /**
@@ -106,9 +83,7 @@ export function nomeDelPosto(identita:string,db:AppDatabase=getDb()):string|null
 }
 /** Controlla tutto il piano prima di scrivere. Nessun cambio di identità, FK o stato del giocatore. */
 export function sincronizzaPercorsiMappe(db:AppDatabase):void {
-  if(!haTabella(db,'mappa_percorso'))return;
-  const conFisso=haColonna(db,'mappa','percorso_fisso');
-  const nodi=db.prepare(`SELECT chiave,nome,tipo,genitore_chiave${conFisso?',percorso_fisso':''} FROM mappa`).all() as Nodo[];
+  const nodi=db.prepare('SELECT chiave,nome,tipo,genitore_chiave,percorso_fisso FROM mappa').all() as Nodo[];
   const indice=new Map(nodi.map(n=>[n.chiave,n]));
   const usati=new Map<string,string>();
   const nomiBase=new Map<string,number>();
@@ -124,7 +99,7 @@ export function sincronizzaPercorsiMappe(db:AppDatabase):void {
       visti.add(corrente.chiave);catena.unshift(corrente);
       corrente=corrente.genitore_chiave?indice.get(corrente.genitore_chiave):undefined;
     }
-    // un percorso fissato (109) resta quello, col nome della mappa sola: la mappa si presenta come prima di essere spostata
+    // un percorso fissato resta quello, col nome della mappa sola: la mappa si presenta come prima di essere spostata
     const significativi=n.percorso_fisso?[n]:catena.filter(c=>c.tipo!=='citta'||c===n);
     let chiave=n.percorso_fisso??significativi.map(c=>slug(c.nome)).join('-');
     // Le varianti native possono condividere il nome del luogo. L'identità è nell'URL, mai nel titolo.

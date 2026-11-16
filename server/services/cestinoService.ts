@@ -1,5 +1,5 @@
 // ============================================================
-// cestinoService — il cestino: ciò che si elimina dalla guida e dalle mappe si può rimettere (migrazioni 104 e utente 021)
+// cestinoService — il cestino: ciò che si elimina dalla guida e dalle mappe si può rimettere
 // ============================================================
 //
 // Richiesta dell'utente (2026-10-16), dopo che tre aree del Palazzo di Madarame eliminate per errore si sono dovute ricostruire a
@@ -34,7 +34,6 @@
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { haTabella } from '../db/colonne.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { ARCHIVI_LEGACY_IMMUTABILI, verificaArchivioLegacy, verificaCestinoLegacy } from '../db/acquistiLegacy.js';
 import { httpErrors } from '../utils/httpError.js';
 import { getProprietario } from '../middleware/requestContext.js';
@@ -67,7 +66,7 @@ interface Passo { seq: number; tabella: string; op: Operazione; prima?: Riga; do
 /** Le chiavi di ciò che stava subito prima e subito dopo l'elemento nel suo elenco (null se era il primo, o l'ultimo). */
 export interface ViciniCestino { prima: string | null; dopo: string | null }
 
-/** I tipi di elemento che il server mette nel cestino (da L5, migrazione 115, anche il luogo e il negozio). */
+/** I tipi di elemento che il server mette nel cestino (da L5 anche il luogo e il negozio). */
 export type TipoElementoCestino = Exclude<TipoCestino, 'partita' | 'fonte-acquisto'|'fonte-pesca'|'sessione-pesca'|'osservazione-pesca'|'persona-scorta'>;
 
 /** L'elemento che si elimina, per l'elenco del cestino; `vicini` per rimetterlo al suo posto (aree, voci). */
@@ -83,9 +82,9 @@ const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> 
   voce: { tabella: 'punto_interesse', colonna: 'chiave' },
   mappa: { tabella: 'mappa', colonna: 'chiave' },
   'area-dedalo': { tabella: 'area_dedalo', colonna: 'chiave' },
-  // un'Area del mondo con le sue planimetrie (L2, migrazione 109)
+  // un'Area del mondo con le sue planimetrie (L2)
   'area-fisica': { tabella: 'area', colonna: 'chiave' },
-  // L5 (migrazione 115): un luogo con i suoi pin, un negozio con articoli, acquisti e punti
+  // L5: un luogo con i suoi pin, un negozio con articoli, acquisti e punti
   luogo: { tabella: 'luogo', colonna: 'chiave' },
   negozio: { tabella: 'negozio', colonna: 'chiave' },
   // L6 (R6-04): una Richiesta dei Mementos; le condizioni che la citano restano (per chiave) e danno «Richiesta eliminata»
@@ -112,7 +111,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   catalogo_oggetto: ['oggetto', 'oggetti'], voce_oggetto: ['contenuto collegato', 'contenuti collegati'],
   ricompensa_oggetto: ['ricompensa collegata', 'ricompense collegate'], ricetta_materiale: ['materiale collegato', 'materiali collegati'],
   proposta_abbinamento: ['proposta di abbinamento', 'proposte di abbinamento'],
-  // tabelle tolte dalla 354 (DECISIONI, eccezione di L2-08): i nomi servono ancora alle voci del Cestino registrate prima e all'anteprima di
+  // tabelle tolte dal modello (DECISIONI, eccezione di L2-08): i nomi servono ancora alle voci del Cestino registrate prima e all'anteprima di
   // «Importa» di un backup vecchio, che le porta con le loro righe (`scartiDelPacchetto`)
   negozio_luogo_extra: ['sede del listino', 'sedi del listino'], negozio_sede_spillo: ['sede confermata di un pin', 'sedi confermate dei pin'],
   negozio_sede_foto: ['copia di partenza delle sedi di un listino', 'copie di partenza delle sedi dei listini'],
@@ -125,20 +124,20 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   copia_pezzo: ['copia di un pezzo', 'copie dei pezzi'], pianta_area: ['pianta di un’infiltrazione', 'piante delle infiltrazioni'],
   guida_mappa: ['scheda di guida di un’infiltrazione', 'schede di guida delle infiltrazioni'], guida_alias: ['nome di prima di un’infiltrazione', 'nomi di prima delle infiltrazioni'],
   area_dedalo: ['area di un dedalo', 'aree dei dedali'], area: ['area', 'aree'], quartiere_ingresso: ['ingresso di un quartiere', 'ingressi dei quartieri'], persona_area_dedalo: ['Persona di un’area di un dedalo', 'Persona delle aree dei dedali'],
-  // L3 (migrazione 110)
+  // L3
   infiltrazione_area: ['legame infiltrazione-area', 'legami infiltrazione-area'], voce_infiltrazione: ['infiltrazione di una voce del diario', 'infiltrazioni delle voci del diario'],
   proposta_infiltrazione_voce: ['proposta d’infiltrazione di una voce del diario', 'proposte d’infiltrazione delle voci del diario'],
   richiesta: ['Richiesta', 'Richieste'], dati_guida: ['dato della guida', 'dati della guida'],
   punto_partita: ['spunta di una voce nelle partite', 'spunte delle voci nelle partite'], spillo_partita: ['stato di un pin nelle partite', 'stati dei pin nelle partite'],
   timbri_dedalo_partita: ['conteggio dei timbri nelle partite', 'conteggi dei timbri nelle partite'],
   spunta_voce_partita: ['spunta del diario nelle partite', 'spunte del diario nelle partite'],
-  // L8 (migrazione 166): le Ombre
+  // L8: le Ombre
   ombra_luogo: ['luogo d’incontro di un’Ombra', 'luoghi d’incontro delle Ombre'], ombra_voce: ['collegamento voce-Ombra', 'collegamenti voce-Ombra'],
-  // L4 (utente 022)
+  // L4
   divergenza_partita: ['divergenza da verificare nelle partite', 'divergenze da verificare nelle partite'],
-  // L4 (§8.11, utente 023)
+  // L4 (§8.11)
   spillo_partita_infiltrazione: ['stato di un pin in un’infiltrazione nelle partite', 'stati dei pin per infiltrazione nelle partite'],
-  // L5 (migrazione 115): luoghi e negozi
+  // L5: luoghi e negozi
   luogo: ['luogo', 'luoghi'], negozio: ['negozio', 'negozi'], articolo: ['articolo', 'articoli'], attivita: ['attività', 'attività'],
   marcatore_luogo: ['segnaposto di un luogo', 'segnaposto dei luoghi'],
   acquisto_partita: ['acquisto nelle partite', 'acquisti nelle partite'], punti_negozio_partita: ['punti di un negozio nelle partite', 'punti dei negozi nelle partite'],
@@ -146,21 +145,21 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   voce_giornata: ['voce del Diario', 'voci del Diario'], voce_effetto: ['effetto della voce', 'effetti della voce'],
   voce_effetto_transizione: ['provenienza degli effetti', 'provenienze degli effetti'],
   proposta_effetto_voce: ['raccordo degli effetti', 'raccordi degli effetti'], operazione_effetti_voce: ['decisione sugli effetti', 'decisioni sugli effetti'],
-  // L13 (migrazione 236)
+  // L13
   proposta_conversione_voce: ['proposta da completare di una voce del Diario', 'proposte da completare delle voci del Diario'],
   acquisto_registrato: ['consumazione registrata', 'consumazioni registrate'], acquisto_provenienza: ['fonte di acquisto', 'fonti di acquisto'],
   acquisto_operazione: ['ricevuta di acquisto', 'ricevute di acquisto'], effetto_applicato: ['ricevuta di un effetto', 'ricevute degli effetti'],
   da_applicare: ['proposta personale', 'proposte personali'], movimento_yen: ['movimento di denaro', 'movimenti di denaro'],
-  // L13 (decisione 18, utente 048)
+  // L13 (decisione 18)
   yen_automatico: ['movimento automatico di denaro', 'movimenti automatici di denaro'],
   yen_fuori_registro: ['causa con gli yen già nel saldo da prima', 'cause con gli yen già nel saldo da prima'], yen_automatico_inizio: ['inizio degli yen automatici', 'inizi degli yen automatici'],
   proposta_operazione: ['decisione personale', 'decisioni personali'], beneficio_ciclo: ['stato del beneficio', 'stati dei benefici'],
-  // Ondata 5 (utente 051): il registro degli acquisti con giorno e pezzi
+  // Ondata 5: il registro degli acquisti con giorno e pezzi
   registro_acquisti: ['acquisto del registro', 'acquisti del registro'],
-  // Ondata 5 (utente 053): il trofeo segnato e gli oggetti dati da un turno con il suo esito (la lotteria vinta, la sfida della Big Bang Burger)
+  // Ondata 5: il trofeo segnato e gli oggetti dati da un turno con il suo esito (la lotteria vinta, la sfida della Big Bang Burger)
   trofeo_esito_turno: ['trofeo segnato da un esito', 'trofei segnati dagli esiti'],
   oggetto_esito_turno: ['oggetto ricevuto da un esito', 'oggetti ricevuti dagli esiti'],
-  // Ondata 5 (utente 054): le copie consumate da un turno con il suo esito o da un Isolamento
+  // Ondata 5: le copie consumate da un turno con il suo esito o da un Isolamento
   consumo_oggetto_partita: ['oggetto consumato', 'oggetti consumati'],
   // R11-06: nomi leggibili per le righe saltate di tabelle tolte o recenti (le etichette delle tabelle tolte non si ripuliscono mai)
   lettura_partita: ['lettura completata nelle partite', 'letture completate nelle partite'], requisito_partita: ['requisito confermato nelle partite', 'requisiti confermati nelle partite'],
@@ -171,7 +170,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   esame_piazzamento_partita: ['piazzamento a un esame nelle partite', 'piazzamenti agli esami nelle partite'],
   confidente_invito: ['invito del Confidente', 'inviti dei Confidenti'],
   oggetto_ottenuto_partita: ['oggetto ricevuto nelle partite', 'oggetti ricevuti nelle partite'], sblocco_partita: ['sblocco ricevuto nelle partite', 'sblocchi ricevuti nelle partite'],
-  // utente 073: il primo richiamo gratuito di una Persona DLC già speso
+  // il primo richiamo gratuito di una Persona DLC già speso
   primo_richiamo_speso: ['primo richiamo DLC speso nelle partite', 'primi richiami DLC spesi nelle partite'],
 };
 
@@ -223,9 +222,9 @@ function strutturaTabella(db: AppDatabase, schema: Schema, tabella: string): { c
 
 /**
  * Le chiavi che una tabella aveva prima di essere ricostruita con una chiave nuova, per riconoscere le righe delle fotografie del Cestino fatte
- * allora. Ondata 5 (utente 052, revisione dei lotti D e D2): `regalo_partita` aveva per chiave (partita, Confidente, nome del regalo) e ora ha
- * `id`; una fotografia di prima non ha `id`, e la riga si riconosce con la chiave di allora più l'istante della consegna (`fatto_at`, che la 052
- * copia identico), perché ora lo stesso regalo può avere più consegne.
+ * allora. Ondata 5 (revisione dei lotti D e D2): `regalo_partita` ha per chiave `id`, non più (partita, Confidente, nome del regalo);
+ * una fotografia vecchia non ha `id`, e la riga si riconosce con la chiave di allora più l'istante della consegna (`fatto_at`,
+ * rimasto identico), perché lo stesso regalo può avere più consegne.
  */
 const CHIAVI_DI_PRIMA: Readonly<Record<string, readonly string[]>> = { 'utente.regalo_partita': ['partita_id', 'confidente_chiave', 'regalo', 'fatto_at'] };
 /** La chiave con cui riconoscere la riga della fotografia: quella della tabella, o quella di prima se la fotografia non ha le colonne nuove. */
@@ -513,7 +512,7 @@ export function ripristinaCestinoPrivato(uid: string): EsitoRipristinoCestinoDto
 // L13 (decisione 18): anche i movimenti automatici degli yen (`yen_automatico`) sono storia durevole del saldo: un ripristino che non sia di una
 // partita intera non li riapre né li richiude, e non rimette il saldo (`partita.yen`, qui sotto); la Richiesta rimessa li riallinea da sé e la
 // voce rimessa rifà i movimenti che la sua eliminazione aveva chiuso (`rimettiYenDellaVoceRipristinata`), con nuove righe. Anche le cause
-// segnate «già nel saldo da prima» (`yen_fuori_registro`, utente 049) restano: il ripristino non le toglie (rimetterle non è un gesto nuovo)
+// segnate «già nel saldo da prima» (`yen_fuori_registro`) restano: il ripristino non le toglie (rimetterle non è un gesto nuovo)
 const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'yen_automatico', 'yen_fuori_registro','acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo','pesca_operazione','pesca_quota_storica','movimento_punti_pesca','punti_pesca_partita']);
 interface IdentitaRipristino { id: number | null; uid: string; tipo: TipoCestino; chiave: string; nome: string; registro_json: string; con_partite: number; vicini_json: string | null; partitaId?: number }
 function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: string }): EsitoRipristinoCestinoDto {
@@ -622,7 +621,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         if (radicePin) throw httpErrors.conflict('cestino-pin-registro-incoerente', 'La fotografia integrale del pin non coincide con lo schema corrente: ripristino annullato, cestino conservato.');
         throw httpErrors.conflict('cestino-fotografia-acquisto-incompleta', 'Lo schema e la fotografia integrale personale non coincidono: ripristino annullato, cestino conservato.');
       }
-      // la chiave con cui si riconosce la riga: quella della tabella, o quella di prima per una fotografia di prima della ricostruzione (utente 052)
+      // la chiave con cui si riconosce la riga: quella della tabella, o quella di prima per una fotografia di prima della ricostruzione della tabella
       const chiaveRiga = s ? chiaveDellaFotografia(p.schema, p.tabella, s.chiave, riferimento) : [];
       const descrivi = (riga: Riga) => chiaveRiga.map((c) => String(riga[c] ?? '')).join(' · ');
       if (!s) {
@@ -633,7 +632,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         // una tabella sparita senza dichiarazione è comunque «la tabella non c'è più», non una riga cambiata dopo: stesso motivo, senza «ora:»
         salta(p.tabella, 'tabella-rimossa', ''); continue;
       }
-      // solo le colonne che la tabella ha ancora (una migrazione dopo l'eliminazione può averne tolte)
+      // solo le colonne che la tabella ha ancora (lo schema di oggi può averne meno della fotografia)
       const colonne = s.colonne.filter((c) => c in riferimento);
       // R11-06: si segnala solo la perdita reale delle colonne tolte: con un valore (eliminazione di una riga), o che l'eliminazione aveva cambiato (modifica);
       // e solo quando la riga è tornata davvero (`esegui` andato a buon fine): una riga già presente, sparita o con un legame mancante non è «tornata senza»
@@ -735,8 +734,8 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
     // Controllo finale della transazione: tutti gli oggetti del registro sono ormai tornati.
     // I JSON e i puntatori fra i due database non hanno foreign key SQLite; in errore
     // l'intero gesto torna indietro e il registro resta recuperabile nel cestino.
-    if (haTabellaMain(db, 'catalogo_oggetto')) {
-      const esiste = db.prepare('SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ?');
+    {
+      const esiste =db.prepare('SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ?');
       const richiedi = (chiave: unknown) => {
         if (typeof chiave === 'string' && !esiste.get(chiave)) throw httpErrors.conflict('cestino-oggetto-mancante',
           'Un riferimento da ripristinare cita un oggetto non più presente. Ripristina prima quell’oggetto: questo elemento resta nel cestino.', { oggetto: chiave });

@@ -1,5 +1,5 @@
 // ============================================================
-// L'Enigma contiene i suoi passi (095, scelte dell'utente del 2026-10-01)
+// L'Enigma contiene i suoi passi (scelte dell'utente del 2026-10-01)
 // ============================================================
 //
 // «Enigma deve diventare un contenitore di sotto elementi che insieme descrivono l'enigma e come sbloccarlo»; «una porta

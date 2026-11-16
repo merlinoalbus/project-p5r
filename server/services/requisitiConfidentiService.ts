@@ -7,14 +7,13 @@
 // alla domanda l'utente ha scelto «Requisito correggibile»: dalla scheda del Confidente si sceglie un'altra Richiesta al suo
 // posto, oppure lo si toglie. I requisiti sono dati di gioco (`gioco.db`): valgono per tutte le partite.
 // L6 (§6.1, R6-07): un requisito è una condizione del vocabolario unico; dalla pagina del Confidente si modifica un rango alla volta
-// («Modifica requisiti»); la copia `confidente_requisito_guida` (migrazione 119) dice se un rango è «Modificato» rispetto alla guida. Non c'è
+// («Modifica requisiti»); la copia `confidente_requisito_guida` dice se un rango è «Modificato» rispetto alla guida. Non c'è
 // un ritorno al valore della guida (decisione dell'utente del 10/11).
-// L7-02 (migrazione 359): la frase di un requisito si genera dalla condizione (`descriviRequisitoSpillo`, una sola sede del dato); la colonna `testo` è
+// L7-02: la frase di un requisito si genera dalla condizione (`descriviRequisitoSpillo`, una sola sede del dato); la colonna `testo` è
 // la NOTA propria del requisito, vuota se non racconta altro. Solo l'`avviso` tiene lì la sua frase, perché è il dato.
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { condizioneDelRequisito, notaDelRequisito } from './semaforiService.js';
@@ -59,11 +58,6 @@ function verificaConfidente(chiave: string): void {
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
 }
 
-/** Vero se la copia della guida c'è (uno schema di prima della 119 non ce l'ha). */
-function conGuida(): boolean {
-  return haTabellaMain(getDb(), 'confidente_requisito_guida');
-}
-
 /** Le righe di un rango (o di tutti i ranghi) in una delle due tabelle, in ordine. */
 function righe(tabella: 'confidente_requisito' | 'confidente_requisito_guida', confidente: string, rango?: number): RigaRequisitoRango[] {
   return (rango === undefined
@@ -87,7 +81,7 @@ export function requisitiDelConfidente(confidente: string): RequisitiConfidenteD
   verificaConfidente(confidente);
   const nomi = nomiCondizioniMemo();
   const attuali = righe('confidente_requisito', confidente);
-  const guida = conGuida() ? righe('confidente_requisito_guida', confidente) : null;
+  const guida = righe('confidente_requisito_guida', confidente);
   const ranghi: RequisitiConfidenteDto['ranghi'] = [];
   for (let rango = 1; rango <= RANGO_MASSIMO_CONFIDENTE; rango++) {
     const qui = attuali.filter((r) => r.rango === rango);
@@ -97,7 +91,7 @@ export function requisitiDelConfidente(confidente: string): RequisitiConfidenteD
       const descrizione = descriviRequisitoSpillo(c, nomi);
       return [{ indice: r.indice, condizione: c, descrizione, nota: notaDelRequisito(r, descrizione) }];
     });
-    ranghi.push({ rango, requisiti, modificato: guida !== null && firma(qui) !== firma(guida.filter((r) => r.rango === rango)) });
+    ranghi.push({ rango, requisiti, modificato: firma(qui) !== firma(guida.filter((r) => r.rango === rango)) });
   }
   return { confidente, ranghi };
 }
@@ -134,7 +128,7 @@ export function impostaRequisitiRanghi(confidente: string, ranghi: ReadonlyArray
   verificaConfidente(confidente);
   if (new Set(ranghi.map((r) => r.rango)).size !== ranghi.length) throw httpErrors.badRequest('rango-doppio', 'Lo stesso rango compare due volte.');
   getDb().transaction(() => { for (const r of ranghi) scriviRango(confidente, r.rango, r.requisiti); })();
-  // la disponibilità legge dai requisiti la pioggia e il «dal» del rango 1 (migrazione 306, R9-04/4) e li tiene in memoria
+  // la disponibilità legge dai requisiti la pioggia e il «dal» del rango 1 (R9-04/4) e li tiene in memoria
   invalidaCacheDiGioco();
   return requisitiDelConfidente(confidente);
 }

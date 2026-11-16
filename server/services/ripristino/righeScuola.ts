@@ -3,13 +3,13 @@
 // ============================================================
 //
 // Un oggetto «a riga» del registro dei ripristini (`righe.ts`): l'esame (`esame`, quattro righe). Il valore della guida è la fotografia
-// `seed_json` presa alla prima correzione (colonne `origine`, `seed_json`, `updated_at` della migrazione 198), che `ripristinoService` gestisce
+// `seed_json` presa alla prima correzione (colonne `origine`, `seed_json`, `updated_at`), che `ripristinoService` gestisce
 // come per quartieri e trofei.
 //
 // Si correggono: il nome, la data dei risultati (una scelta fra i giorni che non spostano nessuna domanda) e le note. Le domande e i giorni
 // d'esame NON stanno qui: dopo R9-18 vivono solo nelle righe di `domanda`, che si correggono dal catalogo (stesso `seed_json`);
 // la chiave, l'ordine e le date d'esame (ricavate dalle righe) non si correggono. L13 (ondata 7, O7-2): si correggono qui anche i premi per
-// piazzamento e il requisito di Conoscenza del primo posto (colonne della 311); in `esame_premi` restano solo le note generali.
+// piazzamento e il requisito di Conoscenza del primo posto (colonne dell'esame); in `esame_premi` restano solo le note generali.
 // Il nome decide se l'esame è «di metà» o «di fine» semestre, la data dei risultati dove finiscono le sue domande e da quando vale il suo
 // bonus: i controlli stanno in `esamiCollegamento` (409 se una correzione sposterebbe domande da un esame all'altro).
 // ============================================================
@@ -24,13 +24,9 @@ import { leggiPremiEsame, leggiRequisitoConoscenza, PIAZZAMENTI_ESAME } from '..
 import { DOTI_SOCIALI, eDote } from '../../../shared/doti.js';
 import { simboliNote } from '../../../shared/note.js';
 
-/** L13 (ondata 7, O7-2): la riga ha le colonne dei premi (dalla 311). */
-const conPremi = (r: RigaEsame): boolean => 'premi_json' in r && 'requisito_conoscenza' in r;
-
 const str = (v: ValoreCampoCorrezione | undefined): string | null => (typeof v === 'string' ? v : null);
 
 interface RigaEsame { nome: string; data_risultati: string | null; note: string; premi_json?: string | null; requisito_conoscenza?: string | null }
-// `SELECT *`: su uno schema di prima della 311 le colonne dei premi non ci sono
 const rigaEsame = (chiave: string): RigaEsame => prepared('SELECT * FROM esame WHERE chiave = ?').get(chiave) as RigaEsame;
 
 // ---- L13 (ondata 7, O7-2): premi per piazzamento e requisito di Conoscenza, il loro unico punto di modifica ----
@@ -95,28 +91,28 @@ const esame: DefRiga = {
       { p: 'nome', e: 'Nome', t: 'testo', max: 80 } as CampoDef,
       { p: 'data_risultati', e: 'Data dei risultati', t: 'scelta', opzioni } as CampoDef,
       { p: 'note', e: 'Note', t: 'testolungo', nullable: true, max: 2000 } as CampoDef,
-      // L13 (ondata 7, O7-2): premi e requisito solo dove la 311 ha messo le colonne
-      ...(conPremi(r) ? campiPremi() : []),
+      // L13 (ondata 7, O7-2): premi e requisito
+      ...campiPremi(),
     ];
   },
   leggi: (chiave) => {
     const r = rigaEsame(chiave);
-    return { nome: r.nome, data_risultati: r.data_risultati ?? '', note: r.note === '' ? null : r.note, ...(conPremi(r) ? valoriPremi(r) : {}) };
+    return { nome: r.nome, data_risultati: r.data_risultati ?? '', note: r.note === '' ? null : r.note, ...valoriPremi(r) };
   },
   scrivi: (chiave, v) => {
     if (v.nome !== undefined) prepared('UPDATE esame SET nome = ? WHERE chiave = ?').run(str(v.nome) ?? '', chiave);
     if (v.data_risultati !== undefined) prepared('UPDATE esame SET data_risultati = ? WHERE chiave = ?').run(str(v.data_risultati) || null, chiave);
     if (v.note !== undefined) prepared('UPDATE esame SET note = ? WHERE chiave = ?').run(str(v.note) ?? '', chiave);
     const r = rigaEsame(chiave);
-    if (conPremi(r) && Object.keys(v).some((k) => k.startsWith('premio/') || k.startsWith('requisito_'))) {
+    if (Object.keys(v).some((k) => k.startsWith('premio/') || k.startsWith('requisito_'))) {
       const nuovi = premiDaValori({ ...valoriPremi(r), ...v });
       prepared('UPDATE esame SET premi_json = ?, requisito_conoscenza = ? WHERE chiave = ?').run(nuovi.premi, nuovi.requisito, chiave);
     }
   },
-  // una fotografia presa prima della 311 non ha i campi dei premi: valgono quelli di adesso (la correzione di prima non li toccava)
+  // una fotografia vecchia non ha i campi dei premi: valgono quelli di adesso (la correzione di prima non li toccava)
   normalizzaGuida: (guida, chiave) => {
     const r = rigaEsame(chiave);
-    return conPremi(r) ? { ...valoriPremi(r), ...guida } : guida;
+    return { ...valoriPremi(r), ...guida };
   },
   nome: (_chiave, v) => String(v.nome),
   valida: (chiave, fusi) => {

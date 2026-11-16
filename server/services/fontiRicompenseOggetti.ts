@@ -3,7 +3,7 @@
 import { prepared } from '../db/dbService.js';
 import { datiGuidaCorretti } from './datiGuida.js';
 import type { CompletamentoDto, CostoOggettoDto, OggettiGuidaDto, SfideDto } from '../../shared/types.js';
-import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
 
 export interface FonteRicompensaOggetto { nome: string; testo: string; casa: string; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; prezzo?: number | null }
@@ -16,7 +16,7 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
   const richiesti = new Set(tipi);
   const out = new Map<string, FonteRicompensaOggetto>();
   const aggiungi = (tipo: string, chiave: string, fonte: FonteRicompensaOggetto) => out.set(`${tipo}\0${chiave}`, fonte);
-  if (richiesti.has('articolo') && catalogoOggettiDisponibile()) {
+  if (richiesti.has('articolo')) {
     const righe = prepared(`SELECT a.chiave,COALESCE(c.nome,a.nome) AS nome,a.nota,a.prezzo,a.costo_json,n.nome AS negozio,n.chiave AS negozio_chiave FROM articolo a
       JOIN negozio n ON n.chiave = a.negozio_chiave LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.nascosto = 0 AND n.nascosto = 0
         AND (a.catalogo_chiave IS NULL
@@ -33,7 +33,7 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
     }
   }
   for (const [tipo, query] of [
-    // L10-01 (381): la Richiesta non ha più testi di ricompensa (vuoti in 33/33): i suoi premi sono i legami stessi
+    // L10-01: la Richiesta non ha testi di ricompensa: i suoi premi sono i legami stessi
     ['richiesta', "SELECT chiave,nome,'' AS testo FROM richiesta"],
     ['domanda', 'SELECT chiave,domanda AS nome,ricompensa AS testo FROM domanda WHERE chiave IS NOT NULL'],
     ['esame', 'SELECT chiave,nome,note AS testo FROM esame'],
@@ -52,7 +52,7 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
     const prodotti = ricompensePerFonte('ricetta');
     for (const r of datiGuidaCorretti<OggettiGuidaDto>('oggetti-guida')?.fabbricazione.ricette ?? []) {
       const collegati = prodotti.get(r.attrezzo) ?? [];
-      // Ondata 5, lotto F (migrazione 279): l'effetto della ricetta è quello del prodotto, che la scheda dell'oggetto dice già; qui resta solo il
+      // Ondata 5, lotto F: l'effetto della ricetta è quello del prodotto, che la scheda dell'oggetto dice già; qui resta solo il
       // testo proprio della ricetta, se c'è (senza un prodotto unico collegato, o corretto dall'utente)
       aggiungi('ricetta', r.attrezzo, { nome: collegati.length ? collegati.map((p) => p.nome).join(' / ') : 'Prodotto non collegato',
         testo: [r.effetto?.trim() ? r.effetto : null, !collegati.length ? `Nome nella fonte: ${r.attrezzo}` : null].filter(Boolean).join(' · '), casa: conElemento('/guida/oggetti?scheda=fabbricazione', r.attrezzo) });

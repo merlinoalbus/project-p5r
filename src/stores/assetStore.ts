@@ -4,8 +4,8 @@
 //
 // Due sorgenti, un solo manifest: `/asset/manifest.json`, generato dal plugin Vite
 // (vite/assetPredefiniti.ts) leggendo `public/asset/` (persona, arcani, ui), e `/api/immagini/manifest`,
-// la grafica di gioco che vive nel database (mappe, Confidenti, sfondi, illustrazioni…: migrazione
-// 079, decisione dell'utente del 2026-09-12). Le chiavi sono le stesse di sempre (`mappe/tokyo`,
+// la grafica di gioco che vive nel database (mappe, Confidenti, sfondi, illustrazioni…:
+// decisione dell'utente del 2026-09-12). Le chiavi sono le stesse di sempre (`mappe/tokyo`,
 // `sfondi/mementos`), quindi `useAsset` e `AssetImg` non cambiano; a parità di chiave vince il database.
 // Se una sorgente fallisce, resta l'altra; senza nessuna delle due ogni componente usa il proprio
 // segnaposto: l'app è pienamente funzionante anche senza alcuna grafica.

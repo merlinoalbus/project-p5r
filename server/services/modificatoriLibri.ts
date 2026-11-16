@@ -5,7 +5,7 @@
 // Decisione 21, precisazione dell'utente: gli oggetti i cui effetti incidono su ciò che l'app gestisce si modellano con i tipi dell'app.
 // Dodici libri non danno Doti ma cambiano un'altra attività: raddoppiano la velocità di lettura o gli strumenti creati per sessione,
 // aumentano i punti Dote da film e da studio, aprono il Terzo Occhio in un minigioco (`libro.effetti_json`, famiglie `moltiplica`,
-// `aumenta-punti`, `sblocca-funzione` di `shared/effettiOggetto.ts`, scritte dalla migrazione 288). La guida non dice di quanto aumentano i
+// `aumenta-punti`, `sblocca-funzione` di `shared/effettiOggetto.ts`). La guida non dice di quanto aumentano i
 // punti né lo dice il gioco a schermo: l'app non inventa importi e non applica niente da sola. Qui si leggono i libri LETTI nella partita
 // (dalle letture complete, `StatoDisponibilita.letture`) e si dice, dove chi gioca sceglie, quale effetto vale:
 //   - nella scelta dell'esito, nella scheda di un'attività (Guida → Attività) e nel suo contatore (Partita → Progressi; per la pesca anche nel
@@ -34,7 +34,7 @@ const AMBITO_SENZA_ATTIVITA: Partial<Record<Funzione, { dove: 'videogiochi' | 'l
 };
 const ambitoSenzaAttivita = (funzione: Funzione) => AMBITO_SENZA_ATTIVITA[funzione] ?? { dove: 'libri' as const, contesto: '' };
 
-/** L'attività della fabbricazione degli strumenti d'infiltrazione (migrazione 290): la bersaglia `moltiplica fabbricazione`. */
+/** L'attività della fabbricazione degli strumenti d'infiltrazione: la bersaglia `moltiplica fabbricazione`. */
 export const ATTIVITA_FABBRICAZIONE = 'fabbricazione-strumenti';
 
 interface LibroLetto { chiave: string; nome: string; effetti: EffettoOggetto[] }

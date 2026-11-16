@@ -16,7 +16,7 @@ import type { AreaRiassuntoDto, DungeonRiassuntoDto, MappaDaCollocareDto, MappaD
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../test/selettore';
 
 const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn(() => Promise.resolve([])),
-  // le Aree della città e le planimetrie da collocare (L2): di serie nessuna, come nel database dopo la 109 senza staff
+  // le Aree della città e le planimetrie da collocare (L2): di serie nessuna, come nel database
   getAreeCitta: vi.fn(async (): Promise<AreaRiassuntoDto[]> => []), getDaCollocare: vi.fn(async (): Promise<MappaDaCollocareDto[]> => []), aggiornaAreaMondo: vi.fn(), eliminaAreaMondo: vi.fn(), collocaPlanimetria: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, api));
 
@@ -337,7 +337,7 @@ describe('QuartierePage', () => {
     expect(senza.getByAltText('Sagoma di Shibuya sulla mappa di Tokyo')).toBeInTheDocument();
   });
 
-  // Superato dal lotto L11 (R11-02/8, migrazione 210): lo scarico automatico della pianta all'apertura del quartiere non esiste più.
+  // Superato dal lotto L11 (R11-02/8): lo scarico automatico della pianta all'apertura del quartiere non esiste più.
   it.skip('lo scarico automatico della pianta su una mappa con pezzi (409 `mappa-con-pezzi`, L1 F5) non sostituisce niente e non mostra errori', async () => {
     const q = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: false, illustrazione: { immagineUrl: null, asset: null }, aree: [],
       pianta: { url: 'https://esempio.test/shibuya.png', fonte: 'Guida', pagina: null }, piantaAssente: null, luoghi: [] } as unknown as QuartiereDettaglioDto;

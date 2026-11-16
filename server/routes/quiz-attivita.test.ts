@@ -1,5 +1,5 @@
 // ============================================================
-// Test API — la guida del quiz delle attività (migrazione 105): il quiz dei codici a barre del Triple Seven si legge
+// Test API — la guida del quiz delle attività: il quiz dei codici a barre del Triple Seven si legge
 // dall'attività, accompagna le voci della giornata che registrano un turno di quel lavoro, si corregge e si ripristina
 // (richiesta dell'utente, 2026-10-17)
 // ============================================================
@@ -7,12 +7,38 @@
 import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { QUIZ_TRIPLE_SEVEN } from '../db/migrations/105_quiz_delle_attivita.js';
 import type { AttivitaTutteDto, AzionePercorsoDto, ElementoCatalogoDto, NegozioDettaglioDto, PercorsoGiornoDto } from '../../shared/types.js';
+import type { QuizAttivita } from '../../shared/quizAttivita.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 const TRIPLE = 'lavoro-triple-seven';
+
+/** Il quiz dei codici a barre del Triple Seven com'è nei dati di gioco (`attivita.quiz_json` di `lavoro-triple-seven`). */
+const QUIZ_TRIPLE_SEVEN: QuizAttivita = {
+  giorni: [7, 17, 27],
+  spiegazione: 'Durante il turno bisogna memorizzare dove si trova il codice a barre di due prodotti scelti a caso; poco dopo il gioco chiede la posizione del codice di uno dei due. Mentre si risponde il registro dei messaggi è bloccato, ma prima della domanda si può rileggere.',
+  domanda: 'Dove si trova il codice a barre di…?',
+  voci: [
+    { oggetto: 'Black Donuts', altroNome: 'Black Donut', risposta: 'Vicino alla descrizione dello zucchero di canna', nota: null },
+    { oggetto: 'Boy Chance', altroNome: 'Black Box o Shonen Trip', risposta: 'Sul retro, sul logo dell’azienda', nota: 'Abbinamento incerto: nella guida italiana è «Black Box» o «Shonen Trip», non si sa quale dei due.' },
+    { oggetto: 'Cow’s Milk', altroNome: 'Cow Milk', risposta: 'Accanto al logo dell’azienda', nota: null },
+    { oggetto: 'Edo Rice Balls', altroNome: 'Edo Rice Ball', risposta: 'Sul retro', nota: null },
+    { oggetto: 'Ink Crunchies', altroNome: 'India Ink', risposta: 'Sul lato destro, guardandolo di fronte', nota: null },
+    { oggetto: 'Jumbo Vanilla Cup', altroNome: 'Super Duper Vanilla Cup', risposta: 'Accanto all’illustrazione del personaggio', nota: null },
+    { oggetto: 'Panda Bread', altroNome: 'BW Panda Pan', risposta: 'Vicino alla coda', nota: null },
+    { oggetto: 'Racing Newspaper Form', altroNome: 'Horse Racing Newspaper', risposta: 'Sul retro, vicino alla sezione dei commenti', nota: null },
+    { oggetto: 'Skeleton Umbrella', altroNome: null, risposta: 'Dietro il manico', nota: null },
+    { oggetto: 'Tiger-striped Pants', altroNome: 'Tiger Pattern Pants', risposta: 'Sull’etichetta cucita all’interno', nota: null },
+    { oggetto: 'Tokyo Food Tour', altroNome: 'Black Box o Shonen Trip', risposta: 'Sul retro della copertina', nota: 'Abbinamento incerto: nella guida italiana è «Black Box» o «Shonen Trip», non si sa quale dei due.' },
+    { oggetto: 'Zebramen', altroNome: 'Zebra Ramen', risposta: 'Vicino alle informazioni sulla zebra', nota: null },
+  ],
+  esiti: [
+    { esito: 'Giusta al primo tentativo', premio: '7.400 ¥ e 3 punti Fascino' },
+    { esito: 'Giusta al secondo tentativo', premio: '5.800 ¥ e 2 punti Fascino' },
+    { esito: 'Due errori', premio: '3.500 ¥ e 2 punti Fascino' },
+  ],
+};
 
 /** Le attività e i lavori della guida. */
 const attivita = async () => (await request(app).get('/api/compendio/attivita')).body.data as AttivitaTutteDto;

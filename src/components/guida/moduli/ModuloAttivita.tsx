@@ -2,8 +2,8 @@
 // ModuloAttivita — tipo e fascia a tessere, sede, costo, paga (solo lavori), sessioni, conteggio, dettagli, effetti, condizioni, guida del quiz
 // ============================================================
 //
-// I tipi e le fasce sono quelli di `shared/attivita.ts`; la paga in yen è dei lavori (075); che
-// cosa alza è l'elenco degli effetti (074), con le condizioni per voce (lo studio al Leblanc: 3
+// I tipi e le fasce sono quelli di `shared/attivita.ts`; la paga in yen è dei lavori; che
+// cosa alza è l'elenco degli effetti, con le condizioni per voce (lo studio al Leblanc: 3
 // note se piove). «Videogioco» è lo stesso modulo con il tipo fissato e il conteggio per round.
 //
 // L13 (O7-5, censimento del 25/10: «ModuloAttivita sovraccarico»): i campi stanno nelle sezioni comuni delle finestre di modifica

@@ -165,7 +165,7 @@ export function QuartierePage() {
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
   const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | 'sblocco' | 'luogo' | null>(null);
-  // L5 (F5): «Colloca» di un luogo senza area, con l'area proposta dalla migrazione
+  // L5 (F5): «Colloca» di un luogo senza area, con l'area proposta dai dati
   const [colloca, setColloca] = useState<{ luogo: { chiave: string; nome: string }; proposta: string | null } | null>(null);
   // La finestra dell'area d'ingresso: aperta arrivando dalla metro (`?ingresso=1`, se c'è un ingresso) o con «Entra»
   const [entraAperta, setEntraAperta] = useState(false);
@@ -263,7 +263,7 @@ export function QuartierePage() {
                 {visibili.map((l) => <Luogo key={l.chiave} l={l} onSalvato={() => void dati.ricarica()} />)}
               </ul>
               {visibili.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessun luogo di questo tipo in {q.nome}.</p>}
-              {/* L5 (F4, F5): i luoghi del quartiere senza un'Area, con l'area proposta se la migrazione ne ha dedotta una: la loro pagina e
+              {/* L5 (F4, F5): i luoghi del quartiere senza un'Area, con l'area proposta se i dati ne hanno una: la loro pagina e
                   «Colloca» */}
               {!IN_RILASCIO && (q.luoghiDaCollocare?.length ?? 0) > 0 && (
                 <details className="card testo-13">

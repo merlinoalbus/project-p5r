@@ -32,7 +32,7 @@ export const negozio: DefinizioneModulo = {
     // L5 (R5-12b): gli orari sono del luogo; il negozio ha solo la sua eccezione (null = valgono quelli della sede)
     eccezione_orari_json: e?.dati.eccezione_orari_json ? normalizzaOrari(jsonDi(e.dati.eccezione_orari_json, ORARI_SEMPRE)) : null,
     programma_punti_json: jsonDi<ProgrammaPunti | null>(e?.dati.programma_punti_json, null),
-    // chiusura dell'ondata 5 (migrazione 254): lo sconto legato al rango di un Confidente; assente nella riga = nessuno
+    // chiusura dell'ondata 5: lo sconto legato al rango di un Confidente; assente nella riga = nessuno
     sconto_json: normalizzaSconto(e?.dati.sconto_json ?? null),
     note: testoDi(e?.dati.note),
   }),
@@ -156,7 +156,7 @@ export const giorniDelMeseOrdinati = (giorni: readonly number[]): number[] =>
 /**
  * La definizione del modulo delle attività; con `tipoFisso` = 'videogioco' il tipo resta fissato (segnato nel campo
  * temporaneo `_tipoFisso`), le sessioni partono da 1 e devono essere almeno 1, e il conteggio salvato è per sessioni.
- * Paga e paga massima si salvano solo per i lavori; il conteggio mancante si deduce dal tipo. La guida del quiz (105) ha i
+ * Paga e paga massima si salvano solo per i lavori; il conteggio mancante si deduce dal tipo. La guida del quiz ha i
  * giorni del mese nel quiz stesso (`quiz_json.giorni`), scelti a pulsanti da 1 a 31 (L13, O7-5: prima un testo «7, 17, 27»
  * da interpretare): al salvataggio si mandano senza doppioni e in ordine, come li dava la lettura del testo.
  */
@@ -188,7 +188,7 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         sessioni: numeroDi(e?.dati.sessioni) ?? (tipo === 'videogioco' ? 1 : null),
         tracciamento: testoDi(e?.dati.tracciamento) || tracciamentoPerTipo(tipo),
         dettagli: testoDi(e?.dati.dettagli), effetti_json: normalizzaVociEffetto(jsonDi(e?.dati.effetti_json, [])),
-        // la guida del quiz (105), con i suoi giorni del mese dentro (scelti a pulsanti)
+        // la guida del quiz, con i suoi giorni del mese dentro (scelti a pulsanti)
         quiz_json: quiz,
         verificato: verificatoDi(e), _tipoFisso: tipoFisso ?? null,
       };

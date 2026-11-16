@@ -167,7 +167,7 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   };
 }
 
-/** L13 (ondata 8, migrazione 317): il valutatore unico sullo stato della partita per i rami di un requisito «almeno una» con la pioggia (la scheda
+/** L13 (ondata 8): il valutatore unico sullo stato della partita per i rami di un requisito «almeno una» con la pioggia (la scheda
  *  del Confidente, `disponibilitaConfidente`). Lo stato si legge alla prima condizione da valutare, una volta sola: chi non ne ha bisogno non lo paga. */
 export function valutatoreDellaPartita(partitaId: number): StatoDelRamo {
   let valuta: StatoDelRamo | null = null;

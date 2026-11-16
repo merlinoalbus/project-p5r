@@ -140,7 +140,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   const rileggi = async () => { setStato(null); await dati.ricarica(); };
 
   const calcolati = p?.eventi.filter((e) => e.origine === 'calcolato') ?? [];
-  // dalla squadra (un Ladro in squadra) e, a parte, le aperture dei Dedali dei Memento (dai Palazzi conclusi, migrazione 305)
+  // dalla squadra (un Ladro in squadra) e, a parte, le aperture dei Dedali dei Memento (dai Palazzi conclusi)
   const dallaSquadra = calcolati.filter((e) => e.apertura === undefined);
   const dedali = calcolati.filter((e) => e.apertura !== undefined);
   const manuali = p?.eventi.filter((e) => e.origine === 'manuale' && !EVENTI_PESCA.some((chiave) => chiave === e.chiave)) ?? [];

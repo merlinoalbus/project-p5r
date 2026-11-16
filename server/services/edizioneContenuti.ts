@@ -121,7 +121,7 @@ const ANAGRAFICA: Record<string, Anagrafica> = {
   allerta_meteo: paginaDi('Allerta meteo', '/guida/calendario'),
   giorno_calendario: paginaDi('Giorno del calendario', '/guida/calendario'),
   evento_calendario: paginaDi('Evento del calendario', '/guida/calendario'),
-  // L13 (O7-4, migrazione 313): il «quando» dei trofei è nelle condizioni (`trofeo.condizioni_json`), controllate come le altre
+  // L13 (O7-4): il «quando» dei trofei è nelle condizioni (`trofeo.condizioni_json`), controllate come le altre
   trofeo: paginaDi('Trofeo', '/guida/completamento'),
   giorno_percorso: paginaDi('Giorno del percorso', '/guida/percorso'),
   voce_giornata: paginaDi('Voce del diario', '/guida/percorso'),
@@ -229,7 +229,7 @@ function contaRighe(db: Db, tabella: string): number {
   return haTabella(db, tabella) ? (db.prepare(`SELECT COUNT(*) FROM main.${q(tabella)}`).pluck().get() as number) : 0;
 }
 
-/** Le tabelle-fotografia della guida: nome che finisce in `_foto` e colonna `seed_json` (migrazione 227: una riga per padre). */
+/** Le tabelle-fotografia della guida: nome che finisce in `_foto` e colonna `seed_json` (una riga per padre). */
 function tabelleFotografia(db: Db): string[] {
   return tabelleDi(db).filter((t) => t.endsWith('_foto') && haColonna(db, t, 'seed_json'));
 }
@@ -323,7 +323,7 @@ class Esistenze {
     const s = this.insiemi.get(k);
     return s ? s.has(valore) : null;
   }
-  /** L13 (O11-1): il Confidente è romanzabile (`confidente.romanzabile = 1`); null se la colonna non c'è (prima della 324: non si può dire). */
+  /** L13 (O11-1): il Confidente è romanzabile (`confidente.romanzabile = 1`); null se la colonna non c'è (non si può dire). */
   private romanzabili: Set<string> | null | undefined;
   romanzabile(chiave: string): boolean | null {
     if (this.romanzabili === undefined) {

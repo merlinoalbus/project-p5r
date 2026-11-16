@@ -1,5 +1,5 @@
 // ============================================================
-// dedali — il conteggio di un dedalo dei Memento ricalcolato nella pagina, con la regola del server (099)
+// dedali — il conteggio di un dedalo dei Memento ricalcolato nella pagina, con la regola del server
 // ============================================================
 //
 // Dopo un gesto (timbri del dedalo, stato di una Richiesta, voce segnata) la scheda si aggiorna subito, senza aspettare la rilettura:

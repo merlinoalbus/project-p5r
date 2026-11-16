@@ -5,7 +5,7 @@
 // La lettura sta in `disponibilitaStrutturataService` (che la scheda e il Diario usano e che non dipende dal catalogo). Qui le scritture:
 // la struttura (modo, giorni, fasce, eccezioni, motivo senza luogo) con la fotografia della fonte G-036 alla prima modifica (il segno «Modificata»),
 // e i luoghi, che si cambiano passando dal luogo (`aggiornaElemento('luogo', …)`): una sola scrittura. «Disponibile dal» è il requisito di
-// rango 1 (L7-06, migrazione 358): qui non si scrive, e il `dal` delle fotografie di prima si ignora.
+// rango 1 (L7-06): qui non si scrive, e il `dal` delle fotografie di prima si ignora.
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';

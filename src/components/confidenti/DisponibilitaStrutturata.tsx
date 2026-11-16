@@ -5,7 +5,7 @@
 // La scheda mostra la struttura (come si incontra, giorni, fasce, eccezioni, «dal» dal requisito di rango 1) e i luoghi per nome, non più il testo libero (che resta nelle note).
 // L'editor scrive la struttura e i luoghi col PUT della rotta strutturata. Il vecchio editor delle informazioni
 // continua a scrivere solo il testo e le note. Mai un blocco: l'esito «oggi» è un'informazione.
-// L13 (ondata 6, migrazione 306): la pioggia non si modifica qui, sta nei requisiti di rango (fonte unica); la scheda la elenca accanto alle
+// L13 (ondata 6): la pioggia non si modifica qui, sta nei requisiti di rango (fonte unica); la scheda la elenca accanto alle
 // eccezioni, letta da lì. Eccezioni nuove: i giorni di un rango (al posto di quelli generali) e i giorni del calendario in cui non si incontra.
 // L13 (ondata 10, O10-2): le fasce con la relazione romantica (solo per i Confidenti romanzabili).
 // ============================================================

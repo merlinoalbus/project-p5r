@@ -16,7 +16,7 @@ vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave }: { tipo: string; chiave: string }) => <div>Dove: {tipo}/{chiave}</div> }));
 
 const base: LibroDto = {
-  // L13 (O7-4, migrazione 313): niente «dove», «disponibile dal», Dote e sblocco in prosa: li dicono negozi, ricompense, condizioni ed effetti
+  // L13 (O7-4): niente «dove», «disponibile dal», Dote e sblocco in prosa: li dicono negozi, ricompense, condizioni ed effetti
   chiave: 'prova', nome: 'Libro di prova', prezzo: 700, ricompensaDi: [],
   sbloccaLuogo: null, sbloccaLuogoNome: null, sessioni: 2,
   dettagli: null, effetti: [{ effetto: { famiglia: 'dote', dote: 'conoscenza', note: 3 }, testo: 'Conoscenza ♪♪♪' }], effettiTesto: ['Conoscenza ♪♪♪'],

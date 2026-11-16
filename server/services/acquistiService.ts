@@ -166,7 +166,7 @@ function preparaRegistrazione(partita:number,r:NuovaRegistrazioneAcquisto,porte?
     const acquistoId=r.scelta.acquistoId,a=stato.registrazioni.find((a)=>a.id===acquistoId);
     if(!a)throw httpErrors.notFound('acquisto-non-trovato','La registrazione indicata non appartiene alla partita.');
     // l'identità dell'offerta è la sua chiave con l'oggetto del catalogo; il negozio della ricevuta è quello del momento in cui fu scritta
-    // (migrazione 304: l'offerta dell'Aojiru è passata, con la stessa chiave, dal KiyasuKu al Chiosco delle bevande) e non la rende un altro fatto
+    // (una ricevuta dell'Aojiru può portare il KiyasuKu: l'offerta sta, con la stessa chiave, nel Chiosco delle bevande) e non la rende un altro fatto
     if(a.identita.articolo!==r.articolo||a.identita.catalogo!==o.identita.catalogo||jsonCanonico(a.momento)!==jsonCanonico(r.momento)
       ||a.consumo.variante!==r.variante||a.consumo.fortuna!==r.fortuna||a.prezzoYen!==PREZZO_AOJIRU)
       throw httpErrors.conflict('acquisto-differente','Identità, momento, variante, prezzo o Fortuna divergono: il fatto non viene sovrascritto né collegato.');
@@ -294,7 +294,7 @@ export function rimuoviPresenzaLegacy(p:number,r:RichiestaRimozioneLegacy):Ricev
   const ricevuta:RicevutaOperazioneAcquistoDto={operazioneId:r.operazioneId,esito:'presenza-rimossa',partitaId:p,acquistoId:null,provenienzaId:null,articolo:r.articolo,creataIl:nowIso()};salvaOperazione(p,r.operazioneId,'rimuovi-legacy',payload,ricevuta);return ricevuta;
 }
 
-// L13 (decisione 18): con i movimenti automatici degli yen (utente 048) e le cause già nel saldo da prima (utente 049), storia durevole del saldo come `movimento_yen`
+// L13 (decisione 18): con i movimenti automatici degli yen e le cause già nel saldo da prima, storia durevole del saldo come `movimento_yen`
 export const TABELLE_DUREVOLI_ACQUISTI=['da_applicare','effetto_applicato','movimento_yen','yen_automatico','yen_fuori_registro','acquisto_operazione','proposta_operazione','beneficio_ciclo'] as const;
 export interface ContestoRipristinoAcquisti {tipoCestino:string;partitaIds:number[];acquistoIds:string[];durevoli:Record<string,unknown[]>;identita:Record<string,unknown>[]}
 export function preparaRipristinoAcquisti(r:{tipoCestino:string;partitaIds:number[];acquistoIds:string[]}):ContestoRipristinoAcquisti {

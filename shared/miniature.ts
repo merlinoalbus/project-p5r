@@ -3,7 +3,7 @@
 // ============================================================
 //
 // La rotta che serve il file di un'immagine (`GET /api/immagini/:ambito/:chiave/file`) accetta `l`, la larghezza in pixel, e
-// risponde con una WebP ridotta, generata la prima volta e poi tenuta in cache nel database (`immagine_miniatura`, migrazione 108).
+// risponde con una WebP ridotta, generata la prima volta e poi tenuta in cache nel database (`immagine_miniatura`).
 // Le viste che mostrano un'immagine in piccolo (schede de La città, intestazioni, indice e griglie delle Mappe) la chiedono con
 // `srcset` e `sizes`, e il browser sceglie la misura per la larghezza e la densità dello schermo; visore ed editor restano a piena
 // risoluzione. Le misure sono un insieme chiuso: la cache non cresce senza limiti e un URL inventato non genera niente.

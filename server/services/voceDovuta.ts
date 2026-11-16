@@ -3,7 +3,7 @@
 // ============================================================
 //
 // L13, ondata 9, lotto O9-3. Istruzione dell'utente del 2026-10-31: «Televendite. é possibile non venga acquistato nessun set. in tal caso
-// viene meno la consegna.». Una voce può dichiarare quando si fa («Si fa solo se»: `voce_giornata.condizioni_json`, migrazione 320), con il
+// viene meno la consegna.». Una voce può dichiarare quando si fa («Si fa solo se»: `voce_giornata.condizioni_json`), con il
 // vocabolario unico delle condizioni (`shared/condizioniSpillo.ts`) e il valutatore unico della disponibilità (`condizioni/valutatore.ts`),
 // allo stato della partita al momento della voce (`statoAlMomento`: il giorno e la fascia della voce, tutto il resto com'è nella partita).
 // Senza condizioni la voce è sempre dovuta (tutte le voci di prima).
@@ -14,8 +14,7 @@
 // dice «non dovuta» solo ciò che è falso. Il legame è un dato della voce, modificabile dal suo modulo: nessun caso scritto a mano qui.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { valutazione } from './condizioni/valutatore.js';
@@ -29,11 +28,6 @@ export const MASSIMO_CONDIZIONI_VOCE = 20;
 
 /** Ciò che serve di una riga di `voce_giornata` per valutarla. */
 export interface RigaVoceDovuta { uid: string; data: string; fascia: string; genere: string; condizioni_json?: string | null }
-
-/** La colonna delle condizioni c'è (dalla migrazione 320)? Le migrazioni di prima che usano i servizi girano su uno schema senza. */
-export function conCondizioniVoce(): boolean {
-  return haColonnaMain(getDb(), 'voce_giornata', 'condizioni_json');
-}
 
 /** Le condizioni della voce («Si fa solo se»), già normalizzate; vuoto = sempre dovuta. */
 export function condizioniDellaVoce(r: Pick<RigaVoceDovuta, 'condizioni_json'>): RequisitoSpillo[] {
@@ -145,7 +139,6 @@ export function vociNonDovute(partitaId: number, righe: readonly RigaVoceDovuta[
 /** Per l'indice dei giorni: quante azioni non spuntate e non dovute ha ogni giorno (non sono cose da fare). Solo le voci con condizioni. */
 export function nonDovutePerGiorno(partitaId: number): Map<string, number> {
   const out = new Map<string, number>();
-  if (!conCondizioniVoce()) return out;
   const righe = prepared(`SELECT v.uid, v.data, v.fascia, v.genere, v.condizioni_json FROM voce_giornata v
     LEFT JOIN spunta_voce_partita s ON s.voce_uid = v.uid AND s.partita_id = ?
     WHERE v.genere = 'azione' AND v.condizioni_json IS NOT NULL AND s.voce_uid IS NULL`).all(partitaId) as RigaVoceDovuta[];

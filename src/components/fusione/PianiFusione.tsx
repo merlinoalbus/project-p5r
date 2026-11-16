@@ -2,7 +2,7 @@
 // PianiFusione — piani di fusione ricorsivi verso una Persona (albero con foglie scorta / Registro / cattura)
 // ============================================================
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Selettore } from '../shared/Selettore';
 import { getPianiFusione, getSkills, salvaPiano, urlSkills } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -72,6 +72,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
   const skillScelte = skillModificate ?? (skillInizialiIds && tutteSkill.dati ? tutteSkill.dati.filter((s) => skillInizialiIds.includes(s.id)) : []);
   const skillIds = skillScelte.map((s) => s.id);
   const [salvati, setSalvati] = useState<Record<string, true>>({});
+  const inCorso = useRef(new Set<string>());
   /**
    * Salva il piano nella partita con le opzioni restituite dal BE, le skill richieste e l'eventuale obiettivo; a buon
    * fine lo segna salvato con una chiave che combina bersaglio, posizione e opzioni correnti, notifica e restituisce il
@@ -79,7 +80,10 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
    */
   const salva = async (d: PianiFusioneDto, piano: PianoFusioneDto, indice: number) => {
     if (!partitaId || !scelta) return;
-    const chiave = `${scelta.id}|${indice}|${skillIds.join(',')}|${profondita}|${alternative}|${catture}|${limitaLivello}|${slotFortunato}`;
+    const chiave = `${partitaId}|${scelta.id}|${indice}|${skillIds.join(',')}|${profondita}|${alternative}|${catture}|${limitaLivello}|${slotFortunato}`;
+    // un secondo tocco mentre la richiesta è in viaggio non spedisce un secondo salvataggio
+    if (inCorso.current.has(chiave)) return;
+    inCorso.current.add(chiave);
     try {
       const salvato = await salvaPiano(partitaId, { personaId: scelta.id, piano, opzioni: d.opzioni, skillIds, obiettivoId: obiettivoId ?? null, nome: `Piano ${indice + 1} per ${scelta.nomeIt}` });
       setSalvati((m) => ({ ...m, [chiave]: true }));
@@ -87,6 +91,8 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
       return salvato;
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Salvataggio fallito.');
+    } finally {
+      inCorso.current.delete(chiave);
     }
   };
   // della Persona scelta la lettura usa solo l'id; le dipendenze si confrontano per valore (`useCarica`): l'elenco degli id delle skill
@@ -145,7 +151,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
               {dati.sconto > 0 && <p className="m-0 testo-12 text-text-muted">Costi con lo sconto del Registro ({dati.sconto}%) della partita.</p>}
               <div className="flex flex-col gap-3">
                 {dati.piani.map((p, i) => {
-                  const chiave = `${scelta.id}|${i}|${skillIds.join(',')}|${profondita}|${alternative}|${catture}|${limitaLivello}|${slotFortunato}`;
+                  const chiave = `${partitaId}|${scelta.id}|${i}|${skillIds.join(',')}|${profondita}|${alternative}|${catture}|${limitaLivello}|${slotFortunato}`;
                   return <Piano key={i} piano={p} indice={i} onSalva={partitaId ? () => void salva(dati, p, i) : undefined} salvato={salvati[chiave] === true} />;
                 })}
               </div>

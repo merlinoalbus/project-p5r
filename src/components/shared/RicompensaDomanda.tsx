@@ -6,7 +6,7 @@
 // quindi dagli effetti delle voci (`DomandaDto.premioVoce`, dal server; le parole in `utils/ricompensaDomanda.ts`): le Doti («Conoscenza ♪»),
 // le note di rango di un Confidente («Ann Takamaki ♪♪», L13 ondata 8), per una riga d'esame senza Doti «conta per il piazzamento», e se una
 // voce chiede alla spunta il piazzamento di un esame lo dice. Il testo della guida (`ricompensa`) resta solo dove dice altro da quel che le voci
-// danno o dove nessuna voce segna la domanda (dalla migrazione 315 nessuna, con i dati della guida); accanto al premio delle voci si mostra
+// danno o dove nessuna voce segna la domanda (con i dati della guida, nessuna); accanto al premio delle voci si mostra
 // come «Per la guida: …», l'unica etichetta che serve (avvisa di una differenza). Una sola resa per DomandePage e ScuolaOggi.
 // ============================================================
 

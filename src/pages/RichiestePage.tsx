@@ -13,8 +13,8 @@
 //
 // Le Richieste si correggono, si aggiungono e si eliminano da qui (richiesta dell'utente, 2026-10-11): «Modifica» su ogni carta
 // e «Aggiungi una Richiesta» in cima aprono `ModuloRichiesta`, lo stesso della colonna del dedalo.
-// L10-01 e L10-05 (migrazione 381): le ricompense in testo della guida (vuote in 33/33) e il rango del Confidente (0/33) non ci sono più,
-// e nemmeno lo stato «da verificare», che il server non produceva più: le ricompense sono gli oggetti del catalogo, gli yen e i PE.
+// L10-01 e L10-05: le ricompense in testo della guida e il rango del Confidente non ci sono,
+// e nemmeno lo stato «da verificare», che il server non produce: le ricompense sono gli oggetti del catalogo, gli yen e i PE.
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -118,7 +118,7 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           {/* D15: Richiesta completata = spunta rossa a sinistra del nome e nome barrato in grigio (lo dice il cartellino di stato accanto) */}
           <h3 className="m-0 testo-16 leading-tight"><SegnoStato stato={r.stato === 'completata' ? 'fatto' : null} className="mr-1.5 align-text-bottom" /><span className={r.stato === 'completata' ? 'stato-fatto' : ''}>{r.nome}</span></h3>
-          {/* il Dedalo e l'area in cui è collocata (310: il `piano` in testo resta solo dove non è il nome dell'area) */}
+          {/* il Dedalo e l'area in cui è collocata (il `piano` in testo resta solo dove non è il nome dell'area) */}
           <span className="testo-12 text-text-muted">{[r.areaNome, r.areaDedaloNome, r.piano].filter(Boolean).join(' · ')}</span>
           {/* O7-1: passata la scadenza con la proroga valida, il bersaglio si è spostato (la guida: nel Dedalo di Da'at durante il terzo semestre) */}
           {/* (la frase non nomina il terzo semestre: dice la proroga, qualunque sia la sua condizione, che il server ha già valutato) */}

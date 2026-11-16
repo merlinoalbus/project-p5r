@@ -2,14 +2,14 @@
 // Disponibilità dei Confidenti strutturata (R9-01) — tipi e valutatore condivisi
 // ============================================================
 //
-// La disponibilità di un Confidente è un dato strutturato (migrazione 163, fonte G-036): come si incontra (`modo`), in quali giorni della settimana e
+// La disponibilità di un Confidente è un dato strutturato (fonte G-036): come si incontra (`modo`), in quali giorni della settimana e
 // fasce, le eccezioni (giorni dopo un rango, fascia o giorni diversi a un rango, giorni del calendario in cui non si incontra), da quando è disponibile
 // e, se non ha un luogo, perché. Il testo libero resta nelle note. Il valutatore dice se, in un dato momento, il Confidente è disponibile: lo usano la
 // scheda, i semafori e il Diario.
-// L13 (ondata 6, migrazione 306): la pioggia non è più un'eccezione della disponibilità. Ha una sola fonte, i requisiti di rango (`meteo non-piove`
+// L13 (ondata 6): la pioggia non è un'eccezione della disponibilità. Ha una sola fonte, i requisiti di rango (`meteo non-piove`
 // in `confidente_requisito`): chi chiama dice nel contesto se l'incontro del rango successivo non si
 // fa con la pioggia (`nonConLaPioggia`), e il valutatore lo applica.
-// L13 (ondata 10, O10-2, migrazione 325): l'eccezione `con-relazione` dà le fasce con la relazione romantica iniziata nella partita; chi chiama
+// L13 (ondata 10, O10-2): l'eccezione `con-relazione` dà le fasce con la relazione romantica iniziata nella partita; chi chiama
 // dice nel contesto se la relazione c'è (`relazioneRomantica`, letta in un punto solo: `relazioneRomanticaService`).
 // ============================================================
 
@@ -30,11 +30,11 @@ export type EccezioneDisponibilita =
   | { tipo: 'giorni-rango'; rango: number; giorni: GiornoDisponibilita[] }
   /** I giorni del calendario di gioco («MM-GG») in cui non si incontra. */
   | { tipo: 'date'; date: string[]; effetto: 'non-disponibile' }
-  /** L7-07 (migrazione 361): l'incontro del rango indicato si fa solo in questi giorni del calendario di gioco («MM-GG»), che prendono il posto dei
+  /** L7-07: l'incontro del rango indicato si fa solo in questi giorni del calendario di gioco («MM-GG»), che prendono il posto dei
    *  giorni della settimana; le fasce restano quelle del rango (Ryuji, rango 7: le sere del suo messaggio). Una per rango. */
   | { tipo: 'solo-date-rango'; rango: number; date: string[] }
   /** L13 (ondata 10, O10-2): con la relazione romantica iniziata nella partita le fasce sono queste, al posto delle generali e di quelle di un
-   *  rango (`fascia-rango`). Una sola per Confidente; ha senso per un Confidente romanzabile (Takemi: «solo di sera», migrazione 325). */
+   *  rango (`fascia-rango`). Una sola per Confidente; ha senso per un Confidente romanzabile (Takemi: «solo di sera»). */
   | { tipo: 'con-relazione'; fasce: FasciaDisponibilita[] };
 
 export interface DisponibilitaStrutturata {
@@ -42,7 +42,7 @@ export interface DisponibilitaStrutturata {
   giorni: GiornoDisponibilita[];
   fasce: FasciaDisponibilita[];
   eccezioni: EccezioneDisponibilita[];
-  /** 'MM-GG' da cui è disponibile: la data del requisito di rango 1 di tipo «data» (L7-06, migrazione 358: una sola fonte); null se il rango 1 non ne ha. */
+  /** 'MM-GG' da cui è disponibile: la data del requisito di rango 1 di tipo «data» (L7-06: una sola fonte); null se il rango 1 non ne ha. */
   dal: string | null;
   motivoSenzaLuogo: string;
   fonte: string | null;
@@ -60,7 +60,7 @@ export interface DisponibilitaConfidenteDto {
   /** I ranghi il cui incontro non si fa con la pioggia, letti dai requisiti di rango (la fonte unica della pioggia): solo da mostrare. */
   ranghiNonConLaPioggia: number[];
   /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (`confidente.romanzabile`): solo allora l'eccezione «con la relazione»
-   *  ha senso. Assente su un file di gioco senza la colonna. */
+   *  ha senso. */
   romanzabile?: boolean;
   /** Presente se è stata indicata una partita: se il Confidente è disponibile adesso. */
   oggi?: EsitoDisponibilita;
@@ -103,7 +103,7 @@ export function richiedeNonPioggia(c: RequisitoSpillo): boolean {
 }
 
 /**
- * L13 (ondata 8, migrazione 317): un gruppo «almeno una» con «non deve piovere» fra i suoi rami dice che la pioggia blocca solo quando gli altri
+ * L13 (ondata 8): un gruppo «almeno una» con «non deve piovere» fra i suoi rami dice che la pioggia blocca solo quando gli altri
  * rami sono falsi (Takemi: l'evento 7.5, prima dello sblocco di «Medicina amara», non si fa con la pioggia; il rango 8 sì). Restituisce gli altri
  * rami (vuoto = tutti i rami chiedono che non piova: è un obbligo), o null se la condizione non è un gruppo così. Chi valuta i rami è chi ha lo
  * stato della partita (`nonConLaPioggia` di disponibilitaStrutturataService).
@@ -134,7 +134,7 @@ function eccezioneLeggibile(e: unknown): e is EccezioneDisponibilita {
   }
 }
 
-/** Quante eccezioni salvate non si sanno leggere (le righe `pioggia` rimaste da prima della 306 non contano): chi legge il DB lo dice nel log. */
+/** Quante eccezioni salvate non si sanno leggere (le righe `pioggia` di un file vecchio non contano): chi legge il DB lo dice nel log. */
 export function eccezioniIlleggibili(testo: string): number {
   try {
     const v = JSON.parse(testo) as unknown;
@@ -152,7 +152,7 @@ export function strutturaDaColonne(r: { modo: string; giorni_settimana_json: str
   let eccezioni: EccezioneDisponibilita[] = [];
   try {
     const v = JSON.parse(r.eccezioni_json) as unknown;
-    // le righe `pioggia` rimaste da prima della 306 non si leggono più: la pioggia sta nei requisiti di rango
+    // le righe `pioggia` di un file vecchio non si leggono: la pioggia sta nei requisiti di rango
     if (Array.isArray(v)) eccezioni = v.filter(eccezioneLeggibile);
   } catch { /* eccezioni illeggibili: nessuna */ }
   return {

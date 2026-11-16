@@ -108,7 +108,7 @@ interface Props {
   onPuntoAggiornato: (p: PuntoInteresseDto) => void;
   /** Rilegge la scheda del Palazzo (ordine cambiato, voce aggiunta o tolta, stati uniti da un collegamento). */
   onRicarica: () => Promise<void>;
-  /** Nei dedali dei Memento (099): l'area del dedalo di cui si mostrano le voci (`area.punti` le ha già filtrate) e le altre aree
+  /** Nei dedali dei Memento: l'area del dedalo di cui si mostrano le voci (`area.punti` le ha già filtrate) e le altre aree
    *  dello stesso dedalo, dove una voce si può spostare. Lì ogni voce ha uno stato, e i tipi sono Persona e Trama (2026-10-11). */
   areaDedalo?: { chiave: string; nome: string; altre: ReadonlyArray<{ chiave: string; nome: string }> };
   /** Nei Palazzi (2026-10-12): le aree del Palazzo, in ordine di guida, dove una voce si può spostare («Area del Palazzo»). Con le loro voci
@@ -143,7 +143,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
   const daCatturare = useMemo(() => (!areaDedalo && onCattura ? areaIntera.punti.filter(voceDaCatturare) : []), [areaIntera.punti, areaDedalo, onCattura]);
   const area = useMemo(() => (daCatturare.length === 0 ? areaIntera : { ...areaIntera, punti: areaIntera.punti.filter((p) => !daCatturare.includes(p)) }), [areaIntera, daCatturare]);
   // Una voce descrittiva si legge e basta (`voceDescrittiva`, la regola del server condivisa con la guida del visore): nelle aree dei dedali
-  // non ce ne sono (099, scelta dell'utente: «Tutti con stato»); un «Altro» «Permanente» o «Si ripropone» si segna come le altre (2026-10-31).
+  // non ce ne sono (scelta dell'utente: «Tutti con stato»); un «Altro» «Permanente» o «Si ripropone» si segna come le altre (2026-10-31).
   /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
   const nomeArea = areaDedalo?.nome ?? area.nome;
   /** I tipi che una voce può avere qui (2026-10-11): fuori dai dedali tutti tranne Trama, che è solo dei Memento (lo stesso
@@ -155,7 +155,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
   const [filtriAperti, setFiltriAperti] = useState(false);
   const [mostraGestiti, setMostraGestiti] = useState(false);
   const [selezionato, setSelezionato] = useState<string | null>(null);
-  /** Il modulo della voce nuova: in fondo all'area, o in fondo ai passi di un Enigma (`contenitore`, 095). */
+  /** Il modulo della voce nuova: in fondo all'area, o in fondo ai passi di un Enigma (`contenitore`). */
   // (UX3-14) `dove`: la planimetria dell'elenco in cui la si aggiunge, che la voce prende (null senza planimetria mostrata)
   const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null; dove: string | null } | null>(null);
   // L4 §8.11 e §8.6: «Riapri» con la conferma quando si riapre anche altro («Riapre anche: …», «Riapre anche l'Enigma «…»»), la stessa della
@@ -177,7 +177,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     return { area: area.chiave, chiavi: n };
   });
 
-  // I passi di ogni Enigma (095), nel loro ordine: stanno dentro l'Enigma, non nell'elenco dell'area (la regola della guida del visore,
+  // I passi di ogni Enigma, nel loro ordine: stanno dentro l'Enigma, non nell'elenco dell'area (la regola della guida del visore,
   // `raggruppaPassi`: in cima le voci fuori da ogni Enigma)
   const { inCima: vociDellArea, passiPer } = useMemo(() => raggruppaPassi(area.punti), [area]);
   /** Una voce si vede se passa il filtro per tipo (nessun filtro = tutti) e se non è segnata, salvo con «Anche le segnate» o se è quella aperta. */
@@ -314,7 +314,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
   }, [voceCollegata?.chiave, voceCollegata?.nome, pinCollegati, occupato]);
   useEffect(() => () => comunica.current?.(null), []);
 
-  /** Il modulo della voce nuova: in fondo all'area o, con `contenitore`, in fondo ai passi di un Enigma (095). Con una planimetria (UX3-14)
+  /** Il modulo della voce nuova: in fondo all'area o, con `contenitore`, in fondo ai passi di un Enigma. Con una planimetria (UX3-14)
    *  la voce prende quella dell'elenco in cui la si aggiunge, così compare dove la si è aggiunta (anche un passo: senza pin starebbe sulla
    *  planimetria 1). */
   const moduloNuovaVoce = (n: { nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null; dove: string | null }) => (
@@ -333,7 +333,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
   );
 
   /** Una voce della guida, fra le sue `fratelli` (le voci dell'area, o i passi dello stesso Enigma): riga, scheda aperta e, per un
-   *  Enigma, i suoi passi dentro di lui (095). */
+   *  Enigma, i suoi passi dentro di lui. */
   const riga = (p: PuntoInteresseDto, fratelli: PuntoInteresseDto[], pl: string | null = qui) => {
     const indice = fratelli.indexOf(p);
     // (UX3-14) aperta solo nell'elenco in cui la si è aperta: un Enigma coi passi su più planimetrie compare in più elenchi
@@ -461,7 +461,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                   const ripetute = etichetteRipetute(JSON.parse(b.dettagli) as RigaDettaglio[]);
                   if (ripetute.length > 0) throw new Error(`Due dettagli con la stessa etichetta (${ripetute.join(', ')}): cambiane una.`);
                   onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì', ...(b.contenitore !== (p.contenitore ?? '') ? { contenitore: b.contenitore || null } : {}),
-                  // un'altra area del dedalo (099): solo per una voce fuori da ogni Enigma (un passo sta nell'area del suo Enigma)
+                  // un'altra area del dedalo: solo per una voce fuori da ogni Enigma (un passo sta nell'area del suo Enigma)
                   ...(areaDedalo && !b.contenitore && b.areaDedalo && b.areaDedalo !== (p.areaDedalo ?? '') ? { areaDedalo: b.areaDedalo } : {}),
                   ...(altrove ? { area: altrove.chiave } : {}),
                   // L4 §4.1: il carattere solo se cambiato; vuoto = «Ripristina» (null: vale la regola del tipo)
@@ -482,7 +482,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                   {(enigmiPossibili.length > 0 || p.contenitore) && <span className="min-w-[180px]">
                     <Selettore etichetta="Passo di" valore={b.contenitore} opzioni={[{ chiave: '', nome: '— nessun Enigma (voce dell’infiltrazione) —' }, ...enigmiPossibili.map((e) => ({ chiave: e.chiave, nome: e.nome }))]} onCambia={(v) => cambia({ contenitore: v })} />
                   </span>}
-                  {/* l'area del dedalo (099): una voce fuori da ogni Enigma passa in un'altra area dello stesso dedalo, coi passi se è un Enigma */}
+                  {/* l'area del dedalo: una voce fuori da ogni Enigma passa in un'altra area dello stesso dedalo, coi passi se è un Enigma */}
                   {areaDedalo && areaDedalo.altre.length > 0 && !b.contenitore && <span className="min-w-[180px]">
                     <Selettore etichetta="Area del dedalo" valore={b.areaDedalo} opzioni={[{ chiave: areaDedalo.chiave, nome: areaDedalo.nome, dettaglio: 'questa' }, ...areaDedalo.altre.map((a) => ({ chiave: a.chiave, nome: a.nome }))]} onCambia={(v) => cambia({ areaDedalo: v })} />
                   </span>}

@@ -30,7 +30,7 @@ import { registraEvento } from './storicoService.js';
 export interface ParametriPunti { noteRisposta: 1 | 2 | 3; bonusArcano: boolean; invito: boolean; piazzamento: PiazzamentoEsame | null; effetto?: string }
 /**
  * 2026-10-28, la forma di prima della correzione: i punti dell'effetto «puntiConfidente» `fissi` così come scritti (nessun moltiplicatore), con
- * l'effetto che li porta. Restano per le spunte già date con quella forma e per gli effetti che la migrazione di gioco 301 non ha potuto portare
+ * l'effetto che li porta. Restano per le spunte già date con quella forma e per gli effetti che non stanno
  * in note (punti diversi da 5, 10 o 15). Contano dove contano le note: un rango da 1 a 9 che sale a punti.
  */
 export interface ParametriPuntiFissi { fissi: number; effetto: string }

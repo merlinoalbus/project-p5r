@@ -355,7 +355,7 @@ function DettaglioPersona({ p, stato, inSalita, inRegistrazione, onSali, onRegis
         <span className="etichetta-campo-confidente">Skill</span>
         <div className="flex flex-wrap gap-1">
           {p.skill.map((s) => (
-            <Link key={s.slot} to={`/skill/${s.id}`} className="no-underline" title={s.effettoNome}>
+            <Link key={s.slot} to={`/skill/${s.id}`} className="touch inline-flex items-center no-underline" title={s.effettoNome}>
               <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
             </Link>
           ))}

@@ -30,7 +30,7 @@ export const getAreeCitta = (partita?: number): Promise<AreaRiassuntoDto[]> => a
 export const getAreeDelQuartiere = (quartiere: string, partita?: number): Promise<AreaRiassuntoDto[]> =>
   apiGet(`/aree/citta/${encodeURIComponent(quartiere)}${queryString({ partita })}`);
 
-/** La condizione propria di un'area (migrazione 303: il Covo dei Ladri dal 5 maggio), in AND con il quartiere e ereditata dai suoi
+/** La condizione propria di un'area (il Covo dei Ladri dal 5 maggio), in AND con il quartiere e ereditata dai suoi
  *  luoghi; un elenco vuoto la toglie. Gli inviti dei Confidenti restano separati. */
 export const aggiornaSbloccoAreaMondo = (contenitore: RifContenitore, slug: string, condizioni: unknown[]): Promise<AreaDettaglioDto> =>
   apiPut(`${percorsoArea(contenitore, slug)}/sblocco`, { condizioni });

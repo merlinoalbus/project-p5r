@@ -192,7 +192,7 @@ function metaRiga(def: DefRiga, chiave: string): { seed: Valori | null; aggiorna
 }
 
 /** Scrive la fotografia nella riga: con una fotografia diversa dai valori di adesso la riga è «dell'utente», altrimenti torna quella della guida
- *  (l'utente ha riscritto i valori della guida). Le tracce «~…» delle propagazioni di prima (tolte dalla migrazione 388) non sono campi: non contano. */
+ *  (l'utente ha riscritto i valori della guida). Le tracce «~…» di una fotografia vecchia non sono campi: non contano. */
 function scriviMetaRiga(def: DefRiga, chiave: string, seed: Valori | null, correnti: Valori): void {
   const corretta = seed !== null && !Object.keys(seed).filter((p) => !p.startsWith('~')).every((p) => uguali(seed[p], correnti[p]));
   if (corretta) prepared(`UPDATE ${def.tabella} SET origine = 'utente', seed_json = ?, updated_at = ? WHERE ${def.colonnaChiave} = ?`).run(JSON.stringify(seed), nowIso(), chiave);
@@ -375,7 +375,7 @@ function correggiBlocco(tipo: TipoModificabile, chiave: string, campi: Record<st
     const percorso = percorsoCampo(e, p);
     const g = risolvi(base, analizzaPercorso(percorso));
     const inGuida = g.trovato && comeValore(g.valore) !== undefined;
-    // un campo che vive sulla scheda dell'oggetto non si corregge da qui (la 279 ha già tolto l'effetto dai premi che sono oggetti)
+    // un campo che vive sulla scheda dell'oggetto non si corregge da qui (i premi che sono oggetti non hanno un effetto proprio)
     if (e.campiDellOggetto.has(p)) {
       throw httpErrors.badRequest('campo-dell-oggetto', `${def.etichetta} «${chiave}»: «${c.e}» è un dato dell'oggetto del catalogo e si corregge sulla sua scheda.`, { campo: p });
     }

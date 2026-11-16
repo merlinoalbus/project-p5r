@@ -2,7 +2,7 @@
 
 > **Dove vive il dato nell'app**: il compendio uscito da queste fonti sta nelle tabelle di `gioco.db` (`persona`, `skill`, tabelle
 > di fusione, `traduzione`), con le attribuzioni in `NOTICE` e le copie delle licenze in `licenze/`. Le correzioni successive si fanno
-> con l'app o con le migrazioni; gli strumenti di importazione citati sotto non esistono più nel repository.
+> con l'app o con un intervento diretto e verificato sul database; gli strumenti di importazione citati sotto non esistono più nel repository.
 
 Analisi delle fonti del compendio: due fonti open source, indipendenti fra loro.
 
@@ -78,8 +78,8 @@ non appartengono alle Persona del compendio e non entrano nel compendio.
   dall'app) e dal foglio Royal della raccolta joyce-chen/persona5-negotiation (277 domande × 3 risposte × 4 personalità; una parte degli
   esiti di Royal viene dall'originale e non è confermata: certezza media sui singoli esiti, alta sull'elenco). Regola: per ogni domanda
   gli esiti si prendono da Royal; dove Royal non dà un esito e l'app sì, resta quello dell'app marcato «solo P5». Le rese italiane
-  delle domande sono dell'app, non il testo del gioco (nessuna fonte italiana le riporta). Copie dei dati in
-  `server/db/migrations/dati/negoziazione-royal*.json`; attribuzioni in `NOTICE`.
+  delle domande sono dell'app, non il testo del gioco (nessuna fonte italiana le riporta). Il dato sta nel database di gioco
+  (`gioco.db`); attribuzioni in `NOTICE`.
 - **Persona dei membri del gruppo** (9 membri × 3 forme): arcano, livello, affinità prima e dopo il risveglio, skill e tratto dai dati
   estratti dal gioco Royal di aqiu384 (`roy-party-data.json`); nomi italiani delle forme, date e tratti dalla guida italiana (pagine
   dei Confidenti, «Rango 10», «Terza evoluzione della Persona di…», tratti, personaggi). Le forme successive non sono Persona nuove ma

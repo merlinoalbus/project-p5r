@@ -67,12 +67,12 @@ describe('eliminare un’infiltrazione', () => {
     if (uid) expect(conta('SELECT COUNT(*) AS n FROM spillo_partita WHERE spillo_uid = ?', uid)).toBe(0);
   });
 
-  it('un dedalo eliminato porta via le sue aree (099) e i loro timbri dalle partite; le Richieste restano, senza area', async () => {
+  it('un dedalo eliminato porta via le sue aree e i loro timbri dalle partite; le Richieste restano, senza area', async () => {
     const dedalo = aree('mementos')[1].chiave;
     const areaDedalo = prepared('SELECT chiave FROM area_dedalo WHERE dedalo_chiave = ?').pluck().get(dedalo) as string;
     const richieste = prepared('SELECT chiave FROM richiesta WHERE area_chiave = ?').pluck().all(dedalo) as string[];
     expect(richieste.length).toBeGreaterThan(0);
-    // un conteggio rimasto per il dedalo (di prima della 018) e uno della sua area
+    // un conteggio rimasto per il dedalo (di un file vecchio) e uno della sua area
     prepared("INSERT INTO timbri_dedalo_partita (partita_id, area_chiave, raccolti, updated_at) VALUES (?, ?, 2, 'x'), (?, ?, 3, 'x')").run(partita, dedalo, partita, areaDedalo);
     await request(app).delete(`/api/compendio/aree/${dedalo}`).expect(204);
     expect(conta('SELECT COUNT(*) AS n FROM timbri_dedalo_partita WHERE area_chiave IN (?, ?)', dedalo, areaDedalo)).toBe(0);

@@ -1,6 +1,6 @@
 // ============================================================
-// Test pezziMappa — zone cancellate, pezzi posati (rotazione e specchio), visibilità e inquadratura (102, 2026-10-14); le copie
-// di un pezzo: elenco, nome e posto della copia nuova (103, 2026-10-15)
+// Test pezziMappa — zone cancellate, pezzi posati (rotazione e specchio), visibilità e inquadratura (2026-10-14); le copie
+// di un pezzo: elenco, nome e posto della copia nuova (2026-10-15)
 // ============================================================
 
 import { describe, it, expect } from 'vitest';
@@ -87,7 +87,7 @@ describe('l\'inquadratura', () => {
   });
 });
 
-describe('le copie di un pezzo (103)', () => {
+describe('le copie di un pezzo', () => {
   it('l\'elenco delle copie posate segue l\'ordine dei pezzi e poi delle copie, col posto di ognuna; la posa unisce zona e copia', () => {
     const a = pezzo({ id: 1, copie: [copia({ id: 11 }), copia({ id: 12, posizione: { x: 1, y: 2 }, rotazione: 270 })] });
     const b = pezzo({ id: 2, nome: 'Ponte', sorgente: { x: 0, y: 0, larghezza: 5, altezza: 5 }, copie: [copia({ id: 21 })] });

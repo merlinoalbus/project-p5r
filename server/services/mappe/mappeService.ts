@@ -24,7 +24,6 @@ import { nomeDelPostoDellaMappa } from '../../../shared/nomiPlanimetrie.js';
 import { slug } from '../../../shared/slug.js';
 import { TIPO_MACCHINA, ancoraPuntoVendita } from '../../../shared/puntoVendita.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
-import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
 import { conCestino, registrazioneCestinoInCorso, registraRipristinoCestino } from '../cestinoService.js';
 import { verificaPartita } from '../verificaPartita.js';
@@ -38,7 +37,7 @@ import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
 import { conPresenzaPin, conDisponibilitaNegozio, senzaIngressoConcluso } from './disponibilitaPin.js';
 import { eVoceDiCattura, erroreCatturaNelCompendio } from '../catturePersona.js';
 import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma, vociDelPin } from './collegamentiGuida.js';
-import { conDivergenze, conStatoPerInfiltrazione, effettiDelGestoDto, modelloAvanzamento, riallineaStati, segnaIlPin, statiDellaPartita, statoDelPin, togliStatiDeiPin, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
+import { effettiDelGestoDto, modelloAvanzamento, riallineaStati, segnaIlPin, statiDellaPartita, statoDelPin, togliStatiDeiPin, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
@@ -46,13 +45,13 @@ import { entitaDellaRadice, palazzoDellaMappa, sottoalberoMappe } from './albero
 import { casaDelLuogo, condizioniDiSblocco, lettureLuoghi, luogoDelPin, presenzaDelLuogo, type LettureLuoghi, type LuogoDelPin } from '../luoghiService.js';
 import { descriviOrariDelLuogo, orariDelLuogo } from '../../../shared/orariNegozio.js';
 import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, dopoImmagineMappa, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
-import { areaRifDellaMappa, casaDellaMappa, conAree, contestoAree, verificaIngressoNelQuartiere, type ContestoAree, type RigaArea } from './casaMappa.js';
+import { areaRifDellaMappa, casaDellaMappa, contestoAree, verificaIngressoNelQuartiere, type ContestoAree, type RigaArea } from './casaMappa.js';
 import { areaDisponibilePerPartita } from './disponibilitaAree.js';
 import { convertiManualiImportati } from '../condizioni/importazione.js';
 import { verificaPinDiVendita } from '../invariantiPuntoVendita.js';
-import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
-import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
-import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
+import { assegnaAreeDelMondo } from './areeDelMondo.js';
+import { assegnaAreeDeiPalazzi } from './areeDeiPalazzi.js';
+import { impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
 import {
   ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, riferimentiAmmessiPerTipo,
   TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo
@@ -62,7 +61,7 @@ import type {
   DatiNuovoPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto
 } from '../../../shared/types.js';
 import {
-  aggiornaCopia, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa,
+  aggiornaCopia, confermaPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa,
   pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi,
   type DimensioniMappa, type PezzoDaImportare
 } from './pezziMappa.js';
@@ -72,7 +71,7 @@ interface RigaMappa {
   chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null;
   larghezza: number | null; altezza: number | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine;
   nome_rivisto?: number;
-  /** L'Area della planimetria e la sua versione (109, L2); assenti su uno schema di prima. */
+  /** L'Area della planimetria e la sua versione (L2). */
   area_chiave?: string | null; versione_etichetta?: string | null; versione_ordine?: number | null }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
 interface RigaSpillo {
@@ -80,11 +79,6 @@ interface RigaSpillo {
   descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number;
   ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null;
   nativo_json?: string | null;
-}
-
-/** La colonna della 082 c'è dal suo turno in poi; prima il nome rivisto non è dichiarabile. */
-function conNomeRivisto(): boolean {
-  return colonnaMappa('nome_rivisto');
 }
 
 /** Vero se la mappa sta nel mondo: è Tokyo, o risale a Tokyo (un quartiere o una sua discendente), fuori dall'ingresso dei Memento. */
@@ -98,11 +92,6 @@ function nelMondo(chiave: string): boolean {
     corrente = (prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').get(corrente) as { genitore_chiave: string | null } | undefined)?.genitore_chiave ?? null;
   }
   return false;
-}
-
-/** Vero se la tabella `mappa` ha la colonna (le migrazioni le aggiungono: i test possono avere uno schema di prima). */
-function colonnaMappa(nome: string): boolean {
-  return haColonnaMain(getDb(), 'mappa', nome);
 }
 
 /** La riga di una mappa dalla chiave pubblica o interna (passa da `idMappa`); 404 se non esiste. */
@@ -140,14 +129,12 @@ interface ContestoMappe {
   aree: ContestoAree;
 }
 
-/** Legge in blocco il contesto delle mappe: presentazioni (se la tabella c'è), collezioni, conteggi di spilli e figli, nomi e immagini. */
+/** Legge in blocco il contesto delle mappe: presentazioni, collezioni, conteggi di spilli e figli, nomi e immagini. */
 function contestoMappe(): ContestoMappe {
   const righe = prepared('SELECT * FROM mappa').all() as RigaMappa[];
   const presentazioni = new Map<string, Pick<MappaRiassuntoDto, 'contesti'>>();
-  if (haTabellaMain(getDb(), 'mappa_presentazione')) {
-    for (const p of prepared('SELECT mappa_chiave, contesti_json FROM mappa_presentazione').all() as Array<{ mappa_chiave: string; contesti_json: string }>) {
-      presentazioni.set(p.mappa_chiave, { contesti: JSON.parse(p.contesti_json) });
-    }
+  for (const p of prepared('SELECT mappa_chiave, contesti_json FROM mappa_presentazione').all() as Array<{ mappa_chiave: string; contesti_json: string }>) {
+    presentazioni.set(p.mappa_chiave, { contesti: JSON.parse(p.contesti_json) });
   }
   /** Da una query che restituisce chiave e conteggio a una mappa chiave → numero. */
   const conta = (sql: string) => new Map((prepared(sql).all() as Array<{ chiave: string; n: number }>).map((r) => [r.chiave, r.n]));
@@ -384,14 +371,6 @@ function negozioDettaglio(chiave: string, ctx: ContestoSpilli): NonNullable<Dett
     ...(a.prezzoScontato ? { prezzoScontato: a.prezzoScontato } : {}) })) };
 }
 
-/** Vero se la tabella `spillo` dello schema corrente ha la colonna `nome` (le colonne aggiunte dalle migrazioni, per esempio
- *  `nativo_json` della 046, possono mancare su un file che non le ha ancora applicate). */
-function colonnaSpillo(nome: string): boolean {
-  return haColonnaMain(getDb(), 'spillo', nome);
-}
-/** Vero se lo spillo ha già la colonna delle prove native `nativo_json` (migrazione 046). */
-function colonnaNativoJson(): boolean { return colonnaSpillo('nativo_json'); }
-
 /** Le prove native dello spillo lette dal JSON; null se non ne ha.
  *
  * Un JSON illeggibile non deve far cadere la mappa: se il campo e' corrotto lo spillo resta,
@@ -434,9 +413,7 @@ function arriviDi(ctx: ContestoSpilli): ArriviDeiPin {
   const nomiSpillo = new Map<number, string | undefined>();
   // il nome dell'arrivo è quello con cui il posto si presenta («Area · etichetta»), non il nome della mappa
   for (const m of prepared('SELECT chiave, nome FROM mappa WHERE chiave IN (SELECT mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL)').all() as Array<{ chiave: string; nome: string }>) nomiMappa.set(m.chiave, nomeDelPosto(m.chiave) ?? m.nome);
-  if (haColonnaMain(getDb(), 'spillo_destinazione', 'spillo_arrivo_id')) {
-    for (const s of prepared('SELECT id, nome FROM spillo WHERE id IN (SELECT spillo_arrivo_id FROM spillo_destinazione WHERE spillo_arrivo_id IS NOT NULL)').all() as Array<{ id: number; nome: string }>) nomiSpillo.set(s.id, s.nome);
-  }
+  for (const s of prepared('SELECT id, nome FROM spillo WHERE id IN (SELECT spillo_arrivo_id FROM spillo_destinazione WHERE spillo_arrivo_id IS NOT NULL)').all() as Array<{ id: number; nome: string }>) nomiSpillo.set(s.id, s.nome);
   return (ctx.arrivi = { righe: righeDestinazioni(), nomiMappa, nomiSpillo });
 }
 
@@ -473,7 +450,7 @@ function contestoSpilli(partitaId?: number, contesto: string | null = null): Con
   if (partitaId) verificaPartita(partitaId);
   const st = partitaId ? statoDisponibilitaPartita(partitaId) : null;
   // per gli ingressi dei Palazzi conclusi: le mappe di ogni Palazzo e le destinazioni degli spilli, lette una volta
-  const destinazioni = st && st.palazziConclusi.size > 0 && haTabellaMain(getDb(), 'spillo_destinazione')
+  const destinazioni = st && st.palazziConclusi.size > 0
     ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
     : undefined;
   return { partitaId, st, nomi: nomiCondizioni(), palazzi: st && st.palazziConclusi.size > 0 ? palazzoDiOgniMappa() : undefined, destinazioni, contesto };
@@ -547,7 +524,7 @@ type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione'
 function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo {
   const lp = r.riferimento_tipo === 'luogo' || r.riferimento_tipo === 'negozio' || r.riferimento_tipo === 'attivita' ? luogoDelPin(r, luoghiDi(ctx)) : null;
   const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx);
-  // le voci della guida del pin (098): le sue righe di `spillo_voce`, o il riferimento «punto» degli elementi senza mappa di prima
+  // le voci della guida del pin: le sue righe di `spillo_voce`, o il riferimento «punto» degli elementi senza mappa di prima
   const voci = vociDelPin(r.id).flatMap((chiave) => {
     const v = dettaglio?.tipo === 'punto' && dettaglio.punto?.chiave === chiave ? dettaglio.punto : (dettaglioRiferimento('punto', chiave, ctx)?.punto ?? null);
     return v ? [v] : [];
@@ -665,7 +642,7 @@ export function dettaglioMappa(chiave: string, partitaId?: number, contesto: str
     percorso: percorsoDi(r, mappe.aree).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
     // il Palazzo (o i Memento) della mappa, risalendo i genitori: l'editor delle condizioni parte da qui per pin e voci della guida
     palazzo: palazzoDellaMappa(chiave),
-    // i pezzi (102) con le loro copie (103): con la partita ogni copia porta l'esito delle sue condizioni, come i pin
+    // i pezzi con le loro copie: con la partita ogni copia porta l'esito delle sue condizioni, come i pin
     pezzi: pezziDellaMappa(chiave, ctx.nomi ?? nomiCondizioni(), ctx.st),
     // dai nomi già letti nel contesto: prima una query in più (P8)
     genitoreNome: r.genitore_chiave ? mappe.nomi.get(r.genitore_chiave) ?? null : null,
@@ -714,7 +691,6 @@ function verificaAreePalazzo(genitore: string | null, aree: string[]): void {
  * viaggiano in `legami`).
  */
 function areePerPacchetto(mappa: string, perMappa?: ReadonlyMap<string, ReadonlyArray<{ chiave: string }>>): { aree?: string[] } {
-  if (!conLegami()) return {};
   const aree = (perMappa?.get(mappa) ?? infiltrazioniDellaMappa(mappa)).map((a) => a.chiave);
   return aree.length ? { aree } : {};
 }
@@ -780,11 +756,11 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
   // L3 (§2.3, R3-26): lo stesso nei Palazzi — sotto `dungeon-<k>` (o una sua discendente), di qualunque tipo, una mappa nasce solo come
   // planimetria di un'Area («Aggiungi area» / «Aggiungi planimetria» della scheda); i Memento no (R3-12). Restano ammesse le generiche
   // fuori dai Palazzi e le importazioni.
-  if (!opz.dallArea && genitore && conAree() && (dati.tipo === 'luogo' || dati.tipo === 'area') && nelMondo(genitore.chiave)) {
+  if (!opz.dallArea && genitore && (dati.tipo === 'luogo' || dati.tipo === 'area') && nelMondo(genitore.chiave)) {
     throw httpErrors.conflict('usa-aggiungi-area', 'Nel mondo le planimetrie si aggiungono dalla pagina dell’area (o del quartiere, con «Aggiungi area»).');
   }
   const palazzoDelGenitore = genitore ? palazzoDellaMappa(genitore.chiave) : null;
-  if (!opz.dallArea && palazzoDelGenitore && palazzoDelGenitore !== 'mementos' && conAree()) {
+  if (!opz.dallArea && palazzoDelGenitore && palazzoDelGenitore !== 'mementos') {
     throw httpErrors.conflict('usa-aggiungi-area', 'Nei Palazzi le planimetrie si aggiungono dalla scheda del Palazzo: «Aggiungi area», o «Aggiungi planimetria» in un’area.');
   }
   const richiesta = chiave;
@@ -876,27 +852,26 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
   // regola di `creaMappa`. Le generiche del mondo restano ammesse; per i Palazzi la regola di L3 qui sotto, i Memento non cambiano.
   const tipoDopo = dati.tipo ?? r.tipo;
   const genitoreNuovo = dati.genitore === undefined ? r.genitore_chiave : dati.genitore;
-  if (conAree() && !r.area_chiave && (tipoDopo === 'luogo' || tipoDopo === 'area') && (genitoreNuovo !== r.genitore_chiave || tipoDopo !== r.tipo)
+  if (!r.area_chiave && (tipoDopo === 'luogo' || tipoDopo === 'area') && (genitoreNuovo !== r.genitore_chiave || tipoDopo !== r.tipo)
     && genitoreNuovo && nelMondo(genitoreNuovo)) {
     throw httpErrors.conflict('usa-aggiungi-area', 'Nel mondo una planimetria sta in un’area: aggiungila con «Aggiungi area» nel quartiere (o «Aggiungi planimetria» in un’area), o collocala dall’elenco «Da collocare».');
   }
   // AP3-3 (L3, R3-26 anche per lo spostamento, decisione del PM): una mappa senza Area spostata sotto la radice di un Palazzo (o una sua
   // discendente), di qualunque tipo, vi diventerebbe una planimetria sciolta: la stessa regola di `creaMappa`. I Memento no (R3-12).
   const palazzoDiArrivo = dati.genitore !== undefined && dati.genitore !== r.genitore_chiave && dati.genitore ? palazzoDellaMappa(dati.genitore) : null;
-  if (conAree() && !r.area_chiave && palazzoDiArrivo && palazzoDiArrivo !== 'mementos') {
+  if (!r.area_chiave && palazzoDiArrivo && palazzoDiArrivo !== 'mementos') {
     throw httpErrors.conflict('usa-aggiungi-area', 'Nei Palazzi una planimetria sta in un’area: aggiungila dalla scheda del Palazzo («Aggiungi area», o «Aggiungi planimetria» in un’area).');
   }
   // Il nome rivisto lo dichiara questo salvataggio, che è il modulo dell'editor e porta sempre il
   // campo «Nome»: premere Salva **è** dire «la mappa si chiama così», anche quando il testo non
-  // cambia. Legarlo al cambiamento del testo lasciava senza rimedio chi il nome l'aveva già
-  // corretto prima della 082: con il nome giusto già scritto non c'era più niente da cambiare, e
-  // il titolo restava quello dedotto dall'estrazione. Lo spegne solo l'importazione di un
+  // cambia. Legarlo al cambiamento del testo lascerebbe senza rimedio chi il nome l'ha già
+  // giusto: non ci sarebbe niente da cambiare, e
+  // il titolo resterebbe quello dedotto dall'estrazione. Lo spegne solo l'importazione di un
   // pacchetto, che quel nome lo sovrascrive.
-  const rivisto = conNomeRivisto() ? (dati.nome !== undefined ? 1 : r.nome_rivisto ?? 0) : 0;
+  const rivisto = dati.nome !== undefined ? 1 : r.nome_rivisto ?? 0;
   // un'area si lega solo a una planimetria del suo Palazzo (controllo prima di scrivere: niente modifiche a metà)
   const genitoreDopo = dati.genitore === undefined ? r.genitore_chiave : dati.genitore;
-  const legamiNuovi = conLegami();
-  if (genitoreDopo !== r.genitore_chiave && legamiNuovi) {
+  if (genitoreDopo !== r.genitore_chiave) {
     // Spostata sotto un altro genitore, la planimetria porta con sé **tutte** le sue aree: devono restare
     // del Palazzo in cui arriva (rilievo della revisione). Quella che questo salvataggio sostituisce non conta.
     // Con lei si spostano le discendenti: anche le loro aree devono restare del Palazzo di arrivo.
@@ -907,13 +882,13 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     verificaAreePalazzo(genitoreDopo, [...areeDopo]);
   } else if (dati.entita?.tipo === 'area') verificaAreePalazzo(genitoreDopo, [dati.entita.chiave]);
   // L3: un'infiltrazione legata dall'editor si lega all'Area della planimetria (le colonne `entita_*` sono state tolte da L11 · B9)
-  const areaDellaPlanimetria = legamiNuovi && dati.entita?.tipo === 'area'
+  const areaDellaPlanimetria = dati.entita?.tipo === 'area'
     ? (prepared('SELECT a.chiave FROM mappa m JOIN area a ON a.chiave = m.area_chiave AND a.dungeon_chiave IS NOT NULL WHERE m.chiave = ?').pluck().get(chiave) as string | undefined) ?? null
     : null;
-  if (legamiNuovi && dati.entita?.tipo === 'area' && !areaDellaPlanimetria) throw httpErrors.badRequest('planimetria-senza-area', 'Questa planimetria non appartiene a un’area del Palazzo: le infiltrazioni si legano alle aree.');
+  if (dati.entita?.tipo === 'area' && !areaDellaPlanimetria) throw httpErrors.badRequest('planimetria-senza-area', 'Questa planimetria non appartiene a un’area del Palazzo: le infiltrazioni si legano alle aree.');
   // rinominare una planimetria non cambia il nome della sua stanza: la stanza è l'Area, e il suo nome è `area.nome` (L11 · B9: il gruppo d'immagini non c'è più)
   getDb().transaction(()=>{
-  if (conNomeRivisto()) prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(rivisto, chiave);
+  prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(rivisto, chiave);
   prepared(`UPDATE mappa SET nome = ?, tipo = ?, genitore_chiave = ?, ordine = ?, asset = ?, larghezza = ?, altezza = ?, note = ?, origine = 'utente', updated_at = ? WHERE chiave = ?`).run(
     dati.nome ?? r.nome, dati.tipo ?? r.tipo, dati.genitore === undefined ? r.genitore_chiave : dati.genitore, dati.ordine ?? r.ordine, dati.asset === undefined ? r.asset : dati.asset,
     dati.larghezza === undefined ? r.larghezza : dati.larghezza, dati.altezza === undefined ? r.altezza : dati.altezza, dati.note ?? r.note, nowIso(), chiave);
@@ -921,9 +896,9 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     const gia = (prepared('SELECT infiltrazione_chiave FROM infiltrazione_area WHERE area_chiave = ?').pluck().all(areaDellaPlanimetria) as string[]);
     if (!gia.includes(dati.entita.chiave)) impostaLegamiInfiltrazione({ area: areaDellaPlanimetria, infiltrazioni: [...gia, dati.entita.chiave] });
   }
-  // un percorso pubblico fissato (109, il Covo) vale finché la mappa resta com'era: rinominata davvero o spostata, il percorso torna
+  // un percorso pubblico fissato (il Covo) vale finché la mappa resta com'era: rinominata davvero o spostata, il percorso torna
   // quello della catena dei genitori (il vecchio resta come alias)
-  if (colonnaMappa('percorso_fisso') && ((dati.nome !== undefined && dati.nome.trim() !== r.nome) || genitoreDopo !== r.genitore_chiave)) {
+  if ((dati.nome !== undefined && dati.nome.trim() !== r.nome) || genitoreDopo !== r.genitore_chiave) {
     prepared('UPDATE mappa SET percorso_fisso = NULL WHERE chiave = ?').run(chiave);
   }
   // tipo, genitore o asset cambiati cambiano il posto nella gerarchia: il ruolo dell'immagine lo segue (L1)
@@ -977,7 +952,7 @@ export function eliminaMappa(chiave: string, opz: { conferma?: boolean; dallArea
     prepared('UPDATE mappa SET genitore_chiave = NULL WHERE genitore_chiave = ?').run(chiave);
     // gli spilli cadono in cascata con la mappa; i loro «raccolto» stanno in un altro file e si puliscono qui
     // (e le loro divergenze «da verificare» e lo stato per infiltrazione: un'unica funzione per tutti i servizi)
-    if (colonnaSpillo('uid')) togliStatiDeiPin(getDb(), 'SELECT uid FROM main.spillo WHERE mappa_chiave = ? AND uid IS NOT NULL', [chiave]);
+    togliStatiDeiPin(getDb(), 'SELECT uid FROM main.spillo WHERE mappa_chiave = ? AND uid IS NOT NULL', [chiave]);
     prepared('DELETE FROM mappa WHERE chiave = ?').run(chiave);
     // §8.11: le voci dei pin della mappa li perdono, e il loro stato si ricalcola dai pin che restano
     riallineaStati(getDb(), mPrima, nowIso());
@@ -1009,8 +984,8 @@ registraRipristinoCestino('mappa', (_chiave, _vicini, saltate) => {
  */
 export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer, opz: { eliminaPezzi?: boolean; origineUrl?: string | null; dellUtente?: boolean } = {}): MappaDto {
   chiave=rigaMappa(chiave).chiave;
-  // I pezzi (102) sono ritagli in pixel dell'immagine di prima: su un'altra ritaglierebbero zone sbagliate. Scelta dell'utente
-  // (2026-10-14, «Chiedere conferma ed eliminarli»): senza conferma 409 col numero dei pezzi e delle copie posate (103); con la
+  // I pezzi sono ritagli in pixel dell'immagine di prima: su un'altra ritaglierebbero zone sbagliate. Scelta dell'utente
+  // (2026-10-14, «Chiedere conferma ed eliminarli»): senza conferma 409 col numero dei pezzi e delle copie posate; con la
   // conferma se ne vanno insieme alla sostituzione, nella stessa transazione (`confermaPezzi`, la stessa regola delle rimozioni).
   const togliPezzi = confermaPezzi([chiave], !!opz.eliminaPezzi, 'sostituendola');
   // immagine, dimensioni e ruolo insieme: una mappa con l'immagine nuova e le dimensioni vecchie sbaglierebbe la posizione di ogni
@@ -1076,7 +1051,7 @@ const pezzoPerEditor = (id: number): PezzoMappaDto => pezzoDto(rigaPezzo(id), ri
 const copiaPerEditor = (id: number): CopiaPezzoDto => copiaDto(rigaCopia(id), nomiCondizioni());
 
 /**
- * Crea un pezzo della planimetria (102) dalla zona scelta nell'editor, con la sua prima copia (103). Le condizioni (della copia)
+ * Crea un pezzo della planimetria dalla zona scelta nell'editor, con la sua prima copia. Le condizioni (della copia)
  * sono quelle dei pin, comprese le condizioni sullo stato di un altro pin o di una voce della guida; zona e posizione si verificano
  * sull'immagine.
  */
@@ -1092,7 +1067,7 @@ export function eliminaPezzoMappa(id: number): void {
   eliminaPezzo(id);
 }
 
-/** Aggiunge una copia a un pezzo (103; 404 se il pezzo non c'è): posizione, rotazione, specchio e condizioni proprie. */
+/** Aggiunge una copia a un pezzo (404 se il pezzo non c'è): posizione, rotazione, specchio e condizioni proprie. */
 export function creaCopiaPezzoMappa(pezzoId: number, dati: DatiCopiaPezzo): CopiaPezzoDto {
   const p = rigaPezzo(pezzoId);
   verificaCondizioni(dati.condizioni, true);
@@ -1227,8 +1202,8 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
 
 /**
  * Vero se il tipo del pin ammette il riferimento (quelli della sua categoria più le eccezioni del tipo). Un riferimento `attivita` (un'attività sta in un luogo: il pin punta al luogo) non si
- * offre più né si scrive, ma uno già sul pin (un backup di prima della migrazione 344 portato con «Importa») si tollera finché la
- * migrazione non lo riallinea: lo si riconosce solo se è identico a quello che il pin ha adesso.
+ * offre più né si scrive, ma uno già sul pin (un backup vecchio portato con «Importa») si
+ * tollera: lo si riconosce solo se è identico a quello che il pin ha adesso.
  */
 function riferimentoAmmesso(tipo: string, rif: { tipo: string; chiave: string }, attuale?: { tipo: string | null; chiave: string | null }): boolean {
   // per tipo: la categoria più le eccezioni del tipo (la Nota che segna un luogo, `riferimentiAmmessiPerTipo`)
@@ -1258,8 +1233,8 @@ function applicaRegoleCategoria<T extends DatiSpillo>(tipo: TipoSpillo, dati: T,
 }
 
 /**
- * Su un pin di una planimetria un riferimento «punto» in ingresso (un client o un pacchetto di prima della 094) è la sua voce
- * della guida: una voce in più del pin (`spillo_voce`, 098), con le regole del collegamento dalla guida (`erroreVoceDelPin`), e il riferimento del pin non
+ * Su un pin di una planimetria un riferimento «punto» in ingresso (un client o un pacchetto vecchio) è la sua voce
+ * della guida: una voce in più del pin (`spillo_voce`), con le regole del collegamento dalla guida (`erroreVoceDelPin`), e il riferimento del pin non
  * si tocca — un passaggio tiene la sua destinazione (`undefined` = invariato; uno spillo nuovo nasce senza).
  */
 function separaVoce<T extends DatiSpillo>(dati: T): { dati: T; voce: string | undefined } {
@@ -1305,7 +1280,7 @@ export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoS
 
 /**
  * Aggiorna uno spillo in una transazione: i campi assenti restano. Una scheda della guida senza mappa non accetta coordinate,
- * mappa né destinazione; su una planimetria un riferimento «punto» diventa una voce in più del pin (098), e spostando il pin su un'altra
+ * mappa né destinazione; su una planimetria un riferimento «punto» diventa una voce in più del pin, e spostando il pin su un'altra
  * mappa le sue voci devono restare del Palazzo. Un riferimento non più ammesso dal tipo cade; condizioni e giri fra pin si
  * verificano. Uno spillo del seed modificato diventa dell'utente e ricorda la sua identità di seed per il reseed.
  */
@@ -1332,7 +1307,7 @@ export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto 
 
   if(r.area_guida_chiave && ['x','y','mappa','destinazione'].some(k=>Object.prototype.hasOwnProperty.call(dati,k)))throw httpErrors.badRequest('contenuto-non-spaziale','Una scheda guida non accetta coordinate o destinazioni.');
   if (dati.tipo && !(TIPI_SPILLO as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di spillo non ammesso.');
-  // su una planimetria il riferimento «punto» in ingresso è una voce in più del pin (098); gli elementi della guida senza mappa restano com'erano
+  // su una planimetria il riferimento «punto» in ingresso è una voce in più del pin; gli elementi della guida senza mappa restano com'erano
   const separata = r.mappa_chiave !== null ? separaVoce(dati) : { dati, voce: undefined };
   dati = separata.dati;
   if (separata.voce) { const errore = erroreVoceDelPin({ nome: dati.nome ?? r.nome, mappa: dati.mappa ? rigaMappa(dati.mappa).chiave : r.mappa_chiave }, separata.voce); if (errore) throw errore; }
@@ -1371,7 +1346,7 @@ export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto 
     dati.riferimento === undefined ? r.riferimento_tipo : dati.riferimento?.tipo ?? null, dati.riferimento === undefined ? r.riferimento_chiave : dati.riferimento?.chiave ?? null,
     dati.collezionabile === undefined ? r.collezionabile : dati.collezionabile ? 1 : 0, dati.ordine ?? r.ordine, nowIso(), dati.condizioni === undefined ? r.condizioni_json : jsonCondizioni(dati.condizioni), identitaSeed, id);
   if (dati.soloPosizione !== undefined) prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(dati.soloPosizione ? 1 : 0, id);
-  // una voce in più (098): le altre restano
+  // una voce in più: le altre restano
   if (separata.voce && !vociAttuali.includes(separata.voce)) {
     const mPrima = modelloAvanzamento(getDb());
     prepared('INSERT OR IGNORE INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(id, separata.voce);
@@ -1477,7 +1452,7 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
     // un pin senza voci, o con sole voci senza stato, ha il suo stato e basta; restano qui sotto i pin delle sole voci senza carattere
     // (dedali dei Memento), con la regola di prima
     if (!vociDelModello || vociDelModello.altre.length === 0) { prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId); return; }
-    // le voci del pin che si segnano (una o più, 098): una voce descrittiva della guida non ha stato (2026-10-01), il raccolto del
+    // le voci del pin che si segnano (una o più): una voce descrittiva della guida non ha stato (2026-10-01), il raccolto del
     // pin non la segna
     // (né una Persona da catturare, che si cattura nel compendio, 2026-10-12; L8: un collegamento rimasto da prima non la segna)
     const voci = vociDelModello.altre.filter((voce) => !eVoceDiCattura(voce));
@@ -1495,23 +1470,23 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
         allineaEnigmaDellaVoce(getDb(), partitaId, voce, adesso);
       }
     } else for (const voce of voci) {
-      // raccogliere lo spillo di un punto è segnare quel punto: è dell'utente, non un segno automatico (utente 006). Un punto
+      // raccogliere lo spillo di un punto è segnare quel punto: è dell'utente, non un segno automatico. Un punto
       // con più pin sulle planimetrie (2026-10-01) è segnato quando li ha raccolti **tutti**; toglierne uno lo riapre. Contano i
-      // pin che hanno solo questa voce: il segno di un pin con altre voci parla di tutte (098), e aspettarlo bloccherebbe la voce.
+      // pin che hanno solo questa voce: il segno di un pin con altre voci parla di tutte, e aspettarlo bloccherebbe la voce.
       const tutti = r.mappa_chiave === null || pinDelPuntoGuida(getDb(), voce)
         .every((p) => p.uid === r.uid || quanteVociDelPin(getDb(), p.id) > 1 || !!prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ? AND raccolto = 1').get(partitaId, p.uid));
       if (raccolto && tutti) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET automatico = 0`).run(partitaId, voce, adesso);
       else if (!raccolto) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, voce);
-      // un Enigma coi suoi passi (095), raggiunto da un elemento della guida di prima: i passi seguono, come segnandolo dalla guida
+      // un Enigma coi suoi passi, raggiunto da un elemento della guida di prima: i passi seguono, come segnandolo dalla guida
       segnaPassiDellEnigma(getDb(), partitaId, voce, segnata(voce) ? 'ottenuto' : null, adesso);
-      // un passo di un Enigma (095): l'Enigma segue i suoi passi
+      // un passo di un Enigma: l'Enigma segue i suoi passi
       allineaEnigmaDellaVoce(getDb(), partitaId, voce, adesso);
       // gli altri pin di questa voce che hanno altre voci la seguono (voci indipendenti, 2026-10-09): fatti solo con tutte le loro
       // voci segnate — un pin con più voci non resta «fatto» con questa voce riaperta
       for (const p of pinDelPuntoGuida(getDb(), voce)) if (p.uid !== r.uid && quanteVociDelPin(getDb(), p.id) > 1) allineaRaccoltoDelPin(getDb(), partitaId, p, adesso);
     }
     // il Tesoro o il boss raccolti non segnano più da soli il boss finale della Guida (scelta dell'utente, 2026-10-04: il
-    // boss si affronta più volte, ed è sconfitto solo col suo spillo raccolto o segnato dalla Guida; utente 017)
+    // boss si affronta più volte, ed è sconfitto solo col suo spillo raccolto o segnato dalla Guida)
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo, contestoSpilli(partitaId));
@@ -1626,27 +1601,23 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   const presentazioni = contestoMappe().presentazioni;
   // L3 (andata e ritorno identica, §2.3): le infiltrazioni di ogni planimetria (quelle della sua Area) per il campo vecchio `aree`. Da L11 · B9 il
   // pacchetto non porta più `entita`, `entitaLegami` e `gruppoImmagini`: l'import li accetta (pacchetti di prima) e li ignora.
-  const infiltrazioniPerMappa = conLegami() ? infiltrazioniDelleMappe() : undefined;
-  const conRivisto = conNomeRivisto();
-  const conFisso = colonnaMappa('percorso_fisso');
-  const conSeedIdentita = colonnaSpillo('seed_identita_json');
-  const conNativoSpillo = colonnaNativoJson();
+  const infiltrazioniPerMappa = infiltrazioniDelleMappe();
   const mappe: EsportazioneMappeDto['mappe'] = (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[]).filter((m) => !ammesse || ammesse.has(m.chiave)).map((m) => ({
     ...(presentazioni.get(m.chiave) ?? {}),
     chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, assetOriginale:m.asset, larghezza: m.larghezza, altezza: m.altezza,
     ruoloImmagine: m.ruolo_immagine,
     note: m.note,
     // L3: nome rivisto, origine, ultima modifica e percorso fissato, perché l'import li rimetta identici
-    ...(conRivisto ? { nomeRivisto: m.nome_rivisto === 1 } : {}), origine: m.origine, updatedAt: m.updated_at,
-    ...(conFisso ? { percorsoFisso: (m as RigaMappa & { percorso_fisso?: string | null }).percorso_fisso ?? null } : {}),
+    nomeRivisto: m.nome_rivisto === 1, origine: m.origine, updatedAt: m.updated_at,
+    percorsoFisso: (m as RigaMappa & { percorso_fisso?: string | null }).percorso_fisso ?? null,
     // L2: l'Area della planimetria e la sua versione (le Aree stanno nel campo `aree` del pacchetto); una mappa senza Area porta la sola versione
     // se ce l'ha (i fogli dei Memento: etichetta e ordine che prima stavano nel gruppo d'immagini)
     ...(m.area_chiave ? { area: m.area_chiave, versione: { etichetta: m.versione_etichetta ?? null, ordine: m.versione_ordine ?? 0 } }
       : m.versione_etichetta != null || m.versione_ordine != null ? { versione: { etichetta: m.versione_etichetta ?? null, ordine: m.versione_ordine ?? 0 } } : {}),
     // le infiltrazioni contenute (2026-09-29; da L3 quelle dell'Area)
     ...areePerPacchetto(m.chiave, infiltrazioniPerMappa),
-    // i pezzi (102), anche nessuno: un pacchetto che lo dice toglie, importato, quelli che la mappa avesse
-    ...(conPezzi() ? { pezzi: pezziPerPacchetto(m.chiave) } : {}),
+    // i pezzi, anche nessuno: un pacchetto che lo dice toglie, importato, quelli che la mappa avesse
+    pezzi: pezziPerPacchetto(m.chiave),
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
       ...destinazionePerPacchetto(s.id),
       uid: s.uid,
@@ -1655,8 +1626,8 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
       soloPosizione: s.solo_posizione === 1, collezionabile: s.collezionabile === 1, ordine: s.ordine,
       // L3: origine, ultima modifica, identità del seed e prove native com'erano salvate
       origine: s.origine as 'seed' | 'utente', updatedAt: s.updated_at,
-      ...(conSeedIdentita ? { seedIdentita: (s as RigaSpillo & { seed_identita_json?: string | null }).seed_identita_json ?? null } : {}),
-      ...(conNativoSpillo ? { nativoJson: (s as RigaSpillo & { nativo_json?: string | null }).nativo_json ?? null } : {}),
+      seedIdentita: (s as RigaSpillo & { seed_identita_json?: string | null }).seed_identita_json ?? null,
+      nativoJson: (s as RigaSpillo & { nativo_json?: string | null }).nativo_json ?? null,
       ...(condizioniDiRiga(s.condizioni_json).length > 0 ? { condizioni: condizioniDiRiga(s.condizioni_json) } : {}),
       // schermate: asset del repository oppure file dell'istanza in base64 (sempre inclusi: il pacchetto è completo)
       immagini: (prepared('SELECT * FROM spillo_immagine WHERE spillo_id = ? ORDER BY ordine, id').all(s.id) as RigaImmagineSpillo[]).flatMap((i): Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> => {
@@ -1694,36 +1665,36 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   // O3-1 (L3): con la radice di un Palazzo nel pacchetto entrano tutte le sue Aree, anche quelle rimaste senza planimetrie (dopo «Colloca»
   // o dal cestino), con i loro legami: il Palazzo esportato è intero, e su un'altra istanza tornano
   const palazziEsportati = mappe.map((m) => /^dungeon-(.+)$/.exec(m.chiave)?.[1]).filter((d): d is string => !!d && d !== 'mementos');
-  const areeDeiPalazzi = palazziEsportati.length === 0 || !conAree() ? [] : prepared(`SELECT chiave FROM area WHERE dungeon_chiave IN (${palazziEsportati.map(() => '?').join(', ')})`).pluck().all(...palazziEsportati) as string[];
+  const areeDeiPalazzi = palazziEsportati.length === 0 ? [] : prepared(`SELECT chiave FROM area WHERE dungeon_chiave IN (${palazziEsportati.map(() => '?').join(', ')})`).pluck().all(...palazziEsportati) as string[];
   const areeEsportate = [...new Set([...mappe.map((m) => m.area).filter((a): a is string => !!a), ...areeDeiPalazzi])];
   const aree: AreaPacchetto[] = areeEsportate.length === 0 ? [] : (prepared(`SELECT * FROM area WHERE chiave IN (${areeEsportate.map(() => '?').join(', ')}) ORDER BY chiave`).all(...areeEsportate) as RigaArea[])
     .map((a) => ({ chiave: a.chiave, quartiere: a.quartiere_chiave, dungeon: a.dungeon_chiave, citta: a.citta_chiave, slug: a.slug, nome: a.nome, nomeRivisto: a.nome_rivisto === 1, ordine: a.ordine,
       predefinita: a.planimetria_predefinita ? chiaveMappa(a.planimetria_predefinita) : null, origine: a.origine, seedJson: a.seed_json, daVerificare: a.da_verificare === 1, updatedAt: a.updated_at }));
   // L3: i legami infiltrazione ↔ area delle Aree esportate (versione da aprire per chiave pubblica)
-  const legami: LegamePacchetto[] = areeEsportate.length === 0 || !conLegami() ? [] : (prepared(`SELECT * FROM infiltrazione_area WHERE area_chiave IN (${areeEsportate.map(() => '?').join(', ')})
+  const legami: LegamePacchetto[] = areeEsportate.length === 0 ? [] : (prepared(`SELECT * FROM infiltrazione_area WHERE area_chiave IN (${areeEsportate.map(() => '?').join(', ')})
     ORDER BY infiltrazione_chiave, ordine, area_chiave`).all(...areeEsportate) as Array<{ infiltrazione_chiave: string; area_chiave: string; ordine: number; planimetria_iniziale: string | null; origine: LegamePacchetto['origine'] }>)
     .map((l) => ({ infiltrazione: l.infiltrazione_chiave, area: l.area_chiave, ordine: l.ordine, planimetriaIniziale: l.planimetria_iniziale ? chiaveMappa(l.planimetria_iniziale) : null, origine: l.origine }));
   for(const m of mappe){m.chiave=chiaveMappa(m.chiave);if(m.genitore)m.genitore=chiaveMappa(m.genitore);m.asset=assetEsistente(m.asset);m.assetOriginale=m.asset;for(const s of m.spilli)if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=chiaveMappa(s.riferimento.chiave);}
-  const ingressi=(prepared(`SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom${conAree()?',area_chiave AS area':''} FROM quartiere_ingresso`)
+  const ingressi=(prepared(`SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom,area_chiave AS area FROM quartiere_ingresso`)
     .all() as NonNullable<EsportazioneMappeDto['ingressi']>)
     .filter(i=>!ammesse||ammesse.has(i.mappa)).map(i=>({...i,mappa:chiaveMappa(i.mappa)}));
   return { versione: 1, esportato: nowIso(), ...(aree.length ? { aree } : {}), ...(legami.length ? { legami } : {}), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
 
-/** Il riferimento proprio di un pin del pacchetto, con le regole della sua categoria: un «punto» (pacchetti di prima della 094)
+/** Il riferimento proprio di un pin del pacchetto, con le regole della sua categoria: un «punto» (pacchetti vecchi)
  *  non è un riferimento ma una voce della guida del pin (`vociDichiarate`). */
 function riferimentoDelPacchetto(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined, tipoSpillo: string): { tipo: TipoRiferimento; chiave: string } | null {
   const categoria = categoriaSpillo(tipoSpillo);
-  // un pacchetto di prima della migrazione 344 cita ancora `attivita`: la chiave è quella di un luogo (la sede dell'attività) e il pin
-  // la importa come pin di quel luogo, come ha fatto la migrazione sui pin esistenti; senza un luogo con quella chiave (la migrazione 344
-  // lascia sull'attività i pin che la citano davvero) il pin non porta un riferimento che non punta a niente
+  // un pacchetto vecchio cita ancora `attivita`: la chiave è quella di un luogo (la sede dell'attività) e il pin
+  // la importa come pin di quel luogo; senza un luogo con quella chiave
+  // il pin non porta un riferimento che non punta a niente
   const r = rif?.tipo === 'attivita' && categoria === 'citta'
     ? (prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(rif.chiave) ? { tipo: 'luogo' as const, chiave: rif.chiave } : null)
     : rif;
   return r && r.tipo !== 'punto' && riferimentiAmmessiPerTipo(tipoSpillo).includes(r.tipo) ? r : null;
 }
 
-/** Le voci della guida che un pin del pacchetto dichiara: il campo `voci` (098), o `voce` di un pacchetto della 094-097, o il
+/** Le voci della guida che un pin del pacchetto dichiara: il campo `voci`, o `voce` di un pacchetto vecchio, o il
  *  riferimento «punto» di un pacchetto di prima. `undefined` = il pacchetto non ne dice niente (un pacchetto di prima). */
 function vociDichiarate(s: { riferimento: { tipo: TipoRiferimento; chiave: string } | null; voci?: string[]; voce?: string | null }): string[] | undefined {
   if (s.voci !== undefined) return [...new Set(s.voci)];
@@ -1737,15 +1708,9 @@ function vociAmmesse(nome: string, mappa: string, voci: string[]): string[] {
   return voci.filter((v) => !erroreVoceDelPin({ nome, mappa }, v)).sort();
 }
 
-/** Le voci proprie di un pin (`spillo_voce`), in ordine di chiave. Su uno schema di prima della 098 (i test caricano il seed a
- *  scaglioni) la sola colonna della 094, se c'è. */
+/** Le voci proprie di un pin (`spillo_voce`), in ordine di chiave. */
 function vociProprie(id: number): string[] {
-  if (haTabellaMain(getDb(), 'spillo_voce')) {
-    return prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(id) as string[];
-  }
-  if (!colonnaSpillo('voce_chiave')) return [];
-  const voce = prepared('SELECT voce_chiave FROM spillo WHERE id = ?').pluck().get(id) as string | null | undefined;
-  return voce ? [voce] : [];
+  return prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(id) as string[];
 }
 
 /** L'identità di un pin del pacchetto: la voce della guida non ne fa parte (è un collegamento, come «raccolto»), e un riferimento
@@ -1804,15 +1769,15 @@ function identitaRettificata(identita:string): {identita:string;mappa?:string} {
 
 export interface EsitoImportazione {
   mappe: number; spilli: number;
-  /** I pezzi delle planimetrie scritti (102: i ritagli). */ pezzi: number;
-  /** Le copie posate scritte (103). */ copie: number;
+  /** I pezzi delle planimetrie scritti (i ritagli). */ pezzi: number;
+  /** Le copie posate scritte. */ copie: number;
   /** I pezzi scartati perché la zona esce dall'immagine della mappa d'arrivo, o nessuna copia ci sta (o la mappa non ne ha una). */ pezziScartati: number;
-  /** Le copie scartate perché escono dall'immagine della mappa d'arrivo, comprese quelle dei pezzi scartati (103). */ copieScartate: number;
-  /** I pezzi tolti, con le loro copie, perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number;
-  /** Le copie tolte con quei pezzi (103). */ copieEliminate: number;
+  /** Le copie scartate perché escono dall'immagine della mappa d'arrivo, comprese quelle dei pezzi scartati. */ copieScartate: number;
+  /** I pezzi tolti, con le loro copie, perché l'immagine della loro mappa è stata sostituita da una diversa. */ pezziEliminati: number;
+  /** Le copie tolte con quei pezzi. */ copieEliminate: number;
   immagini: number; saltate: string[];
   /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number;
-  /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number;
+  /** Voci della guida scartate (una per voce): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number;
   /** L3 (§3.6.3): pin, pezzi e copie tornati con lo stesso uid che non hanno potuto riprendere il loro id (preso da un'altra riga): id
    *  nuovo, con i riferimenti (voci, stati, passaggi, atterraggi, copie) che seguono l'uid nella stessa transazione. Assente se vuoto. */
   idCambiati?: IdCambiatoImportazione[];
@@ -1924,9 +1889,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     if (s.soloPosizione !== undefined && typeof s.soloPosizione !== 'boolean') throw httpErrors.badRequest('posizione-non-valida', 'Il campo soloPosizione deve essere booleano.');
     if (s.destinazioneNonDisponibile !== undefined && typeof s.destinazioneNonDisponibile !== 'boolean') throw httpErrors.badRequest('destinazione-non-valida', 'Stato della destinazione non valido.');
     if (s.destinazioneNonDisponibile && s.destinazione) throw httpErrors.badRequest('destinazione-non-valida', 'Una destinazione non può essere presente e invalidata.');
-    // la voce della guida (094): una chiave o null; altro è un pacchetto rovinato, non un errore del server
+    // la voce della guida: una chiave o null; altro è un pacchetto rovinato, non un errore del server
     if (s.voce !== undefined && s.voce !== null && (typeof s.voce !== 'string' || s.voce.length === 0 || s.voce.length > 200)) throw httpErrors.badRequest('voce-non-valida', 'La voce della guida di uno spillo deve essere una chiave (o null).');
-    // le voci della guida (098): un elenco di chiavi
+    // le voci della guida: un elenco di chiavi
     if (s.voci !== undefined && (!Array.isArray(s.voci) || s.voci.length > 200 || s.voci.some((v) => typeof v !== 'string' || v.length === 0 || v.length > 200))) throw httpErrors.badRequest('voce-non-valida', 'Le voci della guida di uno spillo devono essere un elenco di chiavi.');
     // verificata qui, scritta dopo gli inserimenti: il pacchetto resta com'è, così il confronto «invariato nel seed» legge la forma originale
     verificate.set(s, verificaDestinazioneSpillo(s.destinazione, incoming));
@@ -1961,46 +1926,31 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     /** Passaggi di pin che restano (di altre mappe o dell'utente) il cui spillo d'arrivo sta per essere tolto e reinserito: la DELETE
      *  azzera `spillo_arrivo_id` (ON DELETE SET NULL), quindi si ricollegano al pin reinserito con lo stesso uid. */
     const arriviDaRicollegare: Array<{ spilloId: number; mappa: string; uid: string }> = [];
-    /** Le regole d'atterraggio dei Palazzi (097) il cui pin d'arrivo sta per essere tolto e reinserito: stesso motivo, stesso rimedio. */
+    /** Le regole d'atterraggio dei Palazzi il cui pin d'arrivo sta per essere tolto e reinserito: stesso motivo, stesso rimedio. */
     const atterraggiDaRicollegare: Array<{ id: number; uid: string }> = [];
-    const conAtterraggi = haTabellaMain(getDb(), 'dungeon_atterraggio');
-    const conUid = colonnaSpillo('uid');
     const areeDaLegare: Array<{ mappa: string; aree: string[] }> = [];
-    // le voci della guida dei pin (098; prima della 098 la sola colonna della 094, che ne tiene una): da scrivere a genitori risolti;
+    // le voci della guida dei pin: da scrivere a genitori risolti;
     // quelle dei pin tolti, per uid, per chi torna con lo stesso
-    const conTabellaVoci = haTabellaMain(getDb(), 'spillo_voce');
-    const conColonnaVoce = !conTabellaVoci && colonnaSpillo('voce_chiave');
-    const conVoce = conTabellaVoci || conColonnaVoce;
     const vociDaScrivere: Array<{ id: number; nome: string; mappa: string; voci: string[] }> = [];
     const vociDiPrima = new Map<string, string[]>();
     /** I pin inseriti con condizioni sullo stato di altri pin: si ricontrollano a pacchetto inserito. */
     const conCondizioniSuPin: number[] = [];
-    /** I pezzi (102) delle mappe che il pacchetto aggiorna: si scrivono in fondo, a immagini importate. */
+    /** I pezzi delle mappe che il pacchetto aggiorna: si scrivono in fondo, a immagini importate. */
     const pezziDaScrivere: Array<{ mappa: string; pezzi: PezzoDaImportare[] }> = [];
     /** Le mappe del pacchetto che hanno già dei pezzi, con l'immagine che mostrano adesso: a importazione finita si riconfronta. */
     const immaginiConPezzi = new Map<string, Buffer | null>();
-    if (conPezzi()) {
-      for (const m of pacchetto.mappe) {
-        if (!chiaveValida(m.chiave) || immaginiConPezzi.has(m.chiave) || quantiPezzi(m.chiave) === 0) continue;
-        immaginiConPezzi.set(m.chiave, immagineMostrata(rigaMappa(m.chiave)));
-      }
+    for (const m of pacchetto.mappe) {
+      if (!chiaveValida(m.chiave) || immaginiConPezzi.has(m.chiave) || quantiPezzi(m.chiave) === 0) continue;
+      immaginiConPezzi.set(m.chiave, immagineMostrata(rigaMappa(m.chiave)));
     }
     const adesso = nowIso();
-    // Lo schema non cambia durante l'importazione: colonne e tabelle si controllano una volta, non per ogni mappa e ogni pin
-    // (rilievo P5 della verifica, 2026-10-03; nei test lo schema può essere indietro, per questo si controllano).
-    const conRuolo = haColonnaMain(getDb(), 'mappa', 'ruolo_immagine');
-    // L3: i legami infiltrazione ↔ area (110)
-    const legamiNuovi = conLegami();
-    const conPresentazione = haTabellaMain(getDb(), 'mappa_presentazione');
-    const conNativo = colonnaNativoJson();
-    const conSeedIdentita = colonnaSpillo('seed_identita_json');
     /** I pin tolti per essere reinseriti, per uid: id e colonne che il pacchetto può non portare (L3, andata e ritorno identica). */
     const pinDiPrima = new Map<string, { id: number; seedIdentita: string | null; nativo: string | null; condizioni: string | null }>();
     /** Le immagini dei pin tolti per essere reinseriti, per uid: quelle che tornano identiche si riprendono, le altre si tolgono in fondo. */
     const immaginiPinDiPrima = new Map<string, RigaImmagineSpillo[]>();
     // I pin che erano già senza uid lo ricevono adesso, come prima al primo pin inserito (in ordine di id, prima dei nuovi):
     // poi `assegnaUidMancanti` serve solo per un pin nuovo rimasto senza uid, e non va più rifatta per ogni pin.
-    if (conUid) assegnaUidMancanti(getDb());
+    assegnaUidMancanti(getDb());
     // prima le mappe (in ordine di dipendenza: i genitori possono arrivare dopo → secondo passaggio per i genitori)
     for (const m of pacchetto.mappe) {
       if (!chiaveValida(m.chiave) || !(TIPI_MAPPA as readonly string[]).includes(m.tipo)) { esito.saltate.push(m.chiave); continue; }
@@ -2011,20 +1961,20 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       const ruolo: RuoloImmagine = m.ruoloImmagine && (RUOLI_IMMAGINE as readonly string[]).includes(m.ruoloImmagine)
         ? m.ruoloImmagine
         : m.asset?.startsWith('palazzi/') ? 'emblema' : (m.asset ?? m.immagine) ? 'illustrazione-editoriale' : 'nessuna';
-      prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, origine, note, updated_at${conRuolo ? ', ruolo_immagine' : ''})
-        VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?${conRuolo ? ', ?' : ''})
+      prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, origine, note, updated_at, ruolo_immagine)
+        VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, tipo = excluded.tipo, ordine = excluded.ordine, immagine_chiave = COALESCE(excluded.immagine_chiave, mappa.immagine_chiave), asset = excluded.asset,
-          larghezza = excluded.larghezza, altezza = excluded.altezza, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at${conRuolo ? ', ruolo_immagine = excluded.ruolo_immagine' : ''}`)
+          larghezza = excluded.larghezza, altezza = excluded.altezza, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at, ruolo_immagine = excluded.ruolo_immagine`)
         .run(...[m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null,
           // L3 (andata e ritorno identica): l'origine e l'ultima modifica del pacchetto, salvo un'origine forzata da chi importa (il seed)
-          opz.origine ?? m.origine ?? origine, m.note ?? '', m.updatedAt ?? adesso, ...(conRuolo ? [ruolo] : [])]);
+          opz.origine ?? m.origine ?? origine, m.note ?? '', m.updatedAt ?? adesso, ruolo]);
       // Il nome ora è quello dichiarato dal pacchetto: qualunque revisione fatta a mano su questa
-      // riga è stata appena sovrascritta, quindi non è più lei a presentare la mappa (082) — salvo che il pacchetto dica che il suo
+      // riga è stata appena sovrascritta, quindi non è più lei a presentare la mappa — salvo che il pacchetto dica che il suo
       // nome è rivisto (L3, difetto di andata e ritorno di lotti/L1/noreg.md §5: si azzerava su 38 planimetrie).
-      if (conNomeRivisto()) prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(m.nomeRivisto ? 1 : 0, m.chiave);
-      if (m.percorsoFisso !== undefined && colonnaMappa('percorso_fisso')) prepared('UPDATE mappa SET percorso_fisso = ? WHERE chiave = ?').run(m.percorsoFisso, m.chiave);
+      prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(m.nomeRivisto ? 1 : 0, m.chiave);
+      if (m.percorsoFisso !== undefined) prepared('UPDATE mappa SET percorso_fisso = ? WHERE chiave = ?').run(m.percorsoFisso, m.chiave);
       // la versione di una mappa senza Area (i fogli dei Memento) viaggia da sola; quella di una planimetria con Area la importa `importaAree`
-      if (!m.area && m.versione !== undefined && colonnaMappa('versione_ordine')) {
+      if (!m.area && m.versione !== undefined) {
         const v = z.object({ etichetta: z.string().min(1).max(160).nullable(), ordine: z.number().int().nonnegative() }).safeParse(m.versione);
         if (!v.success) throw httpErrors.badRequest('versione-non-valida', `Versione non valida nella mappa '${m.chiave}'.`);
         prepared('UPDATE mappa SET versione_etichetta = ?, versione_ordine = ? WHERE chiave = ? AND area_chiave IS NULL').run(v.data.etichetta, v.data.ordine, m.chiave);
@@ -2035,7 +1985,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       }
       // `entita`, `entitaLegami` e `gruppoImmagini` dei pacchetti di prima si leggono e si ignorano (L11 · B9, R11-05): le tabelle e le colonne
       // che li accoglievano non esistono più. Le infiltrazioni della planimetria sono l'elenco `aree`, o (pacchetto di prima) l'`entita` di tipo
-      // area: diventano legami dell'Area della planimetria a importazione finita, sempre (qualunque schema abbia la base).
+      // area: diventano legami dell'Area della planimetria a importazione finita, sempre.
       // Le aree si verificano e si legano **dopo** il passaggio dei genitori: il Palazzo della planimetria si trova risalendo la catena nel
       // database, e a questo punto le mappe nuove del pacchetto (e quelle che il pacchetto dichiara dopo la figlia) non hanno ancora un
       // genitore (rilievo della revisione).
@@ -2043,18 +1993,18 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       if (dichiarate && !dichiarate.success) throw httpErrors.badRequest('aree-non-valide', `Infiltrazioni non valide nella mappa '${m.chiave}'.`);
       const aree = [...new Set(dichiarate ? dichiarate.data : m.entita?.tipo === 'area' && m.entita.chiave ? [m.entita.chiave] : [])];
       areeDaLegare.push({ mappa: m.chiave, aree });
-      if (m.contesti !== undefined && conPresentazione) {
+      if (m.contesti !== undefined) {
         const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000)});
         const v=schema.safeParse({contesti:m.contesti??[]});
         if(!v.success || new Set(v.data.contesti.map(c=>c.id)).size!==v.data.contesti.length)throw httpErrors.badRequest('contesti-non-validi','Contesti della planimetria non validi o duplicati.');
         prepared('INSERT INTO mappa_presentazione (mappa_chiave, contesti_json) VALUES(?,?) ON CONFLICT(mappa_chiave) DO UPDATE SET contesti_json=excluded.contesti_json').run(m.chiave,JSON.stringify(v.data.contesti));
       }
-      // I pezzi (102) sono sempre dell'utente: un pacchetto che li dichiara sostituisce quelli della mappa, salvo un reseed (seed sopra
+      // I pezzi sono sempre dell'utente: un pacchetto che li dichiara sostituisce quelli della mappa, salvo un reseed (seed sopra
       // seed, senza «sovrascrivi»), che non li tocca; un pacchetto di prima, senza il campo, li lascia com'erano. Le condizioni si
-      // ripuliscono come quelle dei pin (le chiavi assenti dalla Guida si scartano e si contano), copia per copia (103).
+      // ripuliscono come quelle dei pin (le chiavi assenti dalla Guida si scartano e si contano), copia per copia.
       // Si scrivono in fondo, a immagini importate: si verificano sull'immagine d'arrivo (rilievo F2 del validatore).
-      // Un pezzo della 102 (la posa accanto alla zona) si legge come un pezzo con una copia (`schemaPezziPacchetto`).
-      if (m.pezzi !== undefined && conPezzi() && !(origine === 'seed' && !opz.sovrascrivi)) {
+      // Un pezzo nella forma vecchia (la posa accanto alla zona) si legge come un pezzo con una copia (`schemaPezziPacchetto`).
+      if (m.pezzi !== undefined && !(origine === 'seed' && !opz.sovrascrivi)) {
         const forma = schemaPezziPacchetto.safeParse(m.pezzi);
         if (!forma.success) throw httpErrors.badRequest('pezzi-non-validi', `Pezzi della planimetria non validi nella mappa '${chiaveMappa(m.chiave)}'.`);
         pezziDaScrivere.push({ mappa: m.chiave, pezzi: forma.data.map((p, indicePezzo) => ({ ...p, copie: p.copie.map((c, indiceCopia) => {
@@ -2080,19 +2030,19 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       for (const { id } of daTogliere) {
         if (tenuti.has(id)) continue;
         // uid e voce in una lettura sola (prima due)
-        const prima = conUid ? prepared(`SELECT uid${conColonnaVoce ? ', voce_chiave' : ''} FROM spillo WHERE id = ?`).get(id) as { uid: string | null; voce_chiave?: string | null } : null;
+        const prima = prepared('SELECT uid FROM spillo WHERE id = ?').get(id) as { uid: string | null };
         // L3 (andata e ritorno identica): il pin che torna con lo stesso uid riprende il suo id e le colonne che un pacchetto di prima non
         // porta (identità del seed, prove native)
         if (prima?.uid) {
-          const resto = prepared(`SELECT condizioni_json, ${conSeedIdentita ? 'seed_identita_json' : 'NULL AS seed_identita_json'}, ${conNativo ? 'nativo_json' : 'NULL AS nativo_json'} FROM spillo WHERE id = ?`)
+          const resto = prepared('SELECT condizioni_json, seed_identita_json, nativo_json FROM spillo WHERE id = ?')
             .get(id) as { condizioni_json: string | null; seed_identita_json: string | null; nativo_json: string | null };
           pinDiPrima.set(prima.uid, { id, seedIdentita: resto.seed_identita_json, nativo: resto.nativo_json, condizioni: resto.condizioni_json });
         }
         // le voci collegate dall'utente seguono il pin reinserito con lo stesso uid, se il pacchetto non ne dice niente
-        const vociPrima = conTabellaVoci ? vociProprie(id) : prima?.voce_chiave ? [prima.voce_chiave] : [];
-        if (conVoce && prima?.uid && vociPrima.length > 0) vociDiPrima.set(prima.uid, vociPrima);
+        const vociPrima = vociProprie(id);
+        if (prima?.uid && vociPrima.length > 0) vociDiPrima.set(prima.uid, vociPrima);
         if (prima?.uid) for (const d of prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE spillo_arrivo_id = ?').all(id) as Array<{ spillo_id: number; mappa_chiave: string }>) arriviDaRicollegare.push({ spilloId: d.spillo_id, mappa: d.mappa_chiave, uid: prima.uid });
-        if (prima?.uid && conAtterraggi) for (const a of prepared('SELECT id FROM dungeon_atterraggio WHERE spillo_id = ?').pluck().all(id) as number[]) atterraggiDaRicollegare.push({ id: a, uid: prima.uid });
+        if (prima?.uid) for (const a of prepared('SELECT id FROM dungeon_atterraggio WHERE spillo_id = ?').pluck().all(id) as number[]) atterraggiDaRicollegare.push({ id: a, uid: prima.uid });
         // L3 (come NR3-3): le immagini del pin che torna con lo stesso uid restano da parte fino a pacchetto inserito, perché quelle
         // identiche si riprendano (riga, chiave e data); le altre si tolgono subito, come prima
         const immaginiPin = prepared('SELECT * FROM spillo_immagine WHERE spillo_id = ? ORDER BY ordine, id').all(id) as RigaImmagineSpillo[];
@@ -2128,26 +2078,23 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         }
         // l'id di prima preso da un'altra riga: il pin ne ha uno nuovo, i suoi riferimenti lo seguono per uid; si dice nel riepilogo (§3.6.3)
         if (diPrima && idDiPrima === null) (esito.idCambiati ??= []).push({ tipo: 'pin', uid: s.uid as string, prima: diPrima.id, dopo: Number(info.lastInsertRowid) });
-        if (conSeedIdentita) {
+        {
           const seedIdentita = s.seedIdentita !== undefined ? s.seedIdentita : diPrima?.seedIdentita ?? null;
           if (seedIdentita !== null) prepared('UPDATE spillo SET seed_identita_json = ? WHERE id = ?').run(seedIdentita, Number(info.lastInsertRowid));
         }
-        // (la colonna arriva con la 067; nei test lo schema puo' essere indietro, come per nativo_json)
-        let uidNuovo: string | null = null;
-        if (conUid) {
-          if (uidValido(s.uid) && !prepared('SELECT 1 FROM spillo WHERE uid = ?').get(s.uid)) {
-            prepared('UPDATE spillo SET uid = ? WHERE id = ?').run(s.uid, Number(info.lastInsertRowid));
-            uidNuovo = s.uid as string;
-          } else {
-            // l'uid del pacchetto manca o è già preso: si calcola dall'identità, come per i pin che ne erano senza
-            assegnaUidMancanti(getDb());
-            uidNuovo = prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(Number(info.lastInsertRowid)) as string | null;
-          }
+        let uidNuovo: string | null;
+        if (uidValido(s.uid) && !prepared('SELECT 1 FROM spillo WHERE uid = ?').get(s.uid)) {
+          prepared('UPDATE spillo SET uid = ? WHERE id = ?').run(s.uid, Number(info.lastInsertRowid));
+          uidNuovo = s.uid as string;
+        } else {
+          // l'uid del pacchetto manca o è già preso: si calcola dall'identità, come per i pin che ne erano senza
+          assegnaUidMancanti(getDb());
+          uidNuovo = prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(Number(info.lastInsertRowid)) as string | null;
         }
         prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(s.soloPosizione ? 1 : 0, Number(info.lastInsertRowid));
-        // la voce della guida del pin (la colonna arriva con la 094, come sopra): quella dichiarata dal pacchetto o, se tace, quella
+        // la voce della guida del pin: quella dichiarata dal pacchetto o, se tace, quella
         // che il pin aveva prima di essere reinserito; si scrive a genitori risolti, quando il Palazzo della planimetria è noto
-        if (conVoce) {
+        {
           const dichiarate = vociDichiarate({ riferimento: s.riferimento ?? null, voci: s.voci, voce: s.voce });
           const uid = uidNuovo;
           const voci = dichiarate !== undefined ? dichiarate : uid ? vociDiPrima.get(uid) ?? [] : [];
@@ -2157,13 +2104,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         // identificare tutto ciò che serve a verificarli — vanno conservate come dato. Nella sola
         // descrizione si potevano cancellare senza che nulla se ne accorgesse, e la verifica
         // manuale sarebbe rimasta senza appigli.
-        // La colonna arriva con la migrazione 046, ma il seed puo' essere caricato mentre lo
-        // schema e' ancora indietro (nei test le migrazioni si applicano a scaglioni, per
-        // riprodurre un'installazione vecchia): dove non c'e', le prove non si scrivono invece di
-        // far fallire l'import.
         // L3: il testo salvato (`nativoJson`) vince sulla forma del seed, e un pacchetto che non le porta lascia quelle del pin di prima
         const nativo = s.nativoJson !== undefined ? s.nativoJson : s.nativo ? JSON.stringify(s.nativo) : diPrima?.nativo ?? null;
-        if (nativo !== null && conNativo) prepared('UPDATE spillo SET nativo_json = ? WHERE id = ?')
+        if (nativo !== null) prepared('UPDATE spillo SET nativo_json = ? WHERE id = ?')
           .run(nativo, Number(info.lastInsertRowid));
         const spilloId = Number(info.lastInsertRowid);
         if (pinCitati(valide).length > 0) conCondizioniSuPin.push(spilloId);
@@ -2223,11 +2166,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     for (const v of vociDaScrivere) {
       const ammesse = vociAmmesse(v.nome, v.mappa, v.voci);
       esito.vociScartate += v.voci.length - ammesse.length;
-      // prima della 098 la colonna tiene una voce sola: la prima ammessa
-      const daScrivere = conTabellaVoci ? ammesse : ammesse.slice(0, 1);
-      for (const voce of daScrivere) {
-        if (conTabellaVoci) prepared('INSERT OR IGNORE INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(v.id, voce);
-        else prepared('UPDATE spillo SET voce_chiave = ? WHERE id = ?').run(voce, v.id);
+      for (const voce of ammesse) {
+        prepared('INSERT OR IGNORE INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(v.id, voce);
         allineaStatiPunto(getDb(), voce, adesso);
       }
     }
@@ -2245,40 +2185,38 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     }
     // L2 (§2.3): le Aree del pacchetto, come le mappe (una che c'è si salta, salvo «sovrascrivi»; il seed non scavalca l'utente; un
     // contenitore che qui non esiste la fa saltare), poi i legami delle planimetrie importate con la loro versione, e la predefinita.
-    const areeImportate = conAree() && pacchetto.aree?.length ? importaAree(pacchetto, origine, !!opz.sovrascrivi, esito, adesso) : new Set<string>();
+    const areeImportate = pacchetto.aree?.length ? importaAree(pacchetto, origine, !!opz.sovrascrivi, esito, adesso) : new Set<string>();
     // L3: i legami infiltrazione ↔ area del pacchetto, per le Aree importate
-    if (legamiNuovi && pacchetto.legami !== undefined) importaLegami(pacchetto, areeImportate);
-    // Le planimetrie del mondo arrivate senza Area (un pacchetto di prima della 109, o mappe nuove sotto un quartiere) la ricevono
-    // con la regola della migrazione, che si può rieseguire (L2, §2.3): nessuna zona del mondo resta senza Area, e gli ingressi qui
-    // sotto si controllano sulle Aree. Lo stesso per le planimetrie dei Palazzi (L3, regola della 110).
-    if (conAree()) assegnaAreeDelMondo109(getDb(), adesso);
-    if (legamiNuovi) {
-      assegnaAreePalazzi110(getDb(), adesso);
-      // un pacchetto di prima (senza `legami`): le infiltrazioni del campo `aree` di ogni planimetria diventano legami della sua Area,
-      // in fondo all'infiltrazione, con quella planimetria come versione da aprire; un legame che c'è già non si tocca. Una planimetria
-      // annidata dentro un'altra (le Aree sono le figlie della radice del Palazzo, 110) porta le sue all'Area dell'antenato più vicino che
-      // ne ha una: sta dentro quel posto, e così non si perdono
-      if (pacchetto.legami === undefined) {
-        const areaDi = prepared('SELECT m.genitore_chiave, a.chiave AS area FROM mappa m LEFT JOIN area a ON a.chiave = m.area_chiave AND a.dungeon_chiave IS NOT NULL WHERE m.chiave = ?');
-        for (const { mappa, aree } of areeDaLegare) {
-          let area: string | null = null; let iniziale: string | null = null;
-          for (let k: string | null = mappa, giri = 0; k && !area && giri < 50; giri++) {
-            const r = areaDi.get(k) as { genitore_chiave: string | null; area: string | null } | undefined;
-            if (!r) break;
-            if (r.area) { area = r.area; iniziale = k; }
-            k = r.genitore_chiave;
-          }
-          if (!area) continue;
-          for (const inf of aree) {
-            if (prepared('SELECT 1 FROM infiltrazione_area WHERE infiltrazione_chiave = ? AND area_chiave = ?').get(inf, area)) continue;
-            const ordine = prepared('SELECT COALESCE(MAX(ordine) + 1, 0) FROM infiltrazione_area WHERE infiltrazione_chiave = ?').pluck().get(inf) as number;
-            prepared('INSERT INTO infiltrazione_area (infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine) VALUES (?, ?, ?, ?, ?)').run(inf, area, ordine, iniziale, origine);
-          }
+    if (pacchetto.legami !== undefined) importaLegami(pacchetto, areeImportate);
+    // Le planimetrie del mondo arrivate senza Area (un pacchetto di mappe senza il campo `aree`, o mappe nuove sotto un quartiere) la
+    // ricevono con la regola di `areeDelMondo.ts`, che si può rieseguire (L2, §2.3): nessuna zona del mondo resta senza Area, e gli
+    // ingressi qui sotto si controllano sulle Aree. Lo stesso per le planimetrie dei Palazzi (L3, `areeDeiPalazzi.ts`).
+    assegnaAreeDelMondo(getDb(), adesso);
+    assegnaAreeDeiPalazzi(getDb(), adesso);
+    // un pacchetto di prima (senza `legami`): le infiltrazioni del campo `aree` di ogni planimetria diventano legami della sua Area,
+    // in fondo all'infiltrazione, con quella planimetria come versione da aprire; un legame che c'è già non si tocca. Una planimetria
+    // annidata dentro un'altra (le Aree sono le figlie della radice del Palazzo) porta le sue all'Area dell'antenato più vicino che
+    // ne ha una: sta dentro quel posto, e così non si perdono
+    if (pacchetto.legami === undefined) {
+      const areaDi = prepared('SELECT m.genitore_chiave, a.chiave AS area FROM mappa m LEFT JOIN area a ON a.chiave = m.area_chiave AND a.dungeon_chiave IS NOT NULL WHERE m.chiave = ?');
+      for (const { mappa, aree } of areeDaLegare) {
+        let area: string | null = null; let iniziale: string | null = null;
+        for (let k: string | null = mappa, giri = 0; k && !area && giri < 50; giri++) {
+          const r = areaDi.get(k) as { genitore_chiave: string | null; area: string | null } | undefined;
+          if (!r) break;
+          if (r.area) { area = r.area; iniziale = k; }
+          k = r.genitore_chiave;
+        }
+        if (!area) continue;
+        for (const inf of aree) {
+          if (prepared('SELECT 1 FROM infiltrazione_area WHERE infiltrazione_chiave = ? AND area_chiave = ?').get(inf, area)) continue;
+          const ordine = prepared('SELECT COALESCE(MAX(ordine) + 1, 0) FROM infiltrazione_area WHERE infiltrazione_chiave = ?').pluck().get(inf) as number;
+          prepared('INSERT INTO infiltrazione_area (infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine) VALUES (?, ?, ?, ?, ?)').run(inf, area, ordine, iniziale, origine);
         }
       }
     }
     sincronizzaPercorsiMappe(getDb());
-    if(pacchetto.ingressi?.length && haTabellaMain(getDb(), 'quartiere_ingresso')) {
+    if(pacchetto.ingressi?.length) {
       const ingressi=z.array(z.object({quartiere:z.string().min(1).max(80),mappa:z.string().min(1).max(200),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6)})).max(1000).safeParse(pacchetto.ingressi);
       if(!ingressi.success)throw httpErrors.badRequest('ingressi-non-validi','Ingressi dei quartieri non validi nel pacchetto.');
       for(const i of ingressi.data){
@@ -2287,7 +2225,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         // l'ingresso sta in un'Area di quel quartiere (L2, R2-21; difetto FUN2-1): come la PUT, l'import non lo scrive altrove
         verificaIngressoNelQuartiere(i.quartiere, mappa);
         if(opz.sovrascrivi&&origine!=='seed')prepared('DELETE FROM quartiere_ingresso WHERE quartiere_chiave=?').run(i.quartiere);
-        // colonne dette per nome (dalla 109 la tabella ha anche l'Area, che si deduce dalla planimetria)
+        // colonne dette per nome (la tabella ha anche l'Area, che si deduce dalla planimetria)
         prepared('INSERT OR IGNORE INTO quartiere_ingresso (quartiere_chiave, mappa_chiave, x, y, zoom, area_chiave) VALUES (?, ?, ?, ?, ?, (SELECT area_chiave FROM mappa WHERE chiave = ?))').run(i.quartiere,mappa,i.x,i.y,i.zoom,mappa);
       }
     }
@@ -2308,8 +2246,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     }
     // Il ruolo dichiarato dal pacchetto (o dedotto alla vecchia maniera, se tace) cede alla regola della gerarchia (L1): mappe e
     // immagini sono scritte, e ogni ruolo si riallinea, come per ogni altra strada che le scrive.
-    if (conRuolo) allineaRuoliImmagine(getDb());
-    // I pezzi (102), a immagini scritte: la zona di ognuno e l'ingombro di ogni sua copia (103) devono stare nell'immagine della
+    allineaRuoliImmagine(getDb());
+    // I pezzi, a immagini scritte: la zona di ognuno e l'ingombro di ogni sua copia devono stare nell'immagine della
     // mappa d'arrivo (come all'API); le copie che escono si scartano, e con loro il pezzo rimasto senza copie (o con la zona fuori);
     // tutto, se la mappa non ha un'immagine di cui leggere le dimensioni. Si contano.
     for (const { mappa, pezzi } of pezziDaScrivere) {
@@ -2340,10 +2278,10 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       eliminaPezziDellaMappa(mappa);
     }
     // L4: le divergenze «da verificare» dei pin tolti dal pacchetto e non tornati (un pin che torna con lo stesso uid le tiene)
-    if (conUid && conDivergenze(getDb())) prepared('DELETE FROM divergenza_partita WHERE spillo_uid NOT IN (SELECT uid FROM spillo WHERE uid IS NOT NULL)').run();
+    prepared('DELETE FROM divergenza_partita WHERE spillo_uid NOT IN (SELECT uid FROM spillo WHERE uid IS NOT NULL)').run();
     // §8.11: e il loro stato per infiltrazione; poi gli stati delle partite seguono i legami nuovi (forma dei pin, pin nuovi delle voci
     // fatte, specchio)
-    if (conUid && conStatoPerInfiltrazione(getDb())) prepared('DELETE FROM spillo_partita_infiltrazione WHERE spillo_uid NOT IN (SELECT uid FROM spillo WHERE uid IS NOT NULL)').run();
+    prepared('DELETE FROM spillo_partita_infiltrazione WHERE spillo_uid NOT IN (SELECT uid FROM spillo WHERE uid IS NOT NULL)').run();
     riallineaStati(getDb(), mPrima, adesso);
     // L3 (andata e ritorno identica): l'ultima modifica di ogni mappa importata è quella del pacchetto, anche dopo i passi che la
     // ritoccano (immagini, ruoli, percorsi); un pacchetto di prima, che non la porta, lascia quella dell'import

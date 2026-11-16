@@ -11,22 +11,16 @@
 // Diario (`azioniStrutturateService`, che mostrano il prezzo del listino con quello della fascia accanto).
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
-import { haColonnaMain } from '../db/schemaMemo.js';
+import { prepared } from '../db/dbService.js';
 import { prezzoNellaFascia, type FasciaPrezzo } from '../../shared/catalogo.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import { normalizzaSconto, prezzoScontato, scontoAttivo, type ScontoNegozio } from '../../shared/scontiNegozi.js';
 
 const eFascia = (v: unknown): v is FasciaPrezzo => v === 'giorno' || v === 'sera';
 
-/** Vero se il file di gioco ha la colonna del prezzo per fascia (migrazione 260); uno schema di prima legge solo `prezzo`. */
-function conPrezzoPerFascia(): boolean {
-  return haColonnaMain(getDb(), 'articolo', 'prezzo_per_fascia_json');
-}
-
-/** La colonna del prezzo per fascia da mettere in una SELECT sull'articolo con l'alias dato (`NULL` su uno schema di prima della 260). */
+/** La colonna del prezzo per fascia da mettere in una SELECT sull'articolo con l'alias dato. */
 export function sqlPrezzoPerFascia(alias: string): string {
-  return conPrezzoPerFascia() ? `${alias}.prezzo_per_fascia_json` : 'NULL';
+  return `${alias}.prezzo_per_fascia_json`;
 }
 
 /** La fascia della voce del Diario (giorno o sera); null se la voce non c'è più. */
@@ -41,11 +35,6 @@ export function fasciaDellaPartita(partitaId: number): FasciaPrezzo | null {
   return eFascia(f) ? f : null;
 }
 
-/** Vero se il file di gioco ha la colonna dello sconto del negozio (migrazione 254); uno schema di prima non sconta niente. */
-function conSconto(): boolean {
-  return haColonnaMain(getDb(), 'negozio', 'sconto_json');
-}
-
 /** Il rango del Confidente nella partita (null se la partita non lo ha ancora). */
 function rangoNellaPartita(partitaId: number, confidente: string): number | null {
   const r = prepared('SELECT rango FROM utente.confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, confidente) as { rango: number | null } | undefined;
@@ -57,7 +46,7 @@ function rangoNellaPartita(partitaId: number, confidente: string): number | null
  * indicato, `negozio.sconto_json`); null senza partita, senza sconto o con il Confidente sotto il rango.
  */
 export function scontoNellaPartita(negozio: string | null | undefined, partitaId: number | null | undefined): ScontoNegozio | null {
-  if (!negozio || partitaId === null || partitaId === undefined || !conSconto()) return null;
+  if (!negozio || partitaId === null || partitaId === undefined) return null;
   const sconto = normalizzaSconto((prepared('SELECT sconto_json FROM main.negozio WHERE chiave = ?').get(negozio) as { sconto_json: string | null } | undefined)?.sconto_json ?? null);
   return sconto && scontoAttivo(sconto, rangoNellaPartita(partitaId, sconto.confidente)) ? sconto : null;
 }
@@ -115,7 +104,7 @@ export function scontoAllaVoce(negozio: string | null | undefined, partitaId: nu
  * quello che valeva nel suo momento (`scontoAllaVoce`). È l'importo che gli yen automatici scalano.
  */
 export function prezzoDellArticolo(articolo: string, fascia: FasciaPrezzo | null | undefined, partitaId?: number | null, voceUid?: string | null): number | null {
-  const r = prepared(conPrezzoPerFascia() ? 'SELECT prezzo, prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?' : 'SELECT prezzo, NULL AS prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?')
+  const r = prepared('SELECT prezzo, prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?')
     .get(articolo) as { prezzo: number | null; prezzo_per_fascia_json: string | null; negozio_chiave: string | null } | undefined;
   if (!r) return null;
   const prezzo = prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json, fascia);

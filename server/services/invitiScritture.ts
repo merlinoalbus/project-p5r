@@ -20,7 +20,7 @@ import { dataConArticolo, normalizzaCondizioniSpillo, type RequisitoSpillo } fro
 import type { InvitoDto } from '../../shared/types.js';
 
 export type TipoPostoInvito = 'quartiere' | 'luogo' | 'area';
-/** L13 (O7-4, migrazione 313): quando arriva il messaggio dell'invito; assente = invariato, null = nessuno. */
+/** L13 (O7-4): quando arriva il messaggio dell'invito; assente = invariato, null = nessuno. */
 export type MessaggioInvito = { data: string; fascia: 'giorno' | 'sera' };
 export interface CorpoInvito { apre: { tipo: TipoPostoInvito; chiave: string }; condizioni: RequisitoSpillo[]; nota: string; messaggio?: MessaggioInvito | null }
 export interface CorpoNuovoInvito extends CorpoInvito { data: string }

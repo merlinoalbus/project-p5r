@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Un solo punto che raccoglie gli oggetti «a riga» dei gruppi di R11-17/1 (compendio, confidenti e calendario, luoghi e note, Ombre, negoziazione, Dedalo): `righe.ts`
-// importa questo elenco e basta. Ogni gruppo ha il suo file e la sua migrazione (le tre colonne `origine`, `seed_json`, `updated_at` sulla riga del padre).
+// importa questo elenco e basta. Ogni gruppo ha il suo file e le tre colonne `origine`, `seed_json`, `updated_at` sulla riga del padre.
 // ============================================================
 
 import { DEFINIZIONI_COMPENDIO } from './righeCompendio.js';

@@ -4,7 +4,7 @@
 //
 // Una fonte operativa sola, in sei tabelle (`negoziazione_*`): famiglia di domande, variante concreta (Royal, file originale dell'app,
 // eventuale ritocco di runtime), risposta, attestazione per umore, carte degli umori, fotografia dell'importazione.
-// Questo modulo non ha dipendenze dal server: lo usano la migrazione (che scrive il rapporto), il servizio (che lo rimisura sui dati vivi)
+// Questo modulo non ha dipendenze dal server: lo usano il servizio (che misura il rapporto sui dati vivi)
 // e, domani, il client. Contiene i tipi delle righe, la valutazione di una cella (principale / alternative / altre provenienze) e la
 // riconciliazione dei conteggi, calcolata sulle righe e mai sui totali storici.
 //

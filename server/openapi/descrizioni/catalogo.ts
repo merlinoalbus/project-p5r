@@ -40,7 +40,7 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
     corpo: { perParametro: 'tipo', varianti: SCHEMI_CATALOGO },
     errori: [[400, 'validation-error'], [400, 'nome-mancante'], [400, 'negozio-sconosciuto'], [400, 'quartiere-sconosciuto'], [400, 'luogo-sconosciuto'],
       [400, 'confidente-sconosciuto'], [400, 'oggetto-sconosciuto'], [400, 'oggetto-costo-sconosciuto'], [400, 'effetto-nell-oggetto'],
-      [409, 'catalogo-non-disponibile'], [409, 'condizioni-da-definire'], [400, 'domanda-fuori-dagli-esami'], [404, 'condizione-non-trovata'],
+      [409, 'condizioni-da-definire'], [400, 'domanda-fuori-dagli-esami'], [404, 'condizione-non-trovata'],
       [400, 'punto-vendita-senza-sede'], ...CONFLITTI_FONTE_CONFIDENTE],
   },
   'GET /api/catalogo/:tipo/:chiave': {
@@ -55,7 +55,7 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
     corpo: { perParametro: 'tipo', varianti: SCHEMI_CATALOGO_PARZIALI },
     errori: [[400, 'validation-error'], [400, 'nome-mancante'], [400, 'negozio-sconosciuto'], [400, 'quartiere-sconosciuto'], [400, 'luogo-sconosciuto'],
       [400, 'confidente-sconosciuto'], [400, 'oggetto-sconosciuto'], [400, 'oggetto-costo-sconosciuto'], [400, 'effetto-nell-oggetto'],
-      [409, 'catalogo-non-disponibile'], [409, 'videogioco-con-avanzamento'], [400, 'domanda-fuori-dagli-esami'], [409, 'esame-senza-domande'],
+      [409, 'videogioco-con-avanzamento'], [400, 'domanda-fuori-dagli-esami'], [409, 'esame-senza-domande'],
       [404, 'condizione-non-trovata'], [400, 'punto-vendita-senza-sede'], [409, 'sede-con-pin-in-altra-area'], [409, 'luogo-senza-punto-vendita'], ...CONFLITTI_FONTE_CONFIDENTE],
   },
   'PUT /api/catalogo/:tipo/:chiave/nascosta': {

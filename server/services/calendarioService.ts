@@ -49,7 +49,7 @@ function giornoDto(g: RigaGiorno, eventi: RigaEvento[], allerte: GiornoCalendari
   };
 }
 
-/** I riassunti delle settimane della guida, in ordine di numero. L13 (O7-4, migrazione 313): il periodo viene dai giorni della settimana
+/** I riassunti delle settimane della guida, in ordine di numero. L13 (O7-4): il periodo viene dai giorni della settimana
  *  (`giorno.settimana`, primo e ultimo), con la sola resa `periodoDellaSettimana`; il testo `periodo` solo per una settimana senza giorni. */
 function settimaneGuida():SettimanaGuidaDto[] {
   return (prepared(`SELECT s.numero, s.titolo, s.periodo, s.url, s.riassunto, s.incertezze,

@@ -135,7 +135,7 @@ describe('verifica mappe e guida', () => {
     const id = await nuovaPartita('Voci descrittive');
     const pin = getDb().prepare(`SELECT s.id, s.uid, s.mappa_chiave FROM spillo s WHERE s.collezionabile = 1 AND s.mappa_chiave IN (SELECT chiave FROM mappa WHERE chiave LIKE 'dungeon-kamoshida%' OR genitore_chiave LIKE 'dungeon-kamoshida%') LIMIT 1`).get() as { id: number; uid: string; mappa_chiave: string };
     const altro = getDb().prepare("SELECT chiave FROM punto_interesse WHERE tipo = 'altro' LIMIT 1").pluck().get() as string;
-    // le voci del pin (098): la descrittiva si aggiunge per la prova e poi si toglie
+    // le voci del pin: la descrittiva si aggiunge per la prova e poi si toglie
     const giaSua = !!getDb().prepare('SELECT 1 FROM spillo_voce WHERE spillo_id = ? AND voce_chiave = ?').get(pin.id, altro);
     getDb().prepare('INSERT OR IGNORE INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(pin.id, altro);
     getDb().prepare("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', '2026-10-03')").run(id, altro);

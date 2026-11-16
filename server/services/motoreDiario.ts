@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { haTabellaMain } from '../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
@@ -57,7 +56,7 @@ export interface PorteEffettiLegacy {
 }
 const righeEffetti=(uid:string):RigaEffetto[]=>prepared('SELECT * FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine').all(uid) as RigaEffetto[];
 // Gli effetti di una voce stanno solo in `voce_effetto` (F2: un solo punto di modifica): il RAW storico che la fonte conserva è quello del
-// registro di transizione (`raw_json`, copiato dalla 136), e una voce nuova nasce senza RAW ('[]'). La vecchia colonna `produce_json` non c'è più (L6-08).
+// registro di transizione (`raw_json`), e una voce nuova nasce senza RAW ('[]'). La colonna `produce_json` non esiste (L6-08).
 function voce(uid:string):{uid:string;data:string;fascia:'giorno'|'sera';ordine:number;azione:string;genere:string} {
   const v=prepared('SELECT uid,data,fascia,ordine,azione,genere FROM main.voce_giornata WHERE uid=?').get(uid) as ReturnType<typeof voce>|undefined;
   if(!v)throw httpErrors.notFound('voce-non-trovata','La voce del Diario non è più presente.');return v;
@@ -131,11 +130,8 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     if(!statoVoce)return null;
     const giaComprato=leggiJsonRegistro<{gia?:boolean}|null>(statoVoce.prima_json,'stato prima dell’acquisto')?.gia===true;
     if(giaComprato&&!altraVoceHaLArticolo(p,x.articolo,uid))return null;
-    // il nome del catalogo, se il file di gioco lo ha (come `esitiAttivitaService.articoloEsito`), altrimenti quello del listino
-    const conCatalogo=haTabellaMain(getDb(),'catalogo_oggetto');
-    const a=prepared(conCatalogo
-      ?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?"
-      :"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?")
+    // il nome del catalogo (come `esitiAttivitaService.articoloEsito`)
+    const a=prepared("SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?")
       .get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
     const copie=x.quantita??1;
     // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce (le sfide della Big Bang Burger costano 500 ¥ di sera), con lo sconto
@@ -365,8 +361,10 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
       const tolto=getDb().transaction(()=>conVoceDellaSpunta(uid,():boolean=>{
         let c1:boolean;
         if(vecchio.tipo==='fortuna'){
-          c1=!!prepared('SELECT 1 FROM utente.fortuna_partita WHERE partita_id=? AND da_voce=?').get(p,uid);
-          if(c1&&(!c.nuovo||c.nuovo.effetto.tipo!=='fortuna'))spegniFortunaDaVoce(p,uid);
+          // tolto l'effetto, la Fortuna della voce si spegne anche se un'altra voce l'ha già coperta (esce dalla catena degli stati di prima);
+          // se l'effetto nuovo è ancora una Fortuna la riga resta e la riaccende l'applicazione qui sotto
+          if(!c.nuovo||c.nuovo.effetto.tipo!=='fortuna')c1=spegniFortunaDaVoce(p,uid);
+          else c1=!!prepared('SELECT 1 FROM utente.fortuna_partita WHERE partita_id=? AND da_voce=?').get(p,uid);
         }
         else {const a=annullaEffettoDiStato(p,uid,c.effettoUid,resta);c1=a.tolto;avvisiAnnullo=a.avvisi;}
         // dentro `conYenInOrdine` la restituzione va in coda: se c'era un movimento lo dice il registro, letto prima

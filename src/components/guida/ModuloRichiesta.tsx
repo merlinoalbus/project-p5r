@@ -10,14 +10,14 @@
 //  - «La Richiesta»: nome, committente, Confidente collegato, note (il piano in testo solo dove la guida diceva altro dall'area);
 //  - «Sblocco e scadenza»: le condizioni di sblocco con l'editor UNICO delle condizioni (compresa «Sblocco ricevuto» da una voce del
 //    Diario), la scadenza come data di gioco (`SelettoreData`) e l'eventuale proroga con le sue condizioni (L8-09: i testi di sblocco e di
-//    scadenza della guida, vuoti in tutte le Richieste, non ci sono più, migrazione 337). O7-1: con la proroga, l'area
+//    scadenza della guida non ci sono). O7-1: con la proroga, l'area
 //    (scelta da elenco, raggruppata per Dedalo) in cui il bersaglio si sposta finché vale (la guida: nel Dedalo di Da'at);
 //  - «Per completarla» (O7-1): le condizioni proprie di completamento, oltre al Dedalo del bersaglio aperto, con lo stesso editor;
 //  - «Dove»: dedalo e area;
 //  - «Il bersaglio»: l'Ombra del compendio se c'è (livello e affinità si leggono da lì e il modulo li mostra: un dato in un solo punto; i
 //    campi propri restano salvati, non si azzerano, e valgono solo dove la scheda non sa), altrimenti i campi propri;
 //  - «Ricompense»: oggetti del catalogo con le copie, yen ed esperienza come numeri.
-// L10-01 (migrazione 381): il rango del Confidente (0/33) e le ricompense in testo (vuote in 33/33) non ci sono più: un rango richiesto è
+// L10-01: il rango del Confidente e le ricompense in testo non ci sono: un rango richiesto è
 // una condizione di sblocco, una ricompensa è un oggetto del catalogo. L10-04: con l'Ombra scelta il nome del bersaglio è facoltativo
 // (vuoto vale il nome dell'Ombra) e non si copia mai dall'Ombra nel bersaglio salvato (rapporto E §1.5). L10-05: Scadenza e Proroga con
 // l'etichetta visibile; spiegazioni brevi e le parti facoltative vuote ripiegate, perché al telefono la finestra stia sotto 4,7 schermate.

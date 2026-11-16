@@ -111,10 +111,10 @@ export interface OmbraDettaglioDto extends OmbraSchedaDto {
   note: string;
 }
 
-/** Il rapporto della migrazione che ha creato le Ombre: conteggi e elenco di ciò che richiede una decisione. */
+/** Il rapporto sulla creazione delle Ombre: conteggi e elenco di ciò che richiede una decisione. */
 export interface OmbreVerificaDto {
-  /** Conteggi misurati ora sul database (non quelli scritti dalla migrazione). */
+  /** Conteggi misurati ora sul database (non quelli scritti nel rapporto). */
   conteggi: { ombre: number; conPersona: number; senzaPersona: number; nonCatturabili: number; luoghi: number; voci: number; areeDedalo: number; personalita: Record<PersonalitaOmbra, number> };
-  /** Il rapporto della migrazione: righe corrette, varianti di personalità, possibili doppioni, voci che non sono Ombre, Ombre senza nome della guida… */
+  /** Il rapporto salvato nel database: righe corrette, varianti di personalità, possibili doppioni, voci che non sono Ombre, Ombre senza nome della guida… */
   rapporto: Record<string, unknown> | null;
 }

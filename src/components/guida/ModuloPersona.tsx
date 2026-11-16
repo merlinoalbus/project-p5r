@@ -8,7 +8,7 @@
 // La Persona si sceglie dal compendio (l'immagine viene da lì) e la sua maschera diventa il nome italiano; il nome è quello
 // dell'Ombra che la porta nel dedalo («Ragazza seducente»), e se lo si lascia vuoto è quello della Persona. Cambiando Persona i
 // dettagli dell'Ombra di prima (resistenze, debolezze, personalità) se ne vanno: erano di un'altra maschera.
-// Dal 2026-10-12 (migrazione 101) una Persona si incontra in più aree del dedalo: qui si scelgono tutte, almeno una.
+// Dal 2026-10-12 una Persona si incontra in più aree del dedalo: qui si scelgono tutte, almeno una.
 // ============================================================
 
 import { useState } from 'react';

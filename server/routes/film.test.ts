@@ -9,7 +9,7 @@ import { statoDisponibilitaPartita, valutaRequisiti } from '../services/disponib
 import { letturaCompletata } from '../services/lettureCompletate.js';
 import { createApp } from '../bootstrap.js';
 import type { AttivitaTutteDto, FilmDto, FilmDvdDto, StoricoDto } from '../../shared/types.js';
-import { migraTestiCondizioni } from '../../shared/migraCondizioni.js';
+import { convertiProsa } from '../../shared/migraCondizioni.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
@@ -49,8 +49,8 @@ describe('API Film e DVD', () => {
 
   it('sblocca il requisito aggregato soltanto al completamento, senza esporre un fatto falsificabile', async () => {
     const requisito = { tipo: 'contatore', cosa: 'film-completati', almeno: 1 } as const;
-    expect(migraTestiCondizioni(['dopo essere andati al cinema o aver visto un DVD almeno una volta'])).toEqual([requisito]);
-    // l'articolo porta anche lo sblocco del negozio (Hinokuniya sta a Shinjuku, che apre più avanti): migrazione 070
+    expect(convertiProsa(['dopo essere andati al cinema o aver visto un DVD almeno una volta']).condizioni).toEqual([requisito]);
+    // l'articolo porta anche lo sblocco del negozio (Hinokuniya sta a Shinjuku, che apre più avanti)
     expect(JSON.parse((getDb().prepare("SELECT condizioni_json FROM articolo WHERE chiave='hinokuniya/anima-da-cineasta'").get() as { condizioni_json: string }).condizioni_json)).toEqual([{ tipo: 'quartiere', quartiere: 'shinjuku' }, requisito]);
 
     const id = ((await request(app).post('/api/partite').send({ nome: 'Prima visione', dataGioco: '12-15' })).body.data as { id: number }).id;

@@ -4,21 +4,20 @@
 //
 // Regole dell'utente: «i gruppi senza pin devono essere visibili solo nella planimetria dove sono stati inseriti»; «lasciali agganciati alla
 // planimetria 1 e dammi la possibilità di spostarli a mano in altre planimetrie durante la mia review». Una regola sola, calcolata alla
-// lettura (correzione del PM: niente valori scritti dalla migrazione, così una voce che perde i pin, una voce nuova o una planimetria
+// lettura (correzione del PM: niente valori salvati, così una voce che perde i pin, una voce nuova o una planimetria
 // ripristinata non restano mai senza planimetria), usata da tutte le letture:
 //   a) una voce **con pin** sta dove stanno i suoi pin (su ognuna di quelle planimetrie; la principale è quella con più pin, a parità la
 //      del primo pin);
-//   b) **senza pin** e con l'**aggancio a mano** (`punto_interesse.planimetria_chiave`, 114): quella planimetria;
+//   b) **senza pin** e con l'**aggancio a mano** (`punto_interesse.planimetria_chiave`): quella planimetria;
 //   c) **senza pin e senza aggancio**: la **planimetria 1** della sua infiltrazione, cioè quella con cui l'infiltrazione si apre: la
 //      planimetria iniziale della prima Area toccata nell'ordine (`infiltrazione_area`; senza, la predefinita di quell'Area; la prima Area
 //      toccata che ne dà una); se l'infiltrazione non tocca Aree, la predefinita della prima Area del Palazzo che ne ha una. Se non si trova
 //      niente, nessuna planimetria.
-// Un **Enigma** con i suoi passi (095) sta dove sta almeno uno dei passi, e ogni passo segue la propria regola; la sua planimetria
+// Un **Enigma** con i suoi passi sta dove sta almeno uno dei passi, e ogni passo segue la propria regola; la sua planimetria
 // principale è quella del primo passo. Le voci dei Memento (e dei loro dedali) non hanno planimetrie: nessuna.
 // ============================================================
 
 import type { AppDatabase } from '../../db/dbService.js';
-import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
 
 /** Una voce di un Palazzo per la regola: la sua infiltrazione, il Palazzo, l'Enigma di cui è un passo e l'aggancio a mano. */
 interface VocePerLaRegola { infiltrazione: string; palazzo: string; contenitore: string | null; aMano: string | null }
@@ -47,31 +46,20 @@ export interface PlanimetriaDellaVoce {
   aMano: boolean;
 }
 
-function colonna(db: AppDatabase, tabella: string, nome: string): boolean {
-  return haColonnaMain(db, tabella, nome);
-}
-function tabella(db: AppDatabase, nome: string): boolean {
-  return haTabellaMain(db, nome);
-}
-
 /** Legge in blocco voci dei Palazzi, pin, passi degli Enigmi e planimetrie 1 (tutte le letture usano questa e `planimetriaDellaVoce`). */
 export function letturePlanimetrieDelleVoci(db: AppDatabase): PlanimetrieDelleVoci {
-  const conAggancio = colonna(db, 'punto_interesse', 'planimetria_chiave');
-  const conDedalo = colonna(db, 'punto_interesse', 'area_dedalo_chiave');
   const voci = new Map<string, VocePerLaRegola>();
   const passi = new Map<string, string[]>();
-  for (const r of db.prepare(`SELECT p.chiave, p.area_chiave, a.dungeon_chiave, p.contenitore_chiave, ${conAggancio ? 'p.planimetria_chiave' : 'NULL AS planimetria_chiave'}
+  for (const r of db.prepare(`SELECT p.chiave, p.area_chiave, a.dungeon_chiave, p.contenitore_chiave, p.planimetria_chiave
       FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave JOIN dungeon d ON d.chiave = a.dungeon_chiave
-      WHERE d.tipo = 'palazzo' ${conDedalo ? 'AND p.area_dedalo_chiave IS NULL' : ''} ORDER BY p.ordine, p.chiave`).all() as
+      WHERE d.tipo = 'palazzo' AND p.area_dedalo_chiave IS NULL ORDER BY p.ordine, p.chiave`).all() as
       Array<{ chiave: string; area_chiave: string; dungeon_chiave: string; contenitore_chiave: string | null; planimetria_chiave: string | null }>) {
     voci.set(r.chiave, { infiltrazione: r.area_chiave, palazzo: r.dungeon_chiave, contenitore: r.contenitore_chiave, aMano: r.planimetria_chiave });
     if (r.contenitore_chiave) (passi.get(r.contenitore_chiave) ?? passi.set(r.contenitore_chiave, []).get(r.contenitore_chiave)!).push(r.chiave);
   }
   const pin = new Map<string, PinDellaVocePerLaRegola[]>();
-  const conUid = colonna(db, 'spillo', 'uid');
-  const conLegami = tabella(db, 'spillo_voce');
-  for (const r of db.prepare(`SELECT DISTINCT l.voce, s.id, ${conUid ? 's.uid' : 'NULL AS uid'}, s.mappa_chiave AS mappa, s.nome FROM (
-      ${conLegami ? 'SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION ' : ''}
+  for (const r of db.prepare(`SELECT DISTINCT l.voce, s.id, s.uid, s.mappa_chiave AS mappa, s.nome FROM (
+      SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION
       SELECT id, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave IS NOT NULL) l
       JOIN spillo s ON s.id = l.id WHERE s.mappa_chiave IS NOT NULL ORDER BY s.id, l.voce`).all() as Array<{ voce: string; id: number; uid: string | null; mappa: string; nome: string }>) {
     if (!voci.has(r.voce)) continue;
@@ -79,15 +67,13 @@ export function letturePlanimetrieDelleVoci(db: AppDatabase): PlanimetrieDelleVo
   }
   const primaDellInfiltrazione = new Map<string, string>();
   const primaDelPalazzo = new Map<string, string>();
-  if (tabella(db, 'infiltrazione_area') && tabella(db, 'area')) {
-    for (const r of db.prepare(`SELECT ia.infiltrazione_chiave AS inf, COALESCE(ia.planimetria_iniziale, a.planimetria_predefinita) AS pl
-        FROM infiltrazione_area ia JOIN area a ON a.chiave = ia.area_chiave ORDER BY ia.infiltrazione_chiave, ia.ordine, a.ordine, a.chiave`).all() as Array<{ inf: string; pl: string | null }>) {
-      if (r.pl && !primaDellInfiltrazione.has(r.inf)) primaDellInfiltrazione.set(r.inf, r.pl);
-    }
-    for (const r of db.prepare(`SELECT dungeon_chiave AS d, planimetria_predefinita AS pl FROM area WHERE dungeon_chiave IS NOT NULL AND planimetria_predefinita IS NOT NULL
-        ORDER BY dungeon_chiave, ordine, chiave`).all() as Array<{ d: string; pl: string }>) {
-      if (!primaDelPalazzo.has(r.d)) primaDelPalazzo.set(r.d, r.pl);
-    }
+  for (const r of db.prepare(`SELECT ia.infiltrazione_chiave AS inf, COALESCE(ia.planimetria_iniziale, a.planimetria_predefinita) AS pl
+      FROM infiltrazione_area ia JOIN area a ON a.chiave = ia.area_chiave ORDER BY ia.infiltrazione_chiave, ia.ordine, a.ordine, a.chiave`).all() as Array<{ inf: string; pl: string | null }>) {
+    if (r.pl && !primaDellInfiltrazione.has(r.inf)) primaDellInfiltrazione.set(r.inf, r.pl);
+  }
+  for (const r of db.prepare(`SELECT dungeon_chiave AS d, planimetria_predefinita AS pl FROM area WHERE dungeon_chiave IS NOT NULL AND planimetria_predefinita IS NOT NULL
+      ORDER BY dungeon_chiave, ordine, chiave`).all() as Array<{ d: string; pl: string }>) {
+    if (!primaDelPalazzo.has(r.d)) primaDelPalazzo.set(r.d, r.pl);
   }
   return { voci, pin, passi, primaDellInfiltrazione, primaDelPalazzo };
 }

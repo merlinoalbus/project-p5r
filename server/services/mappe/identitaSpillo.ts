@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Le partite ricordano «raccolto» per uid dello spillo (`spillo_partita.spillo_uid`, file
-// `partite.db`), e il file di gioco può essere sostituito da un pacchetto migrato altrove. Perché
+// `partite.db`), e il file di gioco può essere sostituito da un pacchetto preparato altrove. Perché
 // due file discesi dagli stessi dati diano lo stesso uid allo stesso spillo, l'uid è l'impronta
 // (SHA-256, 32 esadecimali) dell'identità dello spillo: mappa o area della guida, tipo, nome,
 // posizione e riferimento. Due spilli con la stessa identità nello stesso file si distinguono in
@@ -13,7 +13,6 @@
 
 import { createHash } from 'node:crypto';
 import { eGiocoInSolaLettura, type AppDatabase } from '../../db/dbService.js';
-import { haColonna } from '../../db/colonne.js';
 
 export interface IdentitaSpillo { mappa_chiave: string | null; area_guida_chiave?: string | null; tipo: string; nome: string; x: number; y: number; riferimento_tipo: string | null; riferimento_chiave: string | null }
 
@@ -33,16 +32,14 @@ export { uidValido } from '../../../shared/spilli.js';
 
 /**
  * Assegna l'uid a ogni spillo che non ce l'ha, in ordine di id, evitando gli uid già presenti nel
- * file (ordinale crescente). Idempotente: chi ha già l'uid non viene toccato. Vale sia in migrazione
- * (066/067) sia dopo ogni inserimento dell'applicazione. Se la colonna non esiste ancora non fa nulla.
+ * file (ordinale crescente). Idempotente: chi ha già l'uid non viene toccato. Vale dopo
+ * ogni inserimento dell'applicazione.
  */
 export function assegnaUidMancanti(db: AppDatabase): number {
   // L12, istanza di rilascio: `gioco.db` è chiuso e l'edizione ha zero spilli senza uid (lo verifica «Prepara edizione»): la
   // chiamata, che la rotta di un segno sullo spillo fa a ogni richiesta, non scrive e non lancia.
   if (eGiocoInSolaLettura()) return 0;
-  if (!haColonna(db, 'spillo', 'uid')) return 0;
-  const area = haColonna(db, 'spillo', 'area_guida_chiave') ?'area_guida_chiave' : 'NULL AS area_guida_chiave';
-  const senza = db.prepare(`SELECT id, mappa_chiave, ${area}, tipo, nome, x, y, riferimento_tipo, riferimento_chiave FROM main.spillo WHERE uid IS NULL OR uid = '' ORDER BY id`).all() as Array<IdentitaSpillo & { id: number }>;
+  const senza = db.prepare(`SELECT id, mappa_chiave, area_guida_chiave, tipo, nome, x, y, riferimento_tipo, riferimento_chiave FROM main.spillo WHERE uid IS NULL OR uid = '' ORDER BY id`).all() as Array<IdentitaSpillo & { id: number }>;
   if (senza.length === 0) return 0;
   const presi = new Set((db.prepare("SELECT uid FROM main.spillo WHERE uid IS NOT NULL AND uid <> ''").all() as Array<{ uid: string }>).map((r) => r.uid));
   const aggiorna = db.prepare('UPDATE main.spillo SET uid = ? WHERE id = ?');

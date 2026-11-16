@@ -15,7 +15,7 @@ import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 const router = Router();
 
 const queryPartita = z.object({ partita: z.coerce.number().int().positive().optional() }).strict();
-// L13 (ondata 6, migrazione 306): la pioggia non è un'eccezione della disponibilità, sta nei requisiti di rango (fonte unica)
+// L13 (ondata 6): la pioggia non è un'eccezione della disponibilità, sta nei requisiti di rango (fonte unica)
 const eccezione = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('dopo-rango'), giorni: z.number().int().min(1).max(30), effetto: z.literal('non-disponibile') }).strict(),
   z.object({ tipo: z.literal('fascia-rango'), rango: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), fasce: z.array(z.enum(FASCE_DISPONIBILITA)).min(1).max(2) }).strict(),

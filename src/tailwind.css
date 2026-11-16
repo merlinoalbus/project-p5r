@@ -823,7 +823,7 @@
      con cui i pin sono stati disegnati): pin e riquadri tengono la loro misura a schermo con la scala individuale, che a riposo vale 1. */
   .visore-mappa__livello .spillo-mappa, .visore-mappa__livello .spillo-popup { scale: calc(var(--zoom-base, 1) / var(--zoom-mappa, 1)); }
   .visore-mappa__immagine { display: block; width: 100%; height: 100%; max-width: none; pointer-events: none; image-rendering: auto; }
-  /* i pezzi delle planimetrie (102): ritagli posati sotto i pin; senza le loro condizioni, a richiesta, in trasparenza come i pin bloccati */
+  /* i pezzi delle planimetrie: ritagli posati sotto i pin; senza le loro condizioni, a richiesta, in trasparenza come i pin bloccati */
   .visore-mappa__pezzo { pointer-events: none; }
   .visore-mappa__pezzo--non-disponibile { opacity: .35; }
   /* nell'editor: le zone ritagliate tratteggiate, il pezzo selezionato evidenziato, il rettangolo che si sta ritagliando. I bordi

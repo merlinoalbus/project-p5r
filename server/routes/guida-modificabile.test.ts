@@ -79,7 +79,7 @@ describe('raggruppamento delle planimetrie', () => {
   beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
-  // L3: nei Palazzi la «stanza» di una tavola è la sua Area (migrazione 110) e la presentazione scrive l'Area, non il gruppo d'immagini
+  // L3: nei Palazzi la «stanza» di una tavola è la sua Area e la presentazione scrive l'Area, non il gruppo d'immagini
   /** L'Area della planimetria (chiave, nome) con l'etichetta della sua versione, o null se non ne ha. */
   const areaDi = (chiave: string) => prepared(`SELECT a.chiave, a.nome, m.versione_etichetta AS etichetta FROM mappa m JOIN area a ON a.chiave = m.area_chiave
     WHERE m.chiave = ?`).get(chiave) as { chiave: string; nome: string; etichetta: string | null } | undefined ?? null;
@@ -102,7 +102,7 @@ describe('raggruppamento delle planimetrie', () => {
     expect([gruppoDi(una.chiave), gruppoDi(altra.chiave)]).toEqual([null, null]);
   });
 
-  // Superato dal lotto L11 (B9, migrazione 177): il gruppo d'immagini (`aggiornaPresentazioneMappa`, `gruppo_immagini_json`) non esiste più; per una
+  // Superato dal lotto L11 (B9): il gruppo d'immagini (`aggiornaPresentazioneMappa`, `gruppo_immagini_json`) non esiste più; per una
   // mappa senza Area le rotte rispondono 409 `mappa-senza-area`. Il test resta, da riscrivere.
   it.skip('una tavola può uscire dal raggruppamento e tornare a stare da sola', async () => {
     const sola = planimetriaDiPalazzo('kamoshida', { nome: 'Sala B' });

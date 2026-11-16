@@ -3,8 +3,8 @@
 // punti, sconto
 // ============================================================
 //
-// Sede, eccezione di orario e sblocco proprio (122). Le vecchie condizioni trasferite agli articoli (070)
-// restano storiche: non vengono riattivate dal nuovo editor. Il programma punti si dichiara dove esiste.
+// Sede, eccezione di orario e sblocco proprio. Le condizioni di disponibilità stanno sugli articoli:
+// l'editor del negozio non le tocca. Il programma punti si dichiara dove esiste.
 // L3: i campi sono `CampiPuntoVendita`, gli stessi nel modulo da solo (Aggiungi un negozio, negozi senza sede) e nell'editor del posto.
 // Nel posto la sede è il luogo stesso (nessun campo «Sede»), e quel che non serve ogni volta sta ripiegato sotto «Altro del punto vendita».
 // «Che cosa vende» è il genere del punto vendita, distinto dal «Genere di posto» del luogo e dal «Segno sulla mappa» del pin.

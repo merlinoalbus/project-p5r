@@ -155,7 +155,7 @@ describe('API Libri — disponibilità', () => {
   beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 // ============================================================
-// La disponibilità di un libro non è più prosa che nessuno legge (migrazione 052)
+// La disponibilità di un libro non è prosa: sono condizioni
 // ============================================================
 //
 // «dal 18 aprile» stava scritto nella scheda e basta: l'elenco mostrava come già acquistabile un

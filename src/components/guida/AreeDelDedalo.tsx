@@ -1,5 +1,5 @@
 // ============================================================
-// AreeDelDedalo — un dedalo dei Memento: le sue aree, un'area per volta, con i suoi quattro elementi (099, 2026-10-12)
+// AreeDelDedalo — un dedalo dei Memento: le sue aree, un'area per volta, con i suoi quattro elementi (2026-10-12)
 // ============================================================
 //
 // Richiesta dell'utente (2026-10-11): aree in ogni dedalo, ogni elemento con uno stato; un'area è completata quando lo sono tutti

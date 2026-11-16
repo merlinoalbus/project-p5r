@@ -8,15 +8,15 @@
 // memoria CTRL+C la relativa voce». Proposta approvata: «Sì, sul server».
 //
 // Un appunto è un titolo («DOMANDA IN CLASSE», «TELEVENDITA», «STUDIA») e il testo intero, di norma quello che «Copia» del Diario scrive
-// negli appunti di sistema (compreso il blocco delle voci in fondo, che Ctrl+V nel Diario riconosce). Vive nei dati utente (`partite.db`,
-// migrazione utente 058) e NON è di una partita: gli stessi appunti su PC, tablet e telefono. Solo nell'istanza di preparazione.
+// negli appunti di sistema (compreso il blocco delle voci in fondo, che Ctrl+V nel Diario riconosce). Vive nei dati utente (`partite.db`)
+// e NON è di una partita: gli stessi appunti su PC, tablet e telefono. Solo nell'istanza di preparazione.
 //
 // Le categorie (richiesta dell'utente del 2026-11-02: «voglio poter raggruppare per categorie (chiudibili e apribili) gli Appunti Fissi nonchè
-// riordinarli con click e trascina all'interno di gruppi o della lista di Appunti fissi»; migrazione utente 067): un appunto sta in una
+// riordinarli con click e trascina all'interno di gruppi o della lista di Appunti fissi»): un appunto sta in una
 // categoria o nella lista senza categoria (`categoriaId` null), e il suo `ordine` è il posto dentro quel gruppo. Le categorie hanno un loro
 // ordine. Eliminando una categoria i suoi appunti non si perdono: vanno in fondo alla lista senza categoria, nel loro ordine.
-// I limiti stanno qui, una volta sola: li leggono lo schema zod del server, il vincolo della tabella (scritto con gli stessi numeri nella
-// migrazione, che è congelata) e i campi del modulo nel frontend.
+// I limiti stanno qui, una volta sola: li leggono lo schema zod del server, il vincolo della tabella (scritto con gli stessi numeri nello
+// schema) e i campi del modulo nel frontend.
 // ============================================================
 
 /** Il titolo: da 1 a 80 caratteri, senza spazi ai capi. */
@@ -79,12 +79,3 @@ export interface PostoAppuntoFisso {
   indice: number;
 }
 
-/** Una categoria nuova (va in fondo alle categorie) o il suo nome nuovo. */
-export interface NomeCategoriaAppunti {
-  nome: string;
-}
-
-/** Il posto nuovo di una categoria fra le categorie. */
-export interface PostoCategoriaAppunti {
-  indice: number;
-}

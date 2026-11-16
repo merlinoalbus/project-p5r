@@ -22,7 +22,7 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
   },
   'DELETE /api/immagini': {
     sommario: 'Rimuove in blocco le immagini caricate di un ambito o di tutti gli ambiti di caricamento',
-    descrizione: 'Con `ambito` toglie tutte le immagini di quell\'ambito di caricamento; senza, quelle di tutti gli ambiti di caricamento. La grafica predefinita non si tocca mai (la query accetta solo gli ambiti di caricamento). Se fra le immagini tolte c\'è quella che una mappa con pezzi ritagliati (102) mostra, si chiede conferma come nell\'editor (L1): 409 `mappa-con-pezzi` con `{ mappe, pezzi, copie }` e niente si toglie; con `eliminaPezzi=1` i pezzi di quelle mappe se ne vanno con le immagini, nella stessa transazione. La cancellazione è definitiva: le immagini stanno solo nel database di gioco.',
+    descrizione: 'Con `ambito` toglie tutte le immagini di quell\'ambito di caricamento; senza, quelle di tutti gli ambiti di caricamento. La grafica predefinita non si tocca mai (la query accetta solo gli ambiti di caricamento). Se fra le immagini tolte c\'è quella che una mappa con pezzi ritagliati mostra, si chiede conferma come nell\'editor (L1): 409 `mappa-con-pezzi` con `{ mappe, pezzi, copie }` e niente si toglie; con `eliminaPezzi=1` i pezzi di quelle mappe se ne vanno con le immagini, nella stessa transazione. La cancellazione è definitiva: le immagini stanno solo nel database di gioco.',
     risposta: '`{ eliminate }`: il numero di immagini rimosse',
     errori: [[409, 'mappa-con-pezzi']],
   },
@@ -48,7 +48,7 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
   },
   'DELETE /api/immagini/:ambito/:chiave': {
     sommario: 'Elimina l\'immagine di (ambito, chiave)',
-    descrizione: 'Toglie la riga dal database di gioco, contenuto compreso; vale per ogni ambito, anche per la grafica predefinita. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa. Se è l\'immagine che una mappa con pezzi ritagliati (102) mostra — la sua caricata, o l\'asset predefinito di una mappa senza caricata — si chiede conferma come nell\'editor (L1): 409 `mappa-con-pezzi` e niente si toglie; con `?eliminaPezzi=1` i pezzi se ne vanno con lei. 404 se non c\'era nessuna immagine.',
+    descrizione: 'Toglie la riga dal database di gioco, contenuto compreso; vale per ogni ambito, anche per la grafica predefinita. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa. Se è l\'immagine che una mappa con pezzi ritagliati mostra — la sua caricata, o l\'asset predefinito di una mappa senza caricata — si chiede conferma come nell\'editor (L1): 409 `mappa-con-pezzi` e niente si toglie; con `?eliminaPezzi=1` i pezzi se ne vanno con lei. 404 se non c\'era nessuna immagine.',
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'immagine-non-trovata'], [409, 'mappa-con-pezzi']],
   },

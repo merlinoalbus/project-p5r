@@ -35,14 +35,14 @@ libvips; entrambi sono installati con il backend come binari precompilati e coll
    Testo della LGPL-3.0: copia integrale in licenze/LGPL-3.0.txt (da https://www.gnu.org/licenses/lgpl-3.0.txt). La LGPL-3.0
    integra la GNU GPL-3.0, che va distribuita con lei: copia integrale in licenze/GPL-3.0.txt (da https://www.gnu.org/licenses/gpl-3.0.txt).
 
-Le domande e le risposte della negoziazione con le Ombre (server/db/dati/negoziazione-domande.json)
+Le domande e le risposte della negoziazione con le Ombre (dati nel database di gioco, `gioco.db`)
 sono trascritte da «The Ultimate/Most Complete Guide To Negotiations In Persona 5» di joyce-chen e
 GooberSD/Chompobar — https://docs.google.com/document/d/1sPsQ2SPXJdsrhYBj3mMyj5va-hmJ10TycIqJto4k2z4
 — raccolta a sua volta basata su https://github.com/joyce-chen/persona5-negotiation e sulla Megami
 Tensei Fandom Wiki. La resa italiana è di questo progetto: il gioco in italiano può usare parole
 diverse, e le voci marcate «incerto» non sono verificate nemmeno dalla fonte.
 
-Il foglio Royal della negoziazione (server/db/migrations/dati/negoziazione-royal*.json:
+Il foglio Royal della negoziazione (dati nel database di gioco, `gioco.db`:
 277 domande, 831 risposte, 3324 celle con esiti buono/passabile/cattivo per le quattro personalità, le celle
 «non confermate» segnate come tali) è trascritto dalla raccolta pubblica «Persona 5 & Royal Negotiation Guide» di
 joyce-chen — https://github.com/joyce-chen/persona5-negotiation (file royal.md, che il repository genera dal

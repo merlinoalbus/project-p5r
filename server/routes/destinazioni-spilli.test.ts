@@ -4,8 +4,8 @@
 
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
-import { initDb, closeDb, getDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { dbDiProvaSenzaMappe } from '../../test/dbDiProva.js';
 import { tipiDellaCategoria } from '../../shared/spilli.js';
 import type { EsportazioneMappeDto } from '../../shared/types.js';
 
@@ -18,7 +18,7 @@ import type { EsportazioneMappeDto } from '../../shared/types.js';
 const app = createApp();
 let ingressoId = 0;
 beforeEach(async () => {
-  runMigrations(initDb(':memory:'));
+  dbDiProvaSenzaMappe();
   for (const [chiave, nome] of [['partenza', 'Partenza'], ['arrivo', 'Sala di arrivo']]) await request(app).post('/api/mappe').send({ chiave, nome, tipo: 'luogo' }).expect(201);
   ingressoId = (await request(app).post('/api/mappe/arrivo/spilli').send({ tipo: 'porta', nome: 'Ingresso', x: 50, y: 90 })).body.data.id;
 });

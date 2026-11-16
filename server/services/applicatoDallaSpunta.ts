@@ -115,7 +115,7 @@ function annullabile(p: number, r: ReceiptEffettoVoceDto, l: EffettiAzioneDto): 
         .map(({ trofeo, ...x }) => ({ ...x, doti: [], ...(trofeo && trofeoSiToglie(p, trofeo.chiave) ? { trofeo } : {}) }));
       return esami.length ? { esami } : {};
     })(),
-    // le aperture dei Dedali di una ricevuta di prima della 305 restano nella ricevuta ma non sono in vigore: si calcolano dai Palazzi
+    // le aperture dei Dedali di una ricevuta vecchia restano nella ricevuta ma non sono in vigore: si calcolano dai Palazzi
     // L13 (O10-2): la relazione romantica torna com'era solo se nella partita vale ancora quella della spunta (`annullaRelazioneDallaSpunta`)
     ...(l.relazione && relazioneSiAnnulla(p, l.relazione) ? { relazione: l.relazione } : {}),
   };

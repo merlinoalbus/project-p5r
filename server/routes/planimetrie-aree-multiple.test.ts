@@ -7,7 +7,7 @@
 // ordine.» E dal 2026-10-04 (decisione dell'utente, che supera quella del 2026-09-18) un'area può stare su
 // più planimetrie. Quindi: una mappa → più aree (in ordine di guida); un'area → una o più mappe.
 //
-// Da L3 (migrazione 110) le «aree della guida» si chiamano infiltrazioni e il legame è dell'**Area** del Palazzo a cui la planimetria
+// Da L3 le «aree della guida» si chiamano infiltrazioni e il legame è dell'**Area** del Palazzo a cui la planimetria
 // appartiene (`infiltrazione_area`): `PUT /api/mappe/:k/aree` è una rotta vecchia riscritta sul modello nuovo, e le colonne
 // `entita_*` e `mappa_entita` di tipo area non si scrivono più. I casi sono gli stessi, con le attese del modello nuovo.
 // ============================================================
@@ -175,7 +175,7 @@ describe('più aree della guida nella stessa planimetria', () => {
       { ...base, chiave: 'prova-piano-annidato', nome: 'Piano annidato', tipo: 'area', genitore: 'dungeon-kamoshida' },
     ] }, { sovrascrivi: true });
     expect(esito.saltate).toEqual([]);
-    // il piano (figlio della radice) riceve un'Area dalla regola della 110; la stanza dentro di lui ci porta le sue infiltrazioni
+    // il piano (figlio della radice) riceve un'Area dalla regola di L3; la stanza dentro di lui ci porta le sue infiltrazioni
     expect(prepared("SELECT area_chiave FROM mappa WHERE chiave = 'prova-piano-annidato'").pluck().get()).toBeTruthy();
     expect(areeLegate('prova-piano-annidato')).toEqual([a[4].chiave, a[5].chiave].sort());
     expect(prepared("SELECT COUNT(*) FROM mappa_entita WHERE mappa_chiave = 'prova-stanza-annidata' AND entita_tipo = 'area'").pluck().get()).toBe(0);

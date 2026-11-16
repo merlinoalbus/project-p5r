@@ -3,8 +3,8 @@
 // ============================================================
 //
 // Puro: lavora su qualunque connessione (l'istanza, un pacchetto aperto in sola lettura per l'anteprima dell'importazione, la copia da
-// esportare) e non scrive niente. Serve a import, export e ripristino dell'istanza: il registro delle decisioni (migrazione 141) e le note
-// storiche (139) stanno in gioco.db e viaggiano col file; qui si controlla che arrivino integri e si dice che listino portano.
+// esportare) e non scrive niente. Serve a import, export e ripristino dell'istanza: il registro delle decisioni e le note
+// storiche stanno in gioco.db e viaggiano col file; qui si controlla che arrivino integri e si dice che listino portano.
 //   - `precedente`: attive le 20 offerte correnti di prima; `royal`: attive le 18 Royal coi prezzi del manifesto; `misto`: altro (anche
 //     un listino mezzo pre e mezzo post decisione); `assente`: il negozio non c'è.
 //   - Registro integro: fotografie leggibili, versione 1, al più una decisione attiva, ogni ripristino di una decisione che c'è.
@@ -64,7 +64,7 @@ export function avvisiImportazioneTanaka(istanza: StatoTanakaFileDto, pacchetto:
     avvisi.push(`L’istanza ha la decisione Tanaka ${istanza.attiva} applicata; il pacchetto ${pacchetto.attiva ? `ne porta un’altra (${pacchetto.attiva})` : 'non la porta'}: il listino diventa quello del pacchetto (${pacchetto.listino}).`);
   if (pacchetto.listino === 'misto') avvisi.push('Il pacchetto porta un listino di Tanaka misto (né le 20 offerte di prima né le 18 Royal).');
   if (!pacchetto.registroIntegro) avvisi.push(`Il registro delle decisioni Tanaka del pacchetto non è integro: ${pacchetto.problemi.join(' ')}`);
-  if (istanza.noteStoriche > 0 && pacchetto.noteStoriche === 0) avvisi.push('Il pacchetto non porta le note storiche della fonte (Homunculus, G-034): se ha uno schema precedente alla 139 l’importazione le ricrea al valore della guida, altrimenti restano assenti.');
-  // gli acquisti delle partite non cambiano: la spesa storica è congelata (utente 030) e partite.db non viene sostituito
+  if (istanza.noteStoriche > 0 && pacchetto.noteStoriche === 0) avvisi.push('Il pacchetto non porta le note storiche della fonte (Homunculus, G-034): se ha uno schema vecchio, senza la loro tabella, l’importazione le ricrea al valore della guida, altrimenti restano assenti.');
+  // gli acquisti delle partite non cambiano: la spesa storica è congelata e partite.db non viene sostituito
   return avvisi;
 }

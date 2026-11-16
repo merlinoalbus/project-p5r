@@ -6,8 +6,8 @@
 // leggibile da nessuna parte, e un collegamento a senso unico restava invisibile.
 // ============================================================
 
-import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
+import { closeDb } from '../../db/dbService.js';
+import { dbDiProvaSenzaMappe } from '../../../test/dbDiProva.js';
 import { importaMappe, dettaglioMappa, aggiornaSpillo, creaSpillo } from './mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
@@ -17,10 +17,9 @@ const mappa = (chiave: string, genitore: string | null = null): EsportazioneMapp
 
 afterEach(() => closeDb());
 
-/** Database in memoria con tutte le migrazioni e un piccolo atlante seed: un quartiere con due figlie, sottopasso e banchina. */
+/** Database in memoria senza le mappe della guida e con un piccolo atlante seed: un quartiere con due figlie, sottopasso e banchina. */
 function atlante() {
-  const db = initDb(':memory:');
-  runMigrations(db);
+  const db = dbDiProvaSenzaMappe();
   importaMappe({ versione: 1, mappe: [mappa('quartiere'), mappa('sottopasso', 'quartiere'), mappa('banchina', 'quartiere')] }, { origine: 'seed' });
   return db;
 }

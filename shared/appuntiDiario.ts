@@ -95,9 +95,6 @@ export interface AppuntiDiario {
   voci: VoceAppunti[];
 }
 
-/** La richiesta delle voci da mettere negli appunti. */
-export interface RichiestaAppuntiDiario { uid: string[] }
-
 /** Dove incollare: il giorno aperto; con `dopoUid` (la voce selezionata) subito dopo di lei e nella sua fascia, altrimenti ogni voce in
  *  fondo alla fascia da cui viene. */
 export interface RichiestaIncollaVoci {
