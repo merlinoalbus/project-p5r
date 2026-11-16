@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Le pagine della guida (Aiuto in battaglia, Sfide, Trofei e finali, Covo, Oggetti) mostrano accanto ai testi le condizioni che la partita sa
-// valutare (migrazione 340: `condizioniJson` degli elementi, con la frase scritta dal server). Senza partita si legge la sola frase; con la
+// valutare (`condizioniJson` degli elementi, con la frase scritta dal server). Senza partita si legge la sola frase; con la
 // partita ogni condizione porta il suo esito, chiesto al valutatore unico del server in una richiesta per pagina (`useEsitiNellaPartita`):
 // l'interfaccia mostra gli esiti e non rivaluta (R6-02). Il livello consigliato si confronta col livello della partita (Partita → Modifica).
 // ============================================================

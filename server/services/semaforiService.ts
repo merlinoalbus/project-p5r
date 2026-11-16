@@ -67,9 +67,9 @@ export interface StatoPartitaSemafori {
   invitiRegistrati?: Set<string>;
   /** L13: gli sblocchi ricevuti nella partita da una voce spuntata (`utente.sblocco_partita`), come «richiesta:chiave» o «attivita:chiave». */
   sblocchiRicevuti?: Set<string>;
-  /** Gli eventi segnati a mano nella partita: i requisiti `evento` li leggono (le aperture dei Dedali no: si calcolano, migrazione 305). */
+  /** Gli eventi segnati a mano nella partita: i requisiti `evento` li leggono (le aperture dei Dedali no: si calcolano). */
   eventi: Set<string>;
-  /** Non più letto (R6-01b: niente conferme a mano); `requisito_partita` è stata tolta (utente 44). */
+  /** Non letto (R6-01b: niente conferme a mano); la tabella `requisito_partita` non esiste. */
   conferme?: Set<string>;
   /** La partita dello stato: il semaforo della disponibilità legge da qui il giorno dell'ultimo rango (registro degli incontri). Assente = non si sa. */
   partitaId?: number;
@@ -91,9 +91,9 @@ export interface ContenutiPartita {
 }
 
 /**
- * Il salvataggio di Persona 5 (`utente.partita.salvataggio_p5`, migrazione utente 061), la Nuova Partita+ (`utente.partita.nuova_partita_plus`)
+ * Il salvataggio di Persona 5 (`utente.partita.salvataggio_p5`), la Nuova Partita+ (`utente.partita.nuova_partita_plus`)
  * e i set di contenuti scaricabili posseduti (`utente.partita.dlc_posseduti_json`, lo stesso dato della Fusione), dal punto unico della partita. Su uno schema senza la colonna del
- * salvataggio (prima della 061) il salvataggio vale «no»; un JSON dei set che non si legge vale «nessuno», mai un errore.
+ * salvataggio il salvataggio vale «no»; un JSON dei set che non si legge vale «nessuno», mai un errore.
  */
 export function contenutiDellaPartita(partitaId: number): ContenutiPartita {
   const conSalvataggio = haColonnaUtente(getDb(), 'partita', 'salvataggio_p5');
@@ -121,17 +121,17 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
   const dataGioco = partita?.data_gioco ?? null;
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
-  // L6: gli inviti registrati (la tabella nasce con la migrazione utente 025: su uno schema di prima nessun invito)
+  // L6: gli inviti registrati (su uno schema senza la tabella nessun invito)
   const conInviti = haTabellaUtente(getDb(), 'invito_partita');
   const invitiRegistrati = new Set(conInviti ? (prepared('SELECT invito_chiave FROM invito_partita WHERE partita_id = ?').all(partitaId) as Array<{ invito_chiave: string }>).map((r) => r.invito_chiave) : []);
-  // L13: gli sblocchi (la tabella nasce con la migrazione utente 046: su uno schema di prima nessuno sblocco)
+  // L13: gli sblocchi (su uno schema senza la tabella nessuno sblocco)
   const sblocchiRicevuti = new Set(sblocchiDellaPartita(partitaId));
   // Chi e' in squadra: i Ladri con l'interruttore «In squadra» acceso (`in_squadra = 1`), e chi e' fuori quelli con
   // l'interruttore spento. **L'interruttore, non la presenza della riga.** Prima bastava avere segnato un livello (la riga
   // nasce li') perche' il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
-  // gli eventi segnati a mano (Partita → Progressi, «Condizione soddisfatta»); le aperture dei Dedali le calcola il valutatore (305)
+  // gli eventi segnati a mano (Partita → Progressi, «Condizione soddisfatta»); le aperture dei Dedali le calcola il valutatore
   const eventi = new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave));
   const fattiPesca=new Map(leggiFattiPesca(partitaId,dataGioco&&fasciaGioco?{giorno:dataGioco,fascia:fasciaGioco,ordineVisita:Number.MAX_SAFE_INTEGER}:undefined,true).map(f=>[f.evento,f.valore]));
   // i Palazzi letti una volta: conclusi (Tesoro e boss finale, §8.10) col perché, gli altri con quel che manca al furto
@@ -188,7 +188,7 @@ export function condizioneDelRequisito(r: Pick<RigaRequisito, 'tipo' | 'dati_jso
 }
 
 /** L7-02: la nota propria di un requisito (colonna `testo`), da mostrare sotto la frase generata. Vuota per un avviso (la sua frase è il dato) e se ripete
- *  la frase generata (una riga aggiunta a mano prima della migrazione 359). */
+ *  la frase generata (una riga vecchia aggiunta a mano). */
 export function notaDelRequisito(r: { tipo: string; testo: string }, frase: string): string {
   return r.tipo === 'avviso' || r.testo.trim() === frase.trim() ? '' : r.testo.trim();
 }
@@ -208,7 +208,7 @@ export function valuta(r: RigaRequisito, st: StatoValutazione): SemaforoRequisit
 }
 
 /** Lo stato di una condizione sullo stato della partita, col valutatore unico letto «come requisito»: lo usa la disponibilità per i rami di un
- *  requisito «almeno una» con la pioggia (L13, ondata 8, migrazione 317), così semafori, scheda e requisiti dicono la stessa cosa. */
+ *  requisito «almeno una» con la pioggia (L13, ondata 8), così semafori, scheda e requisiti dicono la stessa cosa. */
 export function valutatoreDelloStato(st: StatoValutazione): StatoDelRamo {
   return (c) => {
     const nomi = nomiCondizioniMemo();
@@ -240,7 +240,7 @@ export function semaforiConfidente(chiave: string, rangoAttuale: number, st: Sta
  */
 function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoValutazione): SemaforoRequisitoDto | null {
   if (!st.dataGioco) return null;
-  // la pioggia la legge il verdetto dai requisiti del rango successivo (fonte unica, migrazione 306; i rami «almeno una» sullo stato della partita,
+  // la pioggia la legge il verdetto dai requisiti del rango successivo (fonte unica; i rami «almeno una» sullo stato della partita,
   // 317); i giorni dall'ultimo rango dal registro degli incontri
   const esito = verdettoDelConfidente(chiave, {
     data: st.dataGioco, fascia: st.fasciaGioco ?? 'giorno', festivo: eGiornoFestivo(st.dataGioco),

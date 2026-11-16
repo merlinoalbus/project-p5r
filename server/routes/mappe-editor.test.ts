@@ -28,7 +28,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   beforeAll(async () => {
     const db = dbDiProva();
     // Explicit positioned fixture: editorial seed points no longer pretend to have a physical map.
-    // una voce del Palazzo della planimetria di prova (che è figlia di Kamoshida), che si segna: le regole del collegamento (094)
+    // una voce del Palazzo della planimetria di prova (che è figlia di Kamoshida), che si segna: le regole del collegamento
     const punto=db.prepare("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'kamoshida' AND p.tipo <> 'altro' ORDER BY p.chiave LIMIT 1").get() as {chiave:string};
     const fixture=planimetriaDiPalazzo('kamoshida',{nome:'Fixture geografica'});
     creaSpillo(fixture.chiave,{tipo:'nota',nome:'Punto verificato fixture',x:10,y:20,riferimento:{tipo:'punto',chiave:punto.chiave}});
@@ -36,7 +36,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
   afterAll(() => closeDb());
 
-  // Superato dal lotto L11 (B9, migrazione 177): `MappaRiassuntoDto.entita`, `mappa.entita_*` e la tabella `guida_mappa` non esistono più (al loro
+  // Superato dal lotto L11 (B9): `MappaRiassuntoDto.entita`, `mappa.entita_*` e la tabella `guida_mappa` non esistono più (al loro
   // posto `radiceDi` e `area`); le asserzioni non compilano o non reggono più. Il test resta, da riscrivere.
   it.skip('costruisce l’albero dalla guida (Tokyo → quartieri, Palazzi/Dedalo → aree) con gli spilli dai marcatori', async () => {
     const albero = (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[];
@@ -116,7 +116,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const dettaglio = (await request(app).get(`/api/mappe/${area.chiave}?partita=${partitaId}`)).body.data as MappaDto;
     expect(dettaglio.percorso.map((p) => p.chiave)).toEqual([area.genitore, area.chiave]);
     expect(dettaglio.spilli.length).toBe(area.numeroSpilli);
-    // le voci della guida stanno a parte (094, 098): il riferimento «punto» dato alla creazione è diventato una voce del pin
+    // le voci della guida stanno a parte: il riferimento «punto» dato alla creazione è diventato una voce del pin
     const spilloPunto = dettaglio.spilli.find((s) => s.voci.length > 0)!;
     expect(spilloPunto.riferimento).toBeNull();
     expect(spilloPunto.dettaglio).toBeNull();

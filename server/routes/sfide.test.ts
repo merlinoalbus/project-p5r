@@ -40,7 +40,7 @@ describe('API sfide', () => {
     expect(d.quizTv).toMatchObject({ numeroDomandeTotali: 11, verificato: true });
   });
 
-  it('le 11 domande del game show in TV sono tra le domande (tipo «tv», migrazione 078), ordinate per anno scolastico', async () => {
+  it('le 11 domande del game show in TV sono tra le domande (tipo «tv»), ordinate per anno scolastico', async () => {
     const d = (await request(app).get('/api/compendio/domande')).body.data as DomandeDto;
     const quiz = d.domande.filter((x) => x.tipo === 'tv');
     expect(quiz).toHaveLength(11);

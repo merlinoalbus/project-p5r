@@ -84,7 +84,7 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Modifica area', cosa: 'finestra di modifica delle aree' },
   { testo: 'Aggiungi planimetria', cosa: 'finestra di aggiunta delle planimetrie' },
   { testo: 'Elimina area', cosa: 'eliminazione delle aree' },
-  { testo: 'Sblocco dell’area', cosa: 'condizione propria delle aree (migrazione 303)' },
+  { testo: 'Sblocco dell’area', cosa: 'condizione propria delle aree' },
   { testo: 'Scarica backup dati di gioco', cosa: 'sezione del backup dei dati di gioco (pacchetto di gioco)' },
   { testo: 'Documentazione delle API', cosa: 'sezione della documentazione delle API' },
   { testo: 'Modifica la guida', cosa: 'modalità «Modifica la guida» dei dedali' },

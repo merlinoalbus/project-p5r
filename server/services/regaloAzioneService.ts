@@ -21,7 +21,7 @@
 //     elenco (`confidente_regalo.reazione`, +3/+2/+1), +1 se l'oggetto non c'è («ogni regalo garantisce almeno 1 punto»); i punti per
 //     reazione sono quelli attuali finché non si verificano in gioco (`PUNTI_REGALO_PER_REAZIONE`);
 //   - si regala durante un ritrovo: mai a un Confidente al rango 0 (non ancora incontrato);
-//   - lo stesso oggetto si può ridare (utente 052): ogni consegna è una riga, e si annulla quella precisa (`id`) o l'ultima;
+//   - lo stesso oggetto si può ridare: ogni consegna è una riga, e si annulla quella precisa (`id`) o l'ultima;
 //   - la consegna usa una copia posseduta (comprata, ricevuta o di un set: `copieOggetti`) se c'è; altrimenti si può segnare l'acquisto, che
 //     crea la copia che il regalo usa. Un acquisto che il negozio non registra (pezzo unico già ottenuto) non si paga;
 //   - la Cartolina si spedisce (`shared/regali.ts`): +1, mai a un Confidente al rango massimo, mai con la pioggia nella fascia corrente.
@@ -43,7 +43,7 @@ import { REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, eReazione, modoDelRegalo, te
 import { RANGO_MASSIMO_CONFIDENTE, type ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import type { EsitoRegaloDto, RichiestaRegalo } from '../../shared/types.js';
 
-/** Il Confidente riceve regali: la colonna della 255, o (su un file di gioco più vecchio) un elenco di regali. */
+/** Il Confidente riceve regali: la colonna `regalabile`, o (su un file di gioco che non la ha) un elenco di regali. */
 export function confidenteRegalabile(chiave: string): boolean {
   const conColonna = haColonnaMain(getDb(), 'confidente', 'regalabile');
   if (conColonna) return !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave);
@@ -56,7 +56,7 @@ export function reazioneInElenco(confidente: string, catalogo: string): Reazione
   const righe = prepared(`SELECT ${conColonna ? 'reazione' : 'NULL AS reazione'}, sconsigliato FROM confidente_regalo WHERE confidente_chiave = ? AND catalogo_chiave = ?`)
     .all(confidente, catalogo) as Array<{ reazione: number | null; sconsigliato: number }>;
   if (!righe.length) return null;
-  // una riga non ancora convertita (file di gioco di prima della 256): «sconsigliato» vale +1, il resto +3 come i 50 punti di sempre
+  // una riga non ancora convertita (file di gioco senza la colonna della reazione): «sconsigliato» vale +1, il resto +3 come i 50 punti di sempre
   const valori = righe.map((r) => (eReazione(r.reazione) ? r.reazione : r.sconsigliato === 1 ? 1 : 3));
   return Math.max(...valori) as ReazioneRegalo;
 }
@@ -172,7 +172,7 @@ export function annullaRegalo(partitaId: number, confidente: string, catalogo: s
       try { annullaRigaDelRegistro(partitaId, riga.registro_id); }
       catch (err) { const code = (err as { code?: string }).code; if (code !== 'acquisto-non-trovato' && code !== 'articolo-non-trovato') throw err; }
     } else if (riga.acquisto_articolo && prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, riga.acquisto_articolo)) {
-      // consegna di prima della 052: se l'acquisto del regalo è già stato annullato a parte e l'oggetto resta comprato soltanto da voci del
+      // consegna senza `id`: se l'acquisto del regalo è già stato annullato a parte e l'oggetto resta comprato soltanto da voci del
       // Diario, non c'è niente da togliere qui (le copie delle voci si tolgono con le loro spunte): l'annullo prosegue con punti ed evento
       try { impostaAcquisto(partitaId, riga.acquisto_articolo, false); }
       catch (err) { if ((err as { code?: string }).code !== 'acquisto-della-voce') throw err; }

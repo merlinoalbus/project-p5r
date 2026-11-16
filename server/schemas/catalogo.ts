@@ -68,7 +68,7 @@ export const paramsTipoCatalogo = z.object({ tipo: z.enum(TIPI_CATALOGO) });
 export const paramsElementoCatalogo = paramsTipoCatalogo.extend({ chiave: z.string().min(1).max(200) });
 
 /** Campi di un negozio scrivibili dall'utente (le colonne della tabella, in snake_case come nel servizio). */
-// Le condizioni del negozio stanno in `sblocco_json` (le storiche passarono agli articoli, 070).
+// Le condizioni del negozio stanno in `sblocco_json` (quelle di disponibilità sono degli articoli).
 export const datiNegozio = z.object({
   /** Le condizioni proprie del negozio, aggiuntive a quelle della sede. */
   sblocco_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
@@ -76,13 +76,13 @@ export const datiNegozio = z.object({
   tipo: z.enum(['armi', 'protezioni', 'accessori', 'oggetti', 'regali', 'abiti', 'cibo', 'online', 'ambulante', 'distributore', 'materiali', 'misto', 'altro']).default('altro'),
   gestore: testo(160).nullable().optional(),
   confidente_chiave: z.string().max(80).nullable().optional(),
-  /** La sede: un luogo della città (migrazione 072). È l'unico «dove» del negozio: il quartiere si deriva dal luogo. */
+  /** La sede: un luogo della città. È l'unico «dove» del negozio: il quartiere si deriva dal luogo. */
   sede_chiave: z.string().max(200).nullable().optional(),
   /** L5 (R5-12b): l'orario del solo negozio quando la guida lo distingue dal luogo; null = vale quello della sede. */
   eccezione_orari_json: orariNegozio.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   programma_punti_json: z.object({ nome: testo(80).min(1), unita: testo(40).min(1), calcolo: z.enum(['manuale', 'rango-cliente']) }).nullable().optional()
     .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
-  /** Chiusura dell'ondata 5 (migrazione 254): lo sconto legato al rango di un Confidente (la Clinica di Takemi a metà prezzo); null = nessuno. */
+  /** Chiusura dell'ondata 5: lo sconto legato al rango di un Confidente (la Clinica di Takemi a metà prezzo); null = nessuno. */
   sconto_json: z.object({ confidente: z.string().min(1).max(80), rango: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), percentuale: z.number().int().min(1).max(99) }).strict().nullable().optional()
     .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   note: testo(2000).nullable().optional(),
@@ -131,14 +131,14 @@ export const datiArticolo = z.object({
   nota: testo(600).nullable().optional(),
 });
 
-/** Campi di un libro scrivibili dall'utente. L13 (O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca`, `effetto_json` e il prezzo non ci
- *  sono più (come ogni chiave sconosciuta, si scartano): che cosa dà e che cosa apre lo dicono gli effetti, dove si ottiene e quanto costa articoli e posizioni. */
+/** Campi di un libro scrivibili dall'utente. L13 (O7-4): `dove`, `dote`, `note`, `sblocca`, `effetto_json` e il prezzo non ci
+ *  sono (come ogni chiave sconosciuta, si scartano): che cosa dà e che cosa apre lo dicono gli effetti, dove si ottiene e quanto costa articoli e posizioni. */
 const datiLibro = z.object({
-  // Le condizioni sono la disponibilità, «dal 18 aprile» (migrazione 052).
+  // Le condizioni sono la disponibilità, «dal 18 aprile».
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
-  /** Gli effetti dichiarati (migrazione 074): la Dote che alza, che cosa apre. L'unico punto. */
+  /** Gli effetti dichiarati: la Dote che alza, che cosa apre. L'unico punto. */
   effetti_json: effettiJson,
   sessioni: z.number().int().min(1).max(9).nullable().optional(),
   dettagli: testo(2000).nullable().optional(),
@@ -160,8 +160,8 @@ const datiFilmBase = z.object({
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   dove: z.enum(['cinema', 'dvd']).default('cinema'),
-  // L13 (O7-4, migrazione 313): la prima visione e quanto vale rivederlo (voci `ripetuto`) le dicono solo gli effetti;
-  // `dote`, `note` e `note_successive` non ci sono più
+  // L13 (O7-4): la prima visione e quanto vale rivederlo (voci `ripetuto`) le dicono solo gli effetti;
+  // `dote`, `note` e `note_successive` non ci sono
   effetti_json: effettiJson,
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   sessioni: z.number().int().min(1).max(9).nullable().optional(),
@@ -170,7 +170,7 @@ const datiFilmBase = z.object({
 const datiFilm = datiFilmBase.superRefine(rifinisciFilm);
 const datiFilmParziale = datiFilmBase.partial().superRefine(rifinisciFilm);
 
-/** La guida del quiz di un'attivita' (`shared/quizAttivita.ts`, migrazione 105): strutturata, con i limiti condivisi
+/** La guida del quiz di un'attivita' (`shared/quizAttivita.ts`): strutturata, con i limiti condivisi
  *  col modulo; si salva normalizzata (righe vuote tolte), e un quiz che resta senza domanda ne' elementi vale «nessun quiz». */
 const quizJson = z.object({
   giorni: z.array(z.number().int().min(1).max(31)).max(31).default([]),
@@ -189,7 +189,7 @@ const datiAttivitaBase = z.object({
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   tipo: z.enum(chiaviDi(TIPI_ATTIVITA)).default('altro'),
-  /** La sede: un luogo della città (migrazione 072). È l'unico «dove» dell'attività: il quartiere si deriva dal luogo. */
+  /** La sede: un luogo della città. È l'unico «dove» dell'attività: il quartiere si deriva dal luogo. */
   sede_chiave: z.string().max(200).nullable().optional(),
   fascia: z.enum(chiaviDi(FASCE_ATTIVITA)).nullable().optional(),
   costo: z.number().int().min(0).max(9_999_999).nullable().optional(),
@@ -212,7 +212,7 @@ const datiAttivitaBase = z.object({
 const datiAttivita =datiAttivitaBase.superRefine(rifinisciAttivita);
 const datiAttivitaParziale = datiAttivitaBase.partial().superRefine(rifinisciAttivita);
 
-/** Campi di un luogo della città scrivibili dall'utente (migrazione 071). */
+/** Campi di un luogo della città scrivibili dall'utente. */
 const datiLuogo = z.object({
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),

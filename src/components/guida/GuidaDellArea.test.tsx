@@ -235,7 +235,7 @@ it('i tipi si chiamano come li vuole l’utente, e Persona e Storia si collegano
   expect(screen.getByRole('button', { name: 'Collega pin' })).toBeInTheDocument();
 });
 
-describe('l’Enigma contiene i suoi passi (095)', () => {
+describe('l’Enigma contiene i suoi passi', () => {
   const enigma = punto({ chiave: 'e1', tipo: 'puzzle', nome: 'La porta della torre', esauribile: false });
   const leva = punto({ chiave: 'e1-a', ordine: 0, tipo: 'meccanismo', nome: 'Tira la leva', esauribile: false, contenitore: 'e1', stato: 'ottenuto' });
   const porta = punto({ chiave: 'e1-b', ordine: 1, tipo: 'porta', nome: 'Apri la porta', esauribile: false, contenitore: 'e1' });
@@ -409,7 +409,7 @@ describe('«Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono 
   });
 });
 
-describe('in un\'area di un dedalo dei Memento (099)', () => {
+describe('in un\'area di un dedalo dei Memento', () => {
   const dedalo = { chiave: 'q-1', nome: 'Banchina', altre: [{ chiave: 'q-2', nome: 'Treno' }] };
   /** La guida dell'area del dedalo «Banchina», con un'altra area «Treno» nello stesso dedalo. */
   const montaDedalo = (punti: PuntoInteresseDto[]) => {

@@ -2,7 +2,7 @@
 // divergenzeService — le divergenze fra pin e voci conservate «da verificare» (L4 «Avanzamento unico», lotti/L4/modifiche.md §3.2)
 // ============================================================
 //
-// La migrazione utente 022 ha conservato, senza scrivere niente, i pin che prima di L4 risultavano fatti con una loro voce non fatta
+// I pin che prima di L4 risultavano fatti con una loro voce non fatta sono conservati così, senza scrivere niente
 // (decisione dell'utente del 2026-10-20). Restano «da verificare» finché l'utente non sceglie: «Segna la voce» (`PUT /api/partite/:id/
 // punti`, la riga se ne va quando la voce è fatta) o «Togli il fatto al pin» (qui: il segno di prima del pin si toglie, la voce resta
 // com'è). Nessun'altra strada le scrive.

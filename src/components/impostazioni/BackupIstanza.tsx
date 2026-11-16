@@ -80,7 +80,7 @@ export function BackupIstanza() {
     stato.imposta(esito.stato);
     // il database è cambiato sotto i piedi dell'app: partite e cache locali vanno rilette
     await usePartitaStore.getState().carica();
-    notifica('success', `Istanza ripristinata dal ${esito.formato === 'istanza' ? 'backup completo' : 'database'}${esito.immagini ? `, ${esito.immagini} immagini` : ''}${esito.caratteri ? `, ${esito.caratteri} caratteri` : ''}. Copia di sicurezza: ${esito.copiaDiSicurezza}. La pagina si ricarica.`);
+    notifica('success', `Istanza ripristinata dal ${esito.formato === 'istanza' ? 'backup completo' : 'database'}${esito.caratteri ? `, ${esito.caratteri} caratteri` : ''}. Copia di sicurezza: ${esito.copiaDiSicurezza}. La pagina si ricarica.`);
     // con il backup completo cambiano anche immagini e caratteri: ogni cache di pagina è da rifare, la ricarica è la via pulita
     setTimeout(() => window.location.reload(), 1500);
   };

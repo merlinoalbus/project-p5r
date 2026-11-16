@@ -4,12 +4,12 @@
 //
 // Un oggetto «a riga» del registro dei ripristini (`righe.ts`): il regalo (`confidente_regalo`, 144 righe; chiave composta, qui «<confidente>:<ordine>»,
 // l'espressione SQL `confidente_chiave || ':' || ordine`). Il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne `origine`,
-// `seed_json`, `updated_at` della migrazione 212), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
+// `seed_json`, `updated_at`), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
 //
 // Si correggono: dove si compra, il costo (la frase), la reazione, la nota e l'oggetto del catalogo collegato. NON si correggono: il nome e l'effetto del regalo
 // (li dà l'oggetto del catalogo, che si corregge dal catalogo), l'ordine e il Confidente (identità della riga). Cambiare un regalo non cambia i punti già dati
 // nelle partite (il regalo è un'azione registrata, R10-18): la partita conserva ciò che ha registrato.
-// Ondata 5 (decisione 21 dell'utente, «sconsigliati riconvertiti a +1»): la reazione (+3/+2/+1, `confidente_regalo.reazione`, migrazioni 255-256) prende il
+// Ondata 5 (decisione 21 dell'utente, «sconsigliati riconvertiti a +1»): la reazione (+3/+2/+1, `confidente_regalo.reazione`) prende il
 // posto di «sconsigliato», che la guida non usa. Una fotografia di prima con «sconsigliato» resta leggibile: quel campo non si rimette più.
 // ============================================================
 

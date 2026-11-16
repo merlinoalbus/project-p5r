@@ -88,7 +88,7 @@ export interface ContestoIndice {
   dungeon: Map<string, { nome: string; tipo: string }>;
   /** `dungeon_area` (infiltrazioni dei Palazzi e dedali dei Memento) per chiave. */
   dungeonArea: Map<string, { dungeon: string; nome: string }>;
-  /** I dungeon confluiti in un dedalo dei Memento (L8 B7, migrazione 175: oggi Iweleth): non sono Palazzi, e le loro infiltrazioni, Aree e planimetrie non si indicizzano (le mostra il dedalo). */
+  /** I dungeon confluiti in un dedalo dei Memento (L8 B7: oggi Iweleth): non sono Palazzi, e le loro infiltrazioni, Aree e planimetrie non si indicizzano (le mostra il dedalo). */
   confluiti: Set<string>;
   sinonimi: SinonimiRicerca;
 }

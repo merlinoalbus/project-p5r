@@ -5,9 +5,9 @@
 // «Che ci siano elementi raccoglibili sui palazzi che siano slegati dai pin non è corretto... lo stato di questi punti deve
 // essere integrato (ove possibile) con gli elementi in mappa.» Poi: «lascia i punti come sono senza fare riconciliazioni...
 // li sistemo io via via a mano». Quindi niente abbinamenti automatici: il collegamento lo fa l'utente dalla guida
-// (`collegaPinAlPunto`) o dall'editor delle mappe: uno o più pin per punto e, dalla 098, una o più voci per pin (`spillo_voce`;
-// prima era il campo `voce_chiave` della 094, e prima ancora il riferimento, che i pin con una destinazione o un Confidente
-// avevano già occupato). Da lì gli stati si legano: segnare il punto segna i suoi pin, raccogliere tutti i pin segna il punto
+// (`collegaPinAlPunto`) o dall'editor delle mappe: uno o più pin per punto e una o più voci per pin (`spillo_voce`,
+// non il riferimento del pin, che i pin con una destinazione o un Confidente
+// hanno già occupato). Da lì gli stati si legano: segnare il punto segna i suoi pin, raccogliere tutti i pin segna il punto
 // (`impostaRaccolto`, `impostaStatoPunto`); un pin con più voci è fatto quando tutte le sue voci sono segnate, e ogni voce si
 // segna da sola (scelta dell'utente, 2026-10-09: «Voci indipendenti»).
 // ============================================================
@@ -29,7 +29,7 @@ export { allineaEnigma, allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, alli
  * Le regole del collegamento di un pin a una voce, le stesse per ogni strada che lo scrive — la guida (`collegaPinAlPunto`),
  * l'editor delle mappe, il pacchetto delle mappe (rilievo della revisione, 2026-10-01): la voce esiste, non è descrittiva e non
  * è un Enigma con i suoi passi, e il pin sta su una planimetria del Palazzo della voce. Un pin che ha già altre voci si collega
- * anche a questa (098, scelta dell'utente del 2026-10-09: prima si rifiutava con «già collegato»).
+ * anche a questa (scelta dell'utente del 2026-10-09).
  * Restituisce l'errore da lanciare, o `null` se il collegamento è ammesso (chi importa un pacchetto lo scarta e lo conta).
  */
 export function erroreVoceDelPin(pin: { nome: string; mappa: string | null }, puntoChiave: string): HttpError | null {

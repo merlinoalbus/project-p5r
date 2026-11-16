@@ -52,7 +52,7 @@ export function OggiMappa({ oggi, riempi, raggruppaVicini = false }: Props) {
   // toccando un Palazzo (`atterraggio`, 2026-10-04)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- il giorno della partita non entra nella lettura: al suo cambio si rilegge
   const dungeon = useCarica(async () => (suTokyo ? radiciMetaverso(await getDungeons(oggi.partitaId)) : []), [suTokyo, oggi.partitaId, attiva?.dataGioco]);
-  // il Covo dei Ladri sulla mappa solo quando la sua Area è nel mondo (dal 5 maggio, dai dati: migrazione 303); si rilegge quando
+  // il Covo dei Ladri sulla mappa solo quando la sua Area è nel mondo (dal 5 maggio, dai dati); si rilegge quando
   // cambia lo stato della partita (il giorno che avanza)
   const covo = useCovoNellaPartita(oggi.partitaId, attiva, suTokyo);
 

@@ -3,13 +3,13 @@
 // ============================================================
 //
 // Da L3 un'infiltrazione (`dungeon_area`) tocca delle **Aree** del Palazzo (tabella `area` con `dungeon_chiave`), molti a molti, in
-// `infiltrazione_area` (migrazione 110): l'ordine delle aree dentro l'infiltrazione e la versione da aprire (`planimetria_iniziale`,
+// `infiltrazione_area`: l'ordine delle aree dentro l'infiltrazione e la versione da aprire (`planimetria_iniziale`,
 // null = la predefinita dell'area). È l'unica fonte del legame: `mappa_entita` di tipo area, le colonne `mappa.entita_*` e i gruppi
-// d'immagini non ci sono più (tolti da L11 · B9, migrazione 177; prima nessuno li leggeva, R3-09). «Le planimetrie di un'infiltrazione» sono quelle delle
+// d'immagini non ci sono (L11 · B9, R3-09). «Le planimetrie di un'infiltrazione» sono quelle delle
 // sue aree, nell'ordine dei legami e poi delle versioni (modifiche §1.2).
 //
 // Il modulo dipende solo dal database e dai percorsi pubblici: lo usano la scheda del Palazzo, le Aree, la guida sulle mappe,
-// l'accesso dal mondo e il pacchetto, senza richiamarsi in cerchio. Su uno schema prima della 110 (test fermi a una migrazione) la
+// l'accesso dal mondo e il pacchetto, senza richiamarsi in cerchio. Su uno schema vecchio la
 // tabella non c'è e le letture tornano vuote.
 // ============================================================
 
@@ -18,7 +18,7 @@ import { haTabellaMain } from '../../db/schemaMemo.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { idMappa } from './percorsiMappe.js';
 
-/** Vero se la tabella dei legami c'è (dalla 110). */
+/** Vero se la tabella dei legami c'è. */
 export function conLegami(): boolean {
   return haTabellaMain(getDb(), 'infiltrazione_area');
 }

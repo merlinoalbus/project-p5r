@@ -1,8 +1,7 @@
 // ============================================================
 // L3 (2026-10-20) — i Palazzi con le Aree: scheda, legami infiltrazione ↔ area, case, rotte delle Aree con il contenitore `dungeon`,
 // pacchetto, campo «Infiltrazioni» del diario e voci «da rivedere» (lotti/L3/modifiche.md §6.1, punti 2–9), sui dati del pacchetto
-// iniziale migrati alla 110 (che lì crea le aree ma non tocca il diario, base di una generazione precedente: le proposte di G-022 si
-// provano nel test della migrazione)
+// iniziale
 // ============================================================
 
 import request from 'supertest';

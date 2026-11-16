@@ -2,9 +2,8 @@
 // attivita — i cataloghi delle attività: tipo, fascia, come si tracciano
 // ============================================================
 //
-// Il tipo e la fascia di un'attività erano testo con un elenco ammesso solo nel modulo del
-// catalogo; qui diventano cataloghi condivisi con l'etichetta, usati dal modulo, dalle pagine e
-// dalle migrazioni. `tracciamento` dice come la partita conta un'attività: per niente (studiare,
+// Il tipo e la fascia di un'attività sono cataloghi condivisi con l'etichetta, usati dal modulo
+// del catalogo e dalle pagine. `tracciamento` dice come la partita conta un'attività: per niente (studiare,
 // mangiare), come «svolta n volte» (mini-giochi, lavori, sfide: sono le attività che le
 // condizioni citano) o per sessioni (i videogiochi, che hanno un numero di round).
 // ============================================================

@@ -18,7 +18,7 @@ interface Props {
   luogo: { chiave: string; nome: string };
   /** Le aree del quartiere (slug e nome), nel loro ordine. */
   aree: ReadonlyArray<{ slug: string; nome: string }>;
-  /** L'area proposta (dedotta dalla migrazione), se c'è: parte scelta. */
+  /** L'area proposta, se c'è: parte scelta. */
   proposta?: string | null;
   onChiudi: () => void;
   /** Dopo il salvataggio: chi apre la finestra rilegge. */

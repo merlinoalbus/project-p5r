@@ -33,7 +33,7 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
     }
   }
   for (const [tipo, query] of [
-    // L10-01 (381): la Richiesta non ha più testi di ricompensa (vuoti in 33/33): i suoi premi sono i legami stessi
+    // L10-01: la Richiesta non ha testi di ricompensa: i suoi premi sono i legami stessi
     ['richiesta', "SELECT chiave,nome,'' AS testo FROM richiesta"],
     ['domanda', 'SELECT chiave,domanda AS nome,ricompensa AS testo FROM domanda WHERE chiave IS NOT NULL'],
     ['esame', 'SELECT chiave,nome,note AS testo FROM esame'],
@@ -52,7 +52,7 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
     const prodotti = ricompensePerFonte('ricetta');
     for (const r of datiGuidaCorretti<OggettiGuidaDto>('oggetti-guida')?.fabbricazione.ricette ?? []) {
       const collegati = prodotti.get(r.attrezzo) ?? [];
-      // Ondata 5, lotto F (migrazione 279): l'effetto della ricetta è quello del prodotto, che la scheda dell'oggetto dice già; qui resta solo il
+      // Ondata 5, lotto F: l'effetto della ricetta è quello del prodotto, che la scheda dell'oggetto dice già; qui resta solo il
       // testo proprio della ricetta, se c'è (senza un prodotto unico collegato, o corretto dall'utente)
       aggiungi('ricetta', r.attrezzo, { nome: collegati.length ? collegati.map((p) => p.nome).join(' / ') : 'Prodotto non collegato',
         testo: [r.effetto?.trim() ? r.effetto : null, !collegati.length ? `Nome nella fonte: ${r.attrezzo}` : null].filter(Boolean).join(' · '), casa: conElemento('/guida/oggetti?scheda=fabbricazione', r.attrezzo) });

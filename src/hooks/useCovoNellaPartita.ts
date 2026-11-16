@@ -3,7 +3,7 @@
 // ============================================================
 //
 // «Il covo dei ladri si sblocca il 5 maggio» e deve comparire «in mappa solo da quella data in poi». La data non sta qui: sta una volta
-// nei dati, come condizione dell'Area del Covo (`area.condizioni_json`, migrazione 303), e il server dice per la partita se l'Area è
+// nei dati, come condizione dell'Area del Covo (`area.condizioni_json`), e il server dice per la partita se l'Area è
 // già nel mondo (`disponibile`, `bloccoMotivo`), come per ogni altro posto datato. Qui si legge solo quell'esito, per la fermata della
 // mappa di Tokyo e per i collegamenti fra la pagina del Covo e la sua Area. Senza partita il server dice «disponibile», come per tutti.
 // ============================================================

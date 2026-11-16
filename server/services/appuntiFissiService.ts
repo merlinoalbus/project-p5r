@@ -6,7 +6,7 @@
 // Richiesta dell'utente: «una sorta di clipboard su finestra fluttuante dove possa io inserire e mantenere salvati delle voci che tendono a
 // ripetersi nel diario», proposta approvata «Sì, sul server»; poi «voglio poter raggruppare per categorie (chiudibili e apribili) gli Appunti
 // Fissi nonchè riordinarli con click e trascina all'interno di gruppi o della lista di Appunti fissi», proposta approvata «Sì, procedi».
-// Gli appunti stanno in `utente.appunto_fisso` (migrazione utente 058), le categorie in `utente.categoria_appunti` (067); non sono di una partita.
+// Gli appunti stanno in `utente.appunto_fisso`, le categorie in `utente.categoria_appunti`; non sono di una partita.
 //
 //   - Un appunto sta in un GRUPPO: una categoria (`categoria_id`) o la lista senza categoria (NULL). Il suo `ordine` è il posto nel gruppo, da 0
 //     senza buchi; anche le categorie hanno il loro ordine da 0 senza buchi. Un appunto nuovo va in fondo al suo gruppo, una categoria nuova in

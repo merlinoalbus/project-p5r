@@ -300,7 +300,7 @@ describe('Aree del mondo (L2)', () => {
     getDb().pragma('foreign_keys = ON');
     await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true }).expect(200);
     expect(JSON.stringify(prepared("SELECT a.chiave, a.nome, a.ordine, a.planimetria_predefinita, m.chiave AS mappa, m.versione_ordine, m.versione_etichetta FROM area a JOIN mappa m ON m.area_chiave = a.chiave WHERE a.quartiere_chiave = 'shibuya' ORDER BY m.chiave").all())).toBe(prima);
-    // un pacchetto di prima (senza `aree`): le planimetrie del mondo ricevono un'Area con la regola della 109
+    // un pacchetto di prima (senza `aree`): le planimetrie del mondo ricevono un'Area con la regola dell'importazione
     const { aree: _a, ...diPrima } = pacchetto;
     getDb().pragma('foreign_keys = OFF');
     prepared("UPDATE mappa SET area_chiave = NULL, versione_ordine = NULL, versione_etichetta = NULL WHERE area_chiave LIKE 'citta/shibuya/%'").run();

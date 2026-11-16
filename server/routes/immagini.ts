@@ -5,7 +5,7 @@
 // Caricamento: PUT /api/immagini/:ambito/:chiave con il file come corpo
 // grezzo (Content-Type image/*), fino a 8 MB. Il frontend usa
 // `fetch(url, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })`.
-// Le immagini vivono nel database (migrazione 079): il file si risponde dal contenuto della riga,
+// Le immagini vivono nel database: il file si risponde dal contenuto della riga,
 // con un ETag stabile finché la riga non cambia.
 // ============================================================
 

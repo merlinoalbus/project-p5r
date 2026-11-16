@@ -8,7 +8,7 @@ import { getConfidenti, getDungeons, getElenchiRegole, getQuartieri, getRichiest
 import type { NomiCondizioni, RequisitoSpillo } from '../../shared/condizioniSpillo';
 
 /** Le condizioni senza il testo descrittivo del server (è il server a ricalcolarlo): quel che si rimanda salvando uno spillo o una
- *  copia di un pezzo della planimetria (103). */
+ *  copia di un pezzo della planimetria. */
 export function condizioniSenzaTesto(condizioni: readonly CondizioneSpilloDto[]): RequisitoSpillo[] {
   return condizioni.map((c) => {
     if (c.tipo === 'avviso') return { tipo: 'avviso', testo: c.testo };

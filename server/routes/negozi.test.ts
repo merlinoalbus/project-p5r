@@ -30,7 +30,7 @@ describe('API negozi e inventario', () => {
     const n = (await request(app).get('/api/compendio/negozi')).body.data as NegozioRiassuntoDto[];
     expect(n).toHaveLength(getDb().prepare('SELECT COUNT(*) FROM negozio WHERE nascosto = 0').pluck().get() as number);
     expect(n.length).toBeGreaterThanOrEqual(60);
-    // gli articoli visibili: quelli della guida (con Star Forneus, creato dalla 073) più i creati, meno i nascosti
+    // gli articoli visibili: quelli della guida (con Star Forneus) più i creati, meno i nascosti
     expect(n.reduce((s, x) => s + x.articoli, 0)).toBe(articoliVisibili());
     expect(articoliVisibili()).toBeGreaterThan(500);
     const u = n.find((x) => x.chiave === 'untouchable')!;
@@ -40,7 +40,7 @@ describe('API negozi e inventario', () => {
     expect(n.find((x) => x.chiave === 'tanaka-affari-loschi')?.quartiereChiave).toBeNull();
     const d = (await request(app).get('/api/compendio/negozi/untouchable')).body.data as NegozioDettaglioDto;
     expect(d.articoliElenco).toHaveLength(218);
-    // la 250 unisce le due Kogatana nere nella scheda «materiale» (Oggetti chiave e materiali) e vi conserva le statistiche dell'arma (Joker)
+    // le due Kogatana nere stanno in una sola scheda «materiale» (Oggetti chiave e materiali), con le statistiche dell'arma (Joker)
     expect(d.articoliElenco[0]).toMatchObject({ chiave: 'untouchable/kogatana-nera', nome: 'Kogatana nera', categoria: 'materiale', per: 'Joker', prezzo: 1000, acquistato: false, verificato: true });
     expect(d.articoliElenco.every((a) => a.chiave.startsWith('untouchable/'))).toBe(true);
     expect(new Set(d.articoliElenco.map((a) => a.chiave)).size).toBe(218);
@@ -141,7 +141,7 @@ describe('API negozi e inventario', () => {
     db.exec(`CREATE TEMP TABLE backup_tutte_condizioni_articoli_negozi_test AS SELECT chiave, condizioni_json FROM articolo;
       CREATE TEMP TABLE backup_tutte_condizioni_negozi_test AS SELECT chiave, sblocco_json, eccezione_orari_json FROM negozio`);
     try {
-      // niente condizioni e negozi sempre aperti: la presenza del negozio sono gli orari (dalla 373 solo l'eccezione del negozio; quelli
+      // niente condizioni e negozi sempre aperti: la presenza del negozio sono gli orari (del negozio solo l'eccezione; quelli
       // della sede restano, e la partita nuova parte di giorno)
       db.exec(`UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET sblocco_json = '[]', eccezione_orari_json = '{"giorni":[],"fasce":[],"chiusoConPioggia":false,"nota":null}'`);
       const id = ((await request(app).post('/api/partite').send({ nome: 'Catalogo completo' })).body.data as { id: number }).id;

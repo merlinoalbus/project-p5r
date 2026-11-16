@@ -4,16 +4,16 @@
 //
 // Regole dell'utente: «i gruppi senza pin devono essere visibili solo nella planimetria dove sono stati inseriti»; «lasciali agganciati alla
 // planimetria 1 e dammi la possibilità di spostarli a mano in altre planimetrie durante la mia review». Una regola sola, calcolata alla
-// lettura (correzione del PM: niente valori scritti dalla migrazione, così una voce che perde i pin, una voce nuova o una planimetria
+// lettura (correzione del PM: niente valori salvati, così una voce che perde i pin, una voce nuova o una planimetria
 // ripristinata non restano mai senza planimetria), usata da tutte le letture:
 //   a) una voce **con pin** sta dove stanno i suoi pin (su ognuna di quelle planimetrie; la principale è quella con più pin, a parità la
 //      del primo pin);
-//   b) **senza pin** e con l'**aggancio a mano** (`punto_interesse.planimetria_chiave`, 114): quella planimetria;
+//   b) **senza pin** e con l'**aggancio a mano** (`punto_interesse.planimetria_chiave`): quella planimetria;
 //   c) **senza pin e senza aggancio**: la **planimetria 1** della sua infiltrazione, cioè quella con cui l'infiltrazione si apre: la
 //      planimetria iniziale della prima Area toccata nell'ordine (`infiltrazione_area`; senza, la predefinita di quell'Area; la prima Area
 //      toccata che ne dà una); se l'infiltrazione non tocca Aree, la predefinita della prima Area del Palazzo che ne ha una. Se non si trova
 //      niente, nessuna planimetria.
-// Un **Enigma** con i suoi passi (095) sta dove sta almeno uno dei passi, e ogni passo segue la propria regola; la sua planimetria
+// Un **Enigma** con i suoi passi sta dove sta almeno uno dei passi, e ogni passo segue la propria regola; la sua planimetria
 // principale è quella del primo passo. Le voci dei Memento (e dei loro dedali) non hanno planimetrie: nessuna.
 // ============================================================
 

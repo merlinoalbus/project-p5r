@@ -9,10 +9,8 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, prepared } from '../db/dbService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { utente008 } from '../db/migrazioniUtente/008_effetti_delle_azioni_utente.js';
-import { DDL_UTENTE_STORICHE } from '../db/schemaUtente.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, PercorsoGiornoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
@@ -159,17 +157,5 @@ describe('API — voci aggiunte dall\'utente come azioni della guida', () => {
       prepared("UPDATE libro SET nascosto = 0 WHERE chiave = 'zorro-il-fuorilegge'").run();
       await elimina(a.uid);
     }
-  });
-
-  it('migrazione utente 008: le cose da fare scritte prima ricevono gli effetti dalle loro note', () => {
-    // la tabella di allora (la «utente» 015 l'ha convertita e tolta)
-    getDb().exec(DDL_UTENTE_STORICHE.find((s) => s.includes('utente.azione_utente ('))!);
-    const adesso = 'x';
-    const id = Number(prepared("INSERT INTO utente.azione_utente (partita_id, data, fascia, tipo, azione, note, ordine, created_at, updated_at) VALUES (NULL, '04-25', 'sera', 'altro', 'Bagno pubblico', 'Fascino +2', 1, ?, ?)").run(adesso, adesso).lastInsertRowid);
-    const senza = Number(prepared("INSERT INTO utente.azione_utente (partita_id, data, fascia, tipo, azione, note, ordine, created_at, updated_at) VALUES (NULL, '04-25', 'sera', 'altro', 'Comprare il pane', NULL, 2, ?, ?)").run(adesso, adesso).lastInsertRowid);
-    utente008.up(getDb());
-    expect(JSON.parse((prepared('SELECT produce_json FROM utente.azione_utente WHERE id = ?').get(id) as { produce_json: string }).produce_json)).toEqual([{ tipo: 'dote', dote: 'fascino', note: 2 }]);
-    expect(prepared('SELECT produce_json FROM utente.azione_utente WHERE id = ?').get(senza)).toEqual({ produce_json: '[]' });
-    getDb().exec('DROP TABLE utente.azione_utente');
   });
 });

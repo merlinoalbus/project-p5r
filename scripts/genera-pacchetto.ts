@@ -1,98 +1,98 @@
 // ============================================================
-// genera-pacchetto — porta `pacchetto/gioco.db` alla versione del codice (o lo rifà dai dati di gioco dell'istanza)
+// genera-pacchetto — rifà `pacchetto/gioco.db` dai dati di gioco dell'istanza
 // ============================================================
 //
-//   npm run pacchetto            aggiorna il pacchetto: migrazioni alla versione corrente, VACUUM
-//   npm run pacchetto -- --da-istanza   sostituisce il pacchetto con i dati di gioco dell'istanza (DATA_DIR/gioco.db)
+//   npm run pacchetto
 //
-// Scrive lo stesso file in due posti: `pacchetto/completo/gioco.db` (con le immagini dentro, ~311 MB, FUORI da
-// git: si importa dall'app) e `pacchetto/gioco.db` (senza il contenuto delle immagini, pochi MB, in git: è ciò
-// che il primo avvio copia per aprire l'interfaccia, e ciò che i test caricano).
+// Il pacchetto è il file che ogni nuova installazione copia al primo avvio, e ciò che i test caricano. Nasce dai dati di gioco
+// dell'istanza che si cura (`DATA_DIR/gioco.db`, la cartella dati della configurazione): è il modo in cui le correzioni fatte
+// nell'app diventano dato predefinito. È una fotografia: quello che l'istanza ha tolto resta tolto e quello che ha aggiunto resta
+// aggiunto; nessuna sincronizzazione con la guida ricrea spilli o mappe.
 //
-// Il pacchetto è il file che ogni nuova installazione copia al primo avvio; dalla migrazione 079
-// porta dentro anche le immagini (mappe, Confidenti, sfondi…), quindi è un solo file. Quando una
-// migrazione cambia i dati (orari strutturati, condizioni…), il pacchetto va rigenerato e
-// committato, così un file di gioco nuovo nasce già alla versione del codice. Con `--da-istanza` il
-// pacchetto diventa una copia dei dati di gioco dell'istanza locale (senza partite: stanno in un
-// altro file), che è il modo in cui le correzioni fatte nell'app diventano dato predefinito. È una fotografia: quello
-// che l'istanza ha tolto resta tolto e quello che ha aggiunto resta aggiunto (decisione dell'utente,
-// 2026-09-12); nessuna sincronizzazione con la guida ricrea spilli o mappe. Il cestino dell'istanza (migrazione 104) invece non
-// passa: il pacchetto nasce col cestino vuoto.
+// Che cosa fa, senza mai scrivere nell'istanza:
+//   1. verifica che `gioco.db` dell'istanza sia alla versione che il codice legge (`VERSIONE_GIOCO`): un pacchetto di un'altra
+//      versione non servirebbe a nessuna installazione;
+//   2. ne fa una copia consistente in una cartella di lavoro (backup in linea di SQLite, sicuro anche con il server acceso);
+//   3. sulla copia: applica le regole sui dati dell'avvio (il pacchetto nasce già a posto), svuota il cestino e le miniature (sono
+//      dell'istanza, non dato predefinito) e toglie il contenuto delle immagini (restano le righe: l'app sa che cosa manca; le
+//      immagini arrivano con un backup completo importato dall'app);
+//   4. `VACUUM INTO`, giornale classico e controllo di integrità → `pacchetto/gioco.db`.
+//
+// Le partite non c'entrano: stanno in un altro file, e il loro modello (`pacchetto/partite-vuoto.db`) è un file fisso del
+// repository che questo script non genera.
 // ============================================================
 
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import Database from 'better-sqlite3';
-import { config } from '../server/config.js';
-import { closeDb, copiaSchema, initDb, resolveDbPath } from '../server/db/dbService.js';
-import { runMigrations } from '../server/db/migrationRunner.js';
-import { percorsoPacchettoCompleto, percorsoPacchettoDb, regoleAllAvvio } from '../server/services/pacchetto/pacchettoGioco.js';
+import { resolveDbPath } from '../server/db/dbService.js';
+import { VERSIONE_GIOCO, messaggioVersioneDiversa } from '../server/db/versioneSchema.js';
+import { percorsoPacchettoDb, regoleAllAvvio } from '../server/services/pacchetto/pacchettoGioco.js';
 
-const daIstanza = process.argv.includes('--da-istanza');
-const destinazione = percorsoPacchettoCompleto();
-const destinazioneIniziale = percorsoPacchettoDb();
+const sorgente = resolveDbPath();
+const destinazione = percorsoPacchettoDb();
 const lavoro = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-pacchetto-'));
-const provvisorio = path.join(lavoro, 'gioco.db');
+const copia = path.join(lavoro, 'gioco.db');
+const compatto = path.join(lavoro, 'gioco.compatto.db');
 
-// La cartella di lavoro tiene fino a ~600 MB (il provvisorio e le due copie compattate): si toglie anche se una migrazione o un
-// VACUUM fallisce a metà, non solo a lavoro riuscito (rilievo S7 della verifica completa, 2026-10-03).
+/** La versione (`user_version`) di un database aperto. */
+const versioneDi = (db: Database.Database): number => db.pragma('user_version', { simple: true }) as number;
+
+// La cartella di lavoro tiene la copia dei dati di gioco (centinaia di MB): si toglie anche se un passo fallisce a metà.
 try {
-  if (daIstanza) {
-    const sorgente = resolveDbPath();
-    // il vecchio file unico viene rinominato da initDb: basta che esista uno dei due
-    if (!fs.existsSync(sorgente) && !fs.existsSync(path.join(config.dataDir, config.dbFileNameLegacy))) throw new Error(`Nessuna istanza in ${sorgente}.`);
-    const db = initDb(sorgente);
-    runMigrations(db);
-    await copiaSchema(db, provvisorio, 'main');
-    closeDb();
-  } else {
-    // si parte dal completo se c'è, altrimenti dall'iniziale (le immagini arriveranno dalla migrazione 079 o dall'istanza)
-    const sorgente = fs.existsSync(destinazione) ? destinazione : destinazioneIniziale;
-    if (!fs.existsSync(sorgente)) throw new Error(`Il pacchetto manca (${destinazione} o ${destinazioneIniziale}): usa --da-istanza per crearlo dai dati di gioco dell'istanza.`);
-    fs.copyFileSync(sorgente, provvisorio);
-  }
+  if (!fs.existsSync(sorgente)) throw new Error(`Nessun file dei dati di gioco in ${sorgente}: il pacchetto si genera dall'istanza (DATA_DIR).`);
 
-  // migrazioni alla versione corrente su una copia, con un file delle partite usa e getta accanto
-  const db = initDb(provvisorio);
-  runMigrations(db);
-  // le stesse regole sui dati dell'avvio: il pacchetto nasce già a posto, e un'istanza nuova non cambia nulla al primo avvio
-  console.log('regole applicate:', JSON.stringify(regoleAllAvvio(db)));
-  // il cestino (104) è dell'istanza da cui viene il pacchetto: le sue eliminazioni, con i registri e le immagini, non diventano dato
-  // predefinito di un'installazione nuova (la parte delle partite sta nel file usa e getta accanto e se ne va con lui)
-  console.log('elementi del cestino tolti:', db.prepare('DELETE FROM main.cestino').run().changes);
-  // le miniature (108, L1) sono dati derivati dell'istanza: né il completo né l'iniziale le portano (si rigenerano al primo uso)
-  if (db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'immagine_miniatura'").get()) {
-    console.log('miniature tolte:', db.prepare('DELETE FROM main.immagine_miniatura').run().changes);
-  }
-  const versione = db.pragma('main.user_version', { simple: true }) as number;
-  const tabelle = (db.prepare("SELECT COUNT(*) AS n FROM main.sqlite_master WHERE type = 'table'").get() as { n: number }).n;
-  const partite = (db.prepare("SELECT COUNT(*) AS n FROM main.sqlite_master WHERE type = 'table' AND name = 'partita'").get() as { n: number }).n;
-  if (partite > 0) throw new Error('Il file di gioco contiene ancora la tabella partita: la migrazione 066 non è stata applicata.');
-  const immagini = db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(byte), 0) AS byte FROM immagine WHERE contenuto IS NOT NULL').get() as { n: number; byte: number };
-  closeDb();
-
-  const compatto = new Database(provvisorio);
+  // 1-2. versione attesa e copia consistente: l'istanza si apre in sola lettura e non viene mai scritta
+  const istanza = new Database(sorgente, { readonly: true, fileMustExist: true });
   try {
-    compatto.exec(`VACUUM INTO '${path.join(lavoro, 'gioco.compatto.db').replace(/'/g, "''")}'`);
+    const versione = versioneDi(istanza);
+    if (versione !== VERSIONE_GIOCO) throw new Error(`Il pacchetto non si può generare. ${messaggioVersioneDiversa('gioco', versione, VERSIONE_GIOCO)}`);
+    await istanza.backup(copia);
   } finally {
-    compatto.close();
+    istanza.close();
+  }
+
+  // 3-4. sulla copia: regole, cestino e miniature vuoti, immagini senza contenuto, poi il file compatto
+  const db = new Database(copia);
+  let tabelle = 0;
+  let immagini = 0;
+  try {
+    db.pragma('foreign_keys = ON');
+    if (db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'partita'").get()) {
+      throw new Error('Il file dei dati di gioco contiene la tabella «partita»: non è un file di soli dati di gioco.');
+    }
+    // le stesse regole sui dati dell'avvio: un'istanza nuova non cambia nulla al primo avvio
+    console.log('regole applicate:', JSON.stringify(regoleAllAvvio(db)));
+    // il cestino è dell'istanza da cui viene il pacchetto: le sue eliminazioni non diventano dato predefinito di un'installazione nuova
+    console.log('elementi del cestino tolti:', db.prepare('DELETE FROM main.cestino').run().changes);
+    // le miniature sono dati derivati dell'istanza: si rigenerano al primo uso
+    console.log('miniature tolte:', db.prepare('DELETE FROM main.immagine_miniatura').run().changes);
+    immagini = db.prepare('UPDATE main.immagine SET contenuto = NULL WHERE contenuto IS NOT NULL').run().changes;
+    console.log('immagini senza più il contenuto:', immagini);
+    tabelle = (db.prepare("SELECT COUNT(*) AS n FROM main.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'").get() as { n: number }).n;
+    // il pacchetto è un file solo, senza giornali accanto
+    db.pragma('wal_checkpoint(TRUNCATE)');
+    db.prepare('VACUUM INTO ?').run(compatto);
+  } finally {
+    db.close();
+  }
+
+  // il file compatto si controlla prima di metterlo al posto del pacchetto; giornale classico, così chi lo apre non gli crea giornali WAL accanto
+  const finito = new Database(compatto, { fileMustExist: true });
+  try {
+    const giornale = finito.pragma('journal_mode = DELETE', { simple: true });
+    if (giornale !== 'delete') throw new Error(`Il pacchetto generato è in modalità «${String(giornale)}» invece di «delete».`);
+    if (versioneDi(finito) !== VERSIONE_GIOCO) throw new Error('La versione dei dati non è sopravvissuta alla compattazione.');
+    const integrita = finito.pragma('integrity_check', { simple: true }) as string;
+    if (integrita !== 'ok') throw new Error(`Il pacchetto generato non supera il controllo di integrità: ${integrita}.`);
+  } finally {
+    finito.close();
   }
   fs.mkdirSync(path.dirname(destinazione), { recursive: true });
-  fs.copyFileSync(path.join(lavoro, 'gioco.compatto.db'), destinazione);
-  // l'iniziale: lo stesso file senza il contenuto delle immagini (restano le righe: l'app sa che cosa manca)
-  const iniziale = new Database(provvisorio);
-  try {
-    iniziale.exec('UPDATE immagine SET contenuto = NULL');
-    iniziale.exec(`VACUUM INTO '${path.join(lavoro, 'gioco.iniziale.db').replace(/'/g, "''")}'`);
-  } finally {
-    iniziale.close();
-  }
-  fs.copyFileSync(path.join(lavoro, 'gioco.iniziale.db'), destinazioneIniziale);
-  console.log(`Pacchetto completo scritto in ${destinazione}: schema ${versione}, ${tabelle} tabelle, ${(fs.statSync(destinazione).size / 1024 / 1024).toFixed(2)} MB, immagini dentro ${immagini.n} (${(immagini.byte / 1024 / 1024).toFixed(1)} MB). Iniziale (senza immagini) in ${destinazioneIniziale}: ${(fs.statSync(destinazioneIniziale).size / 1024 / 1024).toFixed(2)} MB.`);
+  fs.copyFileSync(compatto, destinazione);
+  console.log(`Pacchetto scritto in ${destinazione}: versione ${VERSIONE_GIOCO}, ${tabelle} tabelle, ${(fs.statSync(destinazione).size / 1024 / 1024).toFixed(2)} MB, senza il contenuto delle immagini.`);
 } finally {
-  // una connessione rimasta aperta da un errore terrebbe bloccati i file (su Windows la cartella non si toglierebbe)
-  closeDb();
   try {
     fs.rmSync(lavoro, { recursive: true, force: true });
   } catch (err) {

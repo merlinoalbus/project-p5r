@@ -2,14 +2,14 @@
 // contestiParziali.test.ts — titoli contestuali parzialmente ricostruiti (nome null) conservati a roundtrip, reseed e importazioni invalide
 // ============================================================
 
-import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
+import { closeDb } from '../../db/dbService.js';
+import { dbDiProvaSenzaMappe } from '../../../test/dbDiProva.js';
 import { importaMappe, esportaMappe, dettaglioMappa, elencaMappe } from './mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 describe('titoli contestuali parzialmente ricostruiti',()=>{
  afterEach(()=>closeDb());
  it('conserva null e identità al roundtrip e al reseed, senza rinominare mappa o genitore',()=>{
-  const db=initDb(':memory:');runMigrations(db);
+  const db=dbDiProvaSenzaMappe();
   const base={tipo:'generica' as const,genitore:null,ordine:0,immagine:null,asset:null,larghezza:null,altezza:null,entita:null,note:'',spilli:[]};
   const contesti=[{id:'noto',nome:'Ripostiglio',campo:'F153_004_00',texpack:1},{id:'ignoto',nome:null,campo:'F153_051_00',texpack:2}];
   const p:EsportazioneMappeDto={versione:1,mappe:[{...base,chiave:'padre-verificato',nome:'Palazzo verificato'},{...base,chiave:'risorsa-parziale',nome:'Nome conservato',genitore:'padre-verificato',contesti}]};

@@ -15,7 +15,6 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { closeDb, getDb, prepared } from '../../db/dbService.js';
-import { sincronizzaMappe } from '../../db/migrations/congelati/sincronizzaMappe027.js';
 import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
 import { eStrutturale } from '../../../shared/spilli.js';
 import { valutaRequisitiSpillo } from '../disponibilitaService.js';
@@ -23,15 +22,12 @@ import { dettaglioMappa } from './mappeService.js';
 import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
-// Superato dal lotto L11 (B9, migrazione 177): `sincronizzaMappe` è la copia congelata della migrazione 027 e non regge su uno schema aggiornato
-// (scrive `mappa.entita_*`, legge i marcatori). Il test resta, da riscrivere.
+// Superato dal lotto L11 (B9): la formazione dalla guida (spilli dai marcatori, presenza dei luoghi sui pin) che questa suite chiedeva
+// esplicitamente prima dei casi non esiste più (`sincronizzaMappe` e `applicaPresenzaAiLuoghi` sono stati tolti): il pacchetto è la
+// fotografia dell'istanza. La suite resta messa da parte, da riscrivere sui dati del pacchetto.
 describe.skip('visibilità condizionale dei pin', () => {
   beforeAll(() => {
-    const db = dbDiProva();
-    // il pacchetto e' la fotografia della produzione: la formazione dalla guida (spilli dai marcatori,
-    // presenza dei luoghi sui pin) non avviene piu' da sola, qui si chiede esplicitamente
-    sincronizzaMappe(db);
-    // (R11-03/1: `applicaPresenzaAiLuoghi` di `presenzaEntita.ts` è stato eliminato, orfano di produzione; suite non eseguita, da riscrivere)
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -256,7 +252,7 @@ describe.skip('visibilità condizionale dei pin', () => {
     expect(statoDelPin()).not.toBe('bloccato');
 
     // ora si chiude il negozio nel catalogo (gli orari: solo di sera, e la partita è di giorno), e **basta**: lo spillo non viene toccato
-    // dalla 373 gli orari propri del negozio sono la sua eccezione (`eccezione_orari_json`)
+    // gli orari propri del negozio sono la sua eccezione (`eccezione_orari_json`)
     const prima = db.prepare('SELECT eccezione_orari_json FROM negozio WHERE chiave = ?').get(pin!.riferimento_chiave) as { eccezione_orari_json: string | null };
     db.prepare('UPDATE negozio SET eccezione_orari_json = ? WHERE chiave = ?')
       .run(JSON.stringify({ giorni: [], fasce: ['sera'], chiusoConPioggia: false, nota: null }), pin!.riferimento_chiave);

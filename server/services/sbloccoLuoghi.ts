@@ -5,8 +5,8 @@
 // Modulo foglia (solo database e condivisi): lo usano `luoghiService` (presenza del luogo) e `negoziService` (presenza della sede di un
 // negozio), che altrimenti si richiamerebbero in cerchio.
 // L6 (§1, §4.2): lo sblocco è la condizione della riga (`luogo.condizioni_json`) **oppure** un invito di un Confidente che apre il luogo
-// (`confidente_invito`). Le regole `dati_guida.sblocco-luoghi` non si leggono più: la migrazione 118 le ha copiate nelle righe senza
-// condizione (erano già strutturate, l'esito non cambia).
+// (`confidente_invito`). Le regole `dati_guida.sblocco-luoghi` non si leggono: stanno nelle righe dei luoghi,
+// come condizioni.
 // ============================================================
 
 import { condizionePropriaArea, conGliInviti, invitiCheAprono, tuttiGliInviti, type RigaInvito } from './condizioni/condizioneEffettiva.js';
@@ -18,7 +18,7 @@ export function invitiPerSblocco(): RigaInvito[] {
   return tuttiGliInviti();
 }
 
-/** Presenza fisica: quartiere AND condizione propria della sua Area (303) AND (condizioni proprie OR inviti). `luogo{}` conserva invece lo
+/** Presenza fisica: quartiere AND condizione propria della sua Area AND (condizioni proprie OR inviti). `luogo{}` conserva invece lo
  *  sblocco intrinseco usato dai quartieri. Quartiere e Area si leggono dalla riga se li porta, altrimenti dal luogo. */
 export function condizioniDiSblocco(r: { chiave: string; condizioni_json: string | null; quartiere_chiave?: string | null; area_chiave?: string | null }, inviti: readonly RigaInvito[] = tuttiGliInviti()): RequisitoSpillo[] {
   const riga = r.quartiere_chiave == null || r.area_chiave === undefined

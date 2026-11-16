@@ -13,7 +13,7 @@
 // boss) restano in una piega «Dalla guida» con Ottenuto/Esaurito, senza effetto sulla percentuale.
 //
 // I Memento non hanno aree fisse: al posto della colonna delle aree c'è il pozzo disegnato, e la
-// colonna di destra sono le **aree del dedalo** (099, richiesta dell'utente del 2026-10-11) — ognuna
+// colonna di destra sono le **aree del dedalo** (richiesta dell'utente del 2026-10-11) — ognuna
 // con i suoi elementi: voci della guida e Richieste — che con i timbri del dedalo (L10-02) fanno la
 // percentuale; un'area è completata quando lo sono tutti, il dedalo quando lo sono tutte e i suoi timbri
 // sono tutti raccolti. La pianta della guida non c'è: i piani si generano.
@@ -321,7 +321,7 @@ export function DungeonDettaglioPage() {
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Infiltrazione non creata.'); }
     finally { setOccupato(false); }
   };
-  // L'anello conta quel che si raccoglie: collezionabili delle planimetrie (Palazzi) o elementi delle aree dei dedali (Memento, 099).
+  // L'anello conta quel che si raccoglie: collezionabili delle planimetrie (Palazzi) o elementi delle aree dei dedali (Memento).
   // L4 (§1.5, §8.10): nei Palazzi l'anello conta gli oggetti permanenti (numeri del server, percentuale per difetto come la sua); nei
   // Memento gli obiettivi dei dedali, come prima (R4-30). L10-03: la percentuale, per difetto, con la regola unica dei dedali e delle carte
   // dei Luoghi (`percentualeSegnati`), anche per i Memento (prima arrotondata: 199 su 200 diceva 100%)

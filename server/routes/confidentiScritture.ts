@@ -29,7 +29,7 @@ router.put('/confidenti/:chiave/abilita/:rango', validate({ params: paramsRango,
   res.json(impostaAbilita(p.chiave, p.rango, req.body.abilita));
 });
 
-// migrazione 309: i punti solo numerici, da 0 a 3 note (null = la guida non ne dà), e quelli del ramo amore dove la guida dà altro
+// i punti solo numerici, da 0 a 3 note (null = la guida non ne dà), e quelli del ramo amore dove la guida dà altro
 const puntiScelta = z.number().int().min(0).max(3).nullable();
 const scelta = z.object({ testo: z.string().trim().min(1).max(500), punti: puntiScelta, puntiAmore: puntiScelta.optional(), romantica: z.boolean(), avviso: z.string().max(500).nullable() }).strict();
 router.put('/confidenti/:chiave/dialoghi/:id', validate({ params: paramsDialogo, body: z.object({ note: z.string().max(4000).optional(), scelte: z.array(scelta).max(40).optional() }).strict() }), (req, res) => {
@@ -44,7 +44,7 @@ const corpoInvito = z.object({
   apre: z.object({ tipo: z.enum(['quartiere', 'luogo', 'area']), chiave: z.string().min(1).max(200) }).strict(),
   condizioni: z.array(condizioneSpillo).max(20),
   nota: z.string().max(500),
-  // L13 (O7-4, migrazione 313): quando arriva il messaggio dell'invito (giorno e fascia), se la guida lo dice; assente = resta com'è, null = nessuno
+  // L13 (O7-4): quando arriva il messaggio dell'invito (giorno e fascia), se la guida lo dice; assente = resta com'è, null = nessuno
   messaggio: z.object({ data: dataInvito, fascia: z.enum(['giorno', 'sera']) }).strict().nullable().optional(),
 }).strict();
 router.post('/confidenti/:chiave/inviti', validate({ params: paramsChiaveGuida, body: corpoInvito.extend({ data: dataInvito }).strict() }), (req, res) => {

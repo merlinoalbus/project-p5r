@@ -5,8 +5,8 @@
 // `shared/migraCondizioni.ts` non tocca il DB: riceve funzioni. Qui si costruiscono, una volta
 // per uso, dalle tabelle della Guida: il nome di una richiesta, di un libro, di un film o di un
 // articolo → la sua chiave; se un quartiere ha una data di sblocco; quali libri vende Jinbocho;
-// la finestra di ogni Palazzo. Si accetta il `db` esplicito perché serve anche alle migrazioni,
-// che non passano dal `prepared` condiviso.
+// la finestra di ogni Palazzo. Il `db` è esplicito: lo passa chi chiama
+// (il salvataggio del catalogo, i test).
 // ============================================================
 
 import type Database from 'better-sqlite3';
@@ -33,14 +33,14 @@ function cercaPerNome(db: Database.Database, sql: string): (nome: string) => str
   };
 }
 
-/** Vero se la tabella esiste nel `db`: le migrazioni possono girare quando le tabelle della Guida non sono ancora state create. */
+/** Vero se la tabella esiste nel `db`: un file vecchio può non avere le tabelle della Guida. */
 function haTabella(db: Database.Database, nome: string): boolean {
   return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(nome);
 }
 
 /**
  * La query che legge i nomi di una tabella: `nome_it` (la copia italiana, tolta dal modello di libri, film e articoli) si legge solo se la colonna
- * c'è ancora, perché le migrazioni storiche girano anche su database di prima della sua eliminazione (L11, R11-02/10); dopo, non esiste più.
+ * c'è: la ha soltanto un database vecchio (L11, R11-02/10).
  */
 function selezioneNomi(db: Database.Database, tabella: string): string {
   const colonne = (db.prepare(`PRAGMA table_info(${tabella})`).all() as Array<{ name: string }>).map((c) => c.name);
@@ -66,10 +66,10 @@ function condizioniConData(json: string | null): boolean {
 }
 
 /**
- * I quartieri «datati» per la conversione delle frasi. Le migrazioni 036, 052, 064 e 070 girano prima o dopo la 037 che crea `sblocco_data` e comunque
- * prima della 356 che la toglie: finché la colonna c'è, vale lei. Senza la colonna vale la condizione del quartiere (`condizioni_json`, posteriore alla
- * 036: se manca, nessun quartiere è datato). Per effetto della 356 Ikebukuro, Odaiba e Maihama non contano più come datati (la loro condizione è un
- * luogo), Kanda-Jinbocho e Roppongi sì (la condizione ha una data); Shinjuku, Kichijoji, Akihabara e Suidobashi restano.
+ * I quartieri «datati» per la conversione delle frasi. Su un database vecchio che ha ancora la colonna `sblocco_data`, vale lei. Senza la
+ * colonna vale la condizione del quartiere (`condizioni_json`: se manca, nessun quartiere è datato): Ikebukuro, Odaiba e Maihama non
+ * contano come datati (la loro condizione è un luogo), Kanda-Jinbocho e Roppongi sì (la condizione ha una data), come Shinjuku, Kichijoji,
+ * Akihabara e Suidobashi.
  */
 function quartieriDatati(db: Database.Database): Set<string> {
   if (!haTabella(db, 'quartiere')) return new Set();

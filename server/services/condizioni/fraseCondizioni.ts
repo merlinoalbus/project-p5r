@@ -2,7 +2,7 @@
 
 import { condizioneConTesto, leggiCondizioniSalvate, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 
-/** L8-03: le condizioni salvate come JSON in un elemento della guida (`condizioniJson` dei blocchi, migrazione 340), ognuna con la sua frase.
+/** L8-03: le condizioni salvate come JSON in un elemento della guida (`condizioniJson` dei blocchi), ognuna con la sua frase.
  *  Un JSON assente o rotto vale «nessuna». */
 export function condizioniDellaGuida(json: unknown, nomi: NomiCondizioni): Array<RequisitoSpillo & { testo: string }> {
   return leggiCondizioniSalvate(typeof json === 'string' ? json : null).map((c) => condizioneConTesto(c, nomi));

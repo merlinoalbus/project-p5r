@@ -17,7 +17,8 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { config } from '../server/config.js';
 import { initDb, closeDb, getDb } from '../server/db/dbService.js';
-import { runMigrations } from '../server/db/migrationRunner.js';
+import { creaPartiteDalModelloSeMancano } from '../server/db/partiteVuote.js';
+import { verificaVersioni } from '../server/db/versioneSchema.js';
 import { risolviAccessoMondo } from '../server/services/mappe/accessoMondoService.js';
 import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../shared/accessoMondo.js';
 
@@ -40,11 +41,11 @@ function argomento(nome: string): string | undefined {
 const dati = argomento('--dati') ?? config.dataDir;
 const rapporto = argomento('--rapporto');
 
-// Il DB di gioco con il nome di oggi (`gioco.db`, con `partite.db` attaccato da `initDb`). Prima apriva `project-p5r.db`, il nome
-// di prima della migrazione 066: il file non c'era più, SQLite ne creava uno vuoto e la misura si faceva sul nulla (rilievo S1
-// della verifica completa, 2026-10-03).
+// I dati di gioco della cartella indicata (`gioco.db`, con `partite.db` attaccato da `initDb`), così come sono: devono essere alla
+// versione che il codice legge, altrimenti la misura si ferma con il motivo (su un file vuoto o di un'altra versione si farebbe sul nulla).
 const db = initDb(path.join(dati, config.dbFileName));
-runMigrations(db);
+creaPartiteDalModelloSeMancano(db);
+verificaVersioni(db);
 
 // Un'eccezione del risolutore non e' un'entita' senza associazione: e' un guasto, e confonderle
 // nasconderebbe un bug SQL dietro un numero che sembra normale. Vanno contate a parte, e la

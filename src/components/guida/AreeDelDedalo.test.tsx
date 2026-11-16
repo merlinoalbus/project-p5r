@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 // ============================================================
-// Test AreeDelDedalo — un dedalo dei Memento, un'area per volta coi suoi quattro elementi (099, progetto del 2026-10-12)
+// Test AreeDelDedalo — un dedalo dei Memento, un'area per volta coi suoi quattro elementi (progetto del 2026-10-12)
 // ============================================================
 
 import { useState } from 'react';

@@ -21,7 +21,7 @@ it('i nomi uguali conservano ogni ID senza associare un campo arbitrario',()=>{
   expect(alternativeMappa(m)[1]).toEqual({nome:'Museo, 2P',ids:['b','c'],valore:'b|c'});
   expect(titoloContesto(m,'b|c')).toBe('Museo, 2P');
 });
-// Superato dal lotto L11 (B9, migrazione 177): una planimetria in una stanza ha sempre un'etichetta di versione (il gruppo senza etichetta non esiste
+// Superato dal lotto L11 (B9): una planimetria in una stanza ha sempre un'etichetta di versione (il gruppo senza etichetta non esiste
 // più) e il nome della stanza è `area.nome`. Il test resta, da riscrivere.
 it.skip('le immagini del Covo condividono solo il nome verificato del luogo',()=>{
   expect(nomePresentazioneMappa({nome:'livello grafico 4',nomeRivisto:false,area:areaDi('Covo dei Ladri'),versione:{etichetta:null,ordine:3}})).toBe('Covo dei Ladri');
@@ -63,7 +63,7 @@ it('i contesti completi continuano a mostrare tutte le alternative senza nomi ne
 });
 
 // ---- Il nome della stanza scelto da una persona (2026-09-30) ----
-// Superato dal lotto L11 (B9, migrazione 177): la stanza è l'Area e il suo nome (`area.nome`) vince sempre sul nome rivisto della singola mappa, anche
+// Superato dal lotto L11 (B9): la stanza è l'Area e il suo nome (`area.nome`) vince sempre sul nome rivisto della singola mappa, anche
 // quando non l'ha scelto una persona. Il test resta, da riscrivere.
 it.skip('il nome della stanza scelto da una persona vince sul nome rivisto della mappa; senza, resta quello della mappa', () => {
   const stanza = { nome: 'Prigione sotterranea - Tutorial', nomeRivisto: true, area: areaDi('Prigione'), versione: { etichetta: 'planimetria completa', ordine: 0 } };
@@ -71,7 +71,7 @@ it.skip('il nome della stanza scelto da una persona vince sul nome rivisto della
   expect(titoloGruppoImmagini({ ...stanza, area: undefined })).toBe('Prigione sotterranea - Tutorial');
 });
 
-// ---- Il nome rivisto a mano (082) ----
+// ---- Il nome rivisto a mano ----
 //
 // Il caso da cui è nata la regola: due versioni della stessa immagine del sottopasso di Shibuya,
 // con lo stesso nome di gruppo e un'etichetta ciascuna. Chi correggeva il campo «Nome» nell'editor

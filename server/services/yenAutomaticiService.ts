@@ -25,7 +25,7 @@
 // ha ancora una proposta aperta o yen già applicati con una proposta resta in quel registro («in sospeso», `yenPropostiInSospeso`) finché non
 // torna a zero, così niente si conta due volte e niente si applica in silenzio.
 //
-// Le cause nate prima che gli yen si muovessero da soli (utente 049, `yen_automatico_inizio`) erano già nel saldo e non hanno un movimento:
+// Le cause nate prima che gli yen si muovessero da soli (`yen_automatico_inizio`) erano già nel saldo e non hanno un movimento:
 // togliendole non torna niente. Il segno «fuori registro» (`segnaYenFuoriRegistro`, prima di restituire) vale SOLO per la stessa causa nata
 // prima, ricavata dal suo momento, e rimettendola il saldo non cambia perché nel gioco non è successo niente di nuovo:
 //   - l'effetto di una voce: la nozione è UNA, `yenDellEffettoGiaNelSaldo`, e si ricava da ciò che è successo a quell'effetto, non dalla data
@@ -76,7 +76,7 @@ export const MOTIVO_VOCE_ELIMINATA = 'voce-eliminata';
  *  del catalogo si fonde in un altro o si elimina (cambia solo `catalogo_chiave`): così la restituzione ritrova sempre il suo movimento. */
 export const causaYenRegalo = (confidente: string, regalo: string): CausaYen => ({ tipo: 'regalo', chiave: `${confidente}:${regalo}` });
 
-/** Il momento da cui gli yen si muovono da soli in questo file delle partite (utente 049); null se manca (nessuna causa è «di prima»). */
+/** Il momento da cui gli yen si muovono da soli in questo file delle partite; null se manca (nessuna causa è «di prima»). */
 function inizioRegistro(): string | null {
   return (prepared('SELECT dal FROM utente.yen_automatico_inizio WHERE id = 1').get() as { dal: string } | undefined)?.dal ?? null;
 }
@@ -178,14 +178,14 @@ function applicatoPrimaDegliYenAutomatici(p: number, voceUid: string, effettoUid
   return !prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta' AND COALESCE(json_extract(dati_json, '$.passato'), 0) <> 1").get(p, `${voceUid}:${effettoUid}`);
 }
 /** Gli uid degli effetti di una porzione del registro delle operazioni: la lista degli effetti, o un oggetto che la contiene in `effetti` (lo
- *  stato della fonte, la decisione su un candidato, il registro delle migrazioni). Null se la forma non è riconoscibile. */
+ *  stato della fonte, la decisione su un candidato). Null se la forma non è riconoscibile. */
 function uidDegliEffetti(x: unknown, profondita = 0): string[] | null {
   if (Array.isArray(x)) return x.flatMap((e) => (e && typeof e === 'object' && typeof (e as { uid?: unknown }).uid === 'string' ? [(e as { uid: string }).uid] : []));
   if (profondita < 2 && x && typeof x === 'object' && 'effetti' in x) return uidDegliEffetti((x as { effetti: unknown }).effetti, profondita + 1);
   return null;
 }
 /** Vero se la porzione «prima» del registro è una fonte ancora da convertire (il testo legacy): convertirla non aggiunge effetti nuovi nel gioco,
- *  li scrive come dati (i tre libri della revisione della 049 sono di questo tipo). */
+ *  li scrive come dati. */
 function fonteDaConvertire(x: unknown): boolean {
   if (!x || typeof x !== 'object') return false;
   const stato = (x as { stato?: unknown }).stato ?? ((x as { effetti?: unknown }).effetti as { stato?: unknown } | null | undefined)?.stato;
@@ -193,7 +193,7 @@ function fonteDaConvertire(x: unknown): boolean {
 }
 /**
  * Gli effetti aggiunti alla voce dopo che gli yen si muovono da soli, dal registro delle operazioni sugli effetti (`main.operazione_effetti_voce`,
- * scritto da ogni salvataggio, decisione su un candidato e migrazione che aggiunge un effetto): un uid assente in `prima_json` e presente in
+ * scritto da ogni salvataggio e decisione su un candidato): un uid assente in `prima_json` e presente in
  * `dopo_json` di un'operazione nata da `inizio` in poi. Una conversione della fonte legacy non conta (l'effetto c'era già, come testo). Una riga
  * del registro illeggibile ferma il gesto (`registro-yen-illeggibile`): niente si muove alla cieca. L13 (decisione 4): la usa anche il
  * riepilogo di una voce spuntata con articoli in alternativa aggiunti dopo la spunta (`alternativeAggiunteDopoLaSpunta`), con la data della spunta.

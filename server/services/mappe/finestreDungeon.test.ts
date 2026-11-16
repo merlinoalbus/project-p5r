@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Tre cose che erano state affermate senza prova, e che qui diventano un test.
-import { caricaPacchetto, percorsoPacchettoDb } from '../pacchetto/pacchettoGioco.js';
+import { percorsoPacchettoDb } from '../pacchetto/pacchettoGioco.js';
 import Database from 'better-sqlite3';
 // **La prima**: che `collegaPalazziAiLuoghi` crei un ingresso per ogni Palazzo dichiarato, sulla
 // mappa del luogo dichiarato. Dal 2026-09-12 il pacchetto di gioco e' la fotografia dell'istanza di
@@ -28,9 +28,8 @@ import Database from 'better-sqlite3';
 // ============================================================
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { closeDb, initDb, getDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
-import { migrations } from '../../db/migrations/index.js';
+import { closeDb, getDb } from '../../db/dbService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 import { ordineGioco, valutaRequisitiSpillo } from '../disponibilitaService.js';
 import { dettaglioMappa } from './mappeService.js';
 /** `collegaPalazziAiLuoghi` era uno stub che restituiva 0 ed è stato tolto con `sincronizzaMappe.ts` (L11 · B9): serve solo al test messo da parte con `describe.skip`, perché compili. */
@@ -97,9 +96,7 @@ function ingressi(): Ingresso[] {
 // Il test resta, da riscrivere.
 describe.skip('le finestre dei Palazzi, dagli ingressi che collegaPalazziAiLuoghi crea', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    runMigrations(db);
-    caricaPacchetto(db);
+    const db = dbDiProva();
     // Il pacchetto e' la fotografia della produzione: gli ingressi della guida non ci sono, ma l'utente puo'
     // aver messo collegamenti suoi verso un Palazzo (es. un passaggio interno al Palazzo di Kamoshida), che la
     // funzione conta come «ingresso gia' presente». Qui si prova la funzione, non i dati dell'utente: si parte
@@ -161,15 +158,5 @@ describe.skip('le finestre dei Palazzi, dagli ingressi che collegaPalazziAiLuogh
     const colonne = (getDb().prepare("SELECT name FROM pragma_table_info('mappa')")
       .all() as Array<{ name: string }>).map((c) => c.name);
     expect(colonne).not.toContain('condizioni_json');
-  });
-
-  it('il registro delle migrazioni e’ applicato per intero, senza buchi in coda', () => {
-    // La 047 era scritta ma non registrata: su un database esistente non sarebbe mai partita, e
-    // il test verde non se ne accorgeva. Qui l'ultima registrata e la `user_version` devono
-    // coincidere, e gli id devono essere una sequenza senza salti.
-    const ids = migrations.map((m) => m.id).sort((a, b) => a - b);
-    expect(ids).toEqual(Array.from({ length: ids.length }, (_, i) => i + 1));
-    const versione = (getDb().prepare('PRAGMA user_version').get() as { user_version: number }).user_version;
-    expect(versione).toBe(ids[ids.length - 1]);
   });
 });

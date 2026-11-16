@@ -19,12 +19,12 @@ import { normalizzaSconto, prezzoScontato, scontoAttivo, type ScontoNegozio } fr
 
 const eFascia = (v: unknown): v is FasciaPrezzo => v === 'giorno' || v === 'sera';
 
-/** Vero se il file di gioco ha la colonna del prezzo per fascia (migrazione 260); uno schema di prima legge solo `prezzo`. */
+/** Vero se il file di gioco ha la colonna del prezzo per fascia; uno schema vecchio legge solo `prezzo`. */
 function conPrezzoPerFascia(): boolean {
   return haColonnaMain(getDb(), 'articolo', 'prezzo_per_fascia_json');
 }
 
-/** La colonna del prezzo per fascia da mettere in una SELECT sull'articolo con l'alias dato (`NULL` su uno schema di prima della 260). */
+/** La colonna del prezzo per fascia da mettere in una SELECT sull'articolo con l'alias dato (`NULL` su uno schema senza la colonna). */
 export function sqlPrezzoPerFascia(alias: string): string {
   return conPrezzoPerFascia() ? `${alias}.prezzo_per_fascia_json` : 'NULL';
 }
@@ -41,7 +41,7 @@ export function fasciaDellaPartita(partitaId: number): FasciaPrezzo | null {
   return eFascia(f) ? f : null;
 }
 
-/** Vero se il file di gioco ha la colonna dello sconto del negozio (migrazione 254); uno schema di prima non sconta niente. */
+/** Vero se il file di gioco ha la colonna dello sconto del negozio; uno schema vecchio non sconta niente. */
 function conSconto(): boolean {
   return haColonnaMain(getDb(), 'negozio', 'sconto_json');
 }

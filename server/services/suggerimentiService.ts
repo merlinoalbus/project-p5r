@@ -85,7 +85,7 @@ function aggiungiLuogo(r: Raccolta, chiaveLuogo: string): void {
 /** Aggiunge un negozio con il suo quartiere, i luoghi che lo ospitano e lo spillo sulla mappa. */
 function aggiungiNegozio(r: Raccolta, chiaveNegozio: string): void {
   r.negozi.add(chiaveNegozio);
-  // il luogo puntuale è la sede (072), e porta con sé il quartiere e la sua mappa; senza sede (online, Niijima) niente quartiere
+  // il luogo puntuale è la sede, e porta con sé il quartiere e la sua mappa; senza sede (online, Niijima) niente quartiere
   const n = prepared('SELECT sede_chiave FROM negozio WHERE chiave = ?').get(chiaveNegozio) as { sede_chiave: string | null } | undefined;
   if (n?.sede_chiave) aggiungiLuogo(r, n.sede_chiave);
   const sp = prepared("SELECT id FROM spillo WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ? ORDER BY id LIMIT 1").get(chiaveNegozio) as { id: number } | undefined;

@@ -10,7 +10,7 @@
 // Le voci dei dedali dei Memento e le Persona (L8) non hanno carattere (null): restano come sono.
 // Una voce «Altro» è descrittiva (si legge, non si segna) finché l'utente non le dà «permanente» o «rigenerabile» (`CARATTERI_CON_STATO`):
 // allora si segna e conta come le altre (2026-10-31), con la regola unica `puntoDescrittivo` di `shared/spilli.ts`.
-// Il carattere scelto dall'utente (`punto_interesse.carattere`, migrazione 111) vince sulla regola; NULL vuol dire «vale la regola»,
+// Il carattere scelto dall'utente (`punto_interesse.carattere`) vince sulla regola; NULL vuol dire «vale la regola»,
 // così una correzione della regola vale per tutte le voci non scelte a mano e «Ripristina» è rimettere NULL.
 // Server e interfaccia usano queste funzioni: nessuno ricalcola il carattere a modo suo.
 // ============================================================
@@ -76,7 +76,7 @@ export function carattereDellaVoce(v: VoceConCarattere): CarattereVoce | null {
 
 /**
  * La stessa regola in SQL, per la voce con l'alias dato (colonne `tipo`, `area_dedalo_chiave` e, se c'è, `carattere`): il carattere
- * effettivo o NULL. `conColonna` falso per uno schema di prima della 111.
+ * effettivo o NULL. `conColonna` falso per uno schema senza la colonna `carattere`.
  */
 export function sqlCarattereVoce(alias: string, conColonna = true): string {
   const lista = (tipi: readonly string[]) => tipi.map((t) => `'${t}'`).join(', ');

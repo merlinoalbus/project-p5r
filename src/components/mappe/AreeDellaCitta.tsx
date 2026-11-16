@@ -4,7 +4,7 @@
 //
 // «Area riservata allo staff» non sta in nessuna fonte leggibile (G-002): per decisione dell'utente è un'area della città, marcata
 // «Da verificare», e lui deciderà se tenerla («Tieni» toglie il segno) o toglierla («Rimuovi», con conferma: va nel cestino).
-// Le planimetrie del mondo rimaste senza area (dopo la 109 nessuna) hanno «Colloca»: un quartiere, un'area esistente o nuova,
+// Le planimetrie del mondo rimaste senza area hanno «Colloca»: un quartiere, un'area esistente o nuova,
 // un'etichetta; il quartiere proposto è quello del genitore della planimetria. Le due sezioni compaiono solo se c'è qualcosa da mostrare.
 // ============================================================
 

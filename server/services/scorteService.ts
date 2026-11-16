@@ -4,7 +4,7 @@
 //
 // Decisione 21 dell'utente (26 ottobre): la rigenerazione dei negozi per tutte le categorie, con la regola della guida e, dove tace, la regola
 // dell'utente (il segno vale fino al cambio di giornata). Il ciclo si calcola in lettura (`shared/rifornimento.statoScorta`) dalla data della
-// partita e dalle righe di `utente.registro_acquisti` (utente 051): nessuna scrittura al cambio di giornata, quindi il conto resta giusto se
+// partita e dalle righe di `utente.registro_acquisti`: nessuna scrittura al cambio di giornata, quindi il conto resta giusto se
 // la data torna indietro o si toglie una spunta.
 //
 // Le righe le scrivono soltanto `negoziService.impostaAcquisto` (la pagina del negozio, i regali, la spunta di una voce che segna lo stato) e
@@ -28,7 +28,7 @@ export interface RigaRegistro { id: number; partita_id: number; articolo_chiave:
 /** Quel che serve della riga dell'articolo: la regola, i pezzi per ciclo e, per la biblioteca, il libro. */
 export interface ArticoloConRegola { chiave: string; quantita: number | null; rifornimento_json?: string | null; oggetto_fonte?: string | null; oggetto_chiave?: string | null }
 
-/** Il registro esiste (partite.db già migrato alla 051): prima della migrazione nessuna scorta, tutto come prima. */
+/** Il registro esiste: su un partite.db vecchio, senza la tabella, nessuna scorta. */
 function conRegistro(): boolean {
   return haTabellaUtente(getDb(), 'registro_acquisti');
 }
@@ -40,7 +40,7 @@ export function regolaDi(a: ArticoloConRegola): RegolaRifornimento | null {
 
 /**
  * Le righe del registro di un articolo nella partita, dalla più vecchia. Ogni riga porta la chiave con cui l'acquisto è stato segnato (la
- * stessa di `acquisto_partita`, come la migrazione utente 051): il segno «ottenuto» e la riga che lo porta restano così della stessa chiave.
+ * stessa di `acquisto_partita`): il segno «ottenuto» e la riga che lo porta restano così della stessa chiave.
  */
 export function righeDellArticolo(partitaId: number, articolo: string): RigaRegistro[] {
   if (!conRegistro()) return [];
@@ -48,7 +48,7 @@ export function righeDellArticolo(partitaId: number, articolo: string): RigaRegi
 }
 
 /**
- * L'offerta ha un segno «ottenuto» che nessuna riga del registro porta: segnato prima del registro (utente 051), oppure in una partita senza
+ * L'offerta ha un segno «ottenuto» che nessuna riga del registro porta: segnato prima che ci fosse il registro, oppure in una partita senza
  * data di gioco (nessun giorno da registrare). L'interfaccia lo mostra con il suo «Annulla», così resta visibile e correggibile anche per ciò
  * che si rifornisce.
  */

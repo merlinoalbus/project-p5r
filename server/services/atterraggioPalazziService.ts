@@ -8,7 +8,7 @@
 //
 // - **la finestra**: la voce di `finestre-dungeon` in `dati_guida` (dal–al, o senza fine) che decide se il Palazzo compare sulla
 //   mappa di Tokyo per il giorno della partita. È la stessa che dice l'arco corrente alle condizioni: si scrive qui, una sola;
-// - **le regole d'atterraggio** (`dungeon_atterraggio`, migrazione 097): un elenco ordinato; ognuna vale sempre, da un giorno in
+// - **le regole d'atterraggio** (`dungeon_atterraggio`): un elenco ordinato; ognuna vale sempre, da un giorno in
 //   poi, in un intervallo o in un giorno solo, e porta a una planimetria del Palazzo, centrata su un pin se indicato. Vale la
 //   prima che copre il giorno; senza partita, o senza un giorno, vale la prima regola che vale sempre.
 //
@@ -79,7 +79,7 @@ export function atterraggioDelGiorno(dungeon: string, giorno: string | null): { 
  */
 export function impostaAtterraggi(dungeon: string, regole: readonly RegolaAtterraggio[]): AtterraggioPalazzoDto[] {
   richiediDungeon(dungeon);
-  if (!conAtterraggi()) throw httpErrors.conflict('schema-non-aggiornato', 'Le regole di atterraggio arrivano con la migrazione 097: riavvia il server.');
+  if (!conAtterraggi()) throw httpErrors.conflict('schema-non-aggiornato', 'Il database non ha la tabella delle regole di atterraggio.');
   const pronte = regole.map((r, i) => {
     const posto = `regola ${i + 1}`;
     for (const [nome, d] of [['dal', r.dal], ['al', r.al]] as const) {
@@ -106,7 +106,7 @@ export function impostaAtterraggi(dungeon: string, regole: readonly RegolaAtterr
 }
 
 /** Il furto consigliato e il termine della lettera di sfida di un Palazzo (MM-GG, null = la guida non li dà): con la finestra sono le
- *  date del Palazzo (L13 O6-3, migrazione 308), tutte in colonne del dungeon e tutte scritte da `impostaFinestra`. */
+ *  date del Palazzo (L13 O6-3), tutte in colonne del dungeon e tutte scritte da `impostaFinestra`. */
 export interface ConsigliPalazzo { furtoConsigliato: string | null; letteraEntro: string | null }
 
 /** Le quattro date di un Palazzo (le colonne di `dungeon`). */
@@ -114,8 +114,8 @@ interface DateDelPalazzo { finestra_dal: string | null; finestra_al: string | nu
 
 /**
  * Cambia le date del Palazzo: la finestra sulla mappa di Tokyo e, con `consigli`, il furto consigliato e il termine della lettera. L6
- * (§4.4): nelle colonne `dungeon.finestra_dal`/`finestra_al` (migrazione 118), il furto in `furto_consigliato_data` (308) e la lettera in
- * `lettera_entro` (118); su uno schema di prima della 118, la sua voce in `finestre-dungeon` (creata se manca). È l'unico scrittore di
+ * (§4.4): nelle colonne `dungeon.finestra_dal`/`finestra_al`, il furto in `furto_consigliato_data` e la lettera in
+ * `lettera_entro`; su uno schema senza queste colonne, la sua voce in `finestre-dungeon` (creata se manca). È l'unico scrittore di
  * queste colonne. `al` nullo = senza fine, solo dove il gioco non fissa una scadenza (i Memento e i Palazzi col boss dei Memento, Iweleth:
  * 400 `scadenza-necessaria` altrove). L'ordine dev'essere apertura ≤ furto ≤ lettera ≤ scadenza (400 `fine-prima-di-inizio` per la
  * finestra rovesciata, `date-rovesciate` per il resto); senza `consigli` restano quelli salvati, e valgono per l'ordine. Svuota la copia in
@@ -123,7 +123,7 @@ interface DateDelPalazzo { finestra_dal: string | null; finestra_al: string | nu
  */
 export function impostaFinestra(dungeon: string, dal: string, al: string | null, consigli?: ConsigliPalazzo): FinestraDungeon {
   richiediDungeon(dungeon);
-  const colonne = { has: (nome: string): boolean => haColonnaMain(getDb(), 'dungeon', nome) }; // le colonne di `dungeon` che lo schema ha (le date arrivano con le migrazioni 097, 308)
+  const colonne = { has: (nome: string): boolean => haColonnaMain(getDb(), 'dungeon', nome) }; // le colonne di `dungeon` che lo schema ha
   // la regola delle date è una sola, condivisa col modulo «Correggi la scheda» (`shared/datePalazzo`)
   const controlla = (d: DatePalazzo, senzaFinePossibile: boolean) => {
     const e = erroreDatePalazzo(d, senzaFinePossibile);
@@ -136,7 +136,7 @@ export function impostaFinestra(dungeon: string, dal: string, al: string | null,
     // senza `consigli` restano furto e lettera salvati, e valgono per l'ordine
     const lettera = consigli ? consigli.letteraEntro : r.lettera_entro, furto = consigli ? consigli.furtoConsigliato : r.furto_consigliato_data;
     controlla({ dal, al, furtoConsigliato: furto, letteraEntro: lettera }, r.tipo !== 'palazzo' || r.regola_boss === 'memento');
-    if (consigli && !colonne.has('furto_consigliato_data') && consigli.furtoConsigliato !== null) throw httpErrors.badRequest('furto-non-disponibile', 'Il furto consigliato come data arriva con la migrazione 308.');
+    if (consigli && !colonne.has('furto_consigliato_data') && consigli.furtoConsigliato !== null) throw httpErrors.badRequest('furto-non-disponibile', 'Il database non ha la colonna del furto consigliato come data.');
     getDb().transaction(() => {
       prepared('UPDATE dungeon SET finestra_dal = ?, finestra_al = ? WHERE chiave = ?').run(dal, al, dungeon);
       if (consigli) {
@@ -147,7 +147,7 @@ export function impostaFinestra(dungeon: string, dal: string, al: string | null,
     invalidaDatiGuida();
     return finestreDungeon().get(dungeon)!;
   }
-  // uno schema di prima della 118: solo la finestra, nel blocco della guida
+  // uno schema senza le colonne delle date: solo la finestra, nel blocco della guida
   controlla({ dal, al, furtoConsigliato: null, letteraEntro: null }, true);
   // il blocco in memoria è congelato: si lavora su una copia
   const attuale = datiGuida<{ finestre?: Array<{ dungeon: string; dal: string; al?: string }> } & Record<string, unknown>>('finestre-dungeon');

@@ -228,7 +228,7 @@ function SchedaTecnico({ d, onModificato }: { d: BattagliaDto; onModificato: () 
 /** Tre sezioni della guida: la Staffetta con i ranghi e i bonus, gli Speciali con la tabella delle coppie e dello sblocco, e Rapina, Assalto e Parla con i comandi di battaglia. */
 function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const s = d.staffetta; const sp = d.speciali; const a = d.assaltoEHoldUp;
-  // L8-03 (migrazione 340): lo sblocco di ogni Speciale nella partita attiva, in una richiesta sola
+  // L8-03: lo sblocco di ogni Speciale nella partita attiva, in una richiesta sola
   const gruppi = useMemo(() => sp.elenco.map((e) => ({ chiave: e.nome, condizioni: e.condizioni ?? [] })), [sp.elenco]);
   const esiti = useEsitiNellaPartita(gruppi);
   return (
@@ -285,7 +285,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
 }
 
 /**
- * L13-04 (migrazione 369): le Ombre sciagura per Palazzo e per Dedalo, e l'oggetto raro di ognuna raggruppato per oggetto (52 coppie in una ventina
+ * L13-04: le Ombre sciagura per Palazzo e per Dedalo, e l'oggetto raro di ognuna raggruppato per oggetto (52 coppie in una ventina
  * di righe, non 52). Due tabelle adattive: sul telefono ogni riga diventa una scheda con l'etichetta della colonna, senza scorrimenti interni.
  */
 function ElencoSciagura({ elenco, ricompense }: {

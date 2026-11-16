@@ -7,8 +7,8 @@
 // spostato, gli spilli che ha aggiunto, i suoi segni in `spillo_partita`; qualunque
 // riconciliazione che riparta a ogni avvio è un'occasione di riscrivergli addosso qualcosa.
 //
-// All'avvio, con l'hash del seed invariato, il caricamento chiama comunque `sincronizzaMappe`,
-// `collegaPalazziAiLuoghi` e `applicaPresenzaAiLuoghi`. Sono dichiarate idempotenti. «Dichiarate»
+// A ogni avvio girano comunque le regole sui dati (`regoleAllAvvio`: nomi degli spilli, spilli dei
+// luoghi, uid mancanti, miniature orfane). Sono dichiarate idempotenti. «Dichiarate»
 // non basta: qui si prende l'impronta di tutto il livello mappe — righe intere, non conteggi,
 // `updated_at` compreso — si riavvia, e si pretende la stessa impronta. Un conteggio uguale con
 // una data di modifica riscritta passerebbe per idempotente e non lo è: vuol dire che a ogni
@@ -21,13 +21,14 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { closeDb, getDb } from '../../db/dbService.js';
-import { traduciNomiSpilli } from '../../db/migrations/053_nomi_spilli_in_italiano.js';
-import { collegaLuoghiAllePlanimetrie } from '../../db/migrations/054_luoghi_con_la_loro_planimetria.js';
-import { riallineaSpilliLuoghi } from './riallineaSpilliLuoghi.js';
+import { creaPartiteDalModelloSeMancano } from '../../db/partiteVuote.js';
+import { verificaVersioni } from '../../db/versioneSchema.js';
+import { regoleAllAvvio } from '../pacchetto/pacchettoGioco.js';
 import { dbDiProva } from '../../../test/dbDiProva.js';
 
-/** Quel che l'avvio ordinario fa su un database già formato: le regole sui dati di server/index.ts, e nient'altro (il seed non c'è più). */
-function avvioOrdinario(): void { const db = getDb(); traduciNomiSpilli(db); collegaLuoghiAllePlanimetrie(db); riallineaSpilliLuoghi(db); }
+/** Quel che l'avvio ordinario fa su un database già formato, come in server/index.ts: le partite dal modello se mancano, la verifica
+ *  delle versioni e le regole sui dati (tolleranti), e nient'altro. */
+function avvioOrdinario(): void { const db = getDb(); creaPartiteDalModelloSeMancano(db); verificaVersioni(db); regoleAllAvvio(db, 'tollerante'); }
 
 
 /** Le tabelle del livello mappe più il posto dove il giocatore lascia i suoi segni. */

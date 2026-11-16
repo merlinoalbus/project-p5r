@@ -2,7 +2,7 @@
 // FinestraDaVerificare — un pin fatto con la sua voce non fatta, da prima dell'aggiornamento: i due gesti che lo sistemano (L4, §4.1)
 // ============================================================
 //
-// La migrazione utente 022 ha conservato le divergenze che c'erano (decisione dell'utente: niente segnato al suo posto): il pin risulta
+// Le divergenze di prima di L4 sono conservate (decisione dell'utente: niente segnato al suo posto): il pin risulta
 // fatto, una sua voce no. La finestra lo dice senza gergo e offre i due gesti che le chiudono (R4-14b): **«Segna la voce»** (la voce
 // diventa fatta) o **«Togli il fatto al pin»** (il pin torna da fare, la voce resta com'è). La stessa finestra si apre dalla voce
 // (guida dell'infiltrazione), dal pin (visore) e dalla sezione «Da verificare» della scheda del Palazzo.

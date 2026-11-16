@@ -1,5 +1,5 @@
 // ============================================================
-// FormPezzo — le proprietà di una copia di un pezzo della planimetria nell'editor (102, 2026-10-14; copie dalla 103, 2026-10-15)
+// FormPezzo — le proprietà di una copia di un pezzo della planimetria nell'editor (2026-10-14; copie dal 2026-10-15)
 // ============================================================
 //
 // Richiesta dell'utente: «permettermi di selezionarle con il mouse (toglierle dalla visualizzazione ordinaria e gestirle con le

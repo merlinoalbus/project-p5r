@@ -16,15 +16,15 @@ import { nomeCompletoPlanimetria } from '../../../shared/nomiPlanimetrie.js';
 import { httpErrors } from '../../utils/httpError.js';
 
 interface Nodo { chiave:string; nome:string; tipo:string; genitore_chiave:string|null;
-  /** Il percorso pubblico fissato (109, L2: il Covo spostato sotto Yongen-Jaya tiene `covo-dei-ladri`); null = dalla catena dei genitori. */
+  /** Il percorso pubblico fissato (L2: il Covo spostato sotto Yongen-Jaya tiene `covo-dei-ladri`); null = dalla catena dei genitori. */
   percorso_fisso?:string|null }
 
 // ---- Statement per connessione ----
 //
-// Queste funzioni ricevono la connessione (le migrazioni ne usano una loro) e sono chiamate per ogni mappa di ogni risposta: prima
-// compilavano lo statement e controllavano `sqlite_master` a ogni chiamata, un quarto del tempo dell'albero delle mappe (rilievo P2
+// Queste funzioni ricevono la connessione e sono chiamate per ogni mappa di ogni risposta: compilare
+// lo statement e controllare `sqlite_master` a ogni chiamata costerebbe un quarto del tempo dell'albero delle mappe (rilievo P2
 // della verifica, 2026-10-03). Gli statement restano per connessione (una connessione nuova ha i suoi). Della tabella dei percorsi
-// si ricorda solo che c'è: una migrazione può crearla dopo, sulla stessa connessione.
+// si ricorda solo che c'è: il no si ricontrolla.
 const statementPerConnessione = new WeakMap<AppDatabase, Map<string, Database.Statement>>();
 const conPercorsi = new WeakSet<AppDatabase>();
 
@@ -69,7 +69,7 @@ export function nomePercorso(identita:string,db:AppDatabase=getDb()):string {
   return (stmt(db,'SELECT nome FROM mappa_percorso WHERE mappa_chiave=?').get(identita) as {nome:string}|undefined)?.nome??identita;
 }
 const conAreeVersionate = new WeakSet<AppDatabase>();
-/** Vero se la connessione ha le Aree con l'etichetta di versione; il sì si ricorda, il no si ricontrolla (arrivano con le migrazioni). */
+/** Vero se la connessione ha le Aree con l'etichetta di versione; il sì si ricorda, il no si ricontrolla. */
 function haAreeVersionate(db:AppDatabase):boolean {
   if(conAreeVersionate.has(db))return true;
   if(!haTabella(db,'area')||!haColonna(db,'mappa','area_chiave')||!haColonna(db,'mappa','versione_etichetta'))return false;
@@ -124,7 +124,7 @@ export function sincronizzaPercorsiMappe(db:AppDatabase):void {
       visti.add(corrente.chiave);catena.unshift(corrente);
       corrente=corrente.genitore_chiave?indice.get(corrente.genitore_chiave):undefined;
     }
-    // un percorso fissato (109) resta quello, col nome della mappa sola: la mappa si presenta come prima di essere spostata
+    // un percorso fissato resta quello, col nome della mappa sola: la mappa si presenta come prima di essere spostata
     const significativi=n.percorso_fisso?[n]:catena.filter(c=>c.tipo!=='citta'||c===n);
     let chiave=n.percorso_fisso??significativi.map(c=>slug(c.nome)).join('-');
     // Le varianti native possono condividere il nome del luogo. L'identità è nell'URL, mai nel titolo.

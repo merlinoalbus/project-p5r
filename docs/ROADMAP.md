@@ -4,8 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 390 migrazioni di gioco (l'ultima è la 390), 74 delle partite
-(l'ultima è la 074).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: versione 390 dei dati di gioco e 74 delle partite (`server/db/versioneSchema.ts`).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -43,7 +42,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   apribili e riordinati trascinando. Nella finestra della voce la griglia di «Quale» e l'editor «Si fa solo se» si aprono in finestre
   loro, e il corpo della voce resta sotto gli 800 px a 1280.
 - Calendario degli eventi (`/guida/calendario`) collegato alle voci.
-- Dopo il 1° giugno le voci e le Doti della guida dell'elenco approvato il 10/11 (385): gli otto giorni prima scoperti, i passaggi di rango
+- Dopo il 1° giugno le voci e le Doti della guida dell'elenco approvato il 10/11: gli otto giorni prima scoperti, i passaggi di rango
   mancanti (le Gemelle con una voce per rango), Aojiru, letture, scambi di Sakai, l'avanzamento dei videogiochi, Sae e il suo trofeo al 20/11,
   «Occhio di falco» al 4/8, la pesca del 29/11. Resta fuori il film del 5 agosto con Yusuke: la guida non dice quale.
 
@@ -102,7 +101,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   intera, foglio e Guida che non coprono il pin, trascinamento senza ridisegni, Covo chiuso nell'indice prima del 5 maggio) e L4
   (navigazione verso l'elemento: rimandi all'elemento citato invece che all'elenco, ritorno fra mappe sorelle, quattro tipi nuovi nella
   ricerca, Confidenti con un indirizzo solo, Memento dai Palazzi, Ombre collegate dalla scheda Persona) e L5 (prestazioni: indici,
-  cache dei dati di gioco del Diario e dei Palazzi, una voce sola alla spunta, pin letti in blocco, ETag del manifest, copie di avvio
+  cache dei dati di gioco del Diario e dei Palazzi, una voce sola alla spunta, pin letti in blocco, ETag del manifest
   con un tetto in byte, letture condivise di «Da applicare», schede della Partita a richiesta, librerie in un file proprio; risposte
   campione identiche byte per byte; tempi mediani sulla copia: giorno del Diario −23/−39%, mappe −5/−34%, schede di Palazzo e Memento −2/−3%;
   avvio a freddo con «Slow 4G» −0,2 s).
@@ -118,10 +117,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   gestito», «strutture fisse», i testi della pesca in parole da giocatore), «Dove si trova» con la frase del suo tipo; il costo della fusione
   è «evocazione dal Registro», 0 per gli ingredienti in scorta; la disponibilità dell'articolo nel visore dall'esito strutturato; «Stato in:
   …» al posto di «Stato nella …»; nel rilascio la negoziazione mostra le varianti del testo della domanda, senza le provenienze.
-- Da L7, per L8 (correzioni ai dati, non fatte: servono migrazioni): nel pacchetto iniziale 308 testi liberi dei dati di gioco (fuori dalle
+- Da L7, per L8 (correzioni ai dati, non ancora fatte): nel pacchetto iniziale 308 testi liberi dei dati di gioco (fuori dalle
   colonne di fonte e d'archivio) citano allgamestaff, «da verificare», `docs/` o un file `.md`/`.json`; i più sono in `spillo.descrizione`
   (228), poi `dungeon.note` (8), `punto_interesse.descrizione` (7), `settimana_guida.incertezze` (9), `confidente_regalo.*` (7).
-  Il conteggio sull'istanza va rifatto su una copia prima della migrazione.
+  Il conteggio sull'istanza va rifatto su una copia prima della correzione.
   Le incertezze del calendario e della battaglia nel rilascio sono già nascoste; gli altri testi si vedono anche lì.
 - Decisioni dell'utente (01/11): D1 non toccare (L8-01 resta com'è); D2 procedere; D3, D4, D5, D6 sì come proposto; D7 pulsante
   «Applica» nella notifica; D8 e D9 no (nessun tracciamento del Covo; l'annullo dell'incenso resta com'è); D10 sì; D11 no; D12 sì;
@@ -130,8 +129,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   per tutti; «Due arcani» e «Matrice completa» restano nascoste con `?strumenti=1` e nel rilascio non esistono); D20 prima gli schizzi.
   Altre decisioni del 01/11, fatte: la pesca di «Da applicare» con il foglio in tre passi; «Colloca …» rilegge le aree quando l'elenco
   dei contenitori cambia.
-- L8 (coerenza dei dati), stato attuale (migrazioni 335–343, utente 065–066):
-  - Requisiti, date e livelli della guida che l'app sa usare (D4, 340): sblocco degli 8 Speciali, condizioni delle Gemelle e di Lavenza,
+- L8 (coerenza dei dati), stato attuale:
+  - Requisiti, date e livelli della guida che l'app sa usare (D4): sblocco degli 8 Speciali, condizioni delle Gemelle e di Lavenza,
     rango 9 di Maruki entro il 17 novembre per tre finali (Royal, standard come negazione, negativo 3), arco dei Palazzi di 3 ricette, livello consigliato come numero (6 Battaglie Sfida,
     2 boss, Mietitore), 17 sfide del Covo che contano uno stato della partita (attività, lavori, contatori, cruciverba, timbri, yen spesi,
     Confidenti al rango massimo, Richieste, Compendio, livello di una Persona; i totali «tutti» contati nel DB); con lo stato nella partita.
@@ -141,21 +140,20 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
     trofei (Big Bang Burger, fuoricampo, miglior caffè e curry), i punti della pesca sono un saldo senza il guadagnato, i punti del negozio dei vestiti usati sono un saldo, le statistiche delle
     Persona sono stime salvo i valori osservati, i fiori dei Memento e le statistiche di battaglia non si tengono; Maid Café e gioco
     dell'artiglio non sono attività del DB, il Jazz Club non si conta.
-  - Avvisi del giorno: un dato del giorno, modificabile dall'editor del giorno; non ripetono più le voci, la trama e i vincoli (339, e 343
-    per i casi decisi il 01/11: le 13 coperte da trama o vincoli, Yoshida del 17/07, Sumire del 12/01, i doppioni di Medjed, Kaneshiro,
+  - Avvisi del giorno: un dato del giorno, modificabile dall'editor del giorno; non ripetono più le voci, la trama e i vincoli (per i casi decisi il 01/11: le 13 coperte da trama o vincoli, Yoshida del 17/07, Sumire del 12/01, i doppioni di Medjed, Kaneshiro,
     Akechi e Igor, la maid del 20/07; Niijima del 31/10 riscritto; resta il 9/04).
   - Conflitti di dati del censimento degli avvisi, decisi il 01/11: voci del rango 1 di Akechi (10/06) e del rango 10 di Igor (24/12),
     «Impeto dell'Arcano superiore» al rango 6 di Igor, sblocco di «Medicina amara» sulla voce del rango 7 di Takemi (28/05) e della maid
-    sulla voce del rango 8 di Kawakami (19/07) (341), lo sblocco scritto nelle partite che avevano già spuntato la voce del 28/05 come
-    dalla spunta (utente 066); termine di Kaneshiro all'8 luglio, Medjed annunciato il 23/07 con scadenza il 20/08, scadenza di Niijima il
+    sulla voce del rango 8 di Kawakami (19/07), lo sblocco scritto nelle partite che avevano già spuntato la voce del 28/05 come
+    dalla spunta; termine di Kaneshiro all'8 luglio, Medjed annunciato il 23/07 con scadenza il 20/08, scadenza di Niijima il
     19/11, con le date vecchie allineate anche nei riassunti delle settimane 11, 13, 15 e 28, nella trama del 21/06 e nella nota del Palazzo di
     Kaneshiro (il titolo dell'evento 51, «in 3 settimane», resta per decisione dell'utente; il blocco storico `finestre-dungeon` non si tocca), lettera a Kamoshida il 21/04 e furto del Tesoro il 22/04 in due eventi, Biliardo dal rango 2 di Akechi
-    (vale dal rango 2 in su, anche con la voce del rango 3 del 13/08) (342). Hifumi: nessuna modifica (requisito e voce dicono due cose
+    (vale dal rango 2 in su, anche con la voce del rango 3 del 13/08). Hifumi: nessuna modifica (requisito e voce dicono due cose
     diverse). Okumura ed elezioni restano come la trama; le date dei Palazzi si correggono da «Correggi la scheda».
-  - Archivio degli acquisti: tolte le 15 righe della partita 3, che non c'è più (utente 065).
-  - Livello consigliato dei Palazzi: minimo e massimo, con il confronto delle fonti nella nota storica del Palazzo (335).
-  - Capienza della scorta: posti di partenza e gradini in un solo dato (336). Richieste: sblocco dalle condizioni, scadenza dalla data, dedalo
-    da `area_chiave` (337). Giorno di un'infiltrazione: quello delle voci legate a lei.
+  - Archivio degli acquisti: tolte le 15 righe della partita 3, che non c'è più.
+  - Livello consigliato dei Palazzi: minimo e massimo, con il confronto delle fonti nella nota storica del Palazzo.
+  - Capienza della scorta: posti di partenza e gradini in un solo dato. Richieste: sblocco dalle condizioni, scadenza dalla data, dedalo
+    da `area_chiave`. Giorno di un'infiltrazione: quello delle voci legate a lei.
   - Cattura delle Persona: una regola sola per Compendio, alberi e cicli, con tre stati (provata, esclusa per documento, da verificare; le 62
     da verificare restano catturabili, decisione dell'utente). «Dove si incontra»: un servizio solo, Ombre della guida e dedali dei Memento.
   - Effetto dei 90 tratti: un solo testo, la descrizione della guida, in Sfide, scheda Persona, skill e fusione; si corregge dalla riga delle Sfide.
@@ -176,13 +174,13 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   Iweleth senza totale, perché la guida non dà un numero (per Qimranut dice solo che ci sono). Nessun totale generale si impone (scelta
   dell'utente del 10/11): la scheda dei Memento dice una volta la somma dei dedali (153) e il totale dichiarato dalla guida (123). Il 150 della
   guida sta solo nel blocco `timbri-dei-dedali` e nella sfida del Covo «Timbri ovunque», che lo chiede per il premio.
-- Memento: i requisiti di Palazzo delle Richieste seguono le pagine dei Dedali (17 Richieste, 15 aggiunte dalla 383); nei Memento Eligor sta solo in
-  Chemdah, con una voce sola (scelta dell'utente del 10/11), ed Eligor e Reggente stanno fra le Ombre di Chemdah nel blocco della battaglia (384).
+- Memento: i requisiti di Palazzo delle Richieste seguono le pagine dei Dedali (17 Richieste, 15 aggiunte); nei Memento Eligor sta solo in
+  Chemdah, con una voce sola (scelta dell'utente del 10/11), ed Eligor e Reggente stanno fra le Ombre di Chemdah nel blocco della battaglia.
 - Palazzi, da verificare in gioco: i forzieri di Shido tratti dalla guida inglese (per esempio «Life Jacket, Diamante, Granato» nel Ponte
   piscina, dove la guida italiana descrive la Camicia inamovibile).
 - Palazzi, restano com'erano per mancanza di fonte: i nomi inglesi di quattro forzieri di Shido (Soul Food, Life Jacket, Parapsy Ring,
   Classified Armor), che la guida e il catalogo non rendono; le due porte chiuse senza contenuto di Okumura e Maruki.
-- L8, ancora da fare: L8-01 (D1: non toccare); i gradini della capienza non hanno un editor (si correggono con una migrazione).
+- L8, ancora da fare: L8-01 (D1: non toccare); i gradini della capienza non hanno un editor (si correggono con una correzione diretta sui dati).
 - L9 fatto: gli SVG caricati non eseguono script se aperti da soli (CSP `sandbox` e allegato, nell'app si vedono come prima); «Scarica da
   URL» non raggiunge la rete interna né con un IP nell'URL, né con un nome, né con un redirect (al più 5, solo http e https); i collegamenti
   alle fonti passano tutti da `urlHttp`; la CSP completa del rilascio è attiva in solo rapporto accanto a quella applicata di prima; limiti di
@@ -215,15 +213,15 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
     dal testo o dal nome (menu della voce, posto della voce, appunti fissi, guida del visore, frecce dei giorni), chiavi stabili nei 18
     elenchi modificabili con il fuoco che resta sul gesto dopo «Sposta», la classe dei campi della nota storica.
   - L11-02, L11-03, L11-04 (parte server): righe compattate del server riformattate con l'AST invariato (resta oltre i 300 caratteri
-    solo il testo dei letterali: SQL, messaggi, descrizioni dell'API, DDL di base, più le migrazioni registrate e i test, che non si
+    solo il testo dei letterali: SQL, messaggi, descrizioni dell'API, DDL di base, più i test, che non si
     toccano); `validate` tipizzato, senza nessun cast di `req.body`, `req.query` o `req.params` nelle rotte, e nessun SQL nelle rotte
     (`condizioniService`); `RIFERIMENTI_PARTITE` completato dallo schema reale e censimento di ogni tabella e colonna di riferimento delle
-    partite, che dà un avviso nel log se manca qualcosa (non blocca, decisione dell'utente del 01/11); utente 064, gli id delle partite non
+    partite, che dà un avviso nel log se manca qualcosa (non blocca, decisione dell'utente del 01/11); gli id delle partite non
     si riusano più.
   - L11-06 (D12): le dipendenze di `useCarica` controllate dalla regola di `useEffect` (`react-hooks/exhaustive-deps` con
     `additionalHooks`) ed `eslint-plugin-jsx-a11y` 6.10.2 con le regole raccomandate; lint a 0 errori e 0 avvisi, con le correzioni che non
     cambiano il comportamento né l'aspetto e, dove l'omissione o il gesto sono voluti, una disattivazione sulla riga col suo motivo.
-  - L11-07: i punti aperti su bagno, centro battute e Big Bang Burger erano già allineati alle migrazioni 233, 314 e 319; commenti
+  - L11-07: i punti aperti su bagno, centro battute e Big Bang Burger erano già allineati; commenti
     superati corretti (Iweleth fra i Palazzi, il numero delle schede della Partita, i Palazzi del Meta-Nav, documenti tolti dal
     repository); le decisioni «(24/10)» non si riconfermano (D16).
 - Dipendenze di sviluppo: aggiornate le versioni corrette di vitest e `@vitest/coverage-v8` (4.1.12), `fast-uri` (3.1.9) e `undici`
@@ -253,14 +251,14 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 **Riservato all'utente**
 - Collaudo automatico completo della ricerca globale: lo esegue l'utente.
 - Proposte di conversione delle voci del Diario aperte in «Da completare» (periodo dal 1° aprile al 1° giugno): 43 «da verificare» (lo yen
-  dello Scaffale del 12 aprile è chiuso dalla 330, con la condizione del salvataggio di Persona 5) e 8
+  dello Scaffale del 12 aprile è chiuso, con la condizione del salvataggio di Persona 5) e 8
   «probabili», più 4 certe lasciate (le tre «Concimare la pianta…», che dipendono dal tipo di bionutrimenti usato, e lo yen del bagno
   del 26 maggio, da decidere con la sua «da verificare»). Il conteggio va riletto nella pagina prima di decidere.
 
 **Domande all'utente sui doni dei Confidenti**
 - I doni hanno la regola della guida, valutata sulla partita (`doniConfidenti.ts`, il dono vale finché la regola vale): i dolci «se
-  fidanzata» (10) e i giri choco del 15 febbraio (11) dalla 329, il Rampino di Morgana dal suo passo nel Palazzo di Kamoshida dalla 332; i
-  cioccolatini di Ryuji e Sojiro arrivano dall'esito di San Valentino scelto alla spunta della voce del 14 febbraio (331).
+  fidanzata» (10) e i giri choco del 15 febbraio (11), il Rampino di Morgana dal suo passo nel Palazzo di Kamoshida; i
+  cioccolatini di Ryuji e Sojiro arrivano dall'esito di San Valentino scelto alla spunta della voce del 14 febbraio.
 - Resta il Sacchetto di carta di Iwai: la guida lo lega alla vendita della medaglia di Kamoshida del 4 maggio (sbirciando nel sacchetto) e
   alla restituzione del 6 maggio. Sono due voci del periodo validato già spuntate: «oggetto ricevuto» e «restituito» su quelle voci
   cambierebbero le partite, quindi decide l'utente.

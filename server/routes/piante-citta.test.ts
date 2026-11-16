@@ -23,7 +23,7 @@ describe('Mappe dei quartieri', () => {
   });
   afterAll(async () => { await new Promise<void>((ok) => server.close(() => ok())); closeDb(); });
 
-  // Superato dal lotto L11 (R11-02/8, migrazione 210, decisione dell'utente del 24/10): `pianta_quartiere`, `QuartiereDettaglioDto.pianta` e
+  // Superato dal lotto L11 (R11-02/8, decisione dell'utente del 24/10): `pianta_quartiere`, `QuartiereDettaglioDto.pianta` e
   // `piantaAssente` non esistono più; le asserzioni non reggono e il test resta, da riscrivere sull'immagine del quartiere.
   it.skip('22 quartieri su 24 hanno una mappa collegata con credito; i luoghi espongono lo spillo (nullo se non posizionato)', async () => {
     expect((getDb().prepare('SELECT COUNT(*) AS n FROM pianta_quartiere').get() as { n: number }).n).toBeGreaterThanOrEqual(20);
@@ -38,7 +38,7 @@ describe('Mappe dei quartieri', () => {
 
   // La rotta che scriveva lo spillo di un luogo non c'è più: nessuno la chiamava (rilievo O10). Resta da provare che quello che
   // c'è nel database si legge nella scheda e che le regole dell'avvio non toccano gli spilli dell'utente.
-  // Superato dal lotto L11 (B8, migrazione 176): `LuogoDto.marcatore` e la tabella `marcatore_luogo` non esistono più (la posizione di un
+  // Superato dal lotto L11 (B8): `LuogoDto.marcatore` e la tabella `marcatore_luogo` non esistono più (la posizione di un
   // luogo è il suo pin); le asserzioni sul marcatore non compilano più. Il test resta, da riscrivere.
   it.skip('spillo di un luogo: si rilegge nella scheda; le regole dell\'avvio non toccano gli spilli dell\'utente', async () => {
     const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
@@ -52,7 +52,7 @@ describe('Mappe dei quartieri', () => {
     getDb().prepare('DELETE FROM marcatore_luogo WHERE luogo_chiave = ?').run(luogo.chiave);
   });
 
-  // Superato dal lotto L11 (R11-02/8, migrazione 210): la rotta di scarico e la tabella `pianta_quartiere` sono tolte su decisione dell'utente.
+  // Superato dal lotto L11 (R11-02/8): la rotta di scarico e la tabella `pianta_quartiere` sono tolte su decisione dell'utente.
   it.skip('scarica la mappa del quartiere nell\'istanza dall\'URL del seed e la registra come immagine «citta-<quartiere>»', async () => {
     getDb().prepare('UPDATE pianta_quartiere SET url = ? WHERE quartiere_chiave = ?').run(`http://127.0.0.1:${porta}/mappa.png`, 'shinjuku');
     const res = await request(app).post('/api/mappe/piante-citta/shinjuku/scarica');

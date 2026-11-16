@@ -152,7 +152,7 @@ it('un Covo con una sola planimetria (niente fila) tiene il collegamento in test
   expect(collegamenti[0]).not.toHaveClass('lg:max-xl:hidden');
 });
 
-// richiesta dell'utente del 2026-10-29: il Covo c'è dal 5 maggio (condizione della sua Area, migrazione 303)
+// richiesta dell'utente del 2026-10-29: il Covo c'è dal 5 maggio (condizione della sua Area)
 it('prima del 5 maggio il Covo dice che non è ancora aperto e non porta alle sfide', async () => {
   api.getArea.mockResolvedValue({ ...sottopasso, chiave: 'citta/yongen-jaya/covo-dei-ladri', slug: 'covo-dei-ladri', nome: 'Covo dei Ladri', contenitore: { tipo: 'quartiere', chiave: 'yongen-jaya', nome: 'Yongen-Jaya' },
     disponibile: false, bloccoMotivo: 'dal 5 maggio' });

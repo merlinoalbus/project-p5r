@@ -368,7 +368,7 @@ describe('API', () => {
       expect((await request(app).delete('/api/immagini')).body.data).toEqual({ eliminate: totali });
       expect((await request(app).get('/api/immagini')).body.data).toHaveLength(0);
       expect((await request(app).get('/api/immagini/persona/Pixie/file')).status).toBe(404);
-      // la grafica predefinita (famiglie della 079) vive nella stessa tabella ma non entra negli elenchi né nelle rimozioni in blocco
+      // la grafica predefinita vive nella stessa tabella ma non entra negli elenchi né nelle rimozioni in blocco
       expect((await request(app).put('/api/immagini/mappe/tokyo').set('Content-Type', 'image/png').send(png)).status).toBe(201);
       expect((await request(app).put('/api/immagini/mappe/lmap%2Ftokyo%2Fakasaka').set('Content-Type', 'image/png').send(png)).status).toBe(201);
       const manifesto = (await request(app).get('/api/immagini/manifest')).body.data as { totale: number; file: Record<string, string> };

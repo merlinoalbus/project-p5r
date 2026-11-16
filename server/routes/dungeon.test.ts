@@ -19,7 +19,7 @@ describe('API dungeon', () => {
   });
   afterAll(() => closeDb());
 
-  // Superato dal lotto L11 (B8, migrazione 176): `PuntoInteresseDto.marcatore` e la tabella `marcatore_mappa` non esistono più (la posizione
+  // Superato dal lotto L11 (B8): `PuntoInteresseDto.marcatore` e la tabella `marcatore_mappa` non esistono più (la posizione
   // di una voce è sul pin); le asserzioni sul marcatore non compilano più. Il test resta, da riscrivere.
   it.skip('elenco e scheda: 10 dungeon in ordine, aree e punti con chiave stabile, tipi ammessi, fonti', async () => {
     const lista = (await request(app).get('/api/compendio/dungeon')).body.data as DungeonRiassuntoDto[];
@@ -77,7 +77,7 @@ describe('API dungeon', () => {
     expect(m.aree.every((a) => a.mappe.length === 0)).toBe(true);
   });
 
-  // Superato dal lotto L11 (B8, migrazione 176): `PuntoInteresseDto.marcatore` e la tabella `marcatore_mappa` non esistono più; le
+  // Superato dal lotto L11 (B8): `PuntoInteresseDto.marcatore` e la tabella `marcatore_mappa` non esistono più; le
   // asserzioni sul marcatore non compilano più. Il test resta, da riscrivere.
   it.skip('stato dei punti per partita (ottenuto/esaurito/riapri) con evento, avanzamento nell\'elenco, marcatori delle mappe', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Dungeon' })).body.data as { id: number }).id;

@@ -20,7 +20,7 @@ function nomeGenerico(s: SpilloDto | SchedaContenutoGuidaDto): boolean {
 export const nomePin = (s: SpilloDto | SchedaContenutoGuidaDto) => (nomeGenerico(s) && 'mappaChiave' in s ? nomeMetaSpillo(s) : null) ?? s.nome;
 
 /** La parola di un pin segnato: lo stato delle sue voci della guida («ottenuto», «esaurito») se ne ha — quello comune, o «segnato»
- *  se differiscono (098) —, che è anche quello dei pulsanti, altrimenti quella del tipo («raccolto», «aperto», «parlato»…). */
+ *  se differiscono —, che è anche quello dei pulsanti, altrimenti quella del tipo («raccolto», «aperto», «parlato»…). */
 export function parolaSegnato(s: SpilloDto | SchedaContenutoGuidaDto): string {
   const stati = [...new Set(s.voci.map((v) => v.stato))];
   if (stati.length === 0) return parolaDelloStato(s);

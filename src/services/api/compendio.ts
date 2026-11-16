@@ -192,23 +192,23 @@ export interface DatiDungeonApi { nome?: string; sovrano?: string; note?: string
  *  (`timbriTotale`, null = la guida non dà un numero: niente da contare), rifiutato per gli altri. */
 export interface DatiAreaApi { nome?: string; descrizione?: string; timbriTotale?: number | null }
 export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
-  /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
+  /** L'Enigma di cui la voce è un passo; null = voce dell'area. */
   contenitore?: string | null;
   /** Tutti i dettagli della voce (2026-10-18): sostituiscono quelli di prima; la `maschera` di una Persona resta. */
   dettagli?: Record<string, unknown>;
-  /** L'area del dedalo della voce (099): obbligatoria creando una voce di un dedalo; cambiandola la voce passa in un'altra area. */
+  /** L'area del dedalo della voce: obbligatoria creando una voce di un dedalo; cambiandola la voce passa in un'altra area. */
   areaDedalo?: string;
   /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): ne diventa la maschera. */
   persona?: number;
   /** Un'altra area dello stesso Palazzo (2026-10-12): la voce vi passa in fondo, coi passi se è un Enigma. Solo correggendo. */
   area?: string;
-  /** Le aree del dedalo in cui si incontra una Persona di un dedalo (101): almeno una creandola; correggendola le sostituisce. */
+  /** Le aree del dedalo in cui si incontra una Persona di un dedalo: almeno una creandola; correggendola le sostituisce. */
   areeDedalo?: string[];
   /** L4 (§1.1): il carattere scelto per una voce di un Palazzo; null = «Ripristina» (vale la regola del tipo). Solo correggendo. */
   carattere?: CarattereVoce | null;
   /** L3 RG-4: la planimetria del Palazzo a cui agganciare a mano una voce senza pin; null toglie l'aggancio (torna la planimetria 1). */
   planimetria?: string | null }
-/** Nome e dettagli di un'area di un dedalo (099); i timbri sono del dedalo (L10-02: `aggiornaArea` con `timbriTotale`). */
+/** Nome e dettagli di un'area di un dedalo; i timbri sono del dedalo (L10-02: `aggiornaArea` con `timbriTotale`). */
 export interface DatiAreaDedaloApi { nome?: string; descrizione?: string }
 
 /** Corregge i testi della scheda del Palazzo (nome, sovrano, date, consigli, note) e la voce del boss finale; risponde con la scheda aggiornata. */
@@ -245,7 +245,7 @@ export const impostaAtterraggiDungeon = (dungeon: string, regole: Array<{ dal: s
   apiPut(`/compendio/dungeon/${encodeURIComponent(dungeon)}/atterraggi`, { regole });
 /** Elimina un'area della guida per tutte le partite, con i suoi punti e i suoi legami. */
 export const eliminaArea = (chiave: string): Promise<void> => apiDelete(`/compendio/aree/${encodeURIComponent(chiave)}`);
-/* ---- Le aree dei dedali dei Memento (099): Dedalo → Aree → Elementi ---- */
+/* ---- Le aree dei dedali dei Memento: Dedalo → Aree → Elementi ---- */
 /** Un'area nuova in fondo al dedalo; risponde con l'area creata (senza stato di partita). */
 export const creaAreaDedalo = (dedalo: string, dati: DatiAreaDedaloApi & { nome: string }): Promise<AreaDedaloDto> => apiPost(`/compendio/dedali/${encodeURIComponent(dedalo)}/aree`, dati);
 /** Corregge nome e dettagli di un'area del dedalo. */

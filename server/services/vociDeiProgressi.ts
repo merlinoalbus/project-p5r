@@ -4,7 +4,7 @@
 //
 // Tre letture, una per sezione, con la stessa forma (`VoceDiProvenienzaDto`, la riga «Già nel Diario: voce del 09/04 · …»):
 //   - gli eventi di storia: l'effetto «storia» di una spunta ancora attiva che l'ha segnato davvero (non già vero prima della spunta);
-//   - le attività svolte: i turni con il legame esplicito alla voce (`turno_voce_partita`, utente 063) della stessa riga del turno e con la
+//   - le attività svolte: i turni con il legame esplicito alla voce (`turno_voce_partita`) della stessa riga del turno e con la
 //     spunta ancora attiva. I turni segnati col + del contatore non hanno voce, anche quando riprendono il numero di un turno tolto;
 //   - i contatori delle letture: le letture della ricevuta che la spunta ha portato oltre la soglia del contatore (prima sotto, dopo sopra)
 //     e che il contatore conta ancora (`elementiDeiContatori`, la stessa definizione che dà il valore).

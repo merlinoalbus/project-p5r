@@ -1,5 +1,5 @@
 // ============================================================
-// Gli stati delle voci della guida: i pin di una voce e l'Enigma con i suoi passi (2026-10-01, 095)
+// Gli stati delle voci della guida: i pin di una voce e l'Enigma con i suoi passi (2026-10-01)
 // ============================================================
 //
 // Senza dipendenze dai servizi: lo usano la guida (`dungeonService`), le mappe (`mappeService`, `collegamentiGuida`) e i
@@ -20,7 +20,7 @@ import { VOCI_GESTITE_SQL } from './voceDelPin.js';
 //
 // **Ogni pin tiene il suo stato** (`spillo_partita`, come prima di L4): l'utente segna gli oggetti uno a uno, e raccogliere un pin non
 // deve segnare gli altri pin della stessa voce (NR4-1: «Raccogli e depreda le Installazioni Artistiche», 8 pin). Un'eccezione: un pin
-// condiviso da voci **rigenerabili di più infiltrazioni** ha uno stato per infiltrazione (`spillo_partita_infiltrazione`, utente 023),
+// condiviso da voci **rigenerabili di più infiltrazioni** ha uno stato per infiltrazione (`spillo_partita_infiltrazione`),
 // letto nell'infiltrazione di contesto (§1.4), perché l'oggetto raccolto nella 2ª si ripropone nella 4ª (R4-05).
 // Una voce permanente o rigenerabile **con pin** calcola il suo stato dai suoi pin (`statoVoce`): fatta se lo sono tutti, «in corso
 // k/N» se una parte, da fare se nessuno (una rigenerabile legge i pin condivisi nella **sua** infiltrazione). La sua riga in
@@ -34,7 +34,7 @@ import { VOCI_GESTITE_SQL } from './voceDelPin.js';
 // delle sole voci senza carattere seguono la regola di prima.
 // L'**oggetto** permanente (le voci permanenti unite da pin in comune, §1.3) resta l'unità di conteggio (R4-24): è fatto quando lo
 // sono tutte le sue voci; non propaga più lo stato, perché lo fa il pin condiviso.
-// Le divergenze conservate dalla migrazione utente 022 (`divergenza_partita`) tengono il chip «Da verificare» sul pin fatto e sulla
+// Le divergenze conservate (`divergenza_partita`) tengono il chip «Da verificare» sul pin fatto e sulla
 // voce (ora «in corso»), finché l'utente non sceglie «Segna la voce» o «Togli il fatto al pin».
 // Si calcola in blocco, una volta per richiesta: `modelloAvanzamento` (dati di gioco) e `statiDellaPartita` (stati della partita).
 
@@ -83,7 +83,7 @@ export interface ModelloAvanzamento {
 // Ricostruirlo costava ad ogni apertura di mappa, Palazzo o area (tutte le voci, tutti i legami pin-voce, il grafo degli oggetti). Sono soli dati
 // di gioco, quindi si tiene l'ultimo modello per connessione, mai nulla della partita (gli stati stanno in `statiDellaPartita`, sempre letti
 // ora). Il modello vale finché il «gettone» della connessione non cambia: `data_version` di `main` (un'altra connessione ha scritto il file),
-// `schema_version` di `main` (una migrazione ha cambiato la struttura: le colonne opzionali che il modello legge) e `total_changes()` (QUALSIASI
+// `schema_version` di `main` (la struttura è cambiata: le colonne opzionali che il modello legge) e `total_changes()` (QUALSIASI
 // scrittura di questa connessione, anche di una partita: più prudente del necessario, ma senza elenchi di scrittori da ricordare, cosa che
 // il registro delle cache di gioco da solo non garantisce: dungeon, mappe e cestino scrivono senza chiamarlo). Dentro una transazione non si
 // usa né si salva niente (una scrittura annullata lascerebbe un modello fatto su dati che non esistono più), e `registraCacheDiGioco` lo
@@ -123,7 +123,7 @@ export function modelloAvanzamento(db: AppDatabase): ModelloAvanzamento {
 
 /** Il modello letto dal DB, ogni volta da capo. */
 function costruisciModello(db: AppDatabase): ModelloAvanzamento {
-  // le migrazioni e i test possono trovare lo schema di prima: le colonne opzionali si controllano
+  // lo schema può essere vecchio: le colonne opzionali si controllano
   const conCarattere = haColonnaMain(db, 'punto_interesse', 'carattere');
   const conDedalo = haColonnaMain(db, 'punto_interesse', 'area_dedalo_chiave');
   const voci = new Map<string, VoceDelModello>();
@@ -214,11 +214,11 @@ export interface StatiDellaPartita {
   partita: number;
   /** Le righe di `punto_partita` (per le voci con pin, lo specchio). */
   segnate: Map<string, StatoPunto>;
-  /** Gli uid dei pin con `spillo_partita.raccolto = 1` (i pin condivisi dai rigenerabili non hanno più la riga: utente 042). */
+  /** Gli uid dei pin con `spillo_partita.raccolto = 1` (i pin condivisi dai rigenerabili non hanno la riga). */
   raccolti: Set<string>;
-  /** I pin condivisi dai rigenerabili: uid → le infiltrazioni in cui sono raccolti (`spillo_partita_infiltrazione`, utente 023). */
+  /** I pin condivisi dai rigenerabili: uid → le infiltrazioni in cui sono raccolti (`spillo_partita_infiltrazione`). */
   raccoltiPerInfiltrazione: Map<string, Set<string>>;
-  /** Le divergenze conservate (utente 022): uid del pin → voci. */
+  /** Le divergenze conservate: uid del pin → voci. */
   divergenze: Map<string, string[]>;
   /** Lo stato di ogni voce (`statoVoce`). */
   voci: Map<string, StatoVoce>;
@@ -226,13 +226,13 @@ export interface StatiDellaPartita {
   oggettiFatti: Set<string>;
 }
 
-/** La tabella delle divergenze conservate (utente 022) c'è? */
+/** La tabella delle divergenze conservate c'è? */
 export function conDivergenze(db: AppDatabase): boolean {
   return !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
     && haTabellaUtente(db, 'divergenza_partita');
 }
 
-/** La tabella dello stato per infiltrazione dei pin condivisi (utente 023) c'è? */
+/** La tabella dello stato per infiltrazione dei pin condivisi c'è? */
 export function conStatoPerInfiltrazione(db: AppDatabase): boolean {
   return !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
     && haTabellaUtente(db, 'spillo_partita_infiltrazione');
@@ -244,7 +244,7 @@ export function conStatoPerInfiltrazione(db: AppDatabase): boolean {
  * di `partite.db`: il vincolo di `gioco.db` non le elimina in cascata, e l'uid di un pin è l'impronta della sua identità (se si
  * ricrea un elemento identico, uno stato rimasto orfano ricomparirebbe). `uidDaTogliere` è una sottoselezione di uid
  * («SELECT uid FROM main.spillo WHERE … AND uid IS NOT NULL», o «SELECT ?» se l'uid è già noto) da valutare PRIMA di cancellare i pin.
- * Senza lo schema delle partite (una migrazione di gioco sul pacchetto iniziale, che gira prima di quelle delle partite: O9-4, 322) non
+ * Senza lo schema delle partite (un file di gioco aperto da solo) non
  * c'è nessuno stato da togliere, come per `riallineaStati` (`conPartite`).
  */
 export function togliStatiDeiPin(db: AppDatabase, uidDaTogliere: string, parametri: ReadonlyArray<string | number>): void {
@@ -394,7 +394,7 @@ export interface StatoDelPin { fatto: boolean; daVerificare: boolean; statoPropr
 /**
  * Lo stato di un pin (§8.11): il suo segno (`spillo_partita`). Un pin condiviso da rigenerabili di più infiltrazioni legge il segno
  * dell'infiltrazione di contesto (§1.4) — la guardata (`contesto`), altrimenti quella in corso; se il pin non ne ha in
- * quell'infiltrazione, quella più recente prima; se nemmeno, la prima. Una divergenza conservata (utente 022) lo mostra «da
+ * quell'infiltrazione, quella più recente prima; se nemmeno, la prima. Una divergenza conservata lo mostra «da
  * verificare». I pin delle sole voci senza carattere (dedali dei Memento) con la regola di prima: il segno, o le voci tutte segnate.
  */
 export function statoDelPin(m: ModelloAvanzamento, s: StatiDellaPartita, pin: { id: number; uid: string | null }, contesto?: string | null): StatoDelPin {
@@ -446,7 +446,7 @@ export function vociCheCondividonoIPin(m: ModelloAvanzamento, voce: string): str
   return [...out];
 }
 
-/** I pin (sulle planimetrie, non gli elementi della guida senza mappa) collegati a un punto (`spillo_voce`, 098). */
+/** I pin (sulle planimetrie, non gli elementi della guida senza mappa) collegati a un punto (`spillo_voce`). */
 export function pinDelPuntoGuida(db: AppDatabase, punto: string): Array<{ id: number; uid: string }> {
   return db.prepare(`SELECT s.id, s.uid FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id
     WHERE sv.voce_chiave = ? AND s.mappa_chiave IS NOT NULL AND s.uid IS NOT NULL ORDER BY s.id`).all(punto) as Array<{ id: number; uid: string }>;
@@ -476,7 +476,7 @@ export function allineaRaccoltoDelPin(db: AppDatabase, partita: number, pin: { i
     WHERE spillo_partita.raccolto IS NOT excluded.raccolto`).run(partita, pin.uid, fatto ? 1 : 0, adesso);
 }
 
-// ---- L'Enigma e i suoi passi (095, scelte dell'utente del 2026-10-01) ----
+// ---- L'Enigma e i suoi passi (scelte dell'utente del 2026-10-01) ----
 //
 // «Enigma deve diventare un contenitore di sotto elementi che insieme descrivono l'enigma e come sbloccarlo»: i passi sono voci
 // vere della stessa area (`punto_interesse.contenitore_chiave`), di qualunque tipo, coi loro pin; l'Enigma è risolto quando i
@@ -555,7 +555,7 @@ export function rifaiSpecchio(db: AppDatabase, partita: number, voci: Iterable<s
     const riga = s.segnate.get(voce);
     if (sv.fatta) {
       const voluto = scelte?.get(voce) ?? riga ?? 'ottenuto';
-      // segnato dall'utente: automatico = 0 (utente 006; dal 2026-10-04 nessuno scrive più 1)
+      // segnato dall'utente: automatico = 0 (dal 2026-10-04 nessuno scrive 1)
       if (riga === undefined) {
         db.prepare('INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at, automatico) VALUES (?, ?, ?, ?, 0)').run(partita, voce, voluto, adesso);
         effetti.segnate.push(voce); cambiate.push(voce);
@@ -591,7 +591,7 @@ export function scriviStatoVoce(db: AppDatabase, partita: number, voce: string, 
     return { segnate: effetti.segnate.filter((k) => k !== voce), riaperte: effetti.riaperte.filter((k) => k !== voce) };
   }
   if (stato === null) db.prepare('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partita, voce);
-  // segnato dall'utente: automatico = 0 (utente 006; dal 2026-10-04 nessuno scrive più 1, e utente 017 ha tolto quelli rimasti)
+  // segnato dall'utente: automatico = 0 (dal 2026-10-04 nessuno scrive 1)
   else db.prepare('INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET stato = excluded.stato, updated_at = excluded.updated_at, automatico = 0').run(partita, voce, stato, adesso);
   for (const pin of pinDelPuntoGuida(db, voce)) {
     const p = m.pin.get(pin.id);
@@ -709,7 +709,7 @@ function riportaLaFormaDeiPin(db: AppDatabase, mPrima: ModelloAvanzamento, mDopo
         const vecchie = infiltrazioniRigenerabiliDelPin(mPrima, id);
         for (const inf of nuove) scriviSegnoDelPin(db, partita, uid, inf, (vecchie.length === 0 || vecchie.includes(inf)) && letto(inf), adesso);
         db.prepare(`DELETE FROM spillo_partita_infiltrazione WHERE partita_id = ? AND spillo_uid = ? AND infiltrazione_chiave NOT IN (${nuove.map(() => '?').join(',')})`).run(partita, uid, ...nuove);
-        // il segno ora sta per infiltrazione (appena scritto, letto com'era): la riga di `spillo_partita` di un pin condiviso non si legge più (utente 042)
+        // il segno ora sta per infiltrazione (appena scritto, letto com'era): la riga di `spillo_partita` di un pin condiviso non si legge
         db.prepare('DELETE FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').run(partita, uid);
       } else {
         // non più condiviso: il segno nell'infiltrazione delle sue rigenerabili (se ne ha), altrimenti in quella di contesto

@@ -820,7 +820,7 @@ it('un pin non collezionabile collegato a una voce della guida si segna dal suo 
   await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 9 }), 'kamoshida-02/0', 'ottenuto'));
 });
 
-it('un passaggio con la sua destinazione e una voce «Storia» porta altrove e si segna, le due cose insieme (094)', async () => {
+it('un passaggio con la sua destinazione e una voce «Storia» porta altrove e si segna, le due cose insieme', async () => {
   const passaggio = spillo({ id: 11, nome: 'Verso la sala', tipo: 'passaggio', tipoNome: 'Passaggio', x: 30, y: 40, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
     dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo', area: null, casa: '/guida/mappe/shibuya-centro' }, immagine: { url: null, asset: null } },
     voci: [{ chiave: 'kamoshida-02/12', tipo: 'storia', nome: 'Entra nella sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', areaDedalo: null, stato: null }] });
@@ -845,7 +845,7 @@ it('un pin collegato a una voce descrittiva della guida non offre stato, né nel
   expect(screen.queryByRole('button', { name: 'Riapri' })).toBeNull();
 });
 
-it('un pin dei Memento collegato a una voce «Altro» di un\'area del dedalo la segna: lì ogni voce ha uno stato (099), sola o fra più voci', async () => {
+it('un pin dei Memento collegato a una voce «Altro» di un\'area del dedalo la segna: lì ogni voce ha uno stato, sola o fra più voci', async () => {
   const altro = { chiave: 'mementos-01-qimranut/2', tipo: 'altro', nome: 'Banchina del treno', descrizione: '', esauribile: false, dungeon: 'mementos', area: 'mementos-01-qimranut', areaDedalo: 'mementos-01-qimranut-area-1', stato: null };
   const nota = spillo({ id: 12, nome: 'Banchina', tipo: 'nota', tipoNome: 'Nota', x: 30, y: 40, voci: [altro] });
   const doppia = spillo({ id: 13, nome: 'Treno fermo', tipo: 'nota', tipoNome: 'Nota', x: 60, y: 40, voci: [altro, { ...altro, chiave: 'mementos-01-qimranut/3', nome: 'Vagone' }] });
@@ -861,7 +861,7 @@ it('un pin dei Memento collegato a una voce «Altro» di un\'area del dedalo la 
   await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 13 }), 'mementos-01-qimranut/3', 'ottenuto'));
 });
 
-describe('il popup dello spillo si misura (094: uno spostamento di una voce ha anche «Ottenuto»)', () => {
+describe('il popup dello spillo si misura (uno spostamento di una voce ha anche «Ottenuto»)', () => {
   const passaggio = spillo({ id: 40, nome: 'Torre Inferiore', tipo: 'passaggio', tipoNome: 'Passaggio', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
     dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo', area: null, casa: '/guida/mappe/shibuya-centro' }, immagine: { url: null, asset: null } },
     voci: [{ chiave: 'kamoshida-15/1', tipo: 'storia', nome: 'Si apre la torre', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-15', areaDedalo: null, stato: null }] });
@@ -916,7 +916,7 @@ it('nell’editor con «Giorno corrente» acceso un pin del gioco con condizioni
   expect(screen.queryByRole('button', { name: /Punto di Infiltrazione Iniziale/ })).toBeNull();
 });
 
-it('un pin con più voci della guida (098): nel popup una riga per voce, ognuna coi suoi pulsanti; nella scheda ogni voce col suo stato', async () => {
+it('un pin con più voci della guida: nel popup una riga per voce, ognuna coi suoi pulsanti; nella scheda ogni voce col suo stato', async () => {
   /** Una voce «Storia» di Kamoshida con chiave, nome, stato ed esauribilità dati. */
   const voce = (chiave: string, nome: string, stato: 'ottenuto' | 'esaurito' | null, esauribile = false) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile, dungeon: 'kamoshida', area: 'kamoshida-01', areaDedalo: null, stato });
   // una voce già segnata e una ancora da fare: il pin non è fatto (voci indipendenti, 2026-10-09)
@@ -944,7 +944,7 @@ it('un pin con più voci della guida (098): nel popup una riga per voce, ognuna 
   expect(elenco.getByText('«Ritorno al castello»: esauribile · non ancora segnata nella Guida')).toBeInTheDocument();
 });
 
-describe('i pezzi della planimetria (102, 2026-10-14) e le loro copie (103)', () => {
+describe('i pezzi della planimetria (2026-10-14) e le loro copie', () => {
   type Pezzo = MappaDto['pezzi'][number];
   type Copia = Pezzo['copie'][number];
   /** Una copia di prova (posata più su della zona); `extra` sovrascrive. */
@@ -1061,7 +1061,7 @@ describe('i pezzi della planimetria (102, 2026-10-14) e le loro copie (103)', ()
   });
 });
 
-it('l\'inquadratura non conta le zone cancellate dei pezzi e comprende i pezzi posati (102)', async () => {
+it('l\'inquadratura non conta le zone cancellate dei pezzi e comprende i pezzi posati', async () => {
   const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 600, height: 400, x: 0, y: 0, top: 0, left: 0, right: 600, bottom: 400, toJSON: () => ({}) });
   const area = vi.spyOn(inquadratura, 'areaImmagine').mockReturnValue({ x: 100, y: 100, w: 200, h: 200 });
   const fit = vi.spyOn(inquadratura, 'inquadraturaMappa');

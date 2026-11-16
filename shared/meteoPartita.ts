@@ -38,7 +38,7 @@ export function fasceDellaGuida(testo: string | null | undefined): { giorno: Met
 
 // ---- Allerte meteo (pioggia torrenziale, polline, ondata di calore, notte torrida, stagione influenzale, ondata di gelo) ----
 // Cadono in date fisse, che il catalogo (Trofei e finali → Meteo) scrive in prosa: «Date: 27/7, 29/7 (sera), 22/8-26/8».
-// La migrazione 091 le legge una volta sola con `leggiDateAllerta` e le mette in `allerta_meteo` per giorno e fascia.
+// `leggiDateAllerta` legge quella prosa; nel database le date stanno in `allerta_meteo`, per giorno e fascia.
 
 /** La pioggia torrenziale è pioggia: per i requisiti «non deve piovere» e «piove» vale come tale. */
 export const ALLERTA_PIOGGIA = 'pioggia-torrenziale';

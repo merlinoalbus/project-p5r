@@ -55,8 +55,8 @@ export function riferimentoOggetto(chiave: string | null | undefined): Riferimen
 export function dtoOggetto(r: RigaCatalogoOggetto): CatalogoOggettoDto {
   if (!eCategoriaOggetto(r.categoria)) throw httpErrors.conflict('categoria-oggetto-non-valida', `La categoria di «${r.nome}» non è riconosciuta: correggi l’oggetto prima di usarlo.`);
   let statistiche = statisticheOggetto(r.statistiche_json);
-  // Sessioni ed effetti restano sulla sorgente della lettura: anche una correzione successiva
-  // alla migrazione si vede nel catalogo, senza una seconda copia da sincronizzare.
+  // Sessioni ed effetti restano sulla sorgente della lettura: ogni correzione
+  // si vede nel catalogo, senza una seconda copia da sincronizzare.
   const tabella = r.categoria === 'libro' ? 'libro' : r.categoria === 'film' ? 'film' : r.categoria === 'videogioco' ? 'attivita' : null;
   if (tabella) {
     const lettura = prepared(`SELECT sessioni,effetti_json FROM ${tabella} WHERE catalogo_chiave = ?`).get(r.chiave) as { sessioni: number | null; effetti_json: string | null } | undefined;
@@ -73,7 +73,7 @@ export function dtoOggetto(r: RigaCatalogoOggetto): CatalogoOggettoDto {
 /**
  * La lettura del catalogo con il prezzo minimo in yen fra le offerte. Ondata 5 (lotto E, decisione 5): il minimo conta anche il prezzo di una
  * fascia (`articolo.prezzo_per_fascia_json`, le sfide della Big Bang Burger a 500 ¥ di sera), la stessa regola di `prezzoNellaFascia`: la fascia
- * che non compare vale `prezzo`, e un JSON non leggibile vale `prezzo` (mai «gratis»). Su uno schema di prima della 260 resta `MIN(prezzo)`.
+ * che non compare vale `prezzo`, e un JSON non leggibile vale `prezzo` (mai «gratis»). Su uno schema senza i prezzi per fascia resta `MIN(prezzo)`.
  */
 function sqlCatalogo(): string {
   const pf = sqlPrezzoPerFascia('a');
@@ -241,7 +241,7 @@ export function contenutiDelleVoci(voci?: Iterable<string>): Map<string, Contenu
   return out;
 }
 
-/** L13 (ondata 11, O11-3): come leggere la regola di una ricompensa (`ricompensa_oggetto.condizioni_json`, colonna della 295) in parole. */
+/** L13 (ondata 11, O11-3): come leggere la regola di una ricompensa (`ricompensa_oggetto.condizioni_json`) in parole. */
 export interface OpzioniRicompense { condizione?: (condizioniJson: string) => string | null }
 
 /** Le ricompense per fonte. Con `opzioni.condizione` (solo chi la chiede: la scheda del Confidente) ogni ricompensa porta `condizione`, la
@@ -265,7 +265,7 @@ export function ricompensePerFonte(tipo: string, fonti?: Iterable<string>, opzio
 
 /**
  * Ondata 5, lotto F (decisione 21): il testo dell'effetto degli oggetti, dal suo punto unico (`catalogo_oggetto.effetto`), per le pagine che
- * mostrano un oggetto collegato senza un testo proprio (ricette della fabbricazione, premi del Covo: migrazione 279). Chiave → effetto.
+ * mostrano un oggetto collegato senza un testo proprio (ricette della fabbricazione, premi del Covo). Chiave → effetto.
  */
 export function effettiDegliOggetti(chiavi: Iterable<string>): Map<string, string> {
   const elenco = [...new Set(chiavi)];

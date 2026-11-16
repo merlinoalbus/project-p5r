@@ -13,7 +13,7 @@
 // per casa il suo menù nella scheda dei Memento (`?area=`), ogni area del dedalo anche la zona (`&zona=`). Le mappe dei Memento che non
 // hanno un'Area (l'entrata, `citta-mementos`, e ogni mappa figlia della radice `dungeon-mementos` senza Area) sono foglie del nodo Memento,
 // con il visore per casa: per quelle mappe il visore è l'unica pagina. La regola è strutturale (genitore e Area), mai il nome: gli otto fogli
-// delle strutture fisse («Memento - aree fisse — …») sono stati tolti il 2026-10-31 (O9-4, migrazione 322, «Planimetrie delle aree fisse dei
+// delle strutture fisse («Memento - aree fisse — …») non ci sono (O9-4, 2026-10-31: «Planimetrie delle aree fisse dei
 // Memento si possono rimuovere»). Iweleth (L8 B7) sta una volta sola, come dedalo; le Aree e le planimetrie del suo vecchio Palazzo sono
 // l'«Archivio del Palazzo» dentro il suo dedalo, perché non perdano il posto.
 //
@@ -45,8 +45,8 @@ import { avanzamentoDeiLuoghi } from '../dungeonService.js';
 
 /**
  * Il filtro dei Palazzi, in un solo punto (è quello di `utils/palazzi.ts`, `soloPalazzi`): quando Iweleth diventa solo un dedalo
- * (L8 B7, migrazione 175) esce dai Palazzi: i dungeon che confluiscono in un dedalo (`dedalo_confluenza`) non sono Palazzi, e il loro posto è il
- * ramo dei Memento. Senza la tabella (schema precedente alla 175) vale il solo tipo.
+ * (L8 B7) esce dai Palazzi: i dungeon che confluiscono in un dedalo (`dedalo_confluenza`) non sono Palazzi, e il loro posto è il
+ * ramo dei Memento. Senza la tabella (uno schema vecchio) vale il solo tipo.
  */
 const tabellaConfluenza = (): boolean => haTabellaMain(getDb(), 'dedalo_confluenza');
 const sqlPalazzi = (): string => {
@@ -142,7 +142,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
       WHERE a.dungeon_chiave = ? ORDER BY a.ordine, a.chiave, ad.ordine, ad.chiave`).all(memento.chiave) : []) as RigaAreaDedaloG[];
   const perChiave = (sql: string): Map<string, number> => new Map((prepared(sql).all() as RigaConteggioG[]).map((r) => [r.chiave, r.n]));
   const personeDelDedalo = perChiave("SELECT area_chiave AS chiave, COUNT(DISTINCT chiave) AS n FROM punto_interesse WHERE tipo = 'persona' GROUP BY area_chiave");
-  // le voci di un dedalo che non sono Persona: la Trama e, dalla 378, i forzieri e i mini-boss di Iweleth col loro tipo (stanno nella sezione Trama)
+  // le voci di un dedalo che non sono Persona: la Trama e i forzieri e i mini-boss di Iweleth col loro tipo (stanno nella sezione Trama)
   const trameDelDedalo = perChiave("SELECT area_chiave AS chiave, COUNT(*) AS n FROM punto_interesse WHERE tipo <> 'persona' AND area_dedalo_chiave IS NOT NULL GROUP BY area_chiave");
   const richiesteDelDedalo = perChiave('SELECT area_chiave AS chiave, COUNT(*) AS n FROM richiesta GROUP BY area_chiave');
   const personeDellArea = perChiave('SELECT area_dedalo_chiave AS chiave, COUNT(DISTINCT voce_chiave) AS n FROM persona_area_dedalo GROUP BY area_dedalo_chiave');
@@ -207,7 +207,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const nodiQuartieri: NodoGerarchiaDto[] = quartieri.map((q) => {
     const disp = disponibilitaQuartiere(q.chiave, st);
     const stato = partitaId === undefined ? null : disp.disponibile;
-    // Le Aree di un quartiere possono avere una condizione propria (il Covo dei Ladri è un'Area di Yongen-Jaya: migrazione 303): con una partita
+    // Le Aree di un quartiere possono avere una condizione propria (il Covo dei Ladri è un'Area di Yongen-Jaya): con una partita
     // si valuta con la funzione unica delle Aree (`sbloccoArea`, che mette in AND quartiere e Area), come nell'elenco `/api/aree`; senza partita
     // resta «non valutata» (null), mai un `true` non calcolato.
     const figliArea = areeDelQuartiere(q.chiave).map((a) => {
@@ -296,7 +296,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
     };
   };
   // il nome della foglia: l'etichetta della versione se c'è, altrimenti il nome della mappa (nessuna regola sul nome: dal 2026-10-31,
-  // O9-4, i fogli delle strutture fisse con il loro prefisso non ci sono più, migrazione 322)
+  // O9-4, i fogli delle strutture fisse con il loro prefisso non ci sono)
   const nodoFoglio = (f: RigaFoglioG): NodoGerarchiaDto => ({
     tipo: 'planimetria', chiave: chiaveMappa(f.chiave), nome: f.versione_etichetta?.trim() || f.nome,
     casa: casaDellaMappa({ chiave: f.chiave, tipo: 'luogo', area_chiave: null }, ctx), immagine: illustrazioneDaRiga(f, caricate),

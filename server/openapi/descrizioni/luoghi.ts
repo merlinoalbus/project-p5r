@@ -1,5 +1,5 @@
 // ============================================================
-// descrizioni/luoghi — le rotte di /api/luoghi: posizionare e collocare i luoghi (L5 «Luoghi, negozi, orari», migrazione 115)
+// descrizioni/luoghi — le rotte di /api/luoghi: posizionare e collocare i luoghi (L5 «Luoghi, negozi, orari»)
 // ============================================================
 
 import type { DescrizioniArea } from '../tipi.js';

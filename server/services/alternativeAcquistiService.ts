@@ -18,7 +18,8 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
+import { logger } from '../utils/logger.js';
 import { articoliIncompatibili, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { gruppiAlternativi, type EffettoVoceDto } from '../../shared/effettiVoce.js';
 import type { OpzioneAlternativaDto, SceltaEsitoSpunta, SceltaEsitoVoceDto } from '../../shared/esitiAttivita.js';
@@ -170,7 +171,12 @@ export function alternativeDellaVoceFatta(partitaId: number, voceUid: string, ef
   const fatta = prepared('SELECT fatta_at FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').pluck().get(partitaId, voceUid) as string | undefined;
   if (!fatta) return { comprati, daScegliere: new Set() };
   let aggiunti: ReadonlySet<string> | null;
-  try { aggiunti = effettiAggiuntiDopo(voceUid, fatta); } catch { aggiunti = null; }
+  try { aggiunti = effettiAggiuntiDopo(voceUid, fatta); } catch (err) {
+    // solo il registro illeggibile lascia gli articoli «da scegliere»; ogni altro errore è un guasto e non si nasconde
+    if (!(err instanceof HttpError) || err.code !== 'registro-yen-illeggibile') throw err;
+    logger.warn({ partitaId, voceUid }, 'registro delle operazioni sugli effetti illeggibile: gli articoli in alternativa della voce restano da scegliere');
+    aggiunti = null;
+  }
   const daScegliere = new Set(gruppi.flat().filter((e) => aggiunti === null || aggiunti.has(e.uid)).map((e) => e.effetto.articolo));
   return { comprati, daScegliere };
 }

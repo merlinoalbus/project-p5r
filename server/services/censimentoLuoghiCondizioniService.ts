@@ -10,7 +10,7 @@ import type {
 /** Allowlist statica: mai SELECT *, snapshot, descrizioni, immagini o tabelle delle partite. */
 const CAMPI = {
   luogo: ['chiave', 'nome', 'tipo', 'quartiere_chiave', 'area_chiave', 'condizioni_json', 'orari_json', 'note', 'fonte', 'origine', 'nascosto', 'solo_eventi_confidente', 'fonte_condizioni_json'],
-  // `orari_json` del negozio è tolta dalla 373: gli orari sono quelli del luogo della sede, salvo l'eccezione
+  // `orari_json` del negozio non esiste: gli orari sono quelli del luogo della sede, salvo l'eccezione
   negozio: ['chiave', 'nome', 'tipo', 'sblocco_json', 'sede_chiave', 'eccezione_orari_json', 'note', 'fonte', 'origine', 'nascosto'],
   attivita: ['chiave', 'nome', 'tipo', 'condizioni_json', 'sede_chiave', 'fascia', 'fonte', 'origine', 'nascosto'],
   articolo: ['chiave', 'nome', 'negozio_chiave', 'condizioni_json', 'nota', 'fonte', 'origine', 'nascosto', 'catalogo_chiave'],
@@ -47,7 +47,7 @@ export function censimentoLuoghiCondizioni(): CensimentoLuoghiCondizioniDto {
         schema.push({ tabella, presente: false, colonneAssenti, righe: 0 });
         return [];
       }
-      // Identificatori esclusivamente dall'allowlist; una colonna non ancora migrata è dichiarata, mai confusa con NULL SQL.
+      // Identificatori esclusivamente dall'allowlist; una colonna assente è dichiarata, mai confusa con NULL SQL.
       const proiezione = campi.map((c) => colonne.has(c) ? `"${c}"` : `NULL AS "${c}"`).join(', ');
       const righe = db.prepare(`SELECT ${proiezione} FROM main."${tabella}" ORDER BY 1`).all() as Array<Record<string, unknown>>;
       schema.push({ tabella, presente: true, colonneAssenti, righe: righe.length });

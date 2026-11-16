@@ -1,6 +1,6 @@
 /** Riferimenti diretti sulle righe originali della guida; il nome sorgente non viene rinominato. */
 export interface NodoCatalogoGuida { fonte: string; nodo: Record<string, unknown> }
-/** La 121 scrive puntatori operativi soltanto qui. Audit e snapshot sono fotografie immutabili. */
+/** I puntatori operativi stanno soltanto qui. Audit e snapshot sono fotografie immutabili. */
 export const BLOCCHI_GUIDA_CATALOGO = ['oggetti-guida'] as const;
 export const eBloccoGuidaCatalogo = (chiave: unknown): boolean => BLOCCHI_GUIDA_CATALOGO.some((k) => k === chiave);
 

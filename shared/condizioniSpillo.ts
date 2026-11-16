@@ -71,19 +71,19 @@ export const EVENTI_STORIA = [
   { chiave: 'evento-akechi', nome: 'Evento con Akechi (entra in squadra)', membro: 'akechi' },
   { chiave: 'primo-strumento-creato', nome: 'Primo strumento di infiltrazione creato' },
   { chiave: 'biliardo-rango-tecnico-3', nome: 'Biliardo: rango tecnico 3 raggiunto' },
-  // Fatti che i requisiti dei Confidenti chiedono e che nessun altro dato della partita sa dedurre
-  // (migrazione 090): si segnano in Partita → Progressi o col «Condizione soddisfatta» del Confidente,
+  // Fatti che i requisiti dei Confidenti chiedono e che nessun altro dato della partita sa dedurre:
+  // si segnano in Partita → Progressi o col «Condizione soddisfatta» del Confidente,
   // che scrive lo stesso dato.
   { chiave: 'caffe-leblanc', nome: 'Caffè preparato al Leblanc' },
   { chiave: 'duello-akechi-vinto', nome: 'Duello con Akechi vinto nei Memento' },
   { chiave: 'pietra-sacra-comprata', nome: 'Pietra Sacra comprata da Chihaya' },
   { chiave: 'chiamata-kawakami-pagata', nome: 'Chiamata a Kawakami pagata' },
   { chiave: 'oratore-shibuya-ascoltato', nome: 'Oratore di Shibuya ascoltato' },
-  // L13 (ondata 9, O9-1, migrazione 318): la prima visita a Nejima nei Memento, che fallisce da copione e fa emergere Shinya (guida: «per
+  // L13 (ondata 9, O9-1): la prima visita a Nejima nei Memento, che fallisce da copione e fa emergere Shinya (guida: «per
   // affrontarlo davvero serve prima un legame con Shinya Oda»; il Confidente si avvia «solo dopo aver portato avanti la richiesta»). Il rango 1
   // della Torre lo chiede al posto della Richiesta completata, che a sua volta chiede il rango 1: niente più giro chiuso.
   { chiave: 'vincenti-prima-visita', nome: 'Prima visita a Nejima nei Memento (I vincenti non imbrogliano)' },
-  // Le aperture dei Dedali dei Memento **si calcolano** (migrazione 305, richiesta dell'utente del 2026-10-30: «le aperture dovrebbero dipendere
+  // Le aperture dei Dedali dei Memento **si calcolano** (richiesta dell'utente del 2026-10-30: «le aperture dovrebbero dipendere
   // dai palazzi affrontati»): `dedalo` è il Dedalo (`dungeon_area`), e il fatto vale quanto la sua condizione d'apertura (`condizioni_json`: il
   // Palazzo concluso o la data della guida). Non si dichiarano nelle visite né si segnano a mano. Jose usa sette di questi nove fatti.
   { chiave: 'dedalo-qimranut-aperto', nome: 'Dedalo di Qimranut aperto', dedalo: 'mementos-01-qimranut' },
@@ -101,7 +101,7 @@ export function membroDellEvento(chiave: string): string | null {
   const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
   return e && 'membro' in e ? e.membro : null;
 }
-/** Il Dedalo dei Memento la cui condizione d'apertura fa avvenire l'evento (migrazione 305), o null se l'evento non è un'apertura. */
+/** Il Dedalo dei Memento la cui condizione d'apertura fa avvenire l'evento, o null se l'evento non è un'apertura. */
 export function dedaloDellEvento(chiave: string): string | null {
   const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
   return e && 'dedalo' in e ? e.dedalo : null;
@@ -324,7 +324,7 @@ export function dateDiGiocoNelTesto(testo: string): string {
   });
 }
 
-/** L13 (O7-4, migrazione 313): «Il messaggio arriva la sera del 28 luglio» / «… dell’8 ottobre», dal messaggio strutturato di un invito: la sola resa. */
+/** L13 (O7-4): «Il messaggio arriva la sera del 28 luglio» / «… dell’8 ottobre», dal messaggio strutturato di un invito: la sola resa. */
 export function fraseMessaggioInvito(m: { data: string; fascia: 'giorno' | 'sera' }): string {
   return `Il messaggio arriva ${m.fascia === 'sera' ? 'la sera' : 'di giorno'} ${dataConArticolo(m.data, 'di')}.`;
 }

@@ -4,15 +4,15 @@
 
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { dbDiProvaSenzaMappe } from '../../test/dbDiProva.js';
 
 const app = createApp();
 /** Conta le mappe presenti nel DB, per verificare che un'importazione rifiutata non ne abbia inserite. */
 const countMaps = () => (getDb().prepare('SELECT COUNT(*) AS n FROM mappa').get() as { n: number }).n;
 
 describe('dimensione dei pacchetti mappe HTTP', () => {
-  beforeAll(() => { runMigrations(initDb(':memory:')); });
+  beforeAll(() => { dbDiProvaSenzaMappe(); });
   afterAll(() => { closeDb(); });
 
   it('importa un JSON valido oltre 5 MB sulla route dedicata', async () => {

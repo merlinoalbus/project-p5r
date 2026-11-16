@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Tre oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne
-// `origine`, `seed_json`, `updated_at` della migrazione 224).
+// `origine`, `seed_json`, `updated_at`).
 //   - `dedalo-confluenza` (1, chiave = chiave del dungeon che confluisce): il dedalo in cui confluisce e la nota. Il dungeon è l'identità della riga.
 //   - `mappa-dedalo` (26, chiave = chiave interna della mappa): l'area del dedalo a cui la planimetria appartiene (o nessuna) e la nota.
 //   - `infiltrazione-dedalo` (12, chiave = chiave dell'infiltrazione): l'area del dedalo che corrisponde all'infiltrazione. Nessuna pagina la mostra (registro di

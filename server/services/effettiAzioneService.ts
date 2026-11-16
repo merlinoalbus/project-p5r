@@ -45,13 +45,13 @@ const schemaRicevutaLegacy = z.object({
   incontro: z.object({ id: z.number().int().positive().nullable(), marcato: z.number().int().positive().nullable(), confidente: chiaveReceipt,
     nome: z.string(), verso: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), passaggio: z.boolean(), giaContato: z.boolean(), doti: z.array(doteReceipt),
     rango: z.object({ da: z.number().int().min(0).max(RANGO_MASSIMO_CONFIDENTE), a: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), punti: numeroReceipt, sbloccato: z.boolean() }).passthrough().optional() }).passthrough().optional(),
-  // le aperture dei Dedali dichiarate nelle visite di prima della 305: si leggono ancora (la ricevuta resta valida), non si scrivono più
+  // le aperture dei Dedali dichiarate nelle visite vecchie: si leggono ancora (la ricevuta resta valida), non si scrivono più
   apertureDedali: z.array(z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough()).optional(),
   // L13 (ondata 7, O7-2): i risultati di un esame segnati dalla spunta, con il piazzamento di prima e le Doti del premio
   esami: z.array(z.object({ esame: chiaveReceipt, nome: z.string(), piazzamento: z.enum(CHIAVI_PIAZZAMENTO_ESAME), prima: z.enum(CHIAVI_PIAZZAMENTO_ESAME).nullable(),
     doti: z.array(doteReceipt), trofeo: z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough().optional() }).passthrough()).optional(),
   // L13 (O10-2): la relazione romantica segnata dalla scelta alla spunta del passaggio al rango 9, com'era e com'è diventata
-  // L13 (O11-1): `primaDal`, il giorno d'inizio di prima (null senza); manca nelle ricevute scritte prima della 060
+  // L13 (O11-1): `primaDal`, il giorno d'inizio di prima (null senza); manca nelle ricevute vecchie
   relazione: z.object({ confidente: chiaveReceipt, nome: z.string(), prima: z.boolean(), dopo: z.boolean(),
     primaDal: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/).nullable().optional() }).passthrough().optional(),
 }).passthrough();

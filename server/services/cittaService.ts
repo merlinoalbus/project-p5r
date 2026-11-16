@@ -3,9 +3,9 @@
 // ============================================================
 //
 // Dalla voce 5 del piano «struttura, non frasi» (2026-09-12) un luogo è una riga del catalogo
-// (migrazione 071: origine, nascosto, condizioni_json) e i suoi negozi e le sue attività vengono
-// dalle **sedi** (`negozio.sede_chiave`, `attivita.sede_chiave`, migrazione 072), non più da
-// `luogo.negozio` e `luogo.attivita_json`, che non si leggono più e ora non esistono più (L11, migrazione 187). La regola di presenza sta sulla
+// (origine, nascosto, condizioni_json) e i suoi negozi e le sue attività vengono
+// dalle **sedi** (`negozio.sede_chiave`, `attivita.sede_chiave`), non da
+// `luogo.negozio` e `luogo.attivita_json`, che non esistono (L11). La regola di presenza sta sulla
 // riga; il JSON `sblocco-luoghi` della guida resta il ripiego per un file ancora senza colonna.
 // ============================================================
 
@@ -40,8 +40,8 @@ const NON_UN_QUARTIERE = new Set(['mementos']);
  *  il rango di un Confidente decide se ci puoi arrivare (decisione dell'utente, 7 settembre 2026). */
 export function disponibilitaQuartiere(chiave: string, st: StatoDisponibilita | null): { disponibile: boolean; bloccoMotivo: string | null } {
   if (!st) return { disponibile: true, bloccoMotivo: null };
-  // L6 (R6-08, R6-09): dopo la migrazione 118 questa è l'unica fonte runtime;
-  // la prosa della guida resta nota e non viene più interpretata come condizione.
+  // L6 (R6-08, R6-09): questa è l'unica fonte runtime;
+  // la prosa della guida resta nota e non viene interpretata come condizione.
   const condizioni = condizioneEffettivaQuartiere(chiave, st.inviti ??= tuttiGliInviti());
   if (!condizioni) return { disponibile: true, bloccoMotivo: null };
   const esito = valutaRequisiti(condizioni.map((c) => condizioneConTesto(c)) as RequisitoDisponibilita[], st);
@@ -155,7 +155,7 @@ export function impostaIngressoQuartiere(quartiere: string, dati: { mappa?: stri
  if (!prepared('SELECT 1 FROM mappa WHERE chiave=?').get(id)) throw httpErrors.notFound('mappa-non-trovata', 'Mappa inesistente.');
  // l'ingresso sta in un'Area di questo quartiere (L2, R2-21; difetto FUN2-1)
  verificaIngressoNelQuartiere(quartiere, id);
- // colonne dette per nome (dalla 109 la tabella ha anche l'Area, che si deduce dalla planimetria)
+ // colonne dette per nome (la tabella ha anche l'Area, che si deduce dalla planimetria)
  prepared(`INSERT INTO quartiere_ingresso (quartiere_chiave, mappa_chiave, x, y, zoom, area_chiave) VALUES (?, ?, ?, ?, ?, (SELECT area_chiave FROM mappa WHERE chiave = ?))
    ON CONFLICT(quartiere_chiave) DO UPDATE SET mappa_chiave=excluded.mappa_chiave,x=excluded.x,y=excluded.y,zoom=excluded.zoom,area_chiave=excluded.area_chiave`).run(quartiere, id, dati.x, dati.y, dati.zoom, id);
  return ingressoQuartiere(quartiere);

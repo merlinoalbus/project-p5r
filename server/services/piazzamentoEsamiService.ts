@@ -4,7 +4,7 @@
 //
 // Il moltiplicatore dell'esame sui punti dei sette Confidenti dipende dal piazzamento all'ultimo esame di cui sono usciti i risultati
 // («primo» ×1,5, «primi 10» ×1,2, «sopra la media» e «altro» nessuno) e vale fino ai risultati dell'esame successivo. Il piazzamento si salva per
-// partita ed esame in `utente.esame_piazzamento_partita` (migrazioni utente 040 e 057); il calcolo dei punti lo legge da `piazzamentoCorrente`, non
+// partita ed esame in `utente.esame_piazzamento_partita`; il calcolo dei punti lo legge da `piazzamentoCorrente`, non
 // dal client. L13 (ondata 7, O7-2): la stessa riga la scrive anche la spunta della voce con l'effetto «esame» (con il «prima» nella ricevuta),
 // che dà le Doti del premio del piazzamento (`esame.premi_json`, `premiDellEsame`).
 // ============================================================
@@ -52,7 +52,7 @@ export function esameCorrente(partitaId: number): PiazzamentoEsameDto | null {
 
 /**
  * L13 (ondata 7, O7-2): un esame con i suoi premi per piazzamento (`esame.premi_json`, la fonte unica) e il requisito di Conoscenza per il primo
- * posto; null se l'esame non c'è. `SELECT *`: su uno schema di prima della 311 le colonne non ci sono e l'esame non dichiara premi.
+ * posto; null se l'esame non c'è. `SELECT *`: su uno schema vecchio le colonne dei premi non ci sono e l'esame non dichiara premi.
  */
 export function premiDellEsame(chiave: string): { chiave: string; nome: string; premi: PremioPiazzamentoEsame[]; requisito: RequisitoConoscenzaEsame | null } | null {
   const r = prepared('SELECT * FROM esame WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; premi_json?: string | null; requisito_conoscenza?: string | null } | undefined;

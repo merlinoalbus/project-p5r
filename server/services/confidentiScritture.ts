@@ -100,7 +100,7 @@ function comeDto(r: RigaDialogo): DialogoModificatoDto {
   return { id: r.id, note: r.note, scelte: leggiScelteDialogo(r.scelte_json), modificato: haFotografia('dialogo', String(r.id)) };
 }
 
-/** I punti di una scelta: nessuno (null) o da 0 a 3 note, interi (i valori della guida; la migrazione 309 li ha trovati tutti fra 0 e 3). */
+/** I punti di una scelta: nessuno (null) o da 0 a 3 note, interi (i valori della guida stanno tutti fra 0 e 3). */
 const puntiValidi = (p: number | null | undefined): boolean => p === null || p === undefined || (Number.isInteger(p) && p >= 0 && p <= 3);
 
 /**

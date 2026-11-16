@@ -24,7 +24,7 @@ const shibuya = (illustrazione: QuartiereDettaglioDto['illustrazione'], mappa: b
   pianta: { url: 'https://esempio.test/shibuya.png', fonte: 'Guida', pagina: null }, piantaAssente: null, luoghi: [], ingresso: null,
 } as unknown as QuartiereDettaglioDto);
 
-// Superato dal lotto L11 (R11-02/8, migrazione 210): lo scarico automatico della pianta all'apertura del quartiere non esiste più (i due test
+// Superato dal lotto L11 (R11-02/8): lo scarico automatico della pianta all'apertura del quartiere non esiste più (i due test
 // restano, da riscrivere).
 it.skip('scaricata la pianta, il quartiere si rilegge: l’intestazione mostra l’immagine appena scaricata, come il visore', async () => {
   const caricata = { immagineUrl: '/api/immagini/mappa/citta-shibuya/file?v=2026-10-20T10%3A00%3A00.000Z', asset: 'mappe/citta-shibuya' };

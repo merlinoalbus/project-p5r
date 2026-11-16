@@ -2,9 +2,9 @@
 // fontiTolte — il registro delle strutture eliminate dal database (L11, R11-05, R11-06)
 // ============================================================
 //
-// Un solo elenco, aggiornato DA OGNI migrazione che toglie una tabella o una colonna: lo usano l'importazione del pacchetto (il riepilogo di
+// Un solo elenco, aggiornato da ogni modifica dello schema che toglie una tabella o una colonna: lo usano l'importazione del pacchetto (il riepilogo di
 // ciò che un backup vecchio porta e questa versione non usa più) e il cestino (una riga eliminata prima del drop torna senza la colonna tolta,
-// o è saltata con il motivo, invece di diventare irripristinabile). Regola: una voce NON si toglie mai da qui, nemmeno quando la migrazione che
+// o è saltata con il motivo, invece di diventare irripristinabile). Regola: una voce NON si toglie mai da qui, nemmeno quando la modifica che
 // ha tolto la struttura è lontana: serve ai cestini e ai backup vecchi. Anche le etichette delle tabelle tolte in `cestinoService.ETICHETTE`
 // restano, perché danno il nome leggibile alle righe saltate.
 // ============================================================
@@ -14,260 +14,260 @@ export interface FonteTolta {
   tabella: string;
   /** Null = la tabella intera. */
   colonna: string | null;
-  /** Quale migrazione l'ha tolta, per esempio «L11 · migrazione 176». */
+  /** Il lotto di lavoro che l'ha tolta («L11»). */
   tolta: string;
   /** Dove vive ora il dato, in italiano e per l'utente: «le planimetrie dell'Area (L2)». */
   sostituitaDa: string;
 }
 
-/** Le strutture tolte; ogni migrazione di eliminazione vi aggiunge la sua voce (mai si tolgono voci). */
+/** Le strutture tolte; ogni eliminazione di tabella o colonna vi aggiunge la sua voce (mai si tolgono voci). */
 export const FONTI_TOLTE: readonly FonteTolta[] = [
   {
-    schema: 'main', tabella: 'marcatore_mappa', colonna: null, tolta: 'L11 · migrazione 176',
+    schema: 'main', tabella: 'marcatore_mappa', colonna: null, tolta: 'L11',
     sostituitaDa: 'i pin della guida (le schede dei punti sulle planimetrie): la posizione di una voce è quella della sua scheda',
   },
   {
-    schema: 'main', tabella: 'marcatore_luogo', colonna: null, tolta: 'L11 · migrazione 176',
+    schema: 'main', tabella: 'marcatore_luogo', colonna: null, tolta: 'L11',
     sostituitaDa: 'i pin dei luoghi sulla mappa del quartiere; le posizioni di partenza restano nell’archivio «archivio-marcatori-e-piante-l11»',
   },
   {
-    schema: 'main', tabella: 'pianta_area', colonna: null, tolta: 'L11 · migrazione 176',
+    schema: 'main', tabella: 'pianta_area', colonna: null, tolta: 'L11',
     sostituitaDa: 'le planimetrie delle infiltrazioni (le piante non si scaricano più); URL, fonte e licenza restano nell’archivio «archivio-marcatori-e-piante-l11»',
   },
   {
-    schema: 'main', tabella: 'mappa', colonna: 'entita_tipo', tolta: 'L11 · migrazione 177',
+    schema: 'main', tabella: 'mappa', colonna: 'entita_tipo', tolta: 'L11',
     sostituitaDa: 'la chiave e il tipo della mappa (il quartiere è «citta-…», il Palazzo o il dedalo «dungeon-…») e i legami dell’Area con le infiltrazioni',
   },
   {
-    schema: 'main', tabella: 'mappa', colonna: 'entita_chiave', tolta: 'L11 · migrazione 177',
+    schema: 'main', tabella: 'mappa', colonna: 'entita_chiave', tolta: 'L11',
     sostituitaDa: 'la chiave e il tipo della mappa (il quartiere è «citta-…», il Palazzo o il dedalo «dungeon-…») e i legami dell’Area con le infiltrazioni',
   },
   {
-    schema: 'main', tabella: 'mappa_entita', colonna: null, tolta: 'L11 · migrazione 177',
+    schema: 'main', tabella: 'mappa_entita', colonna: null, tolta: 'L11',
     sostituitaDa: 'i legami dell’Area con le infiltrazioni, la planimetria predefinita dell’Area per i luoghi e la chiave della mappa per quartieri e Palazzi; le righe non coperte restano nell’archivio «archivio-legami-e-presentazione-mappe-l11»',
   },
   {
-    schema: 'main', tabella: 'mappa_presentazione', colonna: 'gruppo_immagini_json', tolta: 'L11 · migrazione 177',
+    schema: 'main', tabella: 'mappa_presentazione', colonna: 'gruppo_immagini_json', tolta: 'L11',
     sostituitaDa: 'l’Area della planimetria (il nome della stanza) e la versione della mappa (etichetta e ordine); i gruppi non riproducibili restano nell’archivio «archivio-legami-e-presentazione-mappe-l11»',
   },
   {
-    schema: 'main', tabella: 'guida_mappa', colonna: null, tolta: 'L11 · migrazione 177',
+    schema: 'main', tabella: 'guida_mappa', colonna: null, tolta: 'L11',
     sostituitaDa: 'il nome e la descrizione dell’infiltrazione (`dungeon_area`); i nomi che differivano restano nell’archivio «archivio-legami-e-presentazione-mappe-l11»; i nomi di prima delle infiltrazioni restano in `guida_alias`',
   },
   {
-    schema: 'main', tabella: 'organizzazione_mappa_esito', colonna: null, tolta: 'L11 · migrazione 177',
+    schema: 'main', tabella: 'organizzazione_mappa_esito', colonna: null, tolta: 'L11',
     sostituitaDa: 'niente: la conversione delle vecchie mappe d’area in sezioni della guida è conclusa (la tabella era vuota)',
   },
   {
-    schema: 'main', tabella: 'luogo', colonna: 'giorni', tolta: 'L11 · migrazione 184',
+    schema: 'main', tabella: 'luogo', colonna: 'giorni', tolta: 'L11',
     sostituitaDa: 'gli orari del luogo (`orari_json`) e la disponibilità dei Confidenti; le frasi restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'luogo', colonna: 'giorni_json', tolta: 'L11 · migrazione 184',
+    schema: 'main', tabella: 'luogo', colonna: 'giorni_json', tolta: 'L11',
     sostituitaDa: 'gli orari del luogo (`orari_json`) e la disponibilità dei Confidenti; i valori restano nell’archivio «archivio-frasi-l11»',
   },
   ...(['altri_effetti', 'regole', 'premi'] as const).map((colonna): FonteTolta => ({
-    schema: 'main', tabella: 'attivita', colonna, tolta: 'L9 · migrazione 203',
+    schema: 'main', tabella: 'attivita', colonna, tolta: 'L9',
     sostituitaDa: 'il testo «dettagli» dell’attività (che la conteneva per intero) e gli effetti strutturati; i valori restano nell’archivio «archivio-frasi-l11»',
   })),
   {
-    schema: 'main', tabella: 'attivita', colonna: 'paga', tolta: 'L9 · migrazione 203',
+    schema: 'main', tabella: 'attivita', colonna: 'paga', tolta: 'L9',
     sostituitaDa: 'la paga strutturata (`paga_yen`, `paga_massima`); le frasi restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'articolo', colonna: 'disponibile_dal', tolta: 'L11 · migrazione 194',
+    schema: 'main', tabella: 'articolo', colonna: 'disponibile_dal', tolta: 'L11',
     sostituitaDa: 'le condizioni dell’offerta (`condizioni_json`): il «disponibile dal» mostrato è generato da esse; i testi di prima restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'luogo', colonna: 'sblocco', tolta: 'L11 · migrazione 218',
+    schema: 'main', tabella: 'luogo', colonna: 'sblocco', tolta: 'L11',
     sostituitaDa: 'le condizioni del luogo (`condizioni_json`) e gli inviti che lo aprono: la frase mostrata è generata da esse; le frasi (anche quelle con la data sbagliata) restano nell’archivio «archivio-frasi-l11», e il racconto del Confidente nella nota del luogo',
   },
   {
-    schema: 'main', tabella: 'attivita', colonna: 'sblocco', tolta: 'L11 · migrazione 218',
+    schema: 'main', tabella: 'attivita', colonna: 'sblocco', tolta: 'L11',
     sostituitaDa: 'le condizioni dell’attività (`condizioni_json`): la frase mostrata è generata da esse; le frasi restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'luogo', colonna: 'quando', tolta: 'L11 · migrazione 193',
+    schema: 'main', tabella: 'luogo', colonna: 'quando', tolta: 'L11',
     sostituitaDa: 'gli orari del luogo (`orari_json`): il visore e la scheda mostrano l’orario ricavato dai dati; i valori (anche dei luoghi che divergevano) restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'negozio', colonna: 'orari', tolta: 'L11 · migrazione 184',
-    sostituitaDa: 'gli orari strutturati del negozio (`orari_json`, a sua volta tolta dalla 373: oggi gli orari del luogo della sede, salvo `eccezione_orari_json`): la frase era la sua copia esatta',
+    schema: 'main', tabella: 'negozio', colonna: 'orari', tolta: 'L11',
+    sostituitaDa: 'gli orari strutturati del negozio (`orari_json`, a sua volta tolta: oggi gli orari del luogo della sede, salvo `eccezione_orari_json`): la frase era la sua copia esatta',
   },
   {
-    schema: 'main', tabella: 'negozio', colonna: 'sblocco', tolta: 'L11 · migrazione 184',
+    schema: 'main', tabella: 'negozio', colonna: 'sblocco', tolta: 'L11',
     sostituitaDa: 'le condizioni di sblocco del negozio e della sua sede (`sblocco_json`, `condizioni_json`); le frasi restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'luogo', colonna: 'negozio', tolta: 'L11 · migrazione 187',
+    schema: 'main', tabella: 'luogo', colonna: 'negozio', tolta: 'L11',
     sostituitaDa: 'i negozi della sede (`negozio.sede_chiave`): la chiave era la loro copia esatta',
   },
   {
-    schema: 'main', tabella: 'luogo', colonna: 'attivita_json', tolta: 'L11 · migrazione 187',
+    schema: 'main', tabella: 'luogo', colonna: 'attivita_json', tolta: 'L11',
     sostituitaDa: 'le attività della sede (`attivita.sede_chiave`); i tag liberi restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'articolo', colonna: 'condizione', tolta: 'L11 · migrazione 187',
+    schema: 'main', tabella: 'articolo', colonna: 'condizione', tolta: 'L11',
     sostituitaDa: 'le condizioni dell’offerta (`condizioni_json`); le frasi restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'quartiere', colonna: 'sblocco', tolta: 'L11 · migrazione 188',
+    schema: 'main', tabella: 'quartiere', colonna: 'sblocco', tolta: 'L11',
     sostituitaDa: 'la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti dei Confidenti; le frasi della guida restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'giorno_calendario', colonna: null, tolta: 'L11 · migrazione 189',
+    schema: 'main', tabella: 'giorno_calendario', colonna: null, tolta: 'L11',
     sostituitaDa: 'il giorno unico (tabella `giorno`, L9): meteo in due fasce, tempo libero e settimana; il giorno della settimana si calcola dalla data',
   },
   {
-    schema: 'main', tabella: 'giorno_percorso', colonna: null, tolta: 'L11 · migrazione 189',
+    schema: 'main', tabella: 'giorno_percorso', colonna: null, tolta: 'L11',
     sostituitaDa: 'il giorno unico (tabella `giorno`, L9): fase, trama, vincoli e avvisi; le azioni del percorso sono le voci del Diario e la copia storica resta nell’archivio «archivio-giorno-percorso-azioni-l11»',
   },
   {
-    schema: 'main', tabella: 'pianta_quartiere', colonna: null, tolta: 'L11 · migrazione 210',
+    schema: 'main', tabella: 'pianta_quartiere', colonna: null, tolta: 'L11',
     sostituitaDa: 'l’immagine dell’illustrazione del quartiere nel database (caricata, o la grafica predefinita «mappe/citta-…»); lo scarico dalla guida non esiste più; URL, pagina, fonte e licenza restano nell’archivio «archivio-pianta-quartiere-l11»',
   },
   ...(['libro', 'film', 'articolo'] as const).map((tabella): FonteTolta => ({
-    schema: 'main', tabella, colonna: 'nome_it', tolta: 'L11 · migrazione 215',
+    schema: 'main', tabella, colonna: 'nome_it', tolta: 'L11',
     sostituitaDa: 'il nome del catalogo degli oggetti (`catalogo_oggetto.nome`), con l’inglese fra i nomi alternativi; i valori restano nell’archivio «archivio-frasi-l11»',
   })),
   {
-    schema: 'main', tabella: 'dungeon', colonna: 'livello_consigliato', tolta: 'L8 · migrazione 335',
+    schema: 'main', tabella: 'dungeon', colonna: 'livello_consigliato', tolta: 'L8',
     sostituitaDa: 'il livello consigliato minimo e massimo del Palazzo (`livello_min`, `livello_max`), con il confronto delle fonti nella sua nota storica; i testi di prima restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'richiesta', colonna: 'disponibile_dal', tolta: 'L8 · migrazione 337',
+    schema: 'main', tabella: 'richiesta', colonna: 'disponibile_dal', tolta: 'L8',
     sostituitaDa: 'le condizioni di sblocco della Richiesta (`condizioni_json`); i testi con un valore restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'richiesta', colonna: 'scadenza', tolta: 'L8 · migrazione 337',
+    schema: 'main', tabella: 'richiesta', colonna: 'scadenza', tolta: 'L8',
     sostituitaDa: 'la scadenza come data di gioco (`scadenza_data`) con la proroga; i testi con un valore restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'richiesta', colonna: 'area', tolta: 'L8 · migrazione 337',
+    schema: 'main', tabella: 'richiesta', colonna: 'area', tolta: 'L8',
     sostituitaDa: 'il dedalo della Richiesta (`area_chiave`) con il suo nome; i nomi diversi da quello del dedalo restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'negozio', colonna: 'luogo_chiave', tolta: 'L1 · migrazione 346',
+    schema: 'main', tabella: 'negozio', colonna: 'luogo_chiave', tolta: 'L1',
     sostituitaDa: 'la sede del negozio (`sede_chiave`) e il quartiere della sua sede (`luogo.quartiere_chiave`): un negozio senza sede (quello del Palazzo di Niijima) non ha quartiere; i valori restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'negozio', colonna: 'luogo', tolta: 'L1 · migrazione 346',
+    schema: 'main', tabella: 'negozio', colonna: 'luogo', tolta: 'L1',
     sostituitaDa: 'la sede del negozio (`sede_chiave`) con il suo quartiere e la sua Area; ciò che il testo diceva in più (per esempio «edificio principale 1P») sta nelle note del negozio, e il testo originale resta nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'negozio', colonna: 'condizioni_json', tolta: 'L1 · migrazione 346',
-    sostituitaDa: 'lo sblocco del negozio (`sblocco_json`) e le condizioni della sua sede; la condizione propria del negozio passa nello sblocco; il valore originale resta nell’archivio «archivio-frasi-l11» (per le righe presenti quando la migrazione è girata)',
+    schema: 'main', tabella: 'negozio', colonna: 'condizioni_json', tolta: 'L1',
+    sostituitaDa: 'lo sblocco del negozio (`sblocco_json`) e le condizioni della sua sede; la condizione propria del negozio passa nello sblocco; il valore originale resta nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'attivita', colonna: 'luogo_chiave', tolta: 'L1 · migrazione 346',
+    schema: 'main', tabella: 'attivita', colonna: 'luogo_chiave', tolta: 'L1',
     sostituitaDa: 'la sede dell’attività (`sede_chiave`) e il quartiere della sua sede (`luogo.quartiere_chiave`); i valori restano nell’archivio «archivio-frasi-l11»',
   },
   ...(['effetto', 'statistiche', 'effetto_json'] as const).map((colonna): FonteTolta => ({
-    schema: 'main', tabella: 'articolo', colonna, tolta: 'L1 · migrazione 346',
+    schema: 'main', tabella: 'articolo', colonna, tolta: 'L1',
     sostituitaDa: 'l’oggetto del catalogo (`catalogo_oggetto`): l’effetto e le statistiche di un’offerta sono quelli del suo oggetto; la colonna era vuota in tutte le offerte',
   })),
   ...(['giorni_json', 'fasce_json', 'luogo', 'sblocco_data', 'sblocco_requisiti'] as const).map((colonna): FonteTolta => ({
-    schema: 'main', tabella: 'confidente_disponibilita', colonna, tolta: 'L7 · migrazione 358',
+    schema: 'main', tabella: 'confidente_disponibilita', colonna, tolta: 'L7',
     sostituitaDa: 'la disponibilità strutturata del Confidente (modo, giorni, fasce, eccezioni), i luoghi per chiave e i requisiti di rango; ciò che la prosa diceva in più sta nelle note; i testi di prima restano nell’archivio «archivio-frasi-l11»',
   })),
   {
-    schema: 'main', tabella: 'confidente_disponibilita', colonna: 'dal', tolta: 'L7 · migrazione 358',
+    schema: 'main', tabella: 'confidente_disponibilita', colonna: 'dal', tolta: 'L7',
     sostituitaDa: 'il requisito di rango 1 di tipo «data» (`confidente_requisito`): «Disponibile dal» si legge da lì; i valori di prima restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'attivita', colonna: 'luogo', tolta: 'L8 · migrazione 362',
+    schema: 'main', tabella: 'attivita', colonna: 'luogo', tolta: 'L8',
     sostituitaDa: 'la sede dell’attività (`sede_chiave`) con il suo quartiere; i testi di prima restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'attivita', colonna: 'doti_json', tolta: 'L8 · migrazione 362',
+    schema: 'main', tabella: 'attivita', colonna: 'doti_json', tolta: 'L8',
     sostituitaDa: 'gli effetti strutturati e gli esiti dell’attività (`effetti_json`, `esiti_json`); i valori di prima restano nell’archivio «archivio-frasi-l11»',
   },
   ...(['prezzo', 'dote', 'note', 'disponibile_dal', 'sblocca', 'effetto_json'] as const).map((colonna): FonteTolta => ({
-    schema: 'main', tabella: 'libro', colonna, tolta: 'L8 · migrazione 363',
+    schema: 'main', tabella: 'libro', colonna, tolta: 'L8',
     sostituitaDa: 'gli articoli delle librerie (prezzo e dove si compra), le condizioni e gli effetti del libro; vuota sui dati reali, i valori rimasti in una copia restano nell’archivio «archivio-frasi-l11»',
   })),
   {
-    schema: 'main', tabella: 'film', colonna: 'note_successive', tolta: 'L8 · migrazione 363',
+    schema: 'main', tabella: 'film', colonna: 'note_successive', tolta: 'L8',
     sostituitaDa: 'gli effetti del film (le voci «ripetuto» dicono quanto vale rivederlo); la colonna era vuota in tutti i film',
   },
   {
-    schema: 'main', tabella: 'trofeo', colonna: 'quando', tolta: 'L8 · migrazione 363',
+    schema: 'main', tabella: 'trofeo', colonna: 'quando', tolta: 'L8',
     sostituitaDa: 'le condizioni del trofeo (`condizioni_json`), da cui la pagina genera la frase; la colonna era vuota in tutti i trofei',
   },
   {
-    schema: 'main', tabella: 'regola_pesca', colonna: 'fonti_json', tolta: 'L8 · migrazione 363',
+    schema: 'main', tabella: 'regola_pesca', colonna: 'fonti_json', tolta: 'L8',
     sostituitaDa: 'le fonti dentro la regola (`dati_json.fonti`): la colonna era la loro copia esatta',
   },
   {
-    schema: 'main', tabella: 'negozio', colonna: 'listino_condiviso', tolta: 'L2 · migrazione 354',
+    schema: 'main', tabella: 'negozio', colonna: 'listino_condiviso', tolta: 'L2',
     sostituitaDa: 'le offerte proprie di ogni punto vendita: ogni macchina ha il suo listino e la sua scorta; i valori, se ce n’erano, restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'articolo', colonna: 'articolo_condiviso', tolta: 'L2 · migrazione 354',
+    schema: 'main', tabella: 'articolo', colonna: 'articolo_condiviso', tolta: 'L2',
     sostituitaDa: 'l’offerta del punto vendita: ogni macchina ha la sua riga e la sua scorta; i valori, se ce n’erano, restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'negozio_luogo_extra', colonna: null, tolta: 'L2 · migrazione 354',
+    schema: 'main', tabella: 'negozio_luogo_extra', colonna: null, tolta: 'L2',
     sostituitaDa: 'la sede unica di ogni punto vendita (`negozio.sede_chiave`): una macchina in un altro posto è un punto vendita proprio; le righe restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'negozio_sede_spillo', colonna: null, tolta: 'L2 · migrazione 354',
+    schema: 'main', tabella: 'negozio_sede_spillo', colonna: null, tolta: 'L2',
     sostituitaDa: 'il riferimento del pin al suo punto vendita (`spillo.riferimento_chiave`), che ha una sede sola; le righe restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'negozio_sede_foto', colonna: null, tolta: 'L2 · migrazione 354',
+    schema: 'main', tabella: 'negozio_sede_foto', colonna: null, tolta: 'L2',
     sostituitaDa: 'niente: era la copia di partenza delle sedi aggiuntive dei listini, che non esistono più; le righe restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'negozio', colonna: 'orari_json', tolta: 'L4 · migrazione 373',
+    schema: 'main', tabella: 'negozio', colonna: 'orari_json', tolta: 'L4',
     sostituitaDa: 'gli orari del luogo (la sede) e, quando la guida distingue il punto vendita o non ha sede, `negozio.eccezione_orari_json`; i valori restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'utente', tabella: 'registro_acquisti', colonna: 'sede_chiave', tolta: 'L2 · migrazione utente 68',
-    sostituitaDa: 'la sede del punto vendita dell’offerta comprata: la scorta è dell’offerta; un acquisto fatto in una sede aggiuntiva passa all’offerta della macchina che quella sede è diventata; i valori eventuali restano nel verbale «audit-utente-068-sede» e nella copia di avvio',
+    schema: 'utente', tabella: 'registro_acquisti', colonna: 'sede_chiave', tolta: 'L2',
+    sostituitaDa: 'la sede del punto vendita dell’offerta comprata: la scorta è dell’offerta; un acquisto fatto in una sede aggiuntiva passa all’offerta della macchina che quella sede è diventata; i valori eventuali restano nel verbale «audit-utente-068-sede»',
   },
   {
-    schema: 'main', tabella: 'voce_giornata', colonna: 'produce_json', tolta: 'L6 · migrazione 357 (o utente 69 su un’istanza nuova)',
+    schema: 'main', tabella: 'voce_giornata', colonna: 'produce_json', tolta: 'L6',
     sostituitaDa: 'gli effetti della voce (`voce_effetto`: un solo punto di modifica; per l’incontro dei Confidenti `confidente_dote_incontro`, per i turni le attività); il valore di prima (uid → testo) resta nell’archivio «archivio-frasi-l11», colonna «voce_giornata.produce_json», e il contenuto grezzo di allora in `voce_effetto_transizione.raw_json`',
   },
   {
-    schema: 'main', tabella: 'quartiere', colonna: 'sblocco_data', tolta: 'L5 · migrazione 356',
+    schema: 'main', tabella: 'quartiere', colonna: 'sblocco_data', tolta: 'L5',
     sostituitaDa: 'la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti dei Confidenti: quando la condizione ha una data, è quella a valere; le date di prima restano nell’archivio «archivio-frasi-l11»',
   },
   ...(['data_sblocco', 'data_scadenza', 'furto_consigliato'] as const).map((colonna): FonteTolta => ({
-    schema: 'main', tabella: 'dungeon', colonna, tolta: 'L9 · migrazione 377',
+    schema: 'main', tabella: 'dungeon', colonna, tolta: 'L9',
     sostituitaDa: 'le date del Palazzo in colonne strutturate (`finestra_dal`, `finestra_al`, `furto_consigliato_data`, `lettera_entro`); un eventuale testo rimasto sta nell’archivio «archivio-frasi-l11»',
   })),
   {
-    schema: 'main', tabella: 'ombra', colonna: 'nome_negoziazione', tolta: 'L10 · migrazione 381',
+    schema: 'main', tabella: 'ombra', colonna: 'nome_negoziazione', tolta: 'L10',
     sostituitaDa: 'niente: la colonna era vuota in tutte le Ombre e nessuna parte dell’app la leggeva; un valore rimasto sta nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'richiesta', colonna: 'ricompense_json', tolta: 'L10 · migrazione 381',
+    schema: 'main', tabella: 'richiesta', colonna: 'ricompense_json', tolta: 'L10',
     sostituitaDa: 'gli oggetti della ricompensa (`ricompensa_oggetto`), gli yen e i PE della Richiesta; i testi rimasti stanno nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'richiesta', colonna: 'confidente_rango', tolta: 'L10 · migrazione 381',
+    schema: 'main', tabella: 'richiesta', colonna: 'confidente_rango', tolta: 'L10',
     sostituitaDa: 'le condizioni di sblocco della Richiesta (`condizioni_json`, una condizione sul rango del Confidente); i valori rimasti stanno nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'dungeon', colonna: 'seed_json', tolta: 'via «Ripristina» · migrazione 388',
+    schema: 'main', tabella: 'dungeon', colonna: 'seed_json', tolta: 'via «Ripristina»',
     sostituitaDa: 'niente: era la fotografia del boss finale e delle date del Palazzo per «Ripristina», tolto (decisione dell’utente del 10/11); i valori restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'giorno', colonna: 'seed_json', tolta: 'via «Ripristina» · migrazione 388',
+    schema: 'main', tabella: 'giorno', colonna: 'seed_json', tolta: 'via «Ripristina»',
     sostituitaDa: 'niente: era la fotografia del giorno di gioco per «Ripristina», tolto (decisione dell’utente del 10/11); l’origine «utente» della riga resta; i valori restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'catalogo_oggetto', colonna: 'seed_json', tolta: 'via «Ripristina» · migrazione 388',
+    schema: 'main', tabella: 'catalogo_oggetto', colonna: 'seed_json', tolta: 'via «Ripristina»',
     sostituitaDa: 'niente: era la fotografia dell’oggetto per «Ripristina», tolto (decisione dell’utente del 10/11); l’origine «utente» della riga resta; i valori restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
+    schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },
   {
-    schema: 'utente', tabella: 'requisito_partita', colonna: null, tolta: 'L11 · migrazione utente 44',
+    schema: 'utente', tabella: 'requisito_partita', colonna: null, tolta: 'L11',
     sostituitaDa: 'niente: le conferme a mano dei requisiti dei Confidenti non si leggevano più dalla R6-01b (la tabella era vuota)',
   },
 ];

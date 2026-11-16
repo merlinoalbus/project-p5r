@@ -184,7 +184,7 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
 function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti' | 'conBonus' | 'senzaBonus' | 'gemelliTempo'> {
   const esiti: Record<string, string> = {}, modiEsiti: Record<string, 'scelta' | 'automatico'> = {}, strumenti: Record<string, string> = {}, conBonus: Record<string, true> = {}, senzaBonus: Record<string, true> = {};
   const gemelliTempo: Record<string, string> = {};
-  // `SELECT *`: su uno schema di prima della 233 la colonna non c'è e nessuna attività ha esiti
+  // `SELECT *`: su uno schema senza `esiti_json` la colonna non c'è e nessuna attività ha esiti
   for (const r of prepared('SELECT * FROM attivita').all() as Array<{ chiave: string; esiti_json?: string | null }>) {
     const e = leggiEsitiAttivita(r.esiti_json);
     if (!e) continue;
@@ -271,7 +271,7 @@ export function elenchiAzione(): ElenchiAzioneDto {
   const voci = (sql: string) => prepared(sql).all() as Array<{ chiave: string; nome: string; dettaglio?: string | null }>;
   /** Le stesse righe senza `dettaglio` quando è vuoto o nullo, così il campo compare solo se ha un valore. */
   const pulite = (r: Array<{ chiave: string; nome: string; dettaglio?: string | null }>) => r.map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dettaglio ? { dettaglio: x.dettaglio } : {}) }));
-  // `*` e poi `titolo_corrente`: su uno schema di prima della 233 `esiti_json` non c'è (nessun esito)
+  // `*` e poi `titolo_corrente`: su uno schema vecchio `esiti_json` non c'è (nessun esito)
   const attivita = (prepared(`SELECT * FROM (${titoliLettura('attivita', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`).all() as Array<{ chiave: string; titolo_corrente: string; tipo: string; tracciamento: string; confidente_chiave: string | null; esiti_json?: string | null }>)
     .map((a) => ({ ...a, nome: a.titolo_corrente, esiti_json: a.esiti_json ?? null }));
   // L13: gli esiti di ogni attività, per scegliere nella voce l'esito atteso del turno (solo nel modo «scelta»)

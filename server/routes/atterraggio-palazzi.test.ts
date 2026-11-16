@@ -4,17 +4,16 @@
 //
 // «Devi visualizzare l'icona e permettermi di valorizzare per fasce temporali o giorni specifici il punto di atterraggio
 // dell'icona della mappa rispetto al mappamondo delle planimetrie.» La finestra (voce di `finestre-dungeon`) si cambia con
-// `PUT /dungeon/:chiave` (campo `date`; la rotta `/finestra` è stata tolta, i suoi casi qui sono `it.skip`); le regole d'atterraggio (`dungeon_atterraggio`, 097) con `PUT /dungeon/:chiave/atterraggi`, e
+// `PUT /dungeon/:chiave` (campo `date`; la rotta `/finestra` è stata tolta, i suoi casi qui sono `it.skip`); le regole d'atterraggio (`dungeon_atterraggio`) con `PUT /dungeon/:chiave/atterraggi`, e
 // il riassunto del Palazzo dice dove si atterra nel giorno della partita: la prima regola che lo copre.
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, prepared } from '../db/dbService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaSpillo, eliminaSpillo, esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import { regolaCopre } from '../services/atterraggioPalazziService.js';
 import { finestreDungeon } from '../services/datiGuida.js';
-import { migration097 } from '../db/migrations/097_atterraggio_palazzi.js';
 import type { DungeonRiassuntoDto, MappaDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 // L3: nei Palazzi una planimetria nasce in un'Area (R3-26); qui serve solo come posto d'atterraggio
@@ -66,7 +65,7 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
 
   // Saltato (L12-04, Q20): la rotta `PUT /dungeon/:chiave/finestra` non esiste più, nessuno la chiamava; le date del Palazzo si scrivono da
   // `PUT /dungeon/:chiave` con `date`, che passa dalla stessa `impostaFinestra`. Il corpo originale è conservato, non eseguito (zero test).
-  it.skip('097 porta la finestra di Kamoshida all\'11 aprile; la finestra si cambia, anche senza fine, e torna nel riassunto', async () => {
+  it.skip('la finestra di Kamoshida parte dall\'11 aprile; la finestra si cambia, anche senza fine, e torna nel riassunto', async () => {
     expect(finestreDungeon().get('kamoshida')).toEqual({ dal: '04-11', al: '05-02' });
     expect((await kamoshida()).finestra).toEqual({ dal: '04-11', al: '05-02' });
     // L13 O6-3: un Palazzo ha una scadenza («senza fine» solo i Memento e Iweleth)
@@ -196,28 +195,6 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
     expect(nuovo).toBe(pinSala);
     const regola = (await request(app).get('/api/compendio/dungeon/kamoshida').expect(200)).body.data.atterraggi[0] as { spillo: number | null; spilloNome: string | null };
     expect(regola).toMatchObject({ spillo: nuovo, spilloNome: 'Sala Centrale' });
-  });
-
-  it('097 tocca la finestra solo se è ancora quella trascritta in origine, e ripetuta non cambia niente', () => {
-    /** Riscrive la data d'inizio della finestra di Kamoshida nel blocco salvato. */
-    const scrivi = (dal: string) => {
-      const b = JSON.parse(prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").pluck().get() as string) as { finestre: Array<{ dungeon: string; dal: string }> };
-      b.finestre.find((f) => f.dungeon === 'kamoshida')!.dal = dal;
-      prepared("UPDATE dati_guida SET json = ? WHERE chiave = 'finestre-dungeon'").run(JSON.stringify(b));
-    };
-    /** La data d'inizio della finestra di Kamoshida nel blocco salvato. */
-    const leggi = () => (JSON.parse(prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").pluck().get() as string) as { finestre: Array<{ dungeon: string; dal: string }> }).finestre.find((f) => f.dungeon === 'kamoshida')!.dal;
-    scrivi('04-12');
-    migration097.up(getDb());
-    expect(leggi()).toBe('04-11');
-    migration097.up(getDb());
-    expect(leggi()).toBe('04-11');
-    // corretta a mano: resta
-    scrivi('04-14');
-    migration097.up(getDb());
-    expect(leggi()).toBe('04-14');
-    // le regole salvate sopravvivono alla migrazione ripetuta
-    expect(prepared('SELECT COUNT(*) FROM dungeon_atterraggio').pluck().get()).toBe(1);
   });
 
   it('le voci della guida collegate a un Palazzo portano l’atterraggio del loro giorno, non di quello della partita (2026-10-04)', async () => {

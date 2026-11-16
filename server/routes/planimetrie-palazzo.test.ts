@@ -4,7 +4,7 @@
 //
 // Tre cose che prima non reggevano, e sono le tre che si vedono nella scheda del Palazzo:
 //
-// 1. **Legare una planimetria a un'infiltrazione dall'editor non si vedeva.** Da L3 (migrazione 110) il legame è dell'**Area** della
+// 1. **Legare una planimetria a un'infiltrazione dall'editor non si vedeva.** Da L3 il legame è dell'**Area** della
 //    planimetria (`infiltrazione_area`): l'editor lo scrive lì, e la scheda lo legge da lì (`mappa_entita` non si legge più).
 // 2. **Un'infiltrazione può stare su più planimetrie** (decisione dell'utente, 2026-10-04, che supera quella del 2026-09-18 «un'area
 //    ha una sola planimetria»): legarne una seconda la affianca alla prima.

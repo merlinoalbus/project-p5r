@@ -3,7 +3,7 @@
 // ============================================================
 //
 // La stessa domanda (o lo stesso cruciverba) si segna in due punti: la pagina della Guida e la voce del Diario che la cita con un effetto
-// di stato (migrazioni 157 e 158). La verità è una sola (`domanda_partita`, `cruciverba_partita`); per non avere due stati che si
+// di stato. La verità è una sola (`domanda_partita`, `cruciverba_partita`); per non avere due stati che si
 // contraddicono, quando la voce c'è (`vociDiStato`: una sola voce, senza ambiguità) la spunta dalla Guida è LA spunta della voce:
 //   - la voce risulta fatta nel Diario e nella Home, e l'alone dei suggerimenti non la propone più;
 //   - la Conoscenza non è più un avviso che sparisce: è l'«Applica» della voce, mai applicata da sola (D6);

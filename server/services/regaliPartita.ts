@@ -1,10 +1,10 @@
 // La chiave identifica il regalo; nome e data della consegna restano quelli storici.
 //
-// Ondata 5 (decisione 21 dell'utente, «regalo ripetibile con consumo di copie»; utente 052): ogni consegna è una riga con il suo `id`, anche la
+// Ondata 5 (decisione 21 dell'utente, «regalo ripetibile con consumo di copie»): ogni consegna è una riga con il suo `id`, anche la
 // seconda dello stesso oggetto allo stesso Confidente. L'azione «Regala» scrive e toglie una consegna alla volta (`inserisciConsegna`,
 // `togliConsegna`); il vecchio comando per nome (`scriviRegaloPartita`, la spunta dei regali senza oggetto del catalogo) resta com'era: una
 // consegna per nome, e togliendo si tolgono le consegne di quel nome. Il movimento automatico degli yen di ogni consegna ha la sua causa
-// (`causa_yen`): le consegne di prima della 052 quella di sempre («Confidente:nome storico»), le nuove una propria con il loro `id`.
+// (`causa_yen`): le consegne senza `id` quella di sempre («Confidente:nome storico»), le nuove una propria con il loro `id`.
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { haColonnaUtente, haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -21,9 +21,9 @@ interface RigaConsegna {
   data_gioco: string | null; fascia_gioco: string | null; causa_yen: string | null;
 }
 
-/** Le colonne di `utente.regalo_partita` che lo schema ha (le aggiungono le migrazioni utente 026, 052, …): `has` chiede allo schema ricordato. */
+/** Le colonne di `utente.regalo_partita` che lo schema ha (un file vecchio può averne meno): `has` chiede allo schema ricordato. */
 const colonne = (): { has: (nome: string) => boolean } => ({ has: (nome) => haColonnaUtente(getDb(), 'regalo_partita', nome) });
-/** Il file delle partite ha le consegne ripetibili (utente 052). */
+/** Il file delle partite ha le consegne ripetibili. */
 export const consegneRipetibili = (): boolean => colonne().has('id');
 
 /** Le colonne di una consegna, con null dove il file non le ha ancora. */
@@ -33,13 +33,13 @@ function selezione(): string {
   return `rowid AS rid, ${o('id')}, confidente_chiave, regalo, fatto_at, ${o('catalogo_chiave')}, ${o('acquisto_articolo')}, ${o('data_gioco')}, ${o('fascia_gioco')}, ${o('causa_yen')}`;
 }
 
-/** La causa del movimento automatico degli yen della consegna: la sua, o quella di sempre per le consegne di prima della 052. */
+/** La causa del movimento automatico degli yen della consegna: la sua, o quella di sempre per le consegne senza `id`. */
 export function causaDellaConsegna(r: { confidente_chiave: string; regalo: string; causa_yen: string | null }): CausaYen {
   return r.causa_yen ? { tipo: 'regalo', chiave: r.causa_yen } : causaYenRegalo(r.confidente_chiave, r.regalo);
 }
 
 /**
- * La consegna, se era di prima degli yen automatici e aveva segnato anche l'acquisto dell'articolo (colonne della 035; su un file più vecchio
+ * La consegna, se era di prima degli yen automatici e aveva segnato anche l'acquisto dell'articolo (colonne della memoria dell'azione; su un file più vecchio
  * nessuna consegna lo ricorda): solo allora il suo prezzo era nel saldo di allora (senza acquisto non c'era niente da pagare). Da leggere
  * prima di toglierla.
  */
@@ -64,18 +64,18 @@ function togliRiga(partita: number, r: RigaConsegna): void {
 
 export type SceltaRegalo = string | { catalogo: string };
 export interface RegaloDellaPartita {
-  /** L'id della consegna (utente 052); null su un file più vecchio. */
+  /** L'id della consegna; null su un file più vecchio. */
   id: number | null;
   confidente: string; nome: string; catalogo: string | null;
-  /** La consegna ha usato una copia posseduta (utente 052). */
+  /** La consegna ha usato una copia posseduta. */
   copiaConsumata: boolean;
   modo: ModoRegalo;
-  /** Il momento di gioco della consegna (colonne della 035; null se non registrato). */
+  /** Il momento di gioco della consegna (null se non registrato). */
   dataGioco: string | null;
   fasciaGioco: string | null;
 }
 
-/** Compatibilità durante la preparazione di M7 e con un file delle partite ancora precedente alla 026. */
+/** Compatibilità durante la preparazione di M7 e con un file delle partite vecchio. */
 function chiaviDisponibili(): boolean {
   return haTabellaMain(getDb(), 'catalogo_oggetto')
     && colonne().has('catalogo_chiave');
@@ -123,7 +123,7 @@ export interface NuovaConsegna {
 
 /**
  * Ondata 5: scrive una consegna nuova (anche dello stesso oggetto allo stesso Confidente) e ne restituisce l'id e la causa degli yen. Dentro la
- * transazione dell'azione. Su un file di prima della 052 lo stesso oggetto si consegna una volta sola (409, come prima).
+ * transazione dell'azione. Su un file senza le consegne ripetibili lo stesso oggetto si consegna una volta sola (409).
  */
 export function inserisciConsegna(partita: number, confidente: string, n: NuovaConsegna): { id: number; causa: CausaYen } {
   if (!consegneRipetibili()) {

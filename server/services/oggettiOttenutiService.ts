@@ -12,10 +12,10 @@
 //   - Ondata 5 (lotto G): i turni delle attività registrati con un esito che dà oggetti (la sfida della Big Bang Burger vinta: il distintivo e i
 //     panini), una riga per oggetto del turno (`utente.oggetto_esito_turno`, scritta registrando il turno e tolta togliendolo,
 //     `oggettiDegliEsitiService`).
-//   - Ondata 5 (lotto F-bis): i doni dei Confidenti che la partita ha meritato, dal rango e dal giorno (`doniConfidenti`, regola scritta dalla
-//     migrazione 295): letti dallo stato, come le Richieste, mai copiati.
-// Le copie dello stesso oggetto si sommano nei totali. Ondata 5 (lotto F-bis): accanto, le copie USATE (`consumo_oggetto_partita`, utente 054:
-// turni con un esito che consuma e incensi dell'Isolamento; 2026-10-28, utente 055: copie restituite o vendute da una voce), con la loro origine, e per ogni oggetto le cifre delle copie (comprate, regalate,
+//   - Ondata 5 (lotto F-bis): i doni dei Confidenti che la partita ha meritato, dal rango e dal giorno (`doniConfidenti`, con la regola
+//     di ogni dono): letti dallo stato, come le Richieste, mai copiati.
+// Le copie dello stesso oggetto si sommano nei totali. Ondata 5 (lotto F-bis): accanto, le copie USATE (`consumo_oggetto_partita`:
+// turni con un esito che consuma e incensi dell'Isolamento; 2026-10-28: copie restituite o vendute da una voce), con la loro origine, e per ogni oggetto le cifre delle copie (comprate, regalate,
 // cedute, rimaste) dalla stessa lettura della scelta dell'esito e di «Regala» (`dettaglioCopie`). Sola lettura: nessuna scrittura, anche nel rilascio.
 // ============================================================
 
@@ -76,7 +76,7 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
   }
   // Ondata 5 (lotto F-bis): le copie usate, con la loro origine; un oggetto usato che la partita non ha ricevuto (comprato: il concime, gli
   // incensi, i materiali) compare comunque nei totali. Un Isolamento si annulla da qui (l'uso di un turno si toglie togliendo il turno)
-  // 2026-10-28: le copie restituite o vendute da una voce del Diario (utente 055), con il testo della voce; si annullano togliendo la spunta
+  // 2026-10-28: le copie restituite o vendute da una voce del Diario, con il testo della voce; si annullano togliendo la spunta
   const voceDi = (uid: string | null): string | null => (uid ? (prepared('SELECT azione FROM main.voce_giornata WHERE uid = ?').pluck().get(uid) as string | undefined) ?? null : null);
   const origineConsumo = (c: ReturnType<typeof consumiDellaPartita>[number]): string => {
     if (c.fonte === 'isolamento') return 'Isolamento nella Stanza di Velluto';

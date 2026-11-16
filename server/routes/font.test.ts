@@ -6,8 +6,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
+import { closeDb } from '../db/dbService.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 import { config } from '../config.js';
 import { createApp } from '../bootstrap.js';
 import { MAX_BYTE_FONT, rilevaFormatoFont } from '../services/fontService.js';
@@ -22,8 +22,7 @@ describe('API font', () => {
   let dataDir: string;
   let originale: string;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    runMigrations(db);
+    dbDiProva();
     dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-font-'));
     originale = config.dataDir;
     (config as { dataDir: string }).dataDir = dataDir;

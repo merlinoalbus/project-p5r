@@ -18,6 +18,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { YEN_MASSIMI_SALDO } from '../../shared/yenAutomatici.js';
 import { verificaPartita } from './verificaPartita.js';
 import { datiGuidaCorretti } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
@@ -58,11 +59,11 @@ export function squadraPartita(partitaId: number): SquadraPartitaDto {
   return { yen: p.yen, membri };
 }
 
-/** Cambia i yen del gruppo: valore assoluto o differenza, mai sotto zero. */
+/** Cambia i yen del gruppo: valore assoluto o differenza, mai sotto zero né oltre il tetto del saldo (lo stesso degli yen automatici). */
 export function impostaYen(partitaId: number, mod: { yen?: number; delta?: number }): SquadraPartitaDto {
   verificaPartita(partitaId);
   const attuale = (prepared('SELECT yen FROM partita WHERE id = ?').get(partitaId) as { yen: number }).yen;
-  const nuovo = Math.max(0, mod.yen !== undefined ? mod.yen : attuale + (mod.delta ?? 0));
+  const nuovo = Math.min(YEN_MASSIMI_SALDO, Math.max(0, mod.yen !== undefined ? mod.yen : attuale + (mod.delta ?? 0)));
   const adesso = nowIso();
   getDb().transaction(() => {
     prepared('UPDATE partita SET yen = ?, updated_at = ? WHERE id = ?').run(nuovo, adesso, partitaId);

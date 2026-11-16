@@ -1,4 +1,4 @@
-// Descrizioni L7 registrate con il router del catalogo e le migrazioni 121/122 e utente 026.
+// Descrizioni L7 registrate con il router del catalogo.
 import type { DescrizioniArea } from '../tipi.js';
 
 export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {

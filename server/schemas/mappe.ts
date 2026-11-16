@@ -38,7 +38,7 @@ export const queryMappa = z.object({ partita: idParam.optional(), infiltrazione:
 export const queryGuidaMappa = z.object({ partita: idParam.optional() });
 /** L11 B5: la gerarchia dei luoghi; con la partita quartieri e Aree del mondo dicono se sono già aperti. */
 export const queryGerarchia = z.object({ partita: idParam.optional() });
-/** Sostituire l'immagine di una mappa con dei pezzi (102): `eliminaPezzi=1` conferma che se ne vanno con l'immagine di prima. */
+/** Sostituire l'immagine di una mappa con dei pezzi: `eliminaPezzi=1` conferma che se ne vanno con l'immagine di prima. */
 export const queryImmagineMappa = z.object({ eliminaPezzi: z.enum(['0', '1']).optional() });
 export const bodyCreaMappa = z.object({
   chiave: chiaveMappa.optional(), nome: z.string().min(1).max(LIMITI_GUIDA.mappa.nome), tipo: z.enum(TIPI_MAPPA), genitore: chiaveMappa.nullable().optional(), ordine: z.number().int().min(0).max(9999).optional(),
@@ -82,12 +82,12 @@ export const bodyAggiornaSpillo = z.union([
 /** Il segno di un pin; `infiltrazione` (L4, §3.2) è il contesto per un pin di rigenerabili di più infiltrazioni (null = quella in corso). */
 export const bodyRaccolto = z.object({ raccolto: z.boolean(), infiltrazione: z.string().min(1).max(160).optional() });
 
-/** I pezzi delle planimetrie (102): le forme di zona, posizione, rotazione e specchio stanno col servizio, che le usa anche per il pacchetto.
- *  Dalla 103 il pezzo è il ritaglio (nome, zona, ordine) e le copie sono le sue pose (etichetta, posizione, rotazione, specchio, condizioni). */
+/** I pezzi delle planimetrie: le forme di zona, posizione, rotazione e specchio stanno col servizio, che le usa anche per il pacchetto.
+ *  Il pezzo è il ritaglio (nome, zona, ordine) e le copie sono le sue pose (etichetta, posizione, rotazione, specchio, condizioni). */
 export const paramsPezzo = z.object({ id: idParam });
 export const paramsCopiaPezzo = z.object({ id: idParam });
-// Tutti `strict`: un campo che non appartiene a quella parte (la posizione o le condizioni mandate al ritaglio, come faceva il
-// contratto della 102) è un 400, non un 200 che lo perde senza dirlo (nota F8 del validatore).
+// Tutti `strict`: un campo che non appartiene a quella parte (la posizione o le condizioni mandate al ritaglio, come nel
+// contratto vecchio) è un 400, non un 200 che lo perde senza dirlo (nota F8 del validatore).
 export const bodyCreaCopiaPezzo = z.object({
   etichetta: z.string().trim().max(LIMITI_GUIDA.spillo.nome).optional(), posizione: schemaPosizionePezzo.optional(),
   rotazione: schemaRotazionePezzo.optional(), specchio: schemaSpecchioPezzo.optional(), condizioni, ordine: z.number().int().min(0).max(9999).optional(),

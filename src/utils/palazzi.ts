@@ -19,7 +19,7 @@
 //
 // **Sulla mappa di Tokyo invece ci stanno**, perché la mappa risponde a un'altra domanda: dove
 // si può andare oggi. I Memento sono una radice del Metaverso con una finestra propria (dal 7
-// maggio, migrazione 318, e non si chiude mai), esattamente come i quattro Palazzi del Meta-Nav che la mappa
+// maggio, e non si chiude mai), esattamente come i quattro Palazzi del Meta-Nav che la mappa
 // mostra sul bordo di nord-est — nessuno dei quali ha un ingresso su una fermata. Non avere un
 // ingresso sulla mappa di viaggio non è quindi un motivo per escluderli: vale anche per quei
 // quattro e per il Covo, che sono sulla mappa.

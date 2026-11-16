@@ -108,7 +108,7 @@ export type EffettoOggetto =
   | { famiglia: 'statistica'; statistica: StatisticaOggetto; valore: number }
   | { famiglia: 'dote'; dote: string; note: number }
   // Ondata 5, lotto F (RG-03, decisione 13): la famiglia «regalo» con `graditoA` scritto a mano per nome è tolta. A chi piace un regalo
-  // si legge soltanto da `confidente_regalo` (per chiave del Confidente); nessun dato la usava (censimento sulla copia alla 268).
+  // si legge soltanto da `confidente_regalo` (per chiave del Confidente); nessun dato la usa.
   | { famiglia: 'sblocca-luogo'; luogo: string }
   /** Apre una capacita' dentro un'attivita': il Terzo Occhio alla pesca, i tiri speciali a
    *  biliardo, i trucchi dei videogiochi retro. `dove` e' la chiave dell'attivita', cosi' l'app ci

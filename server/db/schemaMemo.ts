@@ -2,13 +2,13 @@
 // schemaMemo — «la tabella / la colonna c'è?» ricordato per connessione (L5-05, L5-08, L12-02)
 // ============================================================
 //
-// Molte letture si adattano a uno schema più vecchio (le migrazioni aggiungono tabelle e colonne, i test caricano il seed a scaglioni) e
+// Molte letture si adattano a uno schema più vecchio (le modifiche dello schema aggiungono tabelle e colonne, i test caricano il seed a scaglioni) e
 // per farlo interrogavano `sqlite_master` o `pragma_table_info` ad ogni richiesta, a volte per ogni pin. Qui la risposta si ricorda finché lo schema
 // non cambia: la chiave è `PRAGMA <schema>.schema_version`, che SQLite aumenta ad ogni DDL (creare o togliere una tabella o un indice, aggiungere
 // una colonna) della connessione o di un'altra. Una nuova connessione (importazione del pacchetto, riapertura) ha la sua memoria. Dentro una
-// transazione non si ricorda niente: un DDL annullato riporterebbe `schema_version` a un valore già visto con un'altra struttura (le migrazioni
-// girano in transazione e leggono lo schema che stanno cambiando).
-// Due schemi: `main` (i dati di gioco) e `utente` (le partite), ognuno con la sua versione e la sua memoria. Per le migrazioni e le scritture che
+// transazione non si ricorda niente: un DDL annullato riporterebbe `schema_version` a un valore già visto con un'altra struttura (le modifiche dello
+// schema girano in transazione e leggono lo schema che stanno cambiando).
+// Due schemi: `main` (i dati di gioco) e `utente` (le partite), ognuno con la sua versione e la sua memoria. Per le modifiche dello schema e le scritture che
 // non vogliono memoria c'è `colonne.ts` (`haTabella`, `haColonna`): la stessa domanda, sempre riletta.
 // Limite: un DETACH seguito dall'ATTACH di un altro file con lo stesso alias sulla stessa connessione non cambia la chiave (due file possono avere
 // la stessa `schema_version`): chi lo fa deve usare `colonne.ts`. Oggi nessuna connessione che passa di qui lo fa (l'ATTACH/DETACH di

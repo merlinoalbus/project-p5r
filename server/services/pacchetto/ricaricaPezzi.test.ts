@@ -1,5 +1,5 @@
 // ============================================================
-// ricaricaPacchetto e le copie dei pezzi (103): un pacchetto della 102 porta la posa accanto al ritaglio, e nessuna copia resta
+// ricaricaPacchetto e le copie dei pezzi: un pacchetto nella forma vecchia porta la posa accanto al ritaglio, e nessuna copia resta
 // senza il suo ritaglio (nota N2 del validatore, 2026-10-15)
 // ============================================================
 
@@ -15,7 +15,7 @@ let cartella: string;
 beforeEach(() => { cartella = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-ricarica-pezzi-')); });
 afterEach(() => { closeDb(); fs.rmSync(cartella, { recursive: true, force: true }); });
 
-/** Un pacchetto con la sola tabella dei pezzi, nella forma della 102 (`conPosa`) o della 103. */
+/** Un pacchetto con la sola tabella dei pezzi, nella forma vecchia (`conPosa`) o in quella di oggi. */
 function pacchettoConPezzi(conPosa: boolean): string {
   const file = path.join(cartella, conPosa ? 'p102.db' : 'p103.db');
   const p = new Database(file);
@@ -33,7 +33,7 @@ function pezzoNelFile(db: ReturnType<typeof dbDiProva>): void {
   db.prepare("INSERT INTO copia_pezzo (uid, pezzo_id, x, y, updated_at) VALUES (?, 9, 7, 7, 'x')").run('d'.repeat(32));
 }
 
-it('un pacchetto della 102: i ritagli arrivano senza la posa e la posa diventa la prima copia; le copie di prima se ne vanno', () => {
+it('un pacchetto nella forma vecchia: i ritagli arrivano senza la posa e la posa diventa la prima copia; le copie di prima se ne vanno', () => {
   const db = dbDiProva();
   pezzoNelFile(db);
   ricaricaPacchetto(db, pacchettoConPezzi(true));
@@ -43,7 +43,7 @@ it('un pacchetto della 102: i ritagli arrivano senza la posa e la posa diventa l
   expect(db.pragma('foreign_key_check')).toEqual([]);
 });
 
-it('un pacchetto della 103 senza copie: nessuna copia resta senza il suo ritaglio', () => {
+it('un pacchetto nella forma di oggi senza copie: nessuna copia resta senza il suo ritaglio', () => {
   const db = dbDiProva();
   pezzoNelFile(db);
   ricaricaPacchetto(db, pacchettoConPezzi(false));

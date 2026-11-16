@@ -43,7 +43,7 @@ interface Props {
 /** «Un'area a sé»: la versione diventa un'area nuova del Palazzo (col nome scelto). */
 const AREA_NUOVA = '__nuova';
 
-/** La condizione propria salvata dell'area (migrazione 303), come elenco in AND per l'editor; vuota se l'area segue solo il quartiere. */
+/** La condizione propria salvata dell'area, come elenco in AND per l'editor; vuota se l'area segue solo il quartiere. */
 function condizioniProprie(sblocco: SbloccoDto | undefined): RequisitoSpillo[] {
   const salvata = sblocco?.condizioneSalvata as RequisitoSpillo | null | undefined;
   if (!salvata) return [];
@@ -62,7 +62,7 @@ function FinestraModificaAreaReale({ area, aperta, onChiudi, onSalvata, infiltra
   const iniziali = (area.infiltrazioni ?? []).map((x) => x.chiave);
   const [infiltrazioni, setInfiltrazioni] = useState<string[]>(iniziali);
   const [predefinita, setPredefinita] = useState(area.predefinita ?? '');
-  // la condizione propria dell'area (303: il Covo dei Ladri dal 5 maggio), in AND con il quartiere ed ereditata dai suoi luoghi
+  // la condizione propria dell'area (il Covo dei Ladri dal 5 maggio), in AND con il quartiere ed ereditata dai suoi luoghi
   const [sblocco, setSblocco] = useState<RequisitoSpillo[]>(() => condizioniProprie(area.sblocco));
   // la finestra si monta quando si apre (la pagina la rende solo aperta), quindi riparte sempre dai valori dell'Area
   const [etichette, setEtichette] = useState<Record<string, string>>(() => Object.fromEntries(area.planimetrie.map((p) => [p.chiave, p.etichetta ?? ''])));

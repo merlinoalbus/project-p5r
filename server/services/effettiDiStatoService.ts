@@ -35,7 +35,7 @@
 //     l'effetto che la porta): contano dove il rango sale a punti; togliendo la spunta, o l'effetto, se ne vanno e il Confidente si ricalcola.
 //     Corretto lo stesso giorno («i punti rango andavano gestiti come note non come punti specifici»): l'effetto dà note (♪–♪♪♪) e i punti
 //     li calcola la regola delle risposte con gli ingressi dell'incontro (`applicaPunti`);
-//   - `uscitaOggetto`: una riga che somma, nel registro unico delle uscite (`consumo_oggetto_partita`, utente 055), mai oltre le copie possedute;
+//   - `uscitaOggetto`: una riga che somma, nel registro unico delle uscite (`consumo_oggetto_partita`), mai oltre le copie possedute;
 //     gli yen di una vendita li muove `motoreDiario.yenDellEffetto` (decisione 18), solo se l'uscita è stata scritta.
 // ============================================================
 
@@ -331,8 +331,8 @@ function momentoDellaVoce(voceUid: string): { data: string; fascia: string; ordi
  * Le note di rango a un Confidente: la versione di prima dello stesso effetto esce dal registro (decisione 19: cambiate le note nella guida), poi
  * le note entrano nel registro cronologico nel momento della voce come quelle di una risposta (2026-10-28, «i punti rango andavano gestiti come
  * note»): gli stessi ingressi dell'incontro (`effettiAzioneService`: la Persona dello stesso arcano nella partita, l'invito di quel Confidente
- * nella voce, il piazzamento all'esame) e lo stesso calcolo (`shared/puntiConfidenti.ts`); contano solo dove il rango sale a punti. La forma di
- * prima con i punti fissi (non portata in note dalla migrazione 301) dà i suoi punti come scritti. Nessun incontro si registra da qui:
+ * nella voce, il piazzamento all'esame) e lo stesso calcolo (`shared/puntiConfidenti.ts`); contano solo dove il rango sale a punti. La forma
+ * vecchia con i punti fissi (dove non è in note) dà i suoi punti come scritti. Nessun incontro si registra da qui:
  * l'incontro, se c'è, è quello della voce. L'avviso dice quando adesso non contano.
  */
 function applicaPunti(p: number, voceUid: string, uid: string, e: EffettoPuntiConfidente): EsitoStato {
@@ -700,7 +700,7 @@ function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], r
       restanoInScorta.add(r.chiave);
     } else if (d.modo === 'scorta-tolta') {
       // l'esemplare intatto se ne va e con lui si riapre l'obiettivo che la sua aggiunta aveva chiuso, se è ancora chiuso da quella
-      // utente 073: se era la prima entrata della Persona DLC nella scorta, il richiamo gratuito torna (lo stesso esemplare: id e data d'ingresso)
+      // se era la prima entrata della Persona DLC nella scorta, il richiamo gratuito torna (lo stesso esemplare: id e data d'ingresso)
       prepared(`DELETE FROM utente.primo_richiamo_speso WHERE partita_id = ? AND persona_id = ? AND posseduta_id = ?
         AND speso_il = (SELECT created_at FROM persona_posseduta WHERE id = ? AND partita_id = ?)`).run(p, Number(r.chiave), prima.possedutaId, prima.possedutaId, p);
       prepared('DELETE FROM persona_posseduta WHERE id = ?').run(prima.possedutaId);

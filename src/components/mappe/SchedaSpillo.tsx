@@ -195,7 +195,7 @@ function AzioniVoce<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, 
 }
 
 /** Azioni di stato nella partita: per le voci della Guida «Ottenuto/Esaurito/Riapri» (stessi stati della scheda del Palazzo) — con più
- *  voci (098) una riga per voce, col suo nome, che si segna da sola («Voci indipendenti», 2026-10-09) —, altrimenti lo stato del pin
+ *  voci una riga per voce, col suo nome, che si segna da sola («Voci indipendenti», 2026-10-09) —, altrimenti lo stato del pin
  *  con la parola del tipo («Raccolto», «Aperto», «Parlato», «Incontrato», «Sconfitto», «Azionato»…: `statoDelPin`) e, per toglierlo,
  *  «Richiudi» per porta e forzieri, «Annulla» per gli altri (`ritornoDelloStato`). */
 export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
@@ -276,7 +276,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
           {s.voci[0].esauribile ? 'Esauribile · ' : ''}{s.voci[0].stato ? `Nella Guida: ${s.voci[0].stato}` : 'Non ancora segnata nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary-testo">scheda del Palazzo</Link>
         </p>
       )}
-      {/* più voci (098): ognuna col suo stato; il Palazzo è lo stesso per tutte (lo controlla ogni collegamento) */}
+      {/* più voci: ognuna col suo stato; il Palazzo è lo stesso per tutte (lo controlla ogni collegamento) */}
       {s.voci.length > 1 && (
         <div className="flex flex-col gap-0.5 testo-12 text-text-secondary">
           <ul className="m-0 flex list-none flex-col gap-0.5 p-0" aria-label="Voci della guida">

@@ -6,8 +6,8 @@
 // preparazione registra nel manifesto l'impronta dello schema di `partite-vuoto.db`, e l'istanza di rilascio la ricalcola a ogni avvio sul file
 // delle partite vero: se le due non coincidono l'avvio si ferma, perché il codice scriverebbe su tabelle diverse da quelle che si aspetta.
 //
-// Il modulo non importa né il runner né le cartelle delle migrazioni: lo può usare anche il punto d'avvio del rilascio, che quelle cartelle
-// non le carica. È l'unica definizione dell'algoritmo: chi lo ricalcola altrove deve chiamare questa funzione, non riscriverla.
+// Il modulo non importa niente dell'app: lo usano «Prepara edizione» e il punto d'avvio del rilascio. È l'unica definizione
+// dell'algoritmo: chi lo ricalcola altrove deve chiamare questa funzione, non riscriverla.
 // ============================================================
 
 import { createHash } from 'node:crypto';

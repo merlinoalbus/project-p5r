@@ -4,9 +4,9 @@
 
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
-import { initDb, closeDb, prepared } from '../db/dbService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
-import { runMigrations } from '../db/migrationRunner.js';
+import { dbDiProvaSenzaMappe } from '../../test/dbDiProva.js';
 
 // ============================================================
 // Le regole di categoria (2026-09-11): uno spillo di città non è condizionato, non porta altrove e
@@ -16,7 +16,7 @@ import { runMigrations } from '../db/migrationRunner.js';
 // ============================================================
 
 const app = createApp();
-beforeEach(async () => { runMigrations(initDb(':memory:')); await request(app).post('/api/mappe').send({ chiave: 'luoghi', nome: 'Luoghi', tipo: 'luogo' }).expect(201); });
+beforeEach(async () => { dbDiProvaSenzaMappe(); await request(app).post('/api/mappe').send({ chiave: 'luoghi', nome: 'Luoghi', tipo: 'luogo' }).expect(201); });
 afterEach(() => closeDb());
 /** Crea sulla mappa «luoghi» uno spillo «Luogo» (di serie un'attività) con i campi aggiuntivi dati. */
 const crea = (extra: Record<string, unknown> = {}) => request(app).post('/api/mappe/luoghi/spilli').send({ tipo: 'attivita', nome: 'Luogo', x: 20, y: 30, ...extra });

@@ -21,7 +21,7 @@ import { fattiPartita } from './cruciverbaService.js';
 import { timbriRaccoltiInTutto } from './timbriService.js';
 
 interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; fonte: string; verificato: number;
-  /** L13 (O7-4, migrazione 313): quando si ottiene, nel vocabolario unico delle condizioni; assente su uno schema di prima. */
+  /** L13 (O7-4): quando si ottiene, nel vocabolario unico delle condizioni; assente su uno schema di prima. */
   condizioni_json?: string | null }
 type SeedCompletamento = Omit<CompletamentoDto, 'trofei' | 'ottenuti'>;
 
@@ -48,7 +48,7 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const nomi = nomiCondizioniMemo();
   const trofei = (prepared('SELECT * FROM trofeo ORDER BY ordine').all() as RigaTrofeo[]).map((r) => dto(r, ottenuti, nomi));
   const premi = ricompensePerFonte('covo');
-  // ondata 5 (decisione 21 b, migrazione 258): la sfida che conta i regali dice a che punto è la partita chiesta; L8-03 (migrazione 340):
+  // ondata 5 (decisione 21 b): la sfida che conta i regali dice a che punto è la partita chiesta; L8-03:
   // anche quelle che contano un altro stato della partita, letto dallo stesso stato delle condizioni (`statoDisponibilitaPartita`) o dalla
   // tabella che lo tiene; i totali «tutti» si contano nel DB a ogni lettura
   const st = partitaId === undefined || !seed.covo.sfide.some((s) => s.conteggio) ? null : statoDisponibilitaPartita(partitaId);
@@ -60,7 +60,7 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const oggi = partitaId === undefined ? null : (prepared('SELECT data_gioco FROM utente.partita WHERE id = ?').pluck().get(partitaId) as string | null | undefined) ?? null;
   const finali = seed.finali.map((f) => ({ ...f, requisiti: condizioniDellaGuida(f.condizioniJson, nomi),
     ...(oggi && f.entro ? { giorniAllEntro: giorniDiGiocoFra(oggi, f.entro) } : {}) }));
-  // Ondata 5, lotto F (migrazione 279): il premio che è un oggetto del catalogo ne legge l'effetto dal catalogo, il suo punto unico; un testo
+  // Ondata 5, lotto F: il premio che è un oggetto del catalogo ne legge l'effetto dal catalogo, il suo punto unico; un testo
   // del premio (una correzione di prima: la finestra «Modifica» non lo offre più, `registro.ts`) non lo sostituisce
   const effetti = effettiDegliOggetti([...premi.values()].flat().map((o) => o.chiave));
   const covo = { ...seed.covo, sfide, premi: seed.covo.premi.map((p) => {
@@ -136,7 +136,7 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
       return { fatti: r.registrate, obiettivo: r.totale };
     }
     case 'cruciverba-risolti': return { fatti: fattiPartita(partitaId).size, obiettivo: c.obiettivo };
-    // L10-02 (382): i timbri dei dedali con un totale, ciascuno entro il suo (le righe per dedalo della partita, utente 070)
+    // L10-02: i timbri dei dedali con un totale, ciascuno entro il suo (le righe per dedalo della partita)
     case 'timbri-raccolti': return { fatti: timbriRaccoltiInTutto(partitaId), obiettivo: c.obiettivo };
     case 'spesa-negozio': return { fatti: st.spesaPerNegozio.get(c.negozio) ?? 0, obiettivo: c.obiettivo };
     case 'persona-livello': {

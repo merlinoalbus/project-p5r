@@ -55,7 +55,7 @@ const cacheCorretti = new Map<string, BloccoCorretto>();
 
 const SQL_CORREZIONI_DEL_BLOCCO = 'SELECT percorso, valore_json FROM correzione_dati_guida WHERE blocco = ? ORDER BY percorso';
 
-/** Le correzioni di un blocco (`correzione_dati_guida`), nell'ordine dell'indirizzo; vuote se la tabella non c'è (uno schema di prima della 178). */
+/** Le correzioni di un blocco (`correzione_dati_guida`), nell'ordine dell'indirizzo; vuote se la tabella non c'è (uno schema vecchio). */
 export function correzioniDelBlocco(chiave: string): RigaCorrezione[] {
   try {
     return prepared(SQL_CORREZIONI_DEL_BLOCCO).all(chiave) as RigaCorrezione[];
@@ -114,7 +114,7 @@ function bloccoCorretto(chiave: string): BloccoCorretto {
 /**
  * Il blocco della guida con le correzioni dell'utente (B11): è quello che le pagine mostrano. Senza correzioni restituisce LO STESSO oggetto
  * di `datiGuida` (nessun cambio di comportamento dove l'utente non ha corretto niente). Congelato e condiviso come `datiGuida`; si svuota
- * con la stessa invalidazione. Le migrazioni e chi cerca l'identità di un elemento (chiavi, riferimenti al catalogo) leggono `datiGuida`.
+ * con la stessa invalidazione. Chi cerca l'identità di un elemento (chiavi, riferimenti al catalogo) legge `datiGuida`.
  */
 export function datiGuidaCorretti<T>(chiave: string): Congelato<T> | null {
   return bloccoCorretto(chiave).dati as Congelato<T> | null;
@@ -126,8 +126,8 @@ export function correzioniOrfane(chiave: string): string[] {
 }
 
 /**
- * Un blocco della guida letto da un database qualunque (le migrazioni e le conversioni lavorano su una connessione loro, prima
- * che l'app la usi): null se la tabella o la chiave non ci sono o se il JSON è illeggibile. Senza cache: la usa chi gira una volta.
+ * Un blocco della guida letto da un database qualunque (le conversioni possono lavorare su una connessione
+ * loro): null se la tabella o la chiave non ci sono o se il JSON è illeggibile. Senza cache: la usa chi gira una volta.
  */
 export function bloccoGuidaDi(db: AppDatabase, chiave: string): unknown {
   if (!haTabella(db, 'dati_guida')) return null;
@@ -163,19 +163,19 @@ export function finestreDaDati(dati: unknown): Map<string, FinestraDungeon> {
   return out;
 }
 
-/** Le finestre dei Palazzi. L6 (§4.4): stanno nelle colonne `dungeon.finestra_dal`/`finestra_al` (migrazione 118, un solo scrittore:
- *  `impostaFinestra`, che scrive anche furto consigliato e lettera e svuota questa copia; dalla 308 sono l'apertura e la scadenza della
- *  scheda del Palazzo, senza più i testi in prosa accanto); il blocco `finestre-dungeon` della guida si legge solo su uno schema di prima della 118. Una trascrizione
+/** Le finestre dei Palazzi. L6 (§4.4): stanno nelle colonne `dungeon.finestra_dal`/`finestra_al` (un solo scrittore:
+ *  `impostaFinestra`, che scrive anche furto consigliato e lettera e svuota questa copia; sono l'apertura e la scadenza della
+ *  scheda del Palazzo, senza testi in prosa accanto); il blocco `finestre-dungeon` della guida si legge solo su uno schema senza queste colonne. Una trascrizione
  *  illeggibile vale «nessuna finestra»: non si indovina una data. */
 export function finestreDungeon(): ReadonlyMap<string, FinestraDungeon> {
   if (finestre) return finestre;
-  // le colonne della 118 ci sono (sempre, dopo le migrazioni): un errore SQL qui è un guasto vero e risale, non diventa «nessuna finestra»
+  // le colonne ci sono (sempre, sullo schema atteso): un errore SQL qui è un guasto vero e risale, non diventa «nessuna finestra»
   if (haColonnaMain(getDb(), 'dungeon', 'finestra_dal')) {
     const righe = prepared('SELECT chiave, finestra_dal, finestra_al FROM dungeon WHERE finestra_dal IS NOT NULL').all() as Array<{ chiave: string; finestra_dal: string; finestra_al: string | null }>;
     finestre = new Map(righe.map((r) => [r.chiave, { dal: r.finestra_dal, al: r.finestra_al }]));
     return finestre;
   }
-  // uno schema di prima della 118: le colonne non ci sono
+  // uno schema vecchio: le colonne non ci sono
   let dati: unknown;
   try {
     dati = datiGuida('finestre-dungeon');

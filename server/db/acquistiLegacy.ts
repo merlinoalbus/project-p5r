@@ -2,8 +2,8 @@ import { createHash, randomBytes } from 'node:crypto';
 import type { AppDatabase } from './dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 
-/** Valutazioni di continuità: non sono ricevute di un pagamento osservato. */
-export type OrigineContinuita = 'continuita-migrazione' | 'continuita-importazione';
+/** Le origini di una valutazione di continuità scritte nell'archivio (valori dei dati, vincolati dal CHECK delle tabelle): non sono ricevute di un pagamento osservato. */
+type OrigineContinuita = 'continuita-migrazione' | 'continuita-importazione';
 export interface PresenzaLegacy { partita_id: number; articolo_chiave: string; updated_at: string }
 interface IdentitaLegacy { articolo: string; nome: string; negozio: string | null; negozioNome: string; catalogo: string | null }
 export interface ValutazioneLegacy {
@@ -20,6 +20,7 @@ interface Continuita { id: number; formato: number; origine: OrigineContinuita; 
 
 /** Questi archivi non appartengono alle cascate della partita né al reverse del Cestino. */
 export const ARCHIVI_LEGACY_IMMUTABILI = ['acquisto_legacy_valutazione', 'acquisto_legacy_continuita', 'acquisto_legacy_raccordo'] as const;
+/** La struttura attesa delle tabelle dell'archivio (quella del modello `pacchetto/partite-vuoto.db`): `verificaArchivioLegacy` la confronta con quella del file. */
 const DDL = {
   acquisto_legacy_valutazione: `CREATE TABLE utente.acquisto_legacy_valutazione (
     id TEXT PRIMARY KEY CHECK(length(id)=32), partita_id INTEGER NOT NULL,
@@ -58,20 +59,19 @@ function canonico(v: unknown): string {
 const firma = (v: unknown): string => createHash('sha256').update(canonico(v)).digest('hex');
 const esiste = (db: AppDatabase, schema: 'main' | 'utente', tabella: string): boolean => !!db.prepare(`SELECT 1 FROM ${schema}.sqlite_master WHERE type='table' AND name=?`).get(tabella);
 const normalizzaDdl = (sql: string): string => sql.replace(/utente\./g, '').replace(/\s+/g, '').replace(/;$/, '');
-function struttura(db: AppDatabase, nome: keyof typeof DDL, crea: boolean): void {
+/** La tabella dell'archivio ha la struttura attesa (`DDL`), nessun indice o trigger estraneo e, se è immutabile, i due trigger che vietano UPDATE e DELETE. */
+function struttura(db: AppDatabase, nome: keyof typeof DDL): void {
   const r = db.prepare("SELECT sql FROM utente.sqlite_master WHERE type='table' AND name=?").get(nome) as { sql: string } | undefined;
-  if (!r && crea) db.exec(DDL[nome]);
-  else if (!r || normalizzaDdl(r.sql) !== normalizzaDdl(DDL[nome])) errore('Lo schema dell’archivio non è riconosciuto.');
+  if (!r || normalizzaDdl(r.sql) !== normalizzaDdl(DDL[nome])) errore('Lo schema dell’archivio non è riconosciuto.');
   const oggetti = db.prepare("SELECT name,type FROM utente.sqlite_master WHERE tbl_name=? AND type IN ('index','trigger') AND sql IS NOT NULL").all(nome) as Array<{ name: string; type: string }>;
   const immutabile = (ARCHIVI_LEGACY_IMMUTABILI as readonly string[]).includes(nome);
   if (oggetti.some(o => o.type !== 'trigger' || !immutabile || ![`${nome}_no_update`, `${nome}_no_delete`].includes(o.name))) errore('L’archivio contiene indici o trigger non riconosciuti.');
-  if (!(ARCHIVI_LEGACY_IMMUTABILI as readonly string[]).includes(nome)) return;
+  if (!immutabile) return;
   for (const evento of ['UPDATE', 'DELETE'] as const) {
     const trigger = `${nome}_no_${evento.toLowerCase()}`;
     const sql = `CREATE TRIGGER utente.${trigger} BEFORE ${evento} ON ${nome} BEGIN SELECT RAISE(ABORT, 'Archivio acquisti immutabile'); END`;
     const old = db.prepare("SELECT sql FROM utente.sqlite_master WHERE type='trigger' AND name=?").get(trigger) as { sql: string } | undefined;
-    if (!old && crea && !r) db.exec(sql);
-    else if (!old || normalizzaDdl(old.sql) !== normalizzaDdl(sql)) errore('Le protezioni dell’archivio non sono riconosciute.');
+    if (!old || normalizzaDdl(old.sql) !== normalizzaDdl(sql)) errore('Le protezioni dell’archivio non sono riconosciute.');
   }
 }
 function parse(raw: string): unknown { try { return JSON.parse(raw) as unknown; } catch { return errore('Una fotografia non è leggibile.'); } }
@@ -81,9 +81,10 @@ function presenza(v: unknown): PresenzaLegacy {
   if (Object.keys(r).sort().join(',') !== 'articolo_chiave,partita_id,updated_at' || !Number.isSafeInteger(r.partita_id) || typeof r.articolo_chiave !== 'string' || typeof r.updated_at !== 'string') return errore('La tuple personale non è integrale.');
   return r;
 }
-export function presenzeLegacy(db: AppDatabase, schema: 'main' | 'utente' = 'utente'): PresenzaLegacy[] {
-  if (!esiste(db, schema, 'acquisto_partita')) return [];
-  return db.prepare(`SELECT partita_id,articolo_chiave,updated_at FROM ${schema}.acquisto_partita ORDER BY partita_id,articolo_chiave`).all().map(presenza);
+/** Le presenze storiche degli acquisti (`acquisto_partita`) del file delle partite, in ordine di partita e articolo. */
+export function presenzeLegacy(db: AppDatabase): PresenzaLegacy[] {
+  if (!esiste(db, 'utente', 'acquisto_partita')) return [];
+  return db.prepare('SELECT partita_id,articolo_chiave,updated_at FROM utente.acquisto_partita ORDER BY partita_id,articolo_chiave').all().map(presenza);
 }
 function fotografa(db: AppDatabase, raw: PresenzaLegacy, origine: ValutazioneLegacy['origine']): ValutazioneLegacy {
   const articolo = esiste(db, 'main', 'articolo') ? db.prepare('SELECT * FROM main.articolo WHERE chiave=?').get(raw.articolo_chiave) as Record<string, unknown> | undefined : undefined;
@@ -131,57 +132,6 @@ function ultimaGenerazione(db: AppDatabase, f: FotografiaLegacy): void {
 function associa(db: AppDatabase, r: ValutazioneLegacy): void {
   db.prepare('INSERT INTO utente.acquisto_legacy_associazione(partita_id,articolo_chiave,valutazione_id) VALUES(?,?,?)').run(r.partita_id, r.articolo_chiave, r.id);
 }
-/** Prima del main: la fotografia completa è durevole anche se una migrazione successiva fallisce. */
-export function preparaContinuitaLegacy(db: AppDatabase, origine: OrigineContinuita): void {
-  db.transaction(() => {
-    const utente = presenzeLegacy(db), main = utente.length ? [] : presenzeLegacy(db, 'main');
-    const raw = utente.length ? utente : main;
-    const gia = esiste(db, 'utente', 'acquisto_legacy_valutazione');
-    struttura(db, 'acquisto_legacy_valutazione', true); struttura(db, 'acquisto_legacy_continuita', true);
-    const c = db.prepare('SELECT * FROM utente.acquisto_legacy_continuita WHERE id=1').get() as Continuita | undefined;
-    if (gia) {
-      if (!c || c.formato !== 1 || !['continuita-migrazione', 'continuita-importazione'].includes(c.origine) || c.firma !== firma(parse(c.presenze_json)) || canonico(raw) !== c.presenze_json) errore('La ripresa non coincide con la fotografia precedente alle migrazioni.');
-      const foto = db.prepare('SELECT * FROM utente.acquisto_legacy_valutazione ORDER BY partita_id,articolo_chiave').all() as ValutazioneLegacy[];
-      if (foto.length !== raw.length || foto.some((f, i) => canonico(validaFoto(f).presenza) !== canonico(raw[i]) || f.generazione !== 1 || f.origine !== c!.origine)) errore('La copertura durevole del bootstrap è incompleta.');
-      return;
-    }
-    if (c) errore('Il marcatore di continuità esiste senza il suo archivio.');
-    for (const r of raw) fotografa(db, r, origine);
-    db.prepare('INSERT INTO utente.acquisto_legacy_continuita(id,formato,origine,presenze_json,firma,creata_il) VALUES(1,1,?,?,?,?)').run(origine, canonico(raw), firma(raw), new Date().toISOString());
-  })();
-}
-/** La 030 non consulta più il main: adotta esclusivamente la prova pre-main. */
-export function completaContinuitaLegacy(db: AppDatabase): void {
-  for (const n of Object.keys(DDL) as Array<keyof typeof DDL>) struttura(db, n, true);
-  const c = db.prepare('SELECT * FROM utente.acquisto_legacy_continuita WHERE id=1').get() as Continuita | undefined;
-  const raw = presenzeLegacy(db);
-  if (!c || c.formato !== 1 || c.presenze_json !== canonico(raw) || c.firma !== firma(raw)) errore('La 030 non trova la copertura pre-main esatta delle presenze trasferite.');
-  const foto = db.prepare('SELECT * FROM utente.acquisto_legacy_valutazione ORDER BY partita_id,articolo_chiave').all() as ValutazioneLegacy[];
-  if (foto.length !== raw.length) errore('Il bootstrap non copre esattamente le presenze.');
-  for (let i = 0; i < raw.length; i++) {
-    const f = validaFoto(foto[i]!);
-    if (canonico(f.presenza) !== canonico(raw[i]) || f.riga.generazione !== 1 || f.riga.origine !== c.origine) errore('La fotografia pre-main non coincide con la presenza trasferita.');
-    associa(db, f.riga);
-  }
-  if (esiste(db, 'utente', 'acquisto_registrato')) {
-    const fatti = db.prepare('SELECT id,partita_id,articolo_chiave,legacy_firma,legacy_raw_json FROM utente.acquisto_registrato WHERE legacy_firma IS NOT NULL').all() as Array<{ id: string; partita_id: number; articolo_chiave: string; legacy_firma: string; legacy_raw_json: string }>;
-    for (const a of fatti) {
-      const f = foto.find(f => f.partita_id === a.partita_id && f.articolo_chiave === a.articolo_chiave && f.presenza_firma === a.legacy_firma);
-      if (f) {
-        if (canonico(parse(a.legacy_raw_json)) !== f.presenza_json) errore('Il raccordo del fatto non coincide con la tuple fotografata.');
-        db.prepare('INSERT INTO utente.acquisto_legacy_raccordo(acquisto_id,partita_id,articolo_chiave,valutazione_id) VALUES(?,?,?,?)').run(a.id, a.partita_id, a.articolo_chiave, f.id);
-      }
-    }
-  }
-  // La vecchia unicità per RAW non distingue due generazioni con lo stesso timestamp.
-  // L'unicità semantica è ora valutazione_id nel raccordo durevole (anche a fonte inattiva).
-  const vecchio = db.prepare("SELECT sql FROM utente.sqlite_master WHERE type='index' AND name='acquisto_legacy_unica'").get() as { sql: string } | undefined;
-  const atteso = 'CREATE UNIQUE INDEX utente.acquisto_legacy_unica ON acquisto_registrato(partita_id,articolo_chiave,legacy_firma) WHERE legacy_firma IS NOT NULL';
-  if (!vecchio || normalizzaDdl(vecchio.sql) !== normalizzaDdl(atteso)) errore('L’indice storico dei raccordi non è riconosciuto.');
-  db.exec('DROP INDEX utente.acquisto_legacy_unica');
-  db.exec('CREATE INDEX utente.acquisto_legacy_firme ON acquisto_registrato(partita_id,articolo_chiave,legacy_firma) WHERE legacy_firma IS NOT NULL');
-  verificaArchivioLegacy(db);
-}
 export function valutazioniLegacyPartita(db: AppDatabase, partitaId: number): FotografiaLegacy[] {
   const raw = presenzeLegacy(db).filter(r => r.partita_id === partitaId);
   const associazioni = db.prepare('SELECT * FROM utente.acquisto_legacy_associazione WHERE partita_id=? ORDER BY articolo_chiave').all(partitaId) as AssociazioneLegacy[];
@@ -217,7 +167,7 @@ export function collegaGenerazioneLegacy(db: AppDatabase, acquistoId: string, ra
   db.prepare('INSERT INTO utente.acquisto_legacy_raccordo(acquisto_id,partita_id,articolo_chiave,valutazione_id) VALUES(?,?,?,?)').run(acquistoId, raw.partita_id, raw.articolo_chiave, f.riga.id);
 }
 export function verificaArchivioLegacy(db: AppDatabase): void {
-  for (const n of Object.keys(DDL) as Array<keyof typeof DDL>) struttura(db, n, false);
+  for (const n of Object.keys(DDL) as Array<keyof typeof DDL>) struttura(db, n);
   const indice = db.prepare("SELECT sql FROM utente.sqlite_master WHERE type='index' AND name='acquisto_legacy_firme'").get() as { sql: string } | undefined;
   if (!indice || normalizzaDdl(indice.sql) !== normalizzaDdl('CREATE INDEX utente.acquisto_legacy_firme ON acquisto_registrato(partita_id,articolo_chiave,legacy_firma) WHERE legacy_firma IS NOT NULL')
     || db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type='index' AND name='acquisto_legacy_unica'").get()) errore('Gli indici dei raccordi non corrispondono al formato generazionale.');

@@ -23,7 +23,7 @@ export const queryFileImmagine = z.object({
   l: z.string().max(10).optional(),
 });
 
-/** La conferma di eliminare i pezzi (102) delle mappe che cambiano immagine (L1): `eliminaPezzi=1`, come nell'editor. */
+/** La conferma di eliminare i pezzi delle mappe che cambiano immagine (L1): `eliminaPezzi=1`, come nell'editor. */
 export const queryConfermaPezzi = z.object({ eliminaPezzi: z.enum(['0', '1']).optional() });
 
 /** Rimozione multipla: l'ambito e la conferma dei pezzi. */

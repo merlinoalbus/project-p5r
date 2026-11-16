@@ -4,13 +4,12 @@
 //
 // Il volume dell'edizione (`config.edizioneDir`, montato in sola lettura) contiene, prodotti da «Prepara edizione» nella preparazione:
 //   - `gioco.db`        i contenuti chiusi (VACUUM INTO, giornale `delete`, tutte le miniature, nessuno spillo senza uid);
-//   - `partite-vuoto.db` la struttura delle partite con le migrazioni utente fino all'ultima prima del congelamento;
+//   - `partite-vuoto.db` la struttura delle partite alla versione dell'edizione (la copia del modello del repository);
 //   - `manifesto.json`   le versioni e l'impronta con cui l'istanza controlla di avere in mano proprio quella struttura;
 //   - `font/`            i caratteri.
-// L'istanza di rilascio NON ha il runner delle migrazioni: la struttura di `partite.db` è quella di `partite-vuoto.db`, e a ogni avvio
-// la si confronta col manifesto (versioni di `main` e di `utente`, impronta dello schema `utente`). Se non coincide l'avvio si ferma:
-// una struttura diversa non si «aggiusta» in esercizio (progetto §5: nuova edizione e conversione una tantum su copia, dopo il sì
-// dell'utente).
+// La struttura di `partite.db` è quella di `partite-vuoto.db`, e a ogni avvio la si confronta col manifesto (versioni di `main` e di
+// `utente`, impronta dello schema `utente`). Se non coincide l'avvio si ferma: una struttura diversa non si «aggiusta» in esercizio
+// (progetto §5: nuova edizione e conversione una tantum su copia, dopo il sì dell'utente).
 //
 // Il formato del manifesto è UNO SOLO: lo scrive «Prepara edizione» (`server/services/edizioneService.ts`) e lo legge questo modulo, che ne
 // controlla la parte che serve all'avvio (versioni, algoritmo e impronta della struttura delle partite); gli altri campi (file, SHA-256,
@@ -103,7 +102,7 @@ export function verificaSchemaUtente(db: AppDatabase, manifesto: ManifestoEdizio
     if (impronta !== manifesto.improntaSchemaPartite) problemi.push(`l'impronta dello schema di partite.db (${impronta.slice(0, 12)}…) non coincide con quella del manifesto (${manifesto.improntaSchemaPartite.slice(0, 12)}…)`);
   }
   if (problemi.length > 0) {
-    throw new ErroreEdizione(`la struttura delle partite non corrisponde all'edizione: ${problemi.join('; ')}. L'istanza di rilascio non migra: serve l'edizione giusta o una conversione una tantum su copia, decisa dall'utente.`);
+    throw new ErroreEdizione(`la struttura delle partite non corrisponde all'edizione: ${problemi.join('; ')}. Nessuna conversione automatica: serve l'edizione giusta o una conversione una tantum su copia, decisa dall'utente.`);
   }
 }
 

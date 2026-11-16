@@ -86,7 +86,7 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     // un luogo nuovo dell'utente, nascosto e riportato in elenco dei rimossi
     const creato = (await request(app).post('/api/catalogo/luogo').send({ nome: 'Chiosco di prova', tipo: 'ristorante', quartiere_chiave: 'shibuya', cosa_offre: 'Ramen', orari_json: { giorni: ['giovedi', 'sabato'] } })).body.data as ElementoCatalogoDto;
     expect(creato.chiave).toBe('shibuya/u-chiosco-di-prova');
-    // i giorni sono gli orari del luogo (migrazione 184: `giorni_json` non c'è più): viaggiano come oggetto e stanno in tabella come JSON
+    // i giorni sono gli orari del luogo (`giorni_json` non esiste): viaggiano come oggetto e stanno in tabella come JSON
     expect((JSON.parse(getDb().prepare('SELECT orari_json FROM luogo WHERE chiave = ?').pluck().get(creato.chiave) as string) as { giorni: string[] }).giorni).toEqual(['giovedi', 'sabato']);
     expect((await request(app).post('/api/catalogo/luogo').send({ nome: 'Giorno finto', tipo: 'negozio', quartiere_chiave: 'shibuya', orari_json: { giorni: ['lunedi', 'ferragosto'] } })).status).toBe(400);
     const modificato = (await request(app).put(`/api/catalogo/luogo/${encodeURIComponent('shibuya/untouchable')}`).send({ orari_json: { giorni: ['lunedi'] } })).body.data as ElementoCatalogoDto;
@@ -113,7 +113,7 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     await request(app).put(`/api/catalogo/articolo/${encodeURIComponent('untouchable/kogatana-nera')}/nascosta`).send({ nascosta: false });
   });
 
-  // L4-02 (373): gli orari propri di un punto vendita sono solo l'eccezione a quelli del luogo della sede (`negozio.orari_json` non c'è più)
+  // L4-02: gli orari propri di un punto vendita sono solo l'eccezione a quelli del luogo della sede (`negozio.orari_json` non c'è più)
   it('scrivendo la sede il quartiere segue; gli orari e il programma punti si salvano come valori', async () => {
     const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Bottega di prova', tipo: 'misto', sede_chiave: 'kichijoji/jazz-jin', eccezione_orari_json: { giorni: ['domenica'], fasce: ['sera'] }, programma_punti_json: { nome: 'Punti', unita: 'punti', calcolo: 'manuale' } })).body.data as ElementoCatalogoDto;
     expect(n.dati).toMatchObject({ sede_chiave: 'kichijoji/jazz-jin' });
@@ -132,7 +132,7 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
   // Sospeso il 10/11: in fondo il caso riporta libri, attività e film ai valori della guida con `DELETE /api/catalogo/…` (il ritorno alla
   // guida tolto per decisione dell'utente: «Puoi rimuovere questo ripristina del tutto in tutti i punti»), e i casi che seguono, sullo stesso
   // database, contano su quei valori. Sospeso, il caso non cambia il database; resta, da riscrivere senza il ritorno alla guida.
-  it.skip('la correzione di alcuni campi soltanto vale per ogni tipo, e non cancella gli effetti ricavati dalla migrazione', async () => {
+  it.skip('la correzione di alcuni campi soltanto vale per ogni tipo, e non cancella gli effetti già presenti', async () => {
     // ogni tipo accetta un PUT parziale (film e attività portano una rifinitura, che non deve rompere la forma parziale)
     const casi: Array<[string, string, Record<string, unknown>]> = [
       ['negozio', 'untouchable', { note: 'prova' }], ['articolo', 'untouchable/kogatana-nera', { verificato: true }], ['libro', 'il-magnifico-ladro', { verificato: true }],
@@ -145,7 +145,7 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     }
     expect((await request(app).put('/api/catalogo/film/cinema-le-sedici-domande').send({ sessioni: 3 })).status).toBe(400);
     expect((await request(app).put('/api/catalogo/attivita/freccette').send({ paga_yen: 100 })).status).toBe(400);
-    // L13 (O7-4, migrazione 313): libri e film non hanno più campi vecchi (dote, note, note_successive, sblocca, effetto_json, dove): mandati,
+    // L13 (O7-4): libri e film non hanno campi vecchi (dote, note, note_successive, sblocca, effetto_json, dove): mandati,
     // si scartano e gli effetti restano quelli della riga; l'unico punto è `effetti_json`
     const yoncha = (await request(app).put('/api/catalogo/libro/esplorando-yoncha-4').send({ nome: 'Esplorando Yoncha 4', dote: null, note: null, sblocca: null, effetto_json: null, condizioni_json: [] })).body.data as ElementoCatalogoDto;
     expect(JSON.parse(String(yoncha.dati.effetti_json))).toEqual([{ effetto: { famiglia: 'sblocca-luogo', luogo: 'yongen-jaya' } }]);
@@ -229,8 +229,8 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     expect(senza.raccolta.presi).toBeNull();
     expect(senza.planimetrie.every((m) => m.presi === null && m.spilli.every((s) => s.raccolto === null))).toBe(true);
 
-    // Memento (099): Dedalo → Aree → Elementi; gli elementi di un'area sono le sue voci Trama e le sue Richieste
-    // dalla 101 le aree sono quelle della guida (Aiyatsbus Area 1–7); L10-02 (382): i timbri sono del dedalo, come li dà la guida
+    // Memento: Dedalo → Aree → Elementi; gli elementi di un'area sono le sue voci Trama e le sue Richieste
+    // le aree sono quelle della guida (Aiyatsbus Area 1–7); L10-02: i timbri sono del dedalo, come li dà la guida
     await request(app).put('/api/compendio/aree/mementos-02-aiyatsbus').send({ timbriTotale: 8 }).expect(200);
     const mementos = (await request(app).get(`/api/compendio/dungeon/mementos?partita=${id}`)).body.data as DungeonDettaglioDto;
     const aiyatsbus = mementos.aree.find((a) => a.chiave === 'mementos-02-aiyatsbus')!;
@@ -278,7 +278,7 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     const ordini = r.richieste.filter((x) => x.areaOrdine !== null).map((x) => x.areaOrdine as number);
     expect(ordini).toEqual([...ordini].sort((a, b) => a - b));
     expect(r.richieste[0].areaNome).toBeTruthy();
-    // O7-1: completare chiede il Dedalo aperto nella partita (305) e le condizioni proprie (310); qui si contano le completate, non quando si può
+    // O7-1: completare chiede il Dedalo aperto nella partita e le condizioni proprie; qui si contano le completate, non quando si può
     getDb().prepare("UPDATE dungeon_area SET condizioni_json = NULL WHERE dungeon_chiave = 'mementos'").run();
     getDb().prepare('UPDATE richiesta SET completamento_condizioni_json = NULL').run();
     await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: r.richieste[0].chiave, stato: 'completata' });

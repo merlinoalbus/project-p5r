@@ -7,7 +7,7 @@
 // struttura sola per tutte le attività (scelta dell'utente: «generica per tutti i lavori»): in quali
 // giorni del mese c'è, come funziona, la domanda, le risposte per elemento e i premi per esito.
 // Ogni elemento ha il nome che usa la guida italiana e, se diverso, un altro nome con cui lo si
-// trova (le guide inglesi). Si salva in `attivita.quiz_json` (migrazione 105).
+// trova (le guide inglesi). Si salva in `attivita.quiz_json`.
 // ============================================================
 
 /** Un elemento del quiz: il nome della guida italiana, l'altro nome con cui lo si trova, la risposta giusta e una nota

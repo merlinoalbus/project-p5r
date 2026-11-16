@@ -3,17 +3,17 @@
 // ============================================================
 //
 // Un'Area raccoglie le planimetrie (versioni) della stessa zona di un quartiere — o della città, per lo staff che nessuna fonte
-// colloca — e ne dice nome, ordine e planimetria predefinita (tabella `area`, migrazione 109). Questo servizio la legge per le
+// colloca — e ne dice nome, ordine e planimetria predefinita (tabella `area`). Questo servizio la legge per le
 // pagine (elenco del contenitore, pagina dell'Area, planimetrie da collocare) e la scrive (creazione con la prima planimetria,
 // versioni, rinomina, ordine, eliminazione nel cestino, collocazione). Le rotte sono generiche sul contenitore
 // (`/api/aree/:contenitore/:chiave/…`): `citta`, con la chiave di un quartiere o `tokyo` per la città (L2), e `dungeon`, con la
-// chiave di un Palazzo (L3, migrazione 110: le «stanze» dei Palazzi, legate alle infiltrazioni in `infiltrazione_area`). Nei Palazzi
+// chiave di un Palazzo (L3: le «stanze» dei Palazzi, legate alle infiltrazioni in `infiltrazione_area`). Nei Palazzi
 // le planimetrie nascono di tipo `area` sotto `dungeon-<k>`, senza un punto sull'illustrazione (lì non ci sono passaggi), e l'Area
 // porta le infiltrazioni che la toccano e la raccolta delle sue planimetrie.
 // ============================================================
 
 import { getDb, nowIso, prepared, type AppDatabase } from '../../db/dbService.js';
-import { assegnaAreePalazzi110, type EsitoAreePalazzi } from '../../db/migrations/110_aree_dei_palazzi.js';
+import { assegnaAreeDeiPalazzi, type EsitoAreePalazzi } from './areeDeiPalazzi.js';
 import { entitaDellaRadice, radiceDelPalazzo } from './alberoMappe.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, staccaAreaDalleInfiltrazioni, type InfiltrazioneDellArea } from './legamiInfiltrazioni.js';
 // la raccolta per planimetria dei Palazzi è quella della scheda (dungeonService la usa a sua volta per le Aree: l'uso è nelle funzioni)
@@ -137,7 +137,7 @@ function raccoltaDelContenitore(c: Contenitore, partitaId?: number): { perMappa:
  * le infiltrazioni che la toccano e la raccolta delle sue planimetrie. Nei Palazzi non c'è un passaggio (l'illustrazione del Palazzo
  * non ha pin verso le aree) né un ingresso.
  */
-/** La condizione dell'Area: quella del suo quartiere e, dalla 303, la sua propria in AND (il Covo dei Ladri dal 5 maggio). */
+/** La condizione dell'Area: quella del suo quartiere e la sua propria in AND (il Covo dei Ladri dal 5 maggio). */
 function condizioneArea(a: RigaArea): RequisitoSpillo[] | null {
   return condizioneEffettivaArea(a);
 }
@@ -300,7 +300,7 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
 
 // ---- Scritture ----
 
-/** Gli slug che non possono essere di un'Area: sono segmenti delle rotte delle Aree (gli stessi della 109). */
+/** Gli slug che non possono essere di un'Area: sono segmenti delle rotte delle Aree. */
 const SLUG_RISERVATI = new Set(['ordine', 'da-collocare', 'nuova']);
 
 /** Il nome dato, senza spazi ai bordi; 400 `nome-vuoto` se non resta niente. */
@@ -401,9 +401,9 @@ export function impostaInfiltrazioniDellArea(contenitore: ContenitoreRotta, chia
   return dettaglioArea(contenitore, chiave, slugArea);
 }
 
-/** La regola delle Aree dei Palazzi della migrazione 110, per l'import di un pacchetto di prima (L3 §2.3): crea le aree mancanti. */
+/** La regola delle Aree dei Palazzi (`areeDeiPalazzi.ts`), per l'import di un pacchetto di mappe (L3 §2.3): crea le aree mancanti. */
 export function assegnaAreePalazzi(db: AppDatabase = getDb()): EsitoAreePalazzi {
-  return conAree(db) ? assegnaAreePalazzi110(db, nowIso()) : { aree: 0, planimetrie: 0, etichette: 0, legami: 0, legamiDaRegola: 0 };
+  return conAree(db) ? assegnaAreeDeiPalazzi(db, nowIso()) : { aree: 0, planimetrie: 0, etichette: 0, legami: 0, legamiDaRegola: 0 };
 }
 
 /** Aggiunge una planimetria in coda alle versioni dell'Area (R2-24), con l'immagine; `predefinita` la fa aprire per prima. */
@@ -422,7 +422,7 @@ export function aggiungiPlanimetria(contenitore: ContenitoreRotta, chiave: strin
   return dettaglioArea(contenitore, chiave, slugArea);
 }
 
-/** La copia dei valori della guida, presa alla prima correzione di un'Area del pacchetto (come `luogo.seed_json`, 071): la leggono il nome
+/** La copia dei valori della guida, presa alla prima correzione di un'Area del pacchetto (come `luogo.seed_json`): la leggono il nome
  *  della «stanza» (rivisto dall'utente o no) e l'importazione delle mappe, che non sovrascrive un'Area corretta. */
 function seedJson(a: RigaArea): string {
   return JSON.stringify({ nome: a.nome, nome_rivisto: a.nome_rivisto, planimetria_predefinita: a.planimetria_predefinita });
@@ -456,7 +456,7 @@ export function aggiornaArea(contenitore: ContenitoreRotta, chiave: string, slug
 }
 
 /**
- * Sostituisce la condizione propria dell'Area (303: il Covo dei Ladri dal 5 maggio), che vale in AND con quella del quartiere e che i
+ * Sostituisce la condizione propria dell'Area (il Covo dei Ladri dal 5 maggio), che vale in AND con quella del quartiere e che i
  * luoghi dell'Area ereditano: è l'unico punto in cui si scrive. Un elenco vuoto la toglie (l'Area torna a seguire solo il quartiere).
  * Gli inviti dei Confidenti restano separati e intatti.
  */
@@ -680,7 +680,7 @@ function lasciaLArea(vecchia: RigaArea, mappa: string, nuovaArea: string): void 
 
 /**
  * Le planimetrie senza Area — del mondo (figlie di Tokyo o di un quartiere, `luogo` o `area`) e, da L3, dei Palazzi (figlie di
- * `dungeon-<k>`, i Memento esclusi): dopo le migrazioni 109 e 110 nessuna, ma una mappa importata da un pacchetto di prima o tolta da
+ * `dungeon-<k>`, i Memento esclusi): una mappa importata da un pacchetto vecchio o tolta da
  * un'Area finisce qui, e «Colloca» la assegna.
  */
 export function mappeDaCollocare(): MappaDaCollocareDto[] {

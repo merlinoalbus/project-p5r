@@ -2,7 +2,7 @@
 // proposteConversioneService — le proposte «da completare» sulle voci del Diario: elenco, applica, scarta (L13, ondata 4a)
 // ============================================================
 //
-// Il modello è in `shared/proposteConversione.ts`, la tabella nella migrazione 236. Solo preparazione: nessuna di queste rotte è
+// Il modello è in `shared/proposteConversione.ts`, la tabella è `proposta_conversione_voce`. Solo preparazione: nessuna di queste rotte è
 // nell'elenco del giocatore (`server/rilascio/rotteGiocatore.ts`) e l'edizione di rilascio esce con la tabella vuota.
 //
 // **Applicare** scrive la voce con `aggiornaVoce`, la STESSA funzione della finestra della voce: il collegamento si verifica, gli effetti

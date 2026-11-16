@@ -89,7 +89,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
           {i > 0 && <span aria-hidden>›</span>}
           {i === mappa.percorso.length - 1
             ? <span className="text-text">{p.nome}</span>
-            : <Link to={urlMappa(p.chiave)} className="text-text-secondary">{p.nome}</Link>}
+            : <Link to={urlMappa(p.chiave)} className="touch inline-flex items-center text-text-secondary">{p.nome}</Link>}
         </span>)}
       </nav>}
       chip={<>

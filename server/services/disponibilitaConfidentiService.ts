@@ -2,12 +2,12 @@
 // disponibilitaConfidentiService — le «Informazioni del Confidente»: note sulla disponibilità, note generali e fonti, con lo storico
 // ============================================================
 //
-// L13 (ondata 6, lotto O6-2, migrazione 307): giorni, fasce, eccezioni, luoghi e sblocco hanno una sola sede, la disponibilità strutturata
+// L13 (ondata 6, lotto O6-2): giorni, fasce, eccezioni, luoghi e sblocco hanno una sola sede, la disponibilità strutturata
 // (`disponibilitaStrutturataService`) e i requisiti di rango; qui si modificano solo `note`, `note_generali` e `fonti_json`. Le cinque colonne
-// in prosa di prima non esistono più nella tabella (L7-01, migrazione 358): restano solo come campi della fotografia nello storico (le versioni
+// in prosa non esistono nella tabella (L7-01): restano solo come campi della fotografia nello storico (le versioni
 // vecchie le mostrano), la riga di adesso li ha vuoti, l'editor non li scrive e un ripristino non li riporta.
 // Lo storico (`dati_guida` `confidente-disponibilita-editor-v1:<chiave>`) è una catena: ogni revisione parte dalla riga in cui finisce la
-// precedente e l'ultima è la riga di adesso; le revisioni scritte da una migrazione (`bonifica` della 131, `migrazione` della 307) hanno
+// precedente e l'ultima è la riga di adesso; le revisioni automatiche dello storico (azioni `bonifica` e `migrazione`) hanno
 // l'identificativo `migrazione-<numero>-<chiave>` e l'impronta di `{ chiave, migrazione }`.
 // ============================================================
 
@@ -23,12 +23,12 @@ import { CAMPI_INFORMAZIONI_CONFIDENTE, COLONNE_INFORMAZIONI_CONFIDENTE as COLON
 const PREFISSO = 'confidente-disponibilita-editor-v1:';
 /** Le tre colonne vive della riga. */
 const CAMPI_RAW: ReadonlyArray<keyof InformazioniConfidenteRaw> = ['note', 'note_generali', 'fonti_json'];
-/** I campi storici della fotografia (colonne tolte dalla 358): nella riga di adesso sono vuoti, come lo storico si aspetta. */
+/** I campi storici della fotografia (colonne che la tabella non ha): nella riga di adesso sono vuoti, come lo storico si aspetta. */
 const STORICI_VUOTI = { giorni_json: '[]', fasce_json: '[]', luogo: '', sblocco_data: '', sblocco_requisiti: '' } as const;
 const RIGA_VUOTA: InformazioniConfidenteRaw = { ...STORICI_VUOTI, note: '', note_generali: '', fonti_json: '[]' };
 const rawSchema = z.object({ giorni_json: z.string(), fasce_json: z.string(), luogo: z.string(), sblocco_data: z.string(),
   sblocco_requisiti: z.string(), note: z.string(), note_generali: z.string(), fonti_json: z.string() }).strict();
-// «applica-proposta» resta leggibile nello storico (nessuna proposta è più applicabile); «migrazione» è la revisione aggiunta dalla 307
+// «applica-proposta» resta leggibile nello storico (nessuna proposta è applicabile); «migrazione» è l'azione di una revisione automatica dello storico
 const azioniRegistro = z.enum(['bonifica', 'migrazione', 'applica-proposta', 'modifica-manuale', 'crea-informazioni', 'ripristina-versione']);
 const revisioneSchema = z.object({ id: z.number().int().positive(), azione: azioniRegistro, data: z.string().datetime(), motivo: z.string(),
   operazioneId: z.string().min(1), richiesta: z.string().regex(/^[a-f0-9]{64}$/), prima: rawSchema.nullable(), dopo: rawSchema }).strict();
@@ -47,7 +47,7 @@ const impronta = (v: unknown) => createHash('sha256').update(canonico(v)).digest
 const uguali = (a: unknown, b: unknown) => isDeepStrictEqual(a, b);
 const conflittoRegistro = () => httpErrors.conflict('storico-disponibilita-incoerente', 'Lo storico delle informazioni è illeggibile o incoerente. Nessun dato viene azzerato o sostituito.');
 
-/** Una revisione scritta da una migrazione: identificativo `migrazione-<numero>-<chiave>` e impronta di `{ chiave, migrazione }`. */
+/** Una revisione automatica dello storico: identificativo `migrazione-<numero>-<chiave>` e impronta di `{ chiave, migrazione }`. */
 function revisioneDiMigrazioneValida(chiave: string, operazioneId: string, richiesta: string): boolean {
   const m = /^migrazione-(\d+)-(.+)$/.exec(operazioneId);
   return !!m && m[2] === chiave && richiesta === impronta({ chiave, migrazione: Number(m[1]) });

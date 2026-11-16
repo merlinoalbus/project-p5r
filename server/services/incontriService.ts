@@ -5,22 +5,22 @@
 // Scelta dell'utente (2026-09-30): la Dote di un incontro (Takemi il Coraggio, Yoshida il Fascino…) arrivava da ogni
 // incontro registrato — la spunta di un'azione della guida o dell'utente, il passaggio di rango o le note di risposta
 // nella pagina Confidenti — e il passaggio al rango R conta una volta sola, da qualunque parte arrivi. Che cosa dà un
-// incontro lo dice il Confidente (`confidente_dote_incontro` del rango verso cui vale, migrazione 088).
+// incontro lo dice il Confidente (`confidente_dote_incontro` del rango verso cui vale).
 // **Dal 2026-10-17 la Dote arriva solo dal passaggio di rango** (scelta dell'utente, per tutti i Confidenti: un'uscita con
 // Sojiro che dà solo punti dava Gentilezza +3). Gli incontri semplici si registrano ancora (uno per momento, per non contare
 // due volte un passaggio che arriva nello stesso momento), ma senza Dote; un incontro semplice che diventa il passaggio la dà
 // lì, se non l'aveva già data con la regola di prima.
 //
-// Regole (`incontro_confidente_partita`, migrazione utente 009):
+// Regole (`incontro_confidente_partita`):
 // - in un momento della giornata (Confidente, giorno, fascia) c'è un solo incontro «semplice»: nel gioco si esce con un
 //   Confidente una volta per fascia, e un incontro ha più risposte («risposta da 2 note» premuto tre volte) o si segna da
 //   più parti (la spunta e la pagina Confidenti): la Dote arriva una volta;
 // - il passaggio al rango R è unico: spuntare l'azione del rango R e alzare il rango a R dalla pagina è lo stesso incontro;
 //   un passaggio che arriva dove c'è l'incontro semplice di quel momento lo trasforma (niente Dote in più); passaggi di
-//   ranghi diversi nello stesso momento (segnati a mano uno dopo l'altro) sono incontri a sé (migrazione utente 010);
+//   ranghi diversi nello stesso momento (segnati a mano uno dopo l'altro) sono incontri a sé;
 // - togliere la spunta toglie l'incontro che aveva creato (o il segno di passaggio che aveva messo); abbassare il rango
 //   dalla pagina toglie i passaggi registrati dalla pagina oltre il nuovo rango; «Annulla ultimo» che riporta i punti a
-//   quelli di prima delle risposte di quel momento (`punti_prima`, migrazione utente 011) toglie l'incontro che le
+//   quelli di prima delle risposte di quel momento (`punti_prima`) toglie l'incontro che le
 //   risposte avevano registrato.
 // Le Doti non si toccano (scelta dell'utente, 2026-09-30: si segnano solo a mano): l'incontro registra e dice la Dote che il
 // gioco dà (`doti`, `doteIncontro`), e togliendolo dice quella che dava, perché l'utente la segni o la tolga lui.

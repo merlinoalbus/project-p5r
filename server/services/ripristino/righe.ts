@@ -4,7 +4,7 @@
 //
 // Quartiere, trofeo, Dote sociale (con i suoi cinque ranghi) e trasformazione di Jose. La correzione è un UPDATE sul posto: tutti i lettori
 // esistenti restano com'erano. Il valore della guida è la fotografia `seed_json` della riga, presa alla prima correzione (colonne
-// `origine`, `seed_json`, `updated_at` della migrazione 178), che `ripristinoService` gestisce in modo uguale per tutti i tipi.
+// `origine`, `seed_json`, `updated_at`), che `ripristinoService` gestisce in modo uguale per tutti i tipi.
 // ============================================================
 
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
@@ -30,7 +30,7 @@ export interface DefRiga {
   /** Tabella con le colonne `origine`, `seed_json`, `updated_at` e la colonna della chiave. */
   tabella: string;
   colonnaChiave: string;
-  /** La colonna `updated_at` della tabella è NOT NULL (l'Ombra, migrazione 166): senza correzione si rimette l'ora, non NULL. */
+  /** La colonna `updated_at` della tabella è NOT NULL (l'Ombra): senza correzione si rimette l'ora, non NULL. */
   aggiornataSempre?: boolean;
   chiavi(): string[];
   esiste(chiave: string): boolean;
@@ -90,7 +90,7 @@ const TIPI_TROFEO = [{ chiave: 'bronzo', nome: 'Bronzo' }, { chiave: 'argento', 
 const MANCABILE = [{ chiave: '', nome: 'Non detto' }, { chiave: '1', nome: 'Sì, si può perdere' }, { chiave: '0', nome: 'No, non si perde' }];
 interface RigaTrofeo { nome: string; nome_en: string | null; tipo: string; descrizione: string; come: string; mancabile: number | null; fonte: string; verificato: number; condizioni_json: string | null }
 
-/** L13 (O7-4, migrazione 313): le condizioni del «quando» di un trofeo, come testo JSON del campo («[]» = nessuna). Lancia 400 se non è un
+/** L13 (O7-4): le condizioni del «quando» di un trofeo, come testo JSON del campo («[]» = nessuna). Lancia 400 se non è un
  *  elenco di condizioni valide del vocabolario unico (chiavi comprese, come ogni altro editor di condizioni). */
 function condizioniTrofeo(v: ValoreCampoCorrezione): string | null {
   let grezze: unknown;
@@ -119,7 +119,7 @@ const trofeo: DefRiga = {
     return { nome: r.nome, nome_en: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? '' : String(r.mancabile),
       condizioni_json: r.condizioni_json ?? '[]', fonte: r.fonte, verificato: r.verificato === 1 };
   },
-  // una fotografia di prima della 313 non ha le condizioni: nessuna; una di prima della 363 ha ancora il `quando` tolto: non è più un campo
+  // una fotografia vecchia può non avere le condizioni (nessuna) e avere ancora il `quando`, che non è un campo
   normalizzaGuida: ({ quando: _quando, ...guida }) => ({ condizioni_json: '[]', ...guida }),
   scrivi: (chiave, v) => {
     for (const col of ['nome', 'tipo', 'descrizione', 'come', 'fonte'] as const) if (v[col] !== undefined) prepared(`UPDATE trofeo SET ${col} = ? WHERE chiave = ?`).run(str(v[col]) ?? '', chiave);

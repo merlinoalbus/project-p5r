@@ -27,7 +27,7 @@ const elenco = async (partita?: number) => (await request(app).get(`/api/compend
 const leggi = async (chiave: string, partita?: number) => (await elenco(partita)).richieste.find((r) => r.chiave === chiave);
 /** Una partita nuova. */
 const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
-/** O7-1: completare una Richiesta chiede il suo Dedalo aperto nella partita (305); dove il test non parla di questo, i Dedali restano senza
+/** O7-1: completare una Richiesta chiede il suo Dedalo aperto nella partita; dove il test non parla di questo, i Dedali restano senza
  *  condizione d'apertura (un Dedalo senza condizione non blocca). */
 const apriIDedali = () => prepared("UPDATE dungeon_area SET condizioni_json = NULL WHERE dungeon_chiave = 'mementos'").run();
 
@@ -37,7 +37,7 @@ describe('le Richieste modificabili', () => {
 
   it('ogni Richiesta del pacchetto si risalva com\'è (i tetti stanno sopra i dati veri)', async () => {
     for (const r of (await elenco()).richieste) {
-      // L10-01 (381): niente più ricompense in testo né rango del Confidente
+      // L10-01: niente ricompense in testo né rango del Confidente
       const corpo = { nome: r.nome, committente: r.committente, dedalo: r.areaChiave, areaDedalo: r.areaDedalo, piano: r.piano,
         bersaglio: r.bersaglio, confidente: r.confidente?.chiave ?? null, note: r.note };
       const risposta = await request(app).put(`/api/compendio/richieste/${r.chiave}`).send(corpo);
@@ -90,7 +90,7 @@ describe('le Richieste modificabili', () => {
     expect((await request(app).put('/api/compendio/richieste/nessuna').send({ note: 'x' })).status).toBe(404);
   });
 
-  // la colonna `richiesta.area` non c'è più dalla 337 (L8-09) e la rotta `PUT /richieste/:chiave/area` dalla L10-05: cerca strutture tolte
+  // la colonna `richiesta.area` non c'è (L8-09) e la rotta `PUT /richieste/:chiave/area` dalla L10-05: cerca strutture tolte
   it.skip('la prosa della guida sul dove («Dedalo di Aiyatsbus (Area 7) / …») resta finché il dedalo non cambia', async () => {
     const r = prepared("SELECT chiave, area FROM richiesta WHERE area LIKE 'Dedalo di Aiyatsbus (%'").get() as { chiave: string; area: string };
     const area = `${AIYATSBUS}-area-1`;
@@ -103,7 +103,7 @@ describe('le Richieste modificabili', () => {
   it('cambiando nome le voci della giornata che la indicano mostrano il nome nuovo', async () => {
     const chiave = 'un-intruso-a-yongen-jaya';
     const testo = () => prepared("SELECT riferimento_testo FROM voce_giornata WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").pluck().all(chiave);
-    // L13 (O7-3, migrazione 312): il nome scritto uguale a quello della Richiesta si è svuotato, la voce lo legge dalla Richiesta (`nomeDi`)
+    // L13 (O7-3): il nome scritto uguale a quello della Richiesta è vuoto, la voce lo legge dalla Richiesta (`nomeDi`)
     const voce = prepared("SELECT uid, data FROM voce_giornata WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").get(chiave) as { uid: string; data: string };
     const mostrato = async () => ((await request(app).get(`/api/compendio/percorso/${voce.data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.uid === voce.uid)!.riferimentoTesto;
     expect(testo()).toEqual([null]);
@@ -147,13 +147,13 @@ describe('le Richieste modificabili', () => {
     // «Un fidanzato violento»: un requisito di Chihaya (per nome), una voce della giornata (per chiave); in più un pin, una
     // condizione di un libro e uno stato nella partita messi qui
     const r = prepared("SELECT chiave, nome FROM richiesta WHERE nome = 'Un fidanzato violento'").get() as { chiave: string; nome: string };
-    // O7-1 (310): «Un fidanzato violento» si accetta solo dal 30 giugno con lo sblocco della voce; qui conta solo che la partita abbia uno stato
+    // O7-1: «Un fidanzato violento» si accetta solo dal 30 giugno con lo sblocco della voce; qui conta solo che la partita abbia uno stato
     prepared("INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, 'accettata', ?)").run(partita, r.chiave, new Date().toISOString());
     const pin = prepared("SELECT id, nome FROM spillo WHERE riferimento_tipo IS NULL AND mappa_chiave IS NOT NULL ORDER BY id LIMIT 1").get() as { id: number; nome: string };
     prepared("UPDATE spillo SET riferimento_tipo = 'richiesta', riferimento_chiave = ? WHERE id = ?").run(r.chiave, pin.id);
     const libro = prepared('SELECT chiave, nome FROM libro ORDER BY chiave LIMIT 1').get() as { chiave: string; nome: string };
     prepared('UPDATE libro SET condizioni_json = ? WHERE chiave = ?').run(JSON.stringify([{ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'richiesta', richiesta: r.chiave }] }]), libro.chiave);
-    // le azioni della giornata stanno in `voce_giornata` (092); `giorno_percorso.azioni_json` è la copia storica che nessuno legge più:
+    // le azioni della giornata stanno in `voce_giornata`; `giorno_percorso.azioni_json` è la copia storica che nessuno legge più:
     // non si conta e non si tocca (rilievo del validatore, 2026-10-11)
     const voci = prepared("SELECT COUNT(*) FROM voce_giornata WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").pluck().get(r.chiave) as number;
     expect(voci).toBe(1);

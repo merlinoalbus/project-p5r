@@ -44,11 +44,11 @@ import { filtroRicerca } from '../../utils/testo';
 export type { StatoPuntoMappa } from './SchedaSpillo';
 
 /** Strumento attivo dell'editor: selezione e spostamento, aggiunta di un nuovo spillo, incolla dello spillo copiato, ritaglio di
- *  un pezzo della planimetria (102: si trascina un rettangolo sull'immagine). */
+ *  un pezzo della planimetria (si trascina un rettangolo sull'immagine). */
 export type StrumentoEditor = 'seleziona' | 'aggiungi' | 'incolla' | 'ritaglia';
 
-/** I pezzi della planimetria nell'editor (102): selezione, ritaglio di una zona, spostamento. Coordinate in pixel dell'immagine.
- *  Dalla 103 si seleziona e si sposta una **copia** (gli id sono delle copie); la zona tratteggiata evidenziata è del suo pezzo. */
+/** I pezzi della planimetria nell'editor: selezione, ritaglio di una zona, spostamento. Coordinate in pixel dell'immagine.
+ *  Si seleziona e si sposta una **copia** (gli id sono delle copie); la zona tratteggiata evidenziata è del suo pezzo. */
 export interface StrumentiPezzi {
   /** La copia selezionata. */
   selezionatoId: number | null;
@@ -73,7 +73,7 @@ export interface StrumentiEditor {
    * visore basta un clic, ma qui il clic seleziona per modificare: senza questo, per visitare il
    * passaggio appena messo bisognava cercare un pulsante in fondo al pannello. */
   onVisita?: (mappa: string) => void;
-  /** I pezzi della planimetria (102): senza, i pezzi nell'editor si vedono ma non si toccano. */
+  /** I pezzi della planimetria: senza, i pezzi nell'editor si vedono ma non si toccano. */
   pezzi?: StrumentiPezzi;
 }
 
@@ -84,7 +84,7 @@ interface Props {
   onNaviga: NavigaMappa;
   /** Cambio dello stato di uno spillo nella partita (la parola del suo tipo — raccolto, aperto, parlato, incontrato, azionato…: `statoDelPin`). */
   onRaccolto?: (spillo: SpilloDto, raccolto: boolean) => Promise<void> | void;
-  /** Stato nella Guida di una voce (un punto di dungeon) collegata allo spillo (ottenuto, esaurito, riaperto): un pin può averne più d'una (098). */
+  /** Stato nella Guida di una voce (un punto di dungeon) collegata allo spillo (ottenuto, esaurito, riaperto): un pin può averne più d'una. */
   onStatoPunto?: (spillo: SpilloDto, voce: string, stato: StatoPuntoMappa) => Promise<void> | void;
   /** Acquisto (o riapertura) di un articolo del negozio collegato allo spillo. */
   onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void> | void;
@@ -312,7 +312,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Dimensioni naturali: dal DTO quando note, altrimenti dall'immagine caricata, altrimenti un quadrato di riserva.
   const caricata = natCaricata?.src === src ? natCaricata : null;
   const nat: Dimensioni = caricata ?? (mappa.larghezza && mappa.altezza ? { w: mappa.larghezza, h: mappa.altezza } : { w: DIMENSIONE_RISERVA, h: DIMENSIONE_RISERVA });
-  // I pezzi della planimetria (102): le loro zone d'origine sono cancellate dall'immagine e non contano nell'area visibile, i pezzi
+  // I pezzi della planimetria: le loro zone d'origine sono cancellate dall'immagine e non contano nell'area visibile, i pezzi
   // posati sì. Le zone si ricavano da una firma, così la scansione dei pixel si rifà solo quando cambiano davvero (non a ogni
   // ricarica della mappa, che arriva con oggetti nuovi).
   const pezzi = mappa.pezzi ?? [];
@@ -320,7 +320,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const zone = useMemo<AreaMappa[]>(() => (firmaZone ? firmaZone.split(';').map((z) => { const [x, y, w, h] = z.split(',').map(Number); return { x, y, w, h }; }) : []), [firmaZone]);
   const areaVisibile = useMemo(() => (caricata ? areaImmagine(caricata.img, zone) : null), [caricata, zone]);
   const maschera = useMemo(() => mascheraZone({ w: nat.w, h: nat.h }, zone.map((z) => ({ sorgente: { x: z.x, y: z.y, larghezza: z.w, altezza: z.h } }))), [nat.w, nat.h, zone]);
-  // le copie posate (103): una zona per pezzo, una posa per copia; l'inquadratura comprende tutte le copie
+  // le copie posate: una zona per pezzo, una posa per copia; l'inquadratura comprende tutte le copie
   const posate = useMemo(() => copiePosate(mappa.pezzi ?? []), [mappa.pezzi]);
   const fit = inquadraturaMappa(nat, dim, areaConPezzi(areaVisibile, posate.map((x) => posaDi(x.pezzo, x.copia))), mappa.spilli);
   const zoomMin = fit.zoom;
@@ -546,7 +546,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
   };
 
-  /** Il punto dello schermo in pixel dell'immagine (102: i pezzi), interi e dentro l'immagine. */
+  /** Il punto dello schermo in pixel dell'immagine (i pezzi), interi e dentro l'immagine. */
   const pixel = (clientX: number, clientY: number): Punto => {
     const r = tela.current?.getBoundingClientRect();
     const x = r ? (clientX - r.left - pan.x) / zoom : 0;
@@ -555,12 +555,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   };
 
   // Puntatori: trascinamento, pinch, click sulla mappa (editor), trascinamento di uno spillo (editor), ritaglio di una zona e
-  // trascinamento di un pezzo (editor, 102).
+  // trascinamento di un pezzo (editor).
   const puntatori = useRef(new Map<number, Punto>());
   const gesto = useRef<{ tipo: 'trascina'; x: number; y: number; px: number; py: number; z: number; mosso: boolean } | { tipo: 'pinch'; d0: number; z0: number; cx: number; cy: number; px: number; py: number } | { tipo: 'spillo'; id: number; mosso: boolean; x: number; y: number }
     | { tipo: 'ritaglia'; x0: number; y0: number } | { tipo: 'pezzo'; id: number; mosso: boolean; x: number; y: number; px0: number; py0: number; w: number; h: number } | null>(null);
   const [trascinato, setTrascinato] = useState<{ id: number; x: number; y: number } | null>(null);
-  /** Il rettangolo che si sta ritagliando e il pezzo che si sta trascinando (102), in pixel dell'immagine. */
+  /** Il rettangolo che si sta ritagliando e il pezzo che si sta trascinando, in pixel dell'immagine. */
   const [rettangolo, setRettangolo] = useState<{ x: number; y: number; larghezza: number; altezza: number } | null>(null);
   const [pezzoTrascinato, setPezzoTrascinato] = useState<{ id: number; x: number; y: number } | null>(null);
   const [trascinando, setTrascinando] = useState(false);
@@ -710,11 +710,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // un pin «da verificare» (L4) resta in vista anche raccolto, finché non si sistema: nascosto, il suo anello ambra non si vedrebbe
   const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto && !s.daVerificare).length, [mappa.spilli]);
   const filtraBloccati = Boolean(partitaId) && (!editor || vistaGiornoCorrente === true);
-  // anche le copie dei pezzi (102, 103) senza le loro condizioni: si contano e ricompaiono, in trasparenza, con lo stesso comando dei pin
+  // anche le copie dei pezzi senza le loro condizioni: si contano e ricompaiono, in trasparenza, con lo stesso comando dei pin
   const pezziBloccati = useMemo(() => (filtraBloccati ? posate.filter((x) => statoPezzo(x.copia, true, false) === 'nascosto').length : 0), [posate, filtraBloccati]);
   const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter(nascostoPerCondizioni).length : 0) + pezziBloccati, [mappa.spilli, filtraBloccati, pezziBloccati]);
   const pezziDaDisegnare = useMemo(() => posate.map((x) => ({ ...x, stato: statoPezzo(x.copia, filtraBloccati, mostraNonDisponibili) })).filter((x) => x.stato !== 'nascosto'), [posate, filtraBloccati, mostraNonDisponibili]);
-  /** Nell'editor, i comandi dei pezzi (102): selezione, ritaglio, spostamento (di una copia, 103). */
+  /** Nell'editor, i comandi dei pezzi: selezione, ritaglio, spostamento (di una copia). */
   const strumentiPezzi = editor?.pezzi ?? null;
   /** Il pezzo della copia selezionata: la sua zona si evidenzia. */
   const pezzoSelezionatoId = strumentiPezzi ? posate.find((x) => x.copia.id === strumentiPezzi.selezionatoId)?.pezzo.id ?? null : null;
@@ -761,8 +761,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, trovaPin, spilloChiesto]);
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || s.id === spilloChiesto || !bloccato(s))) ?? null;
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
-  // tela: la freccia resta sullo spillo. L'altezza è **misurata** (`altezzaPopupMisurata`), non stimata: dalla 094 uno spostamento
-  // di una voce della guida ha anche «Ottenuto», e su una tela bassa (il visore incorporato, il tablet) il popup non ci stava
+  // tela: la freccia resta sullo spillo. L'altezza è **misurata** (`altezzaPopupMisurata`), non stimata: uno spostamento
+  // di una voce della guida ha anche «Ottenuto», e su una tela bassa (il visore incorporato, il tablet) il popup non ci starebbe
   // più né sopra né sotto e la tela lo tagliava. Quando non sta da nessun lato diventa il foglio, come l'elenco di un gruppo.
   // Prima della misura (il primo disegno) vale la stima di prima: ~215 px, la merce di un negozio di più.
   // un altro pin scelto da tastiera mentre il popup c'è già: il popup resta montato, il fuoco va comunque a lui (L6-13)
@@ -1172,7 +1172,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           {!editor && <span id={idIstruzioni} className="sr-only">Frecce per spostare la mappa, più e meno per ingrandire e ridurre, zero o Inizio per la vista intera. Tab per passare da uno spillo all'altro, Invio o Spazio per aprirlo, Esc per chiudere la scheda.{scelta ? '' : " L'elenco degli spilli è nel pannello."}</span>}
           <div ref={livello} className="visore-mappa__livello" style={stileLivello}>
             {src ? (
-              // le zone d'origine dei pezzi (102) sono cancellate sempre (scelta dell'utente): una maschera alfa sull'immagine di base
+              // le zone d'origine dei pezzi sono cancellate sempre (scelta dell'utente): una maschera alfa sull'immagine di base
               <img src={src} alt={descrizioneImmagineMappa(mappa)} className="visore-mappa__immagine" draggable={false} style={stileImmagineMascherata(maschera)} data-zone-cancellate={zone.length || undefined}
                 onLoad={(e) => { const img = e.currentTarget; if (img.naturalWidth && img.naturalHeight) setNatCaricata({ src: src!, w: img.naturalWidth, h: img.naturalHeight, img }); }} />
             ) : (
@@ -1182,13 +1182,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <span className="testo-13 text-text-secondary">Caricala dall'editor oppure sposta gli spilli sulla griglia.</span>
               </div>
             )}
-            {/* i pezzi posati (102), sotto i pin: parte del disegno della mappa, ritagliati dalla stessa immagine */}
-            {/* nell'editor (102) le zone già ritagliate si vedono tratteggiate: sono cancellate e non si ritagliano di nuovo per sbaglio */}
+            {/* i pezzi posati, sotto i pin: parte del disegno della mappa, ritagliati dalla stessa immagine */}
+            {/* nell'editor le zone già ritagliate si vedono tratteggiate: sono cancellate e non si ritagliano di nuovo per sbaglio */}
             {src && strumentiPezzi && pezzi.map((p) => (
               <div key={`zona-${p.id}`} className={`visore-mappa__zona-pezzo ${p.id === pezzoSelezionatoId ? 'visore-mappa__zona-pezzo--selezionata' : ''}`} data-zona-pezzo={p.uid} aria-hidden="true"
                 style={{ left: p.sorgente.x, top: p.sorgente.y, width: p.sorgente.larghezza, height: p.sorgente.altezza }} />
             ))}
-            {/* ogni copia (103) con la sua posa: stesso ritaglio, posizione, rotazione e specchio propri */}
+            {/* ogni copia con la sua posa: stesso ritaglio, posizione, rotazione e specchio propri */}
             {src && pezziDaDisegnare.map(({ pezzo: p, copia: c, indice, stato }) => {
               const posa = posaDi(p, pezzoTrascinato?.id === c.id ? { ...c, posizione: { x: pezzoTrascinato.x, y: pezzoTrascinato.y } } : c);
               const stile = stilePezzo(posa, src, nat);
@@ -1300,7 +1300,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <div className="flex flex-wrap gap-1">
                   {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={passaDa(selezionato)} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
                   {/* un pin con uno stato (un consumabile, un meccanismo, una porta…: `statoDelPin`, 2026-10-03), e anche un pin senza
-                      collegato a una o più voci della guida (una sicura, un passaggio): lo stato delle voci è il suo (2026-10-01, 098) */}
+                      collegato a una o più voci della guida (una sicura, un passaggio): lo stato delle voci è il suo (2026-10-01) */}
                   {(statoDelPin(selezionato) !== null || selezionato.voci.length > 0) && partitaId && !passaggioConArrivo(selezionato) && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
                   {/* L5 (T5): il pin di un luogo porta alla pagina del luogo, col suo nome (un negozio con sede: alla sua sezione nella pagina) */}
                   {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.luogo?.casa && (() => {

@@ -3,9 +3,9 @@
 // ============================================================
 //
 // La regola sta nei dati di gioco, in un punto solo: il blocco `dati_guida.capienza-scorta` (`{ posti, gradini, fonte }`): `posti` è il valore
-// di partenza (migrazione 230), `gradini` dice a quale rango di Igor la riserva sale a quanti posti (migrazione 336, L8-05). Prima i gradini si
-// ricavavano a ogni lettura dalla descrizione delle abilità di Igor con un'espressione regolare: riscrivendo la descrizione la capienza
-// cambiava senza avviso. Ora la descrizione è solo testo; dell'abilità di quel rango si legge il nome, per dire quale abilità la fa salire.
+// di partenza, `gradini` dice a quale rango di Igor la riserva sale a quanti posti (L8-05). I gradini non si
+// ricavano dalla descrizione delle abilità di Igor, così riscriverla non cambia la capienza:
+// la descrizione è solo testo; dell'abilità di quel rango si legge il nome, per dire quale abilità la fa salire.
 // Se il blocco manca o è illeggibile la capienza è null; senza gradini vale solo il valore di partenza.
 // ============================================================
 

@@ -5,8 +5,8 @@
 // La guida esprime la disponibilità come frasi: «a partire dall'arco del Palazzo di Madarame»,
 // «rango cliente Oscuro», «dopo aver giocato a biliardo almeno una volta», «solo la domenica
 // sera». L'app non legge frasi: legge stati (`condizioniSpillo.ts`). Questo modulo è l'unico
-// posto dove una frase diventa uno stato, e lo fa in tre momenti soltanto: la migrazione che
-// converte le righe esistenti, il salvataggio di una riga del catalogo scritta in prosa, il ripristino di un'istantanea vecchia (`seed_json`).
+// posto dove una frase diventa uno stato, e lo fa in due momenti soltanto:
+// il salvataggio di una riga del catalogo scritta in prosa, il ripristino di un'istantanea vecchia (`seed_json`).
 //
 // **Che cosa non fa.** Non produce mai una condizione «testuale»: se una frase non corrisponde
 // a nessuna regola, non diventa niente — la riga resta disponibile e la frase finisce fra le

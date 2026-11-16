@@ -3,8 +3,8 @@
 // ============================================================
 
 import { calcolaCollezioniImmagini } from './collezioniImmagini.js';
-import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
+import { closeDb } from '../../db/dbService.js';
+import { dbDiProvaSenzaMappe } from '../../../test/dbDiProva.js';
 import { importaMappe, elencaMappe, dettaglioMappa } from './mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 describe('collezioni presentative globali',()=>{
@@ -23,7 +23,7 @@ describe('collezioni presentative globali',()=>{
   expect(out.get('a')?.totale).toBe(2);expect(out.get('a')?.ambito).toBe(out.get('b')?.ambito);
  });
  it('dettaglio isolato e sottoinsieme dell’albero conservano indice e totale globali senza toccare nomi o relazioni',()=>{
-  const db=initDb(':memory:');runMigrations(db);
+  const db=dbDiProvaSenzaMappe();
   // L1: il ruolo si deduce dalla gerarchia e vuole un'immagine che esista: la pianta della prova sta nella grafica predefinita
   db.prepare("INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at) VALUES ('mappe', 'fixture-pianta', 'f.png', 'image/png', 1, 'x')").run();
   const node={nome:'Sala',tipo:'generica' as const,genitore:null,ordine:1,immagine:null,asset:'mappe/fixture-pianta',ruoloImmagine:'planimetria-nativa' as const,larghezza:100,altezza:100,entita:null,note:'',spilli:[]};

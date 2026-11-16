@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Sei oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne `origine`,
-// `seed_json`, `updated_at` della migrazione 216 sulla riga del padre), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
+// `seed_json`, `updated_at` sulla riga del padre), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
 //   - `arcana` (24, chiave = nome dell'Arcano nel dataset): il numero del tarocco. NON si corregge l'ordine (è la posizione dell'Arcano nella tabella di
 //     fusione: un ordinamento, come tutti gli altri del registro); il nome italiano si corregge dalle traduzioni.
 //   - `fusione-arcana` (273 coppie non ordinate, chiave «a:b» come in tabella): l'Arcano risultante.
@@ -186,7 +186,7 @@ const dlcSet: DefRiga = {
 
 // ---- Oggetti del compendio (equipaggiamento delle Persona): categoria e vincolo ----
 
-/** Categoria e vincolo (a chi appartiene l'oggetto) dell'oggetto del compendio, `oggetto` (223, chiave = id). Nome e descrizione si correggono dalle traduzioni, il legame col catalogo dal catalogo. */
+/** Categoria e vincolo (a chi appartiene l'oggetto) dell'oggetto del compendio, `oggetto` (chiave = id). Nome e descrizione si correggono dalle traduzioni, il legame col catalogo dal catalogo. */
 const oggettoCompendio = rigaDaColonne({
   etichetta: 'Oggetto del compendio', tabella: 'oggetto', colonnaChiave: 'CAST(id AS TEXT)', ordine: 'id',
   colonne: () => [

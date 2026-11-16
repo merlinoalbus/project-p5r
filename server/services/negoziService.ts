@@ -3,9 +3,9 @@
 // ============================================================
 //
 // Dalla voce 4 del piano «struttura, non frasi» (2026-09-12) la disponibilità di un negozio è
-// **solo i suoi orari** (oggi quelli della sede o la sua eccezione, migrazione 373): un negozio che non è ancora aperto non è
-// un posto che non c'è, e le condizioni di sblocco vivono sugli articoli (070). Il negozio ha una
-// sede fra i luoghi della città (072) e, se ce l'ha, un programma punti dichiarato (076).
+// **solo i suoi orari** (quelli della sede o la sua eccezione): un negozio che non è ancora aperto non è
+// un posto che non c'è, e le condizioni di sblocco vivono sugli articoli. Il negozio ha una
+// sede fra i luoghi della città e, se ce l'ha, un programma punti dichiarato.
 // ============================================================
 
 import { condizioneConTesto, leggiCondizioniSalvate, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
@@ -76,7 +76,7 @@ function regoleOrari(orari: OrariNegozio) { return orariComeCondizioni(orari).ma
  * la guida la distingue; senza sede (online, televisione, dentro un Palazzo) restano i suoi. Il testo dice da dove vengono.
  */
 function orariDelNegozio(r: PresenzaRiga): { orari: OrariNegozio; testo: string } {
-  // L4-02 (migrazione 373): gli orari propri sono solo l'eccezione, anche per chi non ha sede (il negozio del Palazzo di Niijima)
+  // L4-02: gli orari propri sono solo l'eccezione, anche per chi non ha sede (il negozio del Palazzo di Niijima)
   if (r.eccezione_orari_json) { const o = leggiOrari(r.eccezione_orari_json); return { orari: o, testo: descriviOrari(o) }; }
   if (r.sede_chiave) { const o = orariDelLuogo(r.sede_orari_json ?? null); return { orari: o, testo: descriviOrariDelLuogo(o) }; }
   const o = leggiOrari(null);
@@ -104,7 +104,7 @@ function sedeCasa(chiave: string, sede: string | null): string | null {
   return `${pagina}#${ancoraPuntoVendita(chiave)}`;
 }
 
-/** Il programma punti di un negozio, dal JSON della riga (migrazione 076); null se assente o malformato. */
+/** Il programma punti di un negozio, dal JSON della riga; null se assente o malformato. */
 export function leggiProgrammaPunti(json: string | null): NegozioRiassuntoDto['programmaPunti'] {
   if (!json) return null;
   try {
@@ -150,7 +150,7 @@ function scontatoNellaPartita(r: Pick<RigaArticolo, 'chiave' | 'negozio_chiave'>
   return prezzo !== null ? { prezzoScontato: { prezzo: prezzoScontato(prezzo, sconto), percentuale: sconto.percentuale } } : {};
 }
 
-/** Chiusura dell'ondata 5: lo sconto del negozio legato al rango di un Confidente (migrazione 254), con il nome del Confidente da dire. */
+/** Chiusura dell'ondata 5: lo sconto del negozio legato al rango di un Confidente, con il nome del Confidente da dire. */
 function scontoDelNegozio(json: string | null): NegozioRiassuntoDto['sconto'] {
   const s = normalizzaSconto(json);
   if (!s) return null;
@@ -196,7 +196,7 @@ function statisticheDelCatalogo(o: CatalogoOggettoDto): string | null {
 const CONDIZIONI_DI_TEMPO: ReadonlySet<string> = new Set(['data', 'intervallo', 'stagione', 'arco', 'quartiere']);
 
 /**
- * «Disponibile dal» dell'offerta, sempre dalle condizioni strutturate (R11-02/10; la colonna `articolo.disponibile_dal` è tolta, 194): le condizioni di tempo
+ * «Disponibile dal» dell'offerta, sempre dalle condizioni strutturate (R11-02/10; la colonna `articolo.disponibile_dal` non esiste): le condizioni di tempo
  * con la loro frase, e di più condizioni «dal» solo l'ultima (la data da cui l'offerta c'è davvero). Nessuna condizione di tempo: nessun testo.
  */
 function tempisticaDelleCondizioni(condizioni: ReadonlyArray<RequisitoSpillo & { testo: string }>): string | null {
@@ -229,10 +229,10 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     // più (colonne tolte): senza un oggetto collegato (offerta da collegare) restano null
     effetto: oggetto ? (oggetto.effetto || null) : null, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : null,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
-    // L6-09 (migrazione 386): la data d'apertura del negozio sta nel suo sblocco, non ripetuta sulle offerte; il «disponibile dal» dell'offerta
+    // L6-09: la data d'apertura del negozio sta nel suo sblocco, non ripetuta sulle offerte; il «disponibile dal» dell'offerta
     // la legge da lì insieme alle condizioni dell'offerta (vale la data più tarda), com'era quando l'offerta la ripeteva
     disponibileDal: tempisticaDelleCondizioni([...regole(r.negozio_sblocco ?? null), ...condizioniArticolo]), nota: r.nota, verificato: r.verificato === 1,
-    // F6: la nota storica della fonte è un dato (migrazione 139), legato all'offerta
+    // F6: la nota storica della fonte è un dato, legato all'offerta
     noteStoriche: noteStoricheDi('articolo', r.chiave),
     acquistato: acquisti?.acquistato === true || acquistati.has(r.chiave), acquistiRegistrati, acquisti,
     ...(st ? { disponibilita: disponibilitaArticolo(r, st, scorta) } : {}) };
@@ -482,7 +482,7 @@ function articoloDopoIlGesto(r: RigaArticolo, partitaId: number, catalogo: Map<s
  * chi chiama (`effettiDiStatoService`); nessun controllo di disponibilità (la voce spuntata attesta l'acquisto). Idempotente per voce ed effetto.
  */
 export function registraCopiaDaVoce(partitaId: number, articoloChiave: string, voce: { voceUid: string; effettoUid: string; quantita?: number }): void {
-  // la riga porta la chiave dell'effetto (quella del segno «ottenuto», come `impostaAcquisto` e la migrazione utente 051)
+  // la riga porta la chiave dell'effetto (quella del segno «ottenuto», come `impostaAcquisto`)
   const offerta = prepared('SELECT catalogo_chiave FROM articolo WHERE chiave = ?').get(articoloChiave) as { catalogo_chiave: string | null } | undefined;
   if (!offerta) return;
   if (eOffertaAojiru({ chiave: articoloChiave, catalogoChiave: offerta.catalogo_chiave })) return;

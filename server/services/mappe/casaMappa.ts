@@ -22,19 +22,19 @@ import type { AreaRifDto, ContenitoreAreaDto } from '../../../shared/types.js';
 /** Il nome della città, contenitore delle Aree che non stanno in nessun quartiere (la colonna `area.citta_chiave` ammette solo Tokyo). */
 const NOME_CITTA: Record<string, string> = { tokyo: 'Tokyo' };
 
-/** Una riga della tabella `area` (109). */
+/** Una riga della tabella `area`. */
 export interface RigaArea {
   chiave: string; quartiere_chiave: string | null; dungeon_chiave: string | null; citta_chiave: string | null; slug: string; nome: string;
   nome_rivisto: number; ordine: number; planimetria_predefinita: string | null; origine: 'seed' | 'utente'; seed_json: string | null;
   da_verificare: number; updated_at: string;
-  /** La condizione propria dell'Area (303: il Covo dei Ladri dal 5 maggio), in AND con il quartiere; assente prima della 303. */
+  /** La condizione propria dell'Area (il Covo dei Ladri dal 5 maggio), in AND con il quartiere; assente su uno schema vecchio. */
   condizioni_json?: string | null;
 }
 
 /** Le Aree e i nomi dei loro contenitori, letti una volta per una risposta che descrive molte mappe. */
 export interface ContestoAree { aree: Map<string, RigaArea>; nomiQuartieri: Map<string, string>; nomiDungeon: Map<string, string> }
 
-/** Vero se la tabella delle Aree c'è (dalla 109; i test su uno schema di prima non l'hanno). */
+/** Vero se la tabella delle Aree c'è (uno schema vecchio non l'ha). */
 export function conAree(db: AppDatabase = getDb()): boolean {
   return haTabellaMain(db, 'area');
 }

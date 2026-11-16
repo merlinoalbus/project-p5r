@@ -5,8 +5,8 @@
 // Decisione 21 dell'utente (26 ottobre): «lotteria con esito "vinto/non vinto" alla spunta e trofeo, yen della vincita a mano». L'esito lo
 // dichiara l'attività (`attivita.esiti_json`, campo `trofeo` di `shared/esitiAttivita.ts`: un solo punto); chi registra il turno (la spunta
 // della voce del Diario o il + del contatore, tutte e due passano da `attivitaService.registraTurno`) sceglie l'esito, e se l'esito dice un
-// trofeo questo si segna con lo stesso setter della pagina Trofei (`impostaTrofeo`). Il «prima» sta in `utente.trofeo_esito_turno`
-// (utente 053), una riga per turno:
+// trofeo questo si segna con lo stesso setter della pagina Trofei (`impostaTrofeo`). Il «prima» sta in `utente.trofeo_esito_turno`,
+// una riga per turno:
 //   - `gia` = 1: il trofeo c'era già quando il turno l'ha chiesto (segnato a mano, da una voce o da un altro turno): togliendo il turno resta;
 //   - `gia` = 0: l'ha segnato questo turno (con l'evento dello storico `evento_id`): togliendo il turno il trofeo torna non ottenuto e l'evento
 //     se ne va, a meno che un altro lo rivendichi ancora (un altro turno con un esito che dà lo stesso trofeo, o una voce spuntata con l'effetto
@@ -22,7 +22,7 @@ import { esitiDellAttivita } from './esitiAttivitaService.js';
 
 const TABELLA = 'trofeo_esito_turno';
 
-/** La tabella c'è? (Uno schema di prima della utente 053 non ha trofei dagli esiti: niente da segnare né da togliere.) */
+/** La tabella c'è? (Uno schema vecchio non ha trofei dagli esiti: niente da segnare né da togliere.) */
 const conTabella = (): boolean => haTabellaUtente(getDb(), TABELLA);
 
 interface RigaTrofeoTurno { attivita_chiave: string; ordine: number; trofeo_chiave: string; gia: number; evento_id: number | null }
@@ -56,7 +56,7 @@ export function segnaTrofeoDelTurno(p: number, attivita: string, ordine: number,
 
 /**
  * Togliendo il turno `ordine` dell'attività: il trofeo che aveva segnato torna com'era (l'unica regola dell'annullo, vedi l'intestazione).
- * Va chiamata dentro la transazione del turno. Senza riga (un turno senza trofeo, o di prima della utente 053) non fa niente.
+ * Va chiamata dentro la transazione del turno. Senza riga (un turno senza trofeo) non fa niente.
  */
 export function togliTrofeoDelTurno(p: number, attivita: string, ordine: number): void {
   if (!conTabella()) return;

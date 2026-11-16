@@ -39,7 +39,7 @@ export function DialogoRango({ d, aperto, onToggle, azioni }: { d: DialogoConfid
             <li key={s.ordine} className={`flex flex-wrap items-center gap-2 rounded-md px-2 py-1 ${s.punti !== null && s.punti === max && max > 0 ? 'bg-primary-bg' : ''}`}>
               <span className="text-text-muted w-5">{s.ordine}.</span>
               <span className={s.romantica ? 'text-primary-testo font-semibold' : ''}>{s.testo}</span>
-              {/* migrazione 309: i punti sono numeri; la resa è una sola (`resaPuntiScelta`), col ramo amore dove la guida lo dà */}
+              {/* i punti sono numeri; la resa è una sola (`resaPuntiScelta`), col ramo amore dove la guida lo dà */}
               {resaPuntiScelta(s) && <span className="chip" title="Punti secondo la guida"><TestoNote testo={resaPuntiScelta(s)} /></span>}
               {s.romantica && <span className="chip chip--attivo" title="Scelta che avvia o riguarda la relazione romantica">romantica</span>}
               {s.avviso && <span className="testo-12 text-warning">{s.avviso}</span>}

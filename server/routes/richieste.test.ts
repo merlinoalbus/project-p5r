@@ -33,7 +33,7 @@ describe('API Richieste dei Mementos', () => {
     expect(m.aree).toHaveLength(9);
     expect(m.aree[0].nome).toBe('Dedalo di Qimranut');
     expect(m.aree.flatMap((a) => a.punti).filter((p) => p.tipo === 'persona').length).toBeGreaterThan(100);
-    // nei dedali le voci sono Persona o Trama (le «Sale d'attesa» sono Trama dalla migrazione 100)
+    // nei dedali le voci sono Persona o Trama (le «Sale d'attesa» sono Trama)
     expect(m.aree.some((a) => a.punti.some((p) => p.tipo === 'trama' && p.nome.startsWith("Sala d'attesa")))).toBe(true);
     expect(d.richieste[0].areaChiave).toBe(m.aree[0].chiave);
     expect((await request(app).get('/api/compendio/richieste?partita=99999')).status).toBe(404);
@@ -44,7 +44,7 @@ describe('API Richieste dei Mementos', () => {
     const prima = ((await request(app).get('/api/compendio/richieste')).body.data as RichiesteDto).richieste[0];
     let r = (await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: prima.chiave, stato: 'accettata' })).body.data as RichiestaDto;
     expect(r.stato).toBe('accettata');
-    // O7-1: completarla chiede il Dedalo del bersaglio aperto nella partita (la sua condizione d'apertura, 305): nella partita nuova non lo è
+    // O7-1: completarla chiede il Dedalo del bersaglio aperto nella partita (la sua condizione d'apertura): nella partita nuova non lo è
     const chiuso = await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: prima.chiave, stato: 'completata' });
     expect(chiuso.status).toBe(409);
     expect(chiuso.body.error.code).toBe('dedalo-non-aperto');

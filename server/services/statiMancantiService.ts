@@ -19,15 +19,15 @@
 //   - altrimenti entra nell'elenco della partita: una proposta «da applicare» (`dati.passato`), con le stesse guardie delle altre (una aperta
 //     con la stessa configurazione resta, una tolta dall'utente con «Non applicare» non torna). Si applica solo con «Applica alla
 //     partita» (`motoreDiario.applicaStatoDelPassato`).
-// Il registro (`utente.censimento_stato_voce`, utente 050) tiene l'esito per coppia, ed è una decisione presa una volta sola: una coppia trovata
+// Il registro (`utente.censimento_stato_voce`) tiene l'esito per coppia, ed è una decisione presa una volta sola: una coppia trovata
 // «già vera» (con lo stesso effetto: tipo e chiave) non si rivaluta più, così uno stato che l'utente toglie dopo (una Persona consumata in una
 // fusione, un trofeo tolto a mano) non torna nell'elenco a ogni avvio. Idempotente: un secondo giro non aggiunge niente.
 // Gli effetti con condizioni (`CondizioniEffetto`): con le condizioni false non mancano (non si propongono, non si registrano); diventate vere
 // dopo la spunta (un'impostazione della partita accesa dopo) entrano come gli altri. Gli yen con condizioni senza la ricevuta della spunta
 // seguono la stessa via, con la proposta «Applica» della voce (quella di un effetto Yen aggiunto a una voce già spuntata). Gira anche quando
 // cambiano le impostazioni dei contenuti della partita (`partiteService.aggiornaPartita`).
-// Gira a ogni avvio (dopo le migrazioni e le regole) e dopo l'importazione di un gioco.db: copre anche le migrazioni di gioco che aggiungono
-// effetti a voci già spuntate. Non è un gesto dell'utente: una proposta che si chiude qui non fa avanzare la partita (`senzaAvanzamento`).
+// Gira a ogni avvio (dopo le regole) e dopo l'importazione di un gioco.db: copre anche un file di gioco che porta
+// effetti nuovi su voci già spuntate. Non è un gesto dell'utente: una proposta che si chiude qui non fa avanzare la partita (`senzaAvanzamento`).
 // Nel log solo i conteggi per partita (l'id), mai nomi né email; gli effetti non riconoscibili si contano (`nonRiconosciuti`), non si saltano in silenzio.
 // ============================================================
 

@@ -1,5 +1,5 @@
 // ============================================================
-// descrizioni/aree — le rotte di /api/aree: le Aree del mondo (L2, migrazione 109) e dei Palazzi (L3, migrazione 110)
+// descrizioni/aree — le rotte di /api/aree: le Aree del mondo (L2) e dei Palazzi (L3)
 // ============================================================
 
 import type { DescrizioniArea } from '../tipi.js';
@@ -17,7 +17,7 @@ const IMMAGINE = [[400, 'immagine-vuota'], [400, 'formato-non-ammesso'], [400, '
 export const DESCRIZIONI_AREE: DescrizioniArea = {
   'GET /api/aree/da-collocare': {
     sommario: 'Le planimetrie senza un’Area',
-    descrizione: 'Le planimetrie (`luogo` o `area`) figlie di Tokyo o di un quartiere e, da L3, quelle figlie della radice di un Palazzo (Memento esclusi) che non appartengono a nessuna Area: dopo le migrazioni 109 e 110 nessuna, ma una mappa importata o tolta da un’Area finisce qui, e «Colloca» la assegna. In ordine di genitore e di mappa. Ognuna porta `genitore`, la chiave pubblica del genitore (FUN2-9): per un quartiere è la sua `mappaChiave`.',
+    descrizione: 'Le planimetrie (`luogo` o `area`) figlie di Tokyo o di un quartiere e, da L3, quelle figlie della radice di un Palazzo (Memento esclusi) che non appartengono a nessuna Area: una mappa importata o tolta da un’Area finisce qui, e «Colloca» la assegna. In ordine di genitore e di mappa. Ognuna porta `genitore`, la chiave pubblica del genitore (FUN2-9): per un quartiere è la sua `mappaChiave`.',
     risposta: 'Elenco di `MappaDaCollocareDto`',
   },
   'PUT /api/aree/colloca': {
@@ -64,7 +64,7 @@ export const DESCRIZIONI_AREE: DescrizioniArea = {
     errori: [QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [400, 'nome-vuoto'], [400, 'planimetria-di-altra-area']],
   },
   'PUT /api/aree/:contenitore/:chiave/:slug/sblocco': {
-    sommario: 'La condizione propria di un’Area (migrazione 303)',
+    sommario: 'La condizione propria di un’Area',
     descrizione: 'Corpo `{ condizioni: [...] }` (al più 20, normalizzate): sostituisce la condizione propria dell’Area (`area.condizioni_json`), che vale in AND con quella del quartiere ed è ereditata dai luoghi dell’Area (il Covo dei Ladri dal 5 maggio). Con una partita, un’Area bloccata esce dagli elenchi delle Aree, dai figli della mappa del quartiere, dall’indice delle Mappe e dalla mappa di Tokyo. Un elenco vuoto la toglie e l’Area torna a seguire solo il quartiere. Gli inviti dei Confidenti restano separati e intatti. `sblocco.condizioneSalvata` del dettaglio la riporta.',
     risposta: '`AreaDettaglioDto`',
     errori: [QUARTIERE_NON_TROVATO, DUNGEON_NON_TROVATO, AREA_NON_TROVATA],

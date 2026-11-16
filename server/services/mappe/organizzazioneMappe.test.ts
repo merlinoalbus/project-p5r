@@ -4,10 +4,7 @@
 
 import request from 'supertest';
 import { createApp } from '../../bootstrap.js';
-import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
-import { migrations } from '../../db/migrations/index.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb } from '../../db/dbService.js';
 import { risolviPercorsoMappa } from './contenutiGuidaService.js';
 import { importaMappe, dettaglioMappa, esportaMappe } from './mappeService.js';
 /** `mappaPerEntita` è stata tolta (L11 · B9, la rotta `GET /api/mappe/entita/...` non c'è più): serve solo al test messo da parte con `it.skip`, perché compili. */
@@ -21,20 +18,8 @@ import { chiaveMappa } from './percorsiMappe.js';
 
 describe('organizzazione geografica e contenuti guida',()=>{
  afterEach(()=>closeDb());
- // Le prove «converte senza perdere ID…» e «mantiene consultabili… vecchi collegamenti editoriali» partivano da uno
- // schema precedente alla 42 con i dati del seed: senza il seed (dismesso il 2026-09-12) quel punto di partenza non
- // esiste più, e il pacchetto porta dati già convertiti. Restano le prove sullo stato corrente.
- it('rifiuta conversioni che perderebbero una vera immagine o un arrivo configurato',()=>{
-  const db=initDb(':memory:');runMigrations(db,migrations.filter(m=>m.id<42));caricaPacchetto(db);
-  const aree=db.prepare("SELECT chiave FROM mappa WHERE entita_tipo='area' LIMIT 2").all() as Array<{chiave:string}>;
-  db.prepare('UPDATE mappa SET asset=? WHERE chiave=?').run('pianta-personale',aree[0].chiave);
-  const s=db.prepare("SELECT id FROM spillo WHERE tipo='passaggio' LIMIT 1").get() as {id:number};
-  db.prepare('INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,?,?,?,?)').run(s.id,aree[1].chiave,20,40,2);
-  runMigrations(db);
-  for(const a of aree)expect(db.prepare('SELECT 1 FROM mappa WHERE chiave=?').get(a.chiave)).toBeTruthy();
-  expect(db.prepare('SELECT mappa_chiave FROM spillo_destinazione WHERE spillo_id=?').get(s.id)).toEqual({mappa_chiave:aree[1].chiave});
-  expect(db.pragma('foreign_key_check')).toEqual([]);
- });
+ // Le prove sulle conversioni da uno schema precedente non ci sono più: il pacchetto porta i dati alla versione che il codice legge.
+ // Restano le prove sullo stato corrente.
  it('una nuova installazione conserva le sezioni senza creare false planimetrie',()=>{
   const db=dbDiProva();
   const n=db.prepare('SELECT count(*) n FROM dungeon_area').get();
@@ -60,7 +45,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(db.pragma('foreign_key_check')).toEqual([]);
  });
 
- // Superato dal lotto L11 (B9, migrazione 177): `gruppo_immagini_json`, `mappa_entita` e `mappaPerEntita` non esistono più (l'import ignora il gruppo).
+ // Superato dal lotto L11 (B9): `gruppo_immagini_json`, `mappa_entita` e `mappaPerEntita` non esistono più (l'import ignora il gruppo).
  // Il test resta, da riscrivere.
  it.skip('conserva contesti nominali e gruppi immagini senza scegliere un contesto, e non sceglie la prima associazione multipla',()=>{
   const db=dbDiProva();
@@ -68,7 +53,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   importaMappe({versione:1,mappe:[nodo]});
   expect(dettaglioMappa(nodo.chiave)).toMatchObject({nome:nodo.nome,contesti:nodo.contesti,gruppoImmagini:nodo.gruppoImmagini});
   expect(esportaMappe(nodo.chiave).mappe[0]).toMatchObject({contesti:nodo.contesti,gruppoImmagini:nodo.gruppoImmagini});
-  // L3 (110): un'infiltrazione sta nelle Aree del Palazzo che tocca (`infiltrazione_area`). Con più planimetrie nelle sue Aree non c'è
+  // L3: un'infiltrazione sta nelle Aree del Palazzo che tocca (`infiltrazione_area`). Con più planimetrie nelle sue Aree non c'è
   // una mappa sola da scegliere; l'accesso dal mondo apre ogni Area sulla sua versione (quella da aprire, o la predefinita)
   const a=db.prepare('SELECT ia.infiltrazione_chiave FROM infiltrazione_area ia JOIN mappa m ON m.area_chiave = ia.area_chiave GROUP BY ia.infiltrazione_chiave HAVING COUNT(*) > 1 ORDER BY 1 LIMIT 1').pluck().get() as string;
   expect(mappaPerEntita('area',a)).toBeNull();

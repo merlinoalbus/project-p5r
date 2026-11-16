@@ -5,8 +5,8 @@
 // divergenti dalla whitelist né quando l'erede è ambiguo.
 // ============================================================
 
-import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
+import { closeDb } from '../../db/dbService.js';
+import { dbDiProvaSenzaMappe } from '../../../test/dbDiProva.js';
 import { importaMappe, aggiornaSpillo, rettificaNomiSpilliSeed } from './mappeService.js';
 import { RETTIFICHE_NOMI_SEED } from './rettificheNomiSeed.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
@@ -15,8 +15,8 @@ type Nodo=EsportazioneMappeDto['mappe'][number];
 const nodo=(chiave:string,spilli:Nodo['spilli']=[]):Nodo=>({chiave,nome:chiave,tipo:'generica',genitore:null,ordine:0,immagine:null,asset:null,larghezza:null,altezza:null,entita:null,note:'',spilli});
 /** Pacchetto di prova con gli spilli di `RETTIFICHE_NOMI_SEED` nella forma «prima» (testi errati) o «dopo» (corretti): quelli di Yongen-Jaya sulla mappa della città, gli altri sulla banchina della metropolitana, più una mappa «destinazione» vuota. */
 const pacchetto=(versione:'prima'|'dopo'):EsportazioneMappeDto=>({versione:1,mappe:[nodo('citta-yongen-jaya',RETTIFICHE_NOMI_SEED.filter(r=>r.mappa==='citta-yongen-jaya').map(r=>structuredClone(r[versione]))),nodo('yongen-java-banchina-della-metropolitana',RETTIFICHE_NOMI_SEED.filter(r=>r.mappa!=='citta-yongen-jaya').map(r=>structuredClone(r[versione]))),nodo('destinazione')]});
-/** Apre un database in memoria con tutte le migrazioni e vi importa come seed il pacchetto con i nomi ancora da rettificare. */
-const setup=()=>{const db=initDb(':memory:');runMigrations(db);importaMappe(pacchetto('prima'),{origine:'seed'});return db;};
+/** Apre un database in memoria senza le mappe della guida e vi importa come seed il pacchetto con i nomi ancora da rettificare. */
+const setup=()=>{const db=dbDiProvaSenzaMappe();importaMappe(pacchetto('prima'),{origine:'seed'});return db;};
 describe('rettifiche circoscritte dei nomi base',()=>{
  afterEach(()=>closeDb());
  it('corregge quattro testi e conserva ogni ID, dipendente e posizione dopo due reseed',()=>{

@@ -3,11 +3,11 @@
 // ============================================================
 //
 // Dalla voce 5 del piano «struttura, non frasi» (2026-09-12) che cosa dà una lettura o
-// un'attività lo dicono gli **effetti dichiarati** (`effetti_json`, migrazione 074): i punti Dote
+// un'attività lo dicono gli **effetti dichiarati** (`effetti_json`): i punti Dote
 // di un conseguimento vengono da lì (`dotiDaEffetti`), con le condizioni della voce valutate sulla
 // partita («piove» per lo studio). Le righe nascoste dal catalogo non compaiono; una lettura non
 // disponibile non si può avanzare (409); un libro sa dove si compra (articoli collegati, 073) e
-// un'attività dove si svolge (sede, 072).
+// un'attività dove si svolge (sede).
 // ============================================================
 
 import { randomBytes } from 'node:crypto';
@@ -65,11 +65,10 @@ interface RigaAttivita {
   chiave: string; ordine: number; nome: string; tipo: string; sede_chiave: string | null; fascia: string | null;
   costo: number | null; sessioni: number | null; paga_yen: number | null; paga_massima: number | null; dettagli: string | null;
   effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null;
-  /** L13 (migrazione 233): gli esiti dichiarati; assente su uno schema di prima. */
+  /** L13: gli esiti dichiarati; assente su uno schema senza la colonna. */
   esiti_json?: string | null }
-// L13 (ondata 7, O7-4, migrazione 313): disponibilità, Doti, sblocco e «dove» dei libri, periodo e Doti dei film non si leggono più dalle
-// colonne in prosa: le dicono condizioni, effetti, articoli, posizioni e ricompense. Le colonne vuote del libro e `film.note_successive` sono
-// uscite dallo schema con la 363; `film.dove` è un dato vivo (cinema o DVD).
+// L13 (ondata 7, O7-4): disponibilità, Doti, sblocco e «dove» dei libri, periodo e Doti dei film li dicono condizioni, effetti,
+// articoli, posizioni e ricompense, non colonne in prosa; `film.dove` è un dato vivo (cinema o DVD).
 interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: 'cinema' | 'dvd'; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
@@ -96,7 +95,7 @@ function effettiDto(json: string | null, libro = false): { effetti: VoceEffettoD
 interface RigaPosizioneLibro { libro_chiave: string; tipo: LibroDto['posizioni'][number]['tipo']; chiave: string; etichetta: string }
 interface RigaPosizioneFilm { film_chiave: string; tipo: FilmDto['posizioni'][number]['tipo']; chiave: string; etichetta: string; ruolo: FilmDto['posizioni'][number]['ruolo'] }
 
-/** Gli articoli collegati a libri e videogiochi (migrazione 073): dove si compra ciascuno. */
+/** Gli articoli collegati a libri e videogiochi: dove si compra ciascuno. */
 function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto['negozi']> {
   if (catalogoOggettiDisponibile()) return negoziPerFonte(fonte === 'libri' ? 'libro' : 'videogioco');
   const out = new Map<string, LibroDto['negozi']>();
@@ -134,12 +133,12 @@ function provenienzaDelLibro(chiave: string): string {
   return (posizioniLibri().get(chiave) ?? []).map((p) => p.etichetta).join(', ') || 'Provenienza non indicata';
 }
 
-/** Il «dove» di un'attività nel registro della partita: il nome della sua sede, un luogo (un solo «dove», migrazione 362). */
+/** Il «dove» di un'attività nel registro della partita: il nome della sua sede, un luogo (un solo «dove»). */
 const nomeSedeAttivita = (sede: string | null): string =>
   (sede ? prepared('SELECT nome FROM luogo WHERE chiave = ?').pluck().get(sede) as string | undefined : undefined) ?? 'Sede non indicata';
 
 /** Una riga di `attivita` come DTO: effetti dichiarati con le loro frasi, nome della sede risolto da `sedi`,
- *  tracciamento ricondotto a quello del tipo quando il valore è fuori catalogo, la guida del quiz (105, null se manca o è
+ *  tracciamento ricondotto a quello del tipo quando il valore è fuori catalogo, la guida del quiz (null se manca o è
  *  illeggibile) e la disponibilità valutata se c'è lo stato della partita. */
 const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): AttivitaDto => {
   const oggetto = r.tipo === 'videogioco' ? catalogo.get(r.chiave) : undefined;
@@ -372,7 +371,7 @@ export function filmDvdTutti(partitaId?: number): FilmDvdDto {
   };
 }
 
-/** Un'attività con la guida del quiz (migrazione 105): nome, sede e quiz. */
+/** Un'attività con la guida del quiz: nome, sede e quiz. */
 export interface AttivitaConQuiz { nome: string; sede: string | null; quiz: QuizAttivita }
 
 /** Le attività visibili che hanno una guida del quiz, per chiave: una lettura per richiesta. Le usano la giornata (le voci
@@ -682,7 +681,7 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     const ordine = Math.max(ultimo, prima) + 1;
     scriviVolte(partitaId, chiave, prima + 1, adesso);
     prepared('INSERT INTO turno_partita (partita_id, attivita_chiave, ordine, created_at) VALUES (?, ?, ?, ?)').run(partitaId, chiave, ordine, adesso);
-    // utente 063: il turno registrato dalla spunta di una voce del Diario porta il legame con la voce, con la stessa `created_at` del turno; il +
+    // il turno registrato dalla spunta di una voce del Diario porta il legame con la voce, con la stessa `created_at` del turno; il +
     // del contatore e la pesca non ne hanno (Partita → Progressi non li attribuisce a nessuna voce, `vociDeiProgressi.vociDeiTurni`)
     if (voceUid) prepared('INSERT INTO utente.turno_voce_partita (partita_id, attivita_chiave, ordine, voce_uid, created_at) VALUES (?, ?, ?, ?, ?)').run(partitaId, chiave, ordine, voceUid, adesso);
     // che cosa dà il turno: si registra e si ricorda, le Doti si segnano a mano (`aggiornaDote`)
@@ -824,7 +823,7 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
       togliConsumiDelTurno(partitaId, chiave, bersaglio);
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
-      // utente 063: con il turno se ne va il suo legame con la voce, così un turno rifatto con lo stesso numero non lo eredita
+      // con il turno se ne va il suo legame con la voce, così un turno rifatto con lo stesso numero non lo eredita
       prepared('DELETE FROM utente.turno_voce_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
       // R12-01/7: le Doti non ancora applicate escono dal promemoria; quelle applicate hanno la proposta inversa, come togliendo una spunta
       if (turnoDaRiallineare) riconciliaBeneficiTurno(partitaId, chiave, turnoDaRiallineare);

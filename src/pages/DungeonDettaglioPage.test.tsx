@@ -112,7 +112,7 @@ const areaDellaPrimaLettura = async (_contenitore: unknown, slug: string): Promi
   const prima = getDungeon.mock.results[0]?.value as Promise<DungeonDettaglioDto> | DungeonDettaglioDto | undefined;
   return dettaglioDi(prima ? await prima : palazzo(true), slug);
 };
-/** Un'area di un dedalo di prova (099) con i campi di `extra` che sovrascrivono i predefiniti: vuota, completata. */
+/** Un'area di un dedalo di prova con i campi di `extra` che sovrascrivono i predefiniti: vuota, completata. */
 const areaDedalo = (extra: Partial<AreaDedaloDto>): AreaDedaloDto => ({ chiave: 'a', ordine: 0, nome: 'Area 1', descrizione: '', richieste: [], elementi: { totale: 0, fatti: 0 }, completata: true, ...extra });
 /** Il Memento di prova: due Dedali. Aiyatsbus ha un'area con una Trama, una Persona (fuori dal conto) e una richiesta aperta, e il dedalo i
  *  timbri (1 su 8, L10-02): 1 elemento fatto su 10; Qimranut un'area vuota, quindi completata, e il dedalo con lei (senza timbri). Nessuna
@@ -145,7 +145,7 @@ const apriMenuModifica = () => {
 // reset, non clear: le risposte «una volta» non consumate da un test non devono passare al successivo
 beforeEach(() => { vi.resetAllMocks(); media.larghezza = 0; getAlberoMappe.mockResolvedValue([]); getArea.mockImplementation(areaDellaPrimaLettura); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
 
-it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095)', async () => {
+it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi)', async () => {
   // la rilettura dopo il raccolto: lo spillo 2 raccolto, 2 su 4 (come lo direbbe il server)
   const dopo = palazzo(true);
   dopo.planimetrie[0] = { ...dopo.planimetrie[0], presi: 2, spilli: [spillo(1, true), spillo(2, true)] };

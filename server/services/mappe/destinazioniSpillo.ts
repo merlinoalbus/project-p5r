@@ -72,7 +72,7 @@ export function risolviSpilloArrivo(mappa: string, cerca: { nome: string | null;
   return vicini[0]?.id ?? null;
 }
 
-/** La colonna arriva con la migrazione 065: il seed può caricarsi con lo schema ancora indietro (nei test le migrazioni si applicano a scaglioni). */
+/** La colonna può mancare su uno schema vecchio. */
 function haColonnaArrivo(): boolean {
   return haColonnaMain(getDb(), 'spillo_destinazione', 'spillo_arrivo_id');
 }
@@ -124,7 +124,7 @@ export function salvaDestinazioneSpillo(id: number, value: DestinazioneDaSalvare
   const mappa = value?.mappa ? idMappa(value.mappa) : null;
   const spillo = value ? (value.spillo ?? (value.cerca && mappa ? risolviSpilloArrivo(mappa, value.cerca) : null)) : null;
   if (!haColonnaArrivo()) {
-    // schema ancora alla 064: si conserva il punto descritto, che la 065 convertirà nello spillo più vicino
+    // schema senza la colonna: si conserva il punto descritto
     prepared(`INSERT INTO spillo_destinazione (spillo_id, mappa_chiave, x, y, zoom) VALUES(?,?,?,?,?) ON CONFLICT(spillo_id) DO UPDATE SET
       mappa_chiave=excluded.mappa_chiave, x=excluded.x, y=excluded.y, zoom=excluded.zoom`).run(id, mappa, value?.cerca?.x ?? 0, value?.cerca?.y ?? 0, 1);
     return;

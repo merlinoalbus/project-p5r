@@ -46,7 +46,7 @@ const NOME_FASE: Record<string, string> = {
   verifica: 'Il server sta verificando il backup',
   'copia-di-sicurezza': 'Il server sta salvando la copia di sicurezza',
   sostituzione: 'Il server sta sostituendo i dati di gioco',
-  riapertura: 'Il server sta riaprendo il database e applicando le migrazioni',
+  riapertura: 'Il server sta riaprendo il database e applicando le regole sui dati',
   controllo: 'Il server sta controllando i riferimenti delle partite',
 };
 
@@ -104,7 +104,6 @@ function ElencoScarti({ scarti, quando, copia }: { scarti: ScartoPacchettoDto[];
 
 /** Che cosa cambierebbe importando: versioni, tabelle, immagini, orfani. */
 function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }) {
-  const daApplicare = a.versioneSchema < a.versioneSchemaCodice ? a.versioneSchemaCodice - a.versioneSchema : 0;
   return (
     <div className="flex flex-col gap-3 testo-13">
       <p className="m-0 testo-14">
@@ -113,7 +112,7 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
       </p>
       {!a.importabile && <p className="m-0 text-error-testo" role="alert">{a.motivo}</p>}
       <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2">
-        <li><strong>Schema</strong> <span className="text-text-muted">backup {a.versioneSchema} · istanza {a.versioneSchemaIstanza} · app {a.versioneSchemaCodice}{daApplicare ? ` (${daApplicare} ${daApplicare === 1 ? 'migrazione da applicare' : 'migrazioni da applicare'})` : ''}</span></li>
+        <li><strong>Versione dei dati</strong> <span className="text-text-muted">backup {a.versioneSchema} · istanza {a.versioneSchemaIstanza} · app {a.versioneSchemaCodice}</span></li>
         <li><strong>Database</strong> <span className="text-text-muted">{byteTesto(a.databaseByte)}</span></li>
         <li><strong>Immagini</strong> <span className="text-text-muted">{numero(a.immagini.pacchetto)} nel backup · {numero(a.immagini.istanza)} nell'istanza ora</span></li>
       </ul>
@@ -133,7 +132,7 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
             </table>
           </div>
         )}
-        {a.tabelleAssenti.length > 0 && <p className="m-0 text-text-muted">Non nel backup (le migrazioni le ricreano vuote): {a.tabelleAssenti.join(', ')}.</p>}
+        {a.tabelleAssenti.length > 0 && <p className="m-0 text-text-muted">Tabelle dell'istanza assenti nel backup: {a.tabelleAssenti.join(', ')}.</p>}
       </div>
       {a.scarti !== undefined && <div className="flex flex-col gap-1">
         <h3 className="m-0 testo-14">Cosa questa versione non usa più</h3>
@@ -282,7 +281,7 @@ export function PacchettoGioco() {
       stato.imposta(e.stato);
       // i dati di gioco sono cambiati sotto i piedi dell'app: le partite si rileggono subito, il resto alla ricarica
       await usePartitaStore.getState().carica();
-      notifica('success', `Dati di gioco sostituiti (schema ${e.versioneSchema}${e.migrazioniApplicate ? `, ${e.migrazioniApplicate} migrazioni applicate` : ''}). Copia di sicurezza: ${e.copiaDiSicurezza}.`);
+      notifica('success', `Dati di gioco sostituiti (versione ${e.versioneSchema}). Copia di sicurezza: ${e.copiaDiSicurezza}.`);
     };
     try {
       await concludi(await importaPacchettoDaDeposito(origine.nome));
@@ -383,7 +382,7 @@ export function PacchettoGioco() {
         {esito && (
           <div className="flex flex-col gap-3 testo-13">
             <p className="m-0 testo-14">
-              I dati di gioco sono stati sostituiti: schema {esito.versioneSchema}{esito.migrazioniApplicate ? ` (${esito.migrazioniApplicate} ${esito.migrazioniApplicate === 1 ? 'migrazione applicata' : 'migrazioni applicate'} dal ${esito.versioneSchemaPacchetto})` : ''}, {numero(esito.immagini)} immagini.
+              I dati di gioco sono stati sostituiti: versione {esito.versioneSchema}, {numero(esito.immagini)} immagini.
               Copia di sicurezza: <code>{esito.copiaDiSicurezza}</code>. Le partite sono {numero(esito.stato.partite)}, intatte.
             </p>
             <ElencoOrfani orfani={esito.orfani} quando="dopo" />

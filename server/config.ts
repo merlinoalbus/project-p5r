@@ -53,12 +53,8 @@ export const config = {
   dbFileName: 'gioco.db',
   /** Nome del file SQLite delle partite (schema «utente», attaccato alla stessa connessione). */
   partiteFileName: 'partite.db',
-  /** Il vecchio file unico: al primo avvio viene rinominato in `dbFileName` e la migrazione 066 sposta le partite. */
-  dbFileNameLegacy: 'project-p5r.db',
-  /** Cartella del pacchetto di gioco spedito con il repository (`gioco.db`, con le immagini dentro dalla 079). */
+  /** Cartella del pacchetto spedito con il repository: `gioco.db` (i dati di gioco di un'istanza nuova) e `partite-vuoto.db` (il modello del file delle partite). */
   pacchettoDir: path.resolve(process.env.PACCHETTO_DIR || './pacchetto'),
-  /** Gli asset grafici del repository (`public/asset`): compendio e interfaccia; la migrazione 079 ne assorbe le famiglie di gioco. */
-  assetDir: path.resolve(process.env.ASSET_DIR || './public/asset'),
   /** Cartella d'appoggio da cui importare i pacchetti (il NAS montato in `/deposito`); vuota = nessun deposito. */
   depositoDir: process.env.DEPOSITO_DIR ? path.resolve(process.env.DEPOSITO_DIR) : '',
 

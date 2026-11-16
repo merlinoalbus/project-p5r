@@ -3,7 +3,7 @@
 // ============================================================
 //
 // La rotta del file di un'immagine con `l` (una delle `LARGHEZZE_MINIATURA`) passa da qui: la miniatura si genera la prima volta
-// che serve, con sharp (libvips), e si tiene in `immagine_miniatura` (migrazione 108) legata alla versione della sorgente
+// che serve, con sharp (libvips), e si tiene in `immagine_miniatura` legata alla versione della sorgente
 // (`immagine.created_at`). Le regole:
 //   - formato WebP, qualità 80, `effort` 4, alfa conservato, metadati tolti, proporzioni mantenute e mai ingrandita;
 //   - **ritaglio sul disegno** (UX2-13): un'immagine con alfa e margini trasparenti (le planimetrie su tele native da 2048) si
@@ -87,7 +87,7 @@ function originale(s: SorgenteMiniatura, l: LarghezzaMiniatura): RispostaMiniatu
   return { contenuto: s.contenuto, mime: s.mime, etag: etagMiniatura(s, l), esito: 'originale' };
 }
 
-/** Vero se la tabella delle miniature c'è (dalla 108; i test su uno schema di prima non l'hanno). */
+/** Vero se la tabella delle miniature c'è (uno schema vecchio non l'ha). */
 function conMiniature(db: AppDatabase): boolean {
   return haTabellaMain(db, 'immagine_miniatura');
 }

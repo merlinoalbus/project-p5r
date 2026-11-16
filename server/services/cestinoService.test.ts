@@ -1,6 +1,6 @@
 // ============================================================
 // Test cestinoService — registrare un'eliminazione (trigger temporanei, cascate, BLOB, due file) e rimetterla com'era, con
-// quel che è successo dopo che vince (migrazioni 104 e utente 021, 2026-10-16)
+// quel che è successo dopo che vince (2026-10-16)
 // ============================================================
 
 import { closeDb, getDb } from '../db/dbService.js';

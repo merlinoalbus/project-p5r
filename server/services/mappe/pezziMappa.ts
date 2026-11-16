@@ -1,13 +1,13 @@
 // ============================================================
-// pezziMappa — i pezzi delle planimetrie: zone dell'immagine scelte dall'utente, cancellate e posate altrove con condizioni (102),
-// in una o più copie (103)
+// pezziMappa — i pezzi delle planimetrie: zone dell'immagine scelte dall'utente, cancellate e posate altrove con condizioni,
+// in una o più copie
 // ============================================================
 //
 // Richiesta dell'utente (2026-10-14): selezionare col mouse i pezzi che nelle planimetrie del gioco sono disegnati a parte (parti
 // mobili, come i muri in fondo al Museo 2P di Madarame), toglierli dalla vista ordinaria e posarli nel punto giusto della mappa,
 // della stessa dimensione, con le condizioni dei pin che decidono quando si vedono. «devo poter selezionare io aree da gestire
 // come pezzi»: le zone le sceglie l'utente nell'editor, qui non si riconosce niente da sé.
-// Dal 2026-10-15 (103): «vorrei poter usare un pezzo una volta recuperato e definito per inserirlo più volte nella mappa». Il pezzo
+// Dal 2026-10-15: «vorrei poter usare un pezzo una volta recuperato e definito per inserirlo più volte nella mappa». Il pezzo
 // è il **ritaglio** (`pezzo_mappa`: zona e nome, la zona sempre cancellata); le **copie** (`copia_pezzo`) sono le sue pose, ognuna
 // con posizione, rotazione, specchio, etichetta e condizioni proprie. Scelte dell'utente: condizioni per copia; eliminata
 // l'ultima copia se ne va il ritaglio (la zona torna visibile); nome del ritaglio più etichetta facoltativa della copia.
@@ -25,13 +25,13 @@ import { valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilita
 import type { CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, PezzoMappaDto, PezzoPacchetto, RotazionePezzo } from '../../../shared/types.js';
 import { ingombroPezzo } from '../../../shared/pezziMappa.js';
 
-/** Il ritaglio (102, senza la posa dalla 103). */
+/** Il ritaglio (senza la posa, che è della copia). */
 export interface RigaPezzo {
   id: number; uid: string; mappa_chiave: string; nome: string;
   sorgente_x: number; sorgente_y: number; larghezza: number; altezza: number; ordine: number; updated_at: string;
 }
 
-/** Una copia posata di un ritaglio (103). */
+/** Una copia posata di un ritaglio. */
 export interface RigaCopia {
   id: number; uid: string; pezzo_id: number; etichetta: string; x: number; y: number;
   rotazione: RotazionePezzo; specchio_orizzontale: number; specchio_verticale: number;
@@ -55,26 +55,26 @@ const copiaPacchetto = z.object({
   uid: z.string().max(64).optional(), etichetta: z.string().max(LIMITI_GUIDA.spillo.nome).optional(), posizione: schemaPosizionePezzo,
   rotazione: schemaRotazionePezzo, specchio: schemaSpecchioPezzo, condizioni: condizioniPacchetto, ordine: ordinePacchetto,
 });
-/** Il pezzo della 103: il ritaglio con le sue copie (almeno una). */
+/** Il pezzo: il ritaglio con le sue copie (almeno una). */
 const pezzoPacchetto = z.object({
   uid: z.string().max(64).optional(), nome: z.string().max(LIMITI_GUIDA.spillo.nome), sorgente: schemaSorgentePezzo, ordine: ordinePacchetto,
   copie: z.array(copiaPacchetto).min(1).max(MASSIMO_COPIE),
 });
-/** Il pezzo della 102 (la posa accanto alla zona): si legge come un ritaglio con una copia, senza uid (l'uid era del pezzo). */
+/** Il pezzo nella forma vecchia (la posa accanto alla zona): si legge come un ritaglio con una copia, senza uid (l'uid era del pezzo). */
 const pezzoPacchetto102 = z.object({
   uid: z.string().max(64).optional(), nome: z.string().max(LIMITI_GUIDA.spillo.nome), sorgente: schemaSorgentePezzo, posizione: schemaPosizionePezzo,
   rotazione: schemaRotazionePezzo, specchio: schemaSpecchioPezzo, condizioni: condizioniPacchetto, ordine: ordinePacchetto,
 }).transform((p) => ({ uid: p.uid, nome: p.nome, sorgente: p.sorgente, ordine: p.ordine, copie: [{ posizione: p.posizione, rotazione: p.rotazione, specchio: p.specchio, condizioni: p.condizioni, ordine: 0 }] }));
-/** I pezzi di una mappa in un pacchetto delle mappe: la forma (della 103, o della 102); le condizioni si ripuliscono all'importazione
- *  come quelle dei pin. Un oggetto con `copie` è della 103; senza, con la posa accanto alla zona, della 102. */
+/** I pezzi di una mappa in un pacchetto delle mappe: la forma (di oggi, o quella vecchia); le condizioni si ripuliscono all'importazione
+ *  come quelle dei pin. Un oggetto con `copie` è nella forma di oggi; senza, con la posa accanto alla zona, in quella vecchia. */
 export const schemaPezziPacchetto = z.array(z.union([pezzoPacchetto, pezzoPacchetto102])).max(500);
-/** Un pezzo del pacchetto già letto (forma della 103), con le condizioni ripulite da chi chiama. */
+/** Un pezzo del pacchetto già letto (forma di oggi), con le condizioni ripulite da chi chiama. */
 export type PezzoDaImportare = Omit<z.infer<typeof pezzoPacchetto>, 'copie'> & { copie: Array<Omit<z.infer<typeof copiaPacchetto>, 'condizioni'> & { condizioni?: RequisitoSpillo[] }> };
 
 /** Le dimensioni dell'immagine della mappa, in pixel. */
 export interface DimensioniMappa { larghezza: number; altezza: number }
 
-/** Le tabelle ci sono dalla 102 e dalla 103: nei test e nei file di prima possono mancare (con la sola 102 i pezzi non si leggono). */
+/** Le due tabelle (pezzi e copie) possono mancare nei file vecchi: senza entrambe i pezzi non si leggono. */
 export function conPezzi(): boolean {
   return haTabellaMain(getDb(), 'copia_pezzo');
 }
@@ -194,7 +194,7 @@ export function eliminaPezziDellaMappa(mappa: string): void {
 }
 
 /**
- * I pezzi (102) sono ritagli in pixel dell'immagine che la mappa mostra: un'altra immagine (sostituita, o tolta e rimpiazzata
+ * I pezzi sono ritagli in pixel dell'immagine che la mappa mostra: un'altra immagine (sostituita, o tolta e rimpiazzata
  * dall'asset o da nessuna) li ritaglierebbe da zone sbagliate. Scelta dell'utente del 2026-10-14 («Chiedere conferma ed
  * eliminarli»), dal lotto L1 la stessa per ogni strada che cambia l'immagine mostrata (editor, rotta generica, da URL, scarico
  * della pianta, rimozioni): senza `conferma` 409 `mappa-con-pezzi` con i conteggi; con la conferma la funzione restituita toglie

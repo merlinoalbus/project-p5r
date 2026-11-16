@@ -47,7 +47,7 @@ const COLORE_TROFEO: Record<TrofeoDto['tipo'], string> = {
   bronzo: '#c07a44', argento: '#c9ced8', oro: '#f5c542', platino: '#9fe8ff',
 };
 
-/** L13 (O7-4, migrazione 313): «Quando si ottiene» si scrive con l'editor unico delle condizioni (il campo porta il JSON; la frase «Quando»
+/** L13 (O7-4): «Quando si ottiene» si scrive con l'editor unico delle condizioni (il campo porta il JSON; la frase «Quando»
  *  della scheda la genera il server dalle condizioni). Nel rilascio (sola lettura) non c'è: la costante di build toglie l'editor dal bundle. */
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 const CAMPI_TROFEO: Record<string, EditorCampoSpeciale> | undefined = IN_RILASCIO ? undefined : {
@@ -199,7 +199,7 @@ export function CompletamentoPage() {
                   </div>
                   {f.descrizione && <p className="m-0 text-text-secondary">{f.descrizione}</p>}
                   {f.condizioni.length > 0 && <ul className="m-0 pl-4">{f.condizioni.map((c) => <li key={c}>{c}</li>)}</ul>}
-                  {/* L8-03 (migrazione 340): con una partita, i requisiti che l'app sa leggere e i giorni che restano alla scadenza */}
+                  {/* L8-03: con una partita, i requisiti che l'app sa leggere e i giorni che restano alla scadenza */}
                   {esitiFinali.has(f.chiave) && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-1.5">
                     <CondizioniGuida titolo="Nella partita" condizioni={f.requisiti ?? []} esito={esitiFinali.get(f.chiave)} />
                     <ScadenzaNellaPartita entro={f.entro} giorni={f.giorniAllEntro} />

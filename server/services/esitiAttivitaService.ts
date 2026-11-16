@@ -69,14 +69,14 @@ export function lavoroAScelta(chiave: string): { nome: string; paga: { base: num
 
 /** Gli esiti dichiarati da un'attività (null se non ne dichiara o se la colonna non c'è ancora) e il suo nome. */
 export function esitiDellAttivita(chiave: string): { nome: string; esiti: EsitiAttivita | null } | null {
-  // `SELECT *`: su uno schema di prima della 233 la colonna non c'è e l'attività vale «senza esiti»
+  // `SELECT *`: su uno schema vecchio la colonna non c'è e l'attività vale «senza esiti»
   const r = prepared('SELECT * FROM attivita WHERE chiave = ?').get(chiave) as { nome: string; esiti_json?: string | null } | undefined;
   return r ? { nome: r.nome, esiti: leggiEsitiAttivita(r.esiti_json) } : null;
 }
 
 interface ArticoloEsito { chiave: string; nome: string; prezzo: number | null; prezzoPerFascia: PrezzoPerFascia | null; condizioni: RequisitoSpillo[] }
 /** L'articolo che fa tentare l'esito: il nome è quello del catalogo (la colonna `nome` dell'articolo può essere vuota), prezzo (con quello
- *  per fascia, Ondata 5 lotto E) e condizioni: lo sblocco del negozio (L6-09, migrazione 386: la data d'apertura di un negozio sta lì, non
+ *  per fascia, Ondata 5 lotto E) e condizioni: lo sblocco del negozio (L6-09: la data d'apertura di un negozio sta lì, non
  *  ripetuta sulle sue offerte) e poi quelle del listino. */
 function articoloEsito(chiave: string): ArticoloEsito | null {
   const perFascia = sqlPrezzoPerFascia('a');

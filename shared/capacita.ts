@@ -40,8 +40,6 @@ export interface Capacita {
   deposito: boolean;
   /** La documentazione interattiva delle API (`/api/docs`, `/api/openapi.json`). */
   documentazioneApi: boolean;
-  /** Le migrazioni dei dati all'avvio: in rilascio i contenuti sono chiusi e il runner non esiste. */
-  migrazioni: boolean;
   /** Le partite appartengono a un utente riconosciuto (Cloudflare Access) e ognuno vede solo le sue; in preparazione c'è il proprietario unico. */
   partitePerUtente: boolean;
   /** Il tracciamento dell'avanzamento (partite, giorni, Persona, Confidenti, doti, acquisti): c'è in entrambe le istanze. */
@@ -60,7 +58,6 @@ export const CAPACITA_PER_MODALITA: Readonly<Record<Modalita, Readonly<Capacita>
     importaEsporta: true,
     deposito: true,
     documentazioneApi: true,
-    migrazioni: true,
     partitePerUtente: false,
     tracciamentoPartita: true,
   },
@@ -71,7 +68,6 @@ export const CAPACITA_PER_MODALITA: Readonly<Record<Modalita, Readonly<Capacita>
     importaEsporta: false,
     deposito: false,
     documentazioneApi: false,
-    migrazioni: false,
     partitePerUtente: true,
     tracciamentoPartita: true,
   },

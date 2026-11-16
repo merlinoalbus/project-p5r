@@ -1,11 +1,12 @@
 # Asset grafici predefiniti
 
-**Dal 12 settembre 2026 (migrazione 079) qui restano solo il compendio (`persona/`, `arcani/`, `skill/`) e l'interfaccia (`ui/`).**
+**Qui restano solo il compendio (`persona/`, `arcani/`, `skill/`) e l'interfaccia (`ui/`).**
 Tutte le altre famiglie (mappe, spilli, confidenti, personaggi, sfondi, identita, illustrazioni, persona-gruppo, palazzi, doti,
-elementi, affinita, meteo, attivita, decori, guida) vivono dentro il database di gioco (`pacchetto/gioco.db`, tabella `immagine`,
+elementi, affinita, meteo, attivita, decori, guida) vivono dentro il database di gioco (`gioco.db`, tabella `immagine`,
 famiglia = ambito, chiave = percorso relativo senza estensione) e si servono da `/api/immagini/<famiglia>/<chiave>/file`; il
 frontend le vede nello stesso manifest (`assetStore` unisce `/asset/manifest.json` e `/api/immagini/manifest`). Per aggiungere o
-sostituire una di quelle immagini si carica dall'app (PUT `/api/immagini/<famiglia>/<chiave>`) e si rigenera il pacchetto.
+sostituire una di quelle immagini si carica dall'app (PUT `/api/immagini/<famiglia>/<chiave>`). Il pacchetto `pacchetto/gioco.db`
+non porta il contenuto delle immagini.
 
 Copiare qui i file generati seguendo `docs/grafica/prompt-immagini.md`, nelle sottocartelle e con i nomi indicati
 (`arcani/fool.png`, `arcani/icona/fool.png`, `confidenti/ryuji-fedele.png` (ritratto fedele, mostrato di default) e `confidenti/ryuji.png` (versione stilizzata, al passaggio del mouse), `persona/jack-frost.png`, `elementi/fire.png`,

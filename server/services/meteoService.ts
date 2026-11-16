@@ -38,7 +38,7 @@ function scelto(partitaId: number, data: string): { giorno: MeteoPartita | null;
 
 type Allerte = MeteoFasciaDto['allerte'];
 
-/** Le allerte del giorno per fascia (migrazione 091), in ordine di nome. */
+/** Le allerte del giorno per fascia, in ordine di nome. */
 function allerte(data: string): { giorno: Allerte; sera: Allerte } {
   const righe = prepared('SELECT fascia, chiave, nome, effetti_json FROM allerta_meteo WHERE data = ? ORDER BY nome').all(data) as Array<{ fascia: FasciaGioco; chiave: string; nome: string; effetti_json: string }>;
   /** Le allerte di una fascia, con gli effetti letti dal JSON. */

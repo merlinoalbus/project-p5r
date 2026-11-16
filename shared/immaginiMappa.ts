@@ -2,10 +2,9 @@
 // L'immagine di una mappa: una regola sola (L1 del piano di razionalizzazione, 2026-10-20)
 // ============================================================
 //
-// Prima il ruolo dell'immagine si scriveva in sei posti con cinque regole diverse (migrazioni 043, 044 e 106, sincronizzazione,
-// importazione, caricamento), e la stessa mappa poteva ricevere ruoli diversi secondo la strada da cui era arrivata. Il piano
-// vuole che il ruolo **si deduca dal posto nella gerarchia**: questa è quella deduzione, in SQL perché la usano il server (dopo
-// ogni scrittura che tocca mappe o immagini, `allineaRuoliImmagine`) e la migrazione 107 che la applica una volta a tutto.
+// Il ruolo dell'immagine **si deduce dal posto nella gerarchia**, con una regola sola qualunque sia la strada da cui la mappa
+// arriva (sincronizzazione, importazione, caricamento): questa è quella deduzione, in SQL perché la usa il server dopo
+// ogni scrittura che tocca mappe o immagini (`allineaRuoliImmagine`).
 //
 //   - la radice di un Palazzo o dei Memento ha lo **stemma**: identifica il posto, non è una pianta su cui aprire il visore;
 //   - senza un'immagine (caricata nell'istanza o asset predefinito che esiste davvero) la mappa non ne ha: «nessuna»;

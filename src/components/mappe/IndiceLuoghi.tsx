@@ -266,7 +266,7 @@ function Scheda({ g, sezione, ramo, tokyo, memento, daCollocare, vai, onRicarica
   if (sezione === 'memento') {
     return <div className="flex flex-col gap-4">
       <Gruppo titolo={inizio.nome} voci={[{ nodo: inizio }]} />
-      {/* L7-06: le strutture fisse dei Memento non ci sono più (migrazione 322): sotto i Memento stanno solo i dedali */}
+      {/* L7-06: le strutture fisse dei Memento non ci sono: sotto i Memento stanno solo i dedali */}
       <Gruppo titolo="Dedali" voci={inizio.figli.map((f) => scendiDa([], f))} />
     </div>;
   }

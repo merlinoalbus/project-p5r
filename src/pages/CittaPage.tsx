@@ -61,7 +61,7 @@ export function CittaPage() {
   // Col giorno della partita, perché da quello dipende dove si atterra toccando un Palazzo (`atterraggio`, 2026-10-04).
   const dungeon = useCarica(async () => radiciMetaverso(await getDungeons(attiva?.id)), [attiva?.id]);
   useRileggiAlCambio(dungeon.ricarica, attiva);
-  // il Covo dei Ladri sulla mappa solo quando la sua Area è nel mondo (dal 5 maggio, dai dati: migrazione 303)
+  // il Covo dei Ladri sulla mappa solo quando la sua Area è nel mondo (dal 5 maggio, dai dati)
   const covo = useCovoNellaPartita(attiva?.id, attiva);
   const q = dati.dati;
   return (

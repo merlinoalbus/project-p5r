@@ -2,7 +2,7 @@
 // CicliFusione — vista «Cicli di fusione»: bersaglio, opzioni, cicli trovati (anelli con partner e costo) e salvataggio (Fase 5.5)
 // ============================================================
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Selettore } from '../shared/Selettore';
 import { Link } from 'react-router-dom';
 import { getCicliFusione, salvaCiclo } from '../../services/api';
@@ -84,6 +84,7 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
   const [catture, setCatture] = useState(false);
   const [limitaLivello, setLimitaLivello] = useState(false);
   const [salvati, setSalvati] = useState<Record<string, true>>({});
+  const inCorso = useRef(new Set<string>());
   // della Persona scelta la lettura usa solo l'id
   const idScelta = scelta?.id;
   const { dati, caricamento, errore } = useCarica(
@@ -98,7 +99,10 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
    */
   const salva = async (c: CicloFusioneDto, i: number) => {
     if (!partitaId || !scelta) return;
-    const chiave = `${scelta.id}|${i}|${lunghezzaMin}-${lunghezza}|${partnerDistinti}|${alternative}|${catture}|${limitaLivello}`;
+    const chiave = `${partitaId}|${scelta.id}|${i}|${lunghezzaMin}-${lunghezza}|${partnerDistinti}|${alternative}|${catture}|${limitaLivello}`;
+    // un secondo tocco mentre la richiesta è in viaggio non spedisce un secondo salvataggio
+    if (inCorso.current.has(chiave)) return;
+    inCorso.current.add(chiave);
     try {
       await salvaCiclo(partitaId, { personaId: scelta.id, anelli: c.anelli.map((a) => ({ ingredienteId: a.ingrediente.id, partnerId: a.partner.id, risultatoId: a.risultato.id })), nome: `Ciclo ${i + 1} per ${scelta.nomeIt}` });
       setSalvati((m) => ({ ...m, [chiave]: true }));
@@ -106,6 +110,8 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
       onSalvato?.();
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Salvataggio fallito.');
+    } finally {
+      inCorso.current.delete(chiave);
     }
   };
 
@@ -146,7 +152,7 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
               </p>
               <div className="flex flex-col gap-3">
                 {dati.cicli.map((c, i) => {
-                  const chiave = `${scelta.id}|${i}|${lunghezzaMin}-${lunghezza}|${partnerDistinti}|${alternative}|${catture}|${limitaLivello}`;
+                  const chiave = `${partitaId}|${scelta.id}|${i}|${lunghezzaMin}-${lunghezza}|${partnerDistinti}|${alternative}|${catture}|${limitaLivello}`;
                   return <SchedaCiclo key={i} ciclo={c} indice={i} onSalva={partitaId ? () => void salva(c, i) : undefined} salvato={salvati[chiave] === true} />;
                 })}
               </div>

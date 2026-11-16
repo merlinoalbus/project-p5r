@@ -3,17 +3,17 @@
 // ============================================================
 //
 // Il pacchetto di gioco è UN SOLO FILE: `gioco.db`, i dati di gioco dell'istanza con dentro anche le
-// immagini (decisione dell'utente del 2026-09-12, migrazione 079). Le partite (`partite.db`) non ne
-// fanno parte e l'importazione non le tocca: è la ragione dei due file. Lo stesso file, copiato in
-// `pacchetto/gioco.db`, è ciò che ogni nuova installazione riceve al primo avvio.
+// immagini. Le partite (`partite.db`) non ne fanno parte e l'importazione non le tocca: è la ragione
+// dei due file. Lo stesso file, senza il contenuto delle immagini, è `pacchetto/gioco.db`: ciò che
+// ogni nuova installazione riceve al primo avvio.
 //
 // L'importazione passa sempre dall'anteprima, che legge il file senza sostituire nulla: versione
-// dello schema (un pacchetto più nuovo del codice non si importa, perché il codice non saprebbe
-// leggerlo; uno più vecchio sì, le migrazioni lo portano avanti), conteggi per tabella a confronto
+// (si importa solo un file alla versione che il codice legge, `VERSIONE_GIOCO`: un backup di
+// un'altra versione dell'app non si converte), conteggi per tabella a confronto
 // con l'istanza, immagini, e i riferimenti delle partite che non troverebbero più la loro riga
 // (orfani). Poi, alla conferma: copia di sicurezza, chiusura della connessione, sostituzione di
-// gioco.db, riapertura con migrazioni e regole dell'avvio, orfani ricalcolati sui dati nuovi. Se
-// qualcosa fallisce a connessione chiusa, si torna alla copia di sicurezza.
+// gioco.db, riapertura con la verifica delle versioni e le regole dell'avvio, orfani ricalcolati sui
+// dati nuovi. Se qualcosa fallisce a connessione chiusa, si torna alla copia di sicurezza.
 //
 // **Il pacchetto non passa dal browser.** Un'istanza pubblicata sta dietro un proxy (nginx, un tunnel) che
 // rifiuta i corpi grandi: 311 MB non attraversano quella strada. Il file si mette nella cartella d'appoggio
@@ -32,7 +32,7 @@ import { haColonna, haTabella } from '../db/colonne.js';
 import { colonnaTolta, tabellaTolta } from '../db/fontiTolte.js';
 import { etichettaTabella } from './cestinoService.js';
 import { avvisiImportazioneTanaka, statoTanakaDi } from './tanakaStatoListino.js';
-import { migrations } from '../db/migrations/index.js';
+import { VERSIONE_GIOCO, messaggioVersioneDiversa } from '../db/versioneSchema.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriDopoSostituzione, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, ScartoPacchettoDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
@@ -43,9 +43,9 @@ import { verificaCollegamentiPescaImportati } from './vincoliAttivitaPesca.js';
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
 
-/** La versione dello schema dei dati di gioco che il codice sa leggere: l'ultima migrazione. */
+/** La versione dei dati di gioco che il codice legge (`VERSIONE_GIOCO`). */
 export function versioneSchemaCodice(): number {
-  return migrations.reduce((max, m) => Math.max(max, m.id), 0);
+  return VERSIONE_GIOCO;
 }
 
 /**
@@ -72,7 +72,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   {tabella:'pesca_provenienza',colonna:'effetto_uid',entita:'effetto della fonte di pesca',tabellaGioco:'voce_effetto',colonnaGioco:'uid'},
   { tabella: 'acquisto_partita', colonna: 'articolo_chiave', entita: 'articolo', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
   { tabella: 'acquisto_registrato', colonna: 'articolo_chiave', entita: 'articolo della consumazione (fotografia conservata)', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
-  // Ondata 5 (utente 051): il registro degli acquisti con giorno e pezzi; le righe di una voce citano la voce e il suo effetto
+  // il registro degli acquisti con giorno e pezzi; le righe di una voce citano la voce e il suo effetto
   { tabella: 'registro_acquisti', colonna: 'articolo_chiave', entita: 'articolo del registro degli acquisti', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
   { tabella: 'registro_acquisti', colonna: 'voce_uid', entita: 'voce del registro degli acquisti', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'registro_acquisti', colonna: 'effetto_uid', entita: 'effetto del registro degli acquisti', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid' },
@@ -94,7 +94,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'effetto_lettura_partita', colonna: 'chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave', filtro: "tipo = 'attivita'" },
   { tabella: 'effetto_lettura_partita', colonna: 'dote_chiave', entita: 'Dote sociale', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave' },
   { tabella: 'turno_partita', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
-  // il legame del turno con la voce del Diario che l'ha registrato (utente 063): un'attività o una voce che spariscono lo lasciano orfano
+  // il legame del turno con la voce del Diario che l'ha registrato: un'attività o una voce che spariscono lo lasciano orfano
   { tabella: 'turno_voce_partita', colonna: 'attivita_chiave', entita: 'attività del turno della voce', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
   { tabella: 'turno_voce_partita', colonna: 'voce_uid', entita: 'voce del turno', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'dote_sociale_partita', colonna: 'dote_chiave', entita: 'Dote sociale', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave' },
@@ -103,33 +103,33 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   // la giornata è canone del file di gioco: un pacchetto che non ha più una voce lascia la sua spunta senza voce
   { tabella: 'spunta_voce_partita', colonna: 'voce_uid', entita: 'voce della giornata', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'punto_partita', colonna: 'punto_chiave', entita: 'punto della guida', tabellaGioco: 'punto_interesse', colonnaGioco: 'chiave' },
-  // le divergenze conservate «da verificare» (L4, utente 022): un pin o una voce che spariscono le lasciano orfane
+  // le divergenze conservate «da verificare» (L4): un pin o una voce che spariscono le lasciano orfane
   { tabella: 'divergenza_partita', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },
   { tabella: 'divergenza_partita', colonna: 'voce_chiave', entita: 'punto della guida', tabellaGioco: 'punto_interesse', colonnaGioco: 'chiave' },
-  // lo stato per infiltrazione dei pin condivisi dai rigenerabili (L4 §8.11, utente 023): un pin o un'infiltrazione che spariscono
+  // lo stato per infiltrazione dei pin condivisi dai rigenerabili (L4 §8.11): un pin o un'infiltrazione che spariscono
   // lasciano la riga orfana
   { tabella: 'spillo_partita_infiltrazione', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },
   { tabella: 'spillo_partita_infiltrazione', colonna: 'infiltrazione_chiave', entita: 'infiltrazione', tabellaGioco: 'dungeon_area', colonnaGioco: 'chiave' },
   { tabella: 'richiesta_partita', colonna: 'richiesta_chiave', entita: 'richiesta', tabellaGioco: 'richiesta', colonnaGioco: 'chiave' },
-  // gli inviti dei Confidenti registrati nella partita (L6, utente 025): un invito che sparisce lascia la riga orfana
+  // gli inviti dei Confidenti registrati nella partita (L6): un invito che sparisce lascia la riga orfana
   { tabella: 'invito_partita', colonna: 'invito_chiave', entita: 'invito di un Confidente', tabellaGioco: 'confidente_invito', colonnaGioco: 'chiave' },
-  // i timbri si contano nel dedalo (L10-02, migrazione 382, utente 070): `area_chiave` è la chiave del dedalo
+  // i timbri si contano nel dedalo (L10-02): `area_chiave` è la chiave del dedalo
   { tabella: 'timbri_dedalo_partita', colonna: 'area_chiave', entita: 'dedalo dei Memento', tabellaGioco: 'dungeon_area', colonnaGioco: 'chiave' },
   { tabella: 'domanda_partita', colonna: 'domanda_id', entita: 'domanda', tabellaGioco: 'domanda', colonnaGioco: 'id' },
   { tabella: 'cruciverba_partita', colonna: 'data', entita: 'cruciverba', tabellaGioco: 'cruciverba', colonnaGioco: 'data' },
   { tabella: 'trofeo_partita', colonna: 'trofeo_chiave', entita: 'trofeo', tabellaGioco: 'trofeo', colonnaGioco: 'chiave' },
-  // Ondata 5 (utente 053): il trofeo segnato da un turno con il suo esito; un'attività o un trofeo che spariscono lasciano la riga orfana
+  // Ondata 5:il trofeo segnato da un turno con il suo esito; un'attività o un trofeo che spariscono lasciano la riga orfana
   { tabella: 'trofeo_esito_turno', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
   { tabella: 'trofeo_esito_turno', colonna: 'trofeo_chiave', entita: 'trofeo', tabellaGioco: 'trofeo', colonnaGioco: 'chiave' },
-  // Ondata 5 (utente 053): gli oggetti dati da un turno con il suo esito; un'attività o un oggetto che spariscono lasciano la riga orfana
+  // Ondata 5:gli oggetti dati da un turno con il suo esito; un'attività o un oggetto che spariscono lasciano la riga orfana
   { tabella: 'oggetto_esito_turno', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
   { tabella: 'oggetto_esito_turno', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave' },
-  // Ondata 5 (utente 054): le copie consumate (turni con un esito che consuma, Isolamento); un oggetto o un'attività che spariscono lasciano la riga orfana
+  // Ondata 5:le copie consumate (turni con un esito che consuma, Isolamento); un oggetto o un'attività che spariscono lasciano la riga orfana
   { tabella: 'consumo_oggetto_partita', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave' },
   { tabella: 'consumo_oggetto_partita', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
-  // L13 (utente 046): gli oggetti ricevuti dalle voci; un oggetto che sparisce dal catalogo lascia la riga orfana
+  // L13: gli oggetti ricevuti dalle voci; un oggetto che sparisce dal catalogo lascia la riga orfana
   { tabella: 'oggetto_ottenuto_partita', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave' },
-  // L13: gli sblocchi ricevuti (utente 046), uno per tipo di bersaglio; gli yen delle Richieste completate (utente 047)
+  // L13: gli sblocchi ricevuti, uno per tipo di bersaglio; gli yen delle Richieste completate
   { tabella: 'sblocco_partita', colonna: 'bersaglio_chiave', entita: 'Richiesta sbloccata', tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "bersaglio_tipo = 'richiesta'" },
   { tabella: 'sblocco_partita', colonna: 'bersaglio_chiave', entita: 'attività sbloccata', tabellaGioco: 'attivita', colonnaGioco: 'chiave', filtro: "bersaglio_tipo = 'attivita'" },
   { tabella: 'da_applicare', colonna: 'causa_chiave', entita: 'Richiesta della proposta personale', tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "causa_tipo = 'richiesta'" },
@@ -141,7 +141,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'persona_posseduta', colonna: 'tratto_skill_id', entita: 'abilità', tabellaGioco: 'skill', colonnaGioco: 'id' },
   { tabella: 'persona_posseduta_skill', colonna: 'skill_id', entita: 'abilità', tabellaGioco: 'skill', colonnaGioco: 'id', partita: '(SELECT p.partita_id FROM "utente"."persona_posseduta" p WHERE p.id = posseduta_id)' },
   { tabella: 'compendio_partita', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
-  // utente 073: il primo richiamo gratuito già speso di una Persona DLC
+  // il primo richiamo gratuito già speso di una Persona DLC
   { tabella: 'primo_richiamo_speso', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
   { tabella: 'compendio_partita', colonna: 'tratto_skill_id', entita: 'abilità', tabellaGioco: 'skill', colonnaGioco: 'id' },
   { tabella: 'obiettivo_partita', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
@@ -219,7 +219,7 @@ function strutturaDi(db: Database.Database): Map<string, string[]> {
 }
 
 /**
- * R11-05/3: le strutture del pacchetto (tabelle e colonne) che l'istanza — già migrata al codice corrente, lo schema di arrivo — non ha più, con le righe che
+ * R11-05/3: le strutture del pacchetto (tabelle e colonne) che l'istanza, alla versione che il codice legge, non ha, con le righe che
  * porterebbero. Quelle dichiarate nel registro delle fonti tolte dicono dove vive ora il dato; le altre sono «non spiegate» (probabili rinomine).
  * Sola lettura su entrambi i database; una tabella vuota o una colonna senza valori informativi non si segnala.
  */
@@ -250,7 +250,7 @@ function conteggiTabelle(db: Database.Database, schema: string): Record<string, 
   return out;
 }
 
-/** Quante immagini con contenuto ha uno schema (zero se la tabella non ha ancora la colonna: schema di prima della 079). */
+/** Quante immagini con contenuto ha uno schema (zero se la tabella `immagine` non ha la colonna `contenuto`: un file di un'altra versione, in anteprima). */
 function immaginiPiene(db: Database.Database, schema: string): number {
   const colonne = (db.prepare(`PRAGMA "${schema}".table_info(immagine)`).all() as Array<{ name: string }>).map((c) => c.name);
   if (!colonne.includes('contenuto')) return 0;
@@ -259,8 +259,8 @@ function immaginiPiene(db: Database.Database, schema: string): number {
 
 /**
  * I riferimenti delle partite (schema `utente`) che non risolvono nei dati di gioco (schema `gioco`)
- * della stessa connessione. Una tabella delle partite assente (schema più vecchio) si salta; una
- * tabella di gioco assente rende orfane tutte le righe che la referenziano, con la nota.
+ * della stessa connessione. Una tabella delle partite assente si salta; una tabella di gioco
+ * assente rende orfane tutte le righe che la referenziano, con la nota.
  */
 export function orfaniPartite(db: Database.Database, schemaGioco = 'main', schemaUtente = 'utente'): OrfanoPartiteDto[] {
   const gioco = new Set(tabelleDi(db, schemaGioco));
@@ -345,8 +345,7 @@ function richiediIstanzaSuDisco(): void {
 
 /**
  * Sostituisce i dati di gioco con un pacchetto depositato sul NAS. Il file si copia una volta sola nella cartella di lavoro locale
- * (`data/tmp`): lì si verifica, e da lì prende il posto di gioco.db con un `rename`. Prima si leggeva tutto in memoria e si riscriveva
- * tre volte (verifica, anteprima, sostituzione: rilievo P3' della verifica, 2026-10-03).
+ * (`data/tmp`): lì si verifica, e da lì prende il posto di gioco.db con un `rename` (rilievo P3' della verifica, 2026-10-03).
  */
 export async function importaPacchettoDaDeposito(nome: string): Promise<EsitoImportazionePacchettoDto> {
   const operazione = impegna('lettura');
@@ -371,10 +370,8 @@ function verificaPacchetto(percorso: string): void {
   if (fs.statSync(percorso).size < 100 || !haFirmaSqlite(percorso)) {
     throw httpErrors.badRequest('pacchetto-non-valido', 'Il file non è un backup dei dati di gioco: usa il file gioco.db scaricato da «Scarica backup dati di gioco».');
   }
-  const cosa = verificaDatabase(percorso);
-  if (cosa !== 'gioco') throw httpErrors.badRequest('pacchetto-con-partite', cosa === 'partite'
-    ? 'Il file contiene solo partite: un backup dei dati di gioco porta i dati di gioco.'
-    : 'Il file contiene anche le partite (vecchio file unico): un backup dei dati di gioco porta solo i dati di gioco. Per quel file usa «Backup e ripristino».');
+  // un file con i dati di gioco e le partite insieme lo rifiuta già `verificaDatabase` (400 `database-gioco-e-partite`)
+  if (verificaDatabase(percorso) !== 'gioco') throw httpErrors.badRequest('pacchetto-con-partite', 'Il file contiene solo partite: un backup dei dati di gioco porta i dati di gioco.');
 }
 
 /** Che cosa cambierebbe importando il pacchetto in `percorso` (un file locale). Lo verifica per intero e non sostituisce nulla. */
@@ -396,14 +393,15 @@ function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string
   const nelPacchetto = conteggiTabelle(db, 'main');
   const differenze = Object.keys(nelPacchetto).filter((t) => t in attuali && attuali[t] !== nelPacchetto[t]).map((t) => ({ tabella: t, istanza: attuali[t], pacchetto: nelPacchetto[t] }));
   const tabelleAssenti = Object.keys(attuali).filter((t) => !(t in nelPacchetto));
-  const importabile = versioneSchema <= codice;
+  // si importa solo la versione che il codice legge: un file di un'altra versione dell'app (più vecchia o più nuova) non si converte
+  const importabile = versioneSchema === codice;
   return {
     versioneSchema,
     versioneSchemaCodice: codice,
     versioneSchemaIstanza: istanza.pragma('main.user_version', { simple: true }) as number,
     databaseByte: byte,
     importabile,
-    motivo: importabile ? null : `Il pacchetto ha lo schema ${versioneSchema}, più nuovo di quello che questa versione dell'app sa leggere (${codice}): aggiorna l'app prima di importarlo.`,
+    motivo: importabile ? null : `Il backup è di un'altra versione dell'app e non si può importare. ${messaggioVersioneDiversa('gioco', versioneSchema, codice)}`,
     differenze,
     tabelleAssenti,
     scarti: scartiDelPacchetto(db, istanza),
@@ -416,7 +414,7 @@ function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string
 
 // ---- Una importazione alla volta, e osservabile ----
 //
-// Sostituire i dati di gioco dura: lettura dalla cartella d'appoggio, copia di sicurezza, scrittura di centinaia di MB, migrazioni.
+// Sostituire i dati di gioco dura: lettura dalla cartella d'appoggio, copia di sicurezza, scrittura di centinaia di MB, riapertura.
 // Chi sta davanti può stancarsi prima (un proxy chiude a cento secondi) e l'utente vedrebbe un errore
 // mentre il lavoro procede: se ritentasse, partirebbe una seconda sostituzione sopra la prima. Qui una
 // richiesta per volta (409 alle altre), la fase corrente è interrogabile e l'esito resta a disposizione
@@ -479,13 +477,13 @@ export async function importaPacchetto(percorso: string): Promise<EsitoImportazi
 
 /**
  * Il lavoro vero, sul file nella cartella di lavoro: verifica e anteprima, copia di sicurezza, chiusura, il file al posto di gioco.db,
- * riapertura con migrazioni e regole dell'avvio. Le partite restano. Chiamata solo con il lucchetto in mano.
+ * riapertura con la verifica delle versioni e le regole dell'avvio. Le partite restano. Chiamata solo con il lucchetto in mano.
  */
 async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePacchettoDto> {
   // l'anteprima si rifà qui, sul file che si sta per installare: quella mostrata all'utente era sul file depositato, che
   // nel frattempo può essere cambiato
   const anteprima = anteprimaPacchetto(file);
-  if (!anteprima.importabile) throw httpErrors.badRequest('pacchetto-troppo-nuovo', anteprima.motivo ?? 'Il pacchetto non è importabile.');
+  if (!anteprima.importabile) throw httpErrors.badRequest('pacchetto-di-altra-versione', anteprima.motivo ?? 'Il pacchetto non è importabile.');
   avanza('copia-di-sicurezza');
   const salvataggio = await copiaDiSicurezza();
   // R11-05/3: il riepilogo di ciò che si scarta resta accanto alla copia di sicurezza (la memoria del servizio si perde al riavvio); non blocca mai l'importazione
@@ -503,9 +501,9 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     avanza('sostituzione');
     await installaDatabase(file, resolveDbPath(), 'sposta');
     avanza('riapertura');
-    // L13-01: la via unica di riapertura, la stessa del ripristino dell'istanza (`impostazioniService.riapriDopoSostituzione`): migrazioni,
-    // condizioni `manuale` convertite, regole dell'avvio rigide, effetti di stato mai applicati fra le proposte, specchio dei pin, registro Tanaka
-    condizioniConvertite = riapriDopoSostituzione({ origine: 'continuita-migrazione', gioco: true, operazione: 'importazione' });
+    // L13-01: la via unica di riapertura, la stessa del ripristino dell'istanza (`impostazioniService.riapriDopoSostituzione`): verifica delle
+    // versioni, condizioni `manuale` convertite, regole dell'avvio rigide, effetti di stato mai applicati fra le proposte, specchio dei pin, registro Tanaka
+    condizioniConvertite = riapriDopoSostituzione({ gioco: true, operazione: 'importazione' });
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'importazione-fallita', 'Importazione del pacchetto');
   }
@@ -519,7 +517,6 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     copiaDiSicurezza: path.basename(salvataggio),
     versioneSchemaPacchetto: anteprima.versioneSchema,
     versioneSchema,
-    migrazioniApplicate: migrations.filter((m) => m.id > anteprima.versioneSchema && m.id <= versioneSchema).length,
     immagini,
     orfani,
     condizioniConvertite,

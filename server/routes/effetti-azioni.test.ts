@@ -15,10 +15,6 @@
 import request from 'supertest';
 import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { contestoConversione, effettiDellAzione } from '../db/conversioneEffettiAzione.js';
-import { utente007 } from '../db/migrazioniUtente/007_effetti_delle_azioni.js';
-import { utente015 } from '../db/migrazioniUtente/015_giornata_canone.js';
-import { DDL_UTENTE_STORICHE } from '../db/schemaUtente.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
 import { letturaCompletata } from '../services/lettureCompletate.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, EffettiAzioneDto, PercorsoGiornoDto, ProgressiPartitaDto } from '../../shared/types.js';
@@ -59,7 +55,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
   });
   /** Legge il percorso del giorno `data` (senza partita) e restituisce l'azione della guida al posto `indice`. */
   const azione = async (data: string, indice: number) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.uid === uidDi(data, indice))!;
-  /** Gli effetti che la conversione (086) ha dato all'azione della guida d'origine (`azioni_json`, copia storica): il pacchetto è
+  /** Gli effetti che la conversione ha dato all'azione della guida d'origine (`azioni_json`, copia storica): il pacchetto è
    *  la fotografia dell'istanza, e l'utente può aver cambiato gli effetti della voce nel canone. */
   const produceDellaGuida = (data: string, indice: number) => (JSON.parse(prepared('SELECT azioni_json FROM giorno_percorso WHERE data = ?').pluck().get(data) as string) as Array<{ produce: unknown }>)[indice].produce;
 
@@ -71,10 +67,10 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     expect(produceDellaGuida('04-25', 4)).toEqual([{ tipo: 'dote', dote: 'fascino', note: 3 }]); // bagno: la guida scrive +3
     expect(produceDellaGuida('04-26', 0)).toEqual([{ tipo: 'turno', attivita: 'lavoro-rafflesia' }]);
     expect(produceDellaGuida('05-08', 4)).toEqual([{ tipo: 'turno', attivita: 'lavoro-ore-no-beko', doti: [{ dote: 'perizia', note: 3 }] }]);
-    // e le voci della giornata le hanno portate con sé (092): dove l'utente non le ha cambiate sono le stesse
+    // e le voci della giornata le hanno portate con sé: dove l'utente non le ha cambiate sono le stesse
     expect((await azione('04-26', 0)).produce).toEqual(produceDellaGuida('04-26', 0));
     expect((await azione('04-25', 4)).produce).toEqual(produceDellaGuida('04-25', 4));
-    // la voce di Zorro del 25 aprile nel canone (riparata dalla 093, scelta dell'utente): finire Zorro, e basta — la Ballerina
+    // la voce di Zorro del 25 aprile nel canone (scelta dell'utente): finire Zorro, e basta — la Ballerina
     // non si legge qui (la sua restituzione e il prestito sono una voce a parte, senza effetti)
     const zorro = await azione('04-25', 1);
     expect(zorro).toMatchObject({ azione: 'Finire di leggere "Zorro, il fuorilegge" sulla metro.', riferimento: { tipo: 'libro', chiave: 'zorro-il-fuorilegge' } });
@@ -152,20 +148,6 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     expect(await tutteAZero(p)).toBe(true);
   });
 
-  it('la conversione legge i titoli solo prima del «;»; al cinema ogni azione è «una visione»', () => {
-    const ctx = contestoConversione(getDb());
-    /** Trova fra le azioni del contesto di conversione quella del giorno `data` al posto `indice` della guida. */
-    const trova = (data: string, indice: number) => ctx.successive.find((s) => s.data === data && s.indice === indice)!;
-    const rivelazioni = trova('10-31', 0);
-    expect(effettiDellAzione(rivelazioni.azione, rivelazioni, ctx)).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'rivelazioni-eroiche', almeno: null }]);
-    const cinema = trova('07-31', 2);
-    expect(effettiDellAzione(cinema.azione, cinema, ctx)).toEqual([{ tipo: 'lettura', categoria: 'film', chiave: 'cinema-l-amore-chissa', almeno: null }]);
-    const primaSerata = trova('07-18', 0);
-    expect(effettiDellAzione(primaSerata.azione, primaSerata, ctx)).toEqual([{ tipo: 'lettura', categoria: 'film', chiave: 'dvd-the-running-dead', almeno: 1 }]);
-    // un'azione dell'utente senza posto nella guida: le Doti dal testo delle note
-    expect(effettiDellAzione({ azione: 'Bagno', tipo: 'altro', riferimento: null, note: 'Fascino +2' }, null, ctx)).toEqual([{ tipo: 'dote', dote: 'fascino', note: 2 }]);
-  });
-
   it('al cinema una spunta è una visione: saltare la prima visita non regala una visione, togliere e rimettere non ne aggiunge', async () => {
     const p = await nuovaPartita('Cinema', '07-31');
     /** Quante visioni di «L'amore chissà» al cinema ha registrato la partita (0 se non c'è la riga). */
@@ -238,36 +220,6 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     ]));
     prepared('DELETE FROM turno_partita WHERE partita_id = ?').run(p);
     prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND chiave = 'lavoro-che-non-esiste'").run(p);
-  });
-
-  it('migrazione utente 007: una correzione che cambiava le note tiene i punti che quelle note davano (e la 015 la porta nella voce)', async () => {
-    const originale = (JSON.parse((prepared("SELECT azioni_json FROM giorno_percorso WHERE data = '04-12'").get() as { azioni_json: string }).azioni_json) as Array<Record<string, unknown>>)[0];
-    const adesso = 'x';
-    // la tabella delle correzioni di allora (la «utente» 015 l'ha convertita in canone e tolta)
-    getDb().exec(DDL_UTENTE_STORICHE.find((s) => s.includes('utente.correzione_azione_guida ('))!);
-    // com'era salvata prima della 086: solo la nota corretta, e l'originale senza effetti
-    const { produce: _senza, ...originaleVecchio } = originale;
-    prepared("INSERT INTO correzione_azione_guida (data, indice, originale_json, modifiche_json, nascosta, created_at, updated_at) VALUES ('04-12', 0, ?, ?, 0, ?, ?)")
-      .run(JSON.stringify(originaleVecchio), JSON.stringify({ note: 'Coraggio +2' }), adesso, adesso);
-    // e una che cambiava solo la fascia: resta com'è
-    prepared("INSERT INTO correzione_azione_guida (data, indice, originale_json, modifiche_json, nascosta, created_at, updated_at) VALUES ('04-12', 1, ?, ?, 0, ?, ?)")
-      .run(JSON.stringify((JSON.parse((prepared("SELECT azioni_json FROM giorno_percorso WHERE data = '04-12'").get() as { azioni_json: string }).azioni_json) as unknown[])[1]), JSON.stringify({ fascia: 'sera' }), adesso, adesso);
-    utente007.up(getDb());
-    expect(JSON.parse((prepared("SELECT modifiche_json FROM correzione_azione_guida WHERE data = '04-12' AND indice = 0").get() as { modifiche_json: string }).modifiche_json))
-      .toEqual({ note: 'Coraggio +2', produce: [{ tipo: 'dote', dote: 'coraggio', note: 2 }] });
-    expect(JSON.parse((prepared("SELECT modifiche_json FROM correzione_azione_guida WHERE data = '04-12' AND indice = 1").get() as { modifiche_json: string }).modifiche_json)).toEqual({ fascia: 'sera' });
-    // la 015 scrive le correzioni nelle voci (canone) e toglie la tabella
-    utente015.up(getDb());
-    expect(getDb().prepare("SELECT 1 FROM utente.sqlite_master WHERE name = 'correzione_azione_guida'").get()).toBeUndefined();
-    // la spunta dice gli effetti della correzione (Coraggio, 2 note = 3 punti), e non quelli della guida
-    const p = await nuovaPartita('Correzione convertita', '04-12');
-    const r = (await spunta(p, '04-12', 0).expect(200)).body.data as AzionePercorsoDto;
-    expect(r.produce).toEqual([{ tipo: 'dote', dote: 'coraggio', note: 2 }]);
-    expect(r.note).toBe('Coraggio +2');
-    expect(detta(r.effetti, 'coraggio')).toBe(3);
-    expect(detta(r.effetti, 'conoscenza')).toBe(0);
-    expect(await tutteAZero(p)).toBe(true);
-    expect((await azione('04-12', 1)).fascia).toBe('sera');
   });
 });
 

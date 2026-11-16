@@ -1,5 +1,5 @@
-// Compatibilità dei backup locali: solo durante l'importazione esplicita, dopo le migrazioni storiche.
-// Non è una migrazione di avvio: condizioni già correnti e dati della partita non vengono riscritti.
+// Compatibilità dei backup locali: solo durante l'importazione esplicita.
+// Condizioni già correnti e dati della partita non vengono riscritti.
 import type { AppDatabase } from '../../db/dbService.js';
 import { haColonna, haTabella } from '../../db/colonne.js';
 import { normalizzaRequisitoSpillo } from '../../../shared/condizioniSpillo.js';
@@ -46,8 +46,8 @@ function convertiSnapshotCatalogo(valore: unknown, origine: string, conversioni:
   return risultato;
 }
 
-/** Aggiorna i soli vecchi `manuale` rimasti dopo le migrazioni. La migrazione 090 mantiene quindi la precedenza per i fatti che
- * conosce (caffè al Leblanc, ecc.): non li si declassa ad avvisi. Tutto il recupero è atomico e nel ripristino protetto dell'import. */
+/** Aggiorna i soli vecchi `manuale` rimasti nel file importato. I fatti noti
+ * (caffè al Leblanc, ecc.) mantengono la precedenza: non li si declassa ad avvisi. Tutto il recupero è atomico e nel ripristino protetto dell'import. */
 export function convertiCondizioniDatabaseImportato(db: AppDatabase): string[] {
   const conversioni: string[] = [];
   return db.transaction(() => {

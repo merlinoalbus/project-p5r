@@ -7,15 +7,15 @@
 // giapponese dava Ventaglio, Portachiavi e Flan, che la finestra «Regala» proponeva di ricomprare).
 //
 // Una lettura sola, nessuna scrittura: le copie si calcolano dalle fonti che la partita ha già, ognuna nel suo registro:
-//   - comprate: le righe del registro degli acquisti (utente 051) degli articoli dell'oggetto, con i loro pezzi; un acquisto segnato prima del
+//   - comprate: le righe del registro degli acquisti degli articoli dell'oggetto, con i loro pezzi; un acquisto segnato prima del
 //     registro (o in una partita senza data, quindi senza riga) vale una copia;
 //   - dentro un set comprato: lo stesso conto per gli articoli che contengono l'oggetto (`ricompensa_oggetto` di fonte «articolo», per
 //     esempio i set delle televendite), per le copie del contenuto;
-//   - ricevute: le voci del Diario spuntate con l'effetto «oggetto ricevuto» (`oggetto_ottenuto_partita`, utente 046) e i turni con un esito
-//     che dà oggetti (`oggetto_esito_turno`, utente 053: la sfida della Big Bang Burger vinta);
-//   - regalate: le consegne che hanno usato una copia (`regalo_partita.copia_consumata`, utente 052);
+//   - ricevute: le voci del Diario spuntate con l'effetto «oggetto ricevuto» (`oggetto_ottenuto_partita`) e i turni con un esito
+//     che dà oggetti (`oggetto_esito_turno`: la sfida della Big Bang Burger vinta);
+//   - regalate: le consegne che hanno usato una copia (`regalo_partita.copia_consumata`);
 //   - consumate (Ondata 5, lotto F-bis): le copie usate da un turno con un esito che consuma o bruciate in un Isolamento
-//     (`consumo_oggetto_partita`, utente 054) e quelle cedute negli scambi (l'acquisto di un'offerta che costa oggetti: Sakai, Gachapon, Super
+//     (`consumo_oggetto_partita`) e quelle cedute negli scambi (l'acquisto di un'offerta che costa oggetti: Sakai, Gachapon, Super
 //     Baron), lette dall'acquisto e dal costo dell'offerta. Il regalo resta nel suo registro: la consegna è già il consumo, e non si copia.
 //   - Ondata 5 (lotto F-bis): ricevute anche dai doni dei Confidenti che la partita ha già meritato (`doniConfidentiOttenuti`, dal rango e dal
 //     giorno della partita: nessuna copia del dato in un'altra tabella) e dalle Richieste completate (`ricompensa_oggetto` di fonte «richiesta»,
@@ -90,7 +90,7 @@ export function dettaglioCopie(partitaId: number, catalogo: string, doni?: reado
   if (haTabellaUtente(getDb(), 'oggetto_ottenuto_partita')) {
     ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   }
-  // Ondata 5 (lotto G, utente 053): ricevute dai turni con un esito che dà oggetti (la sfida della Big Bang Burger vinta)
+  // Ondata 5 (lotto G): ricevute dai turni con un esito che dà oggetti (la sfida della Big Bang Burger vinta)
   if (haTabellaUtente(getDb(), 'oggetto_esito_turno')) {
     ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_esito_turno WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   }
@@ -106,7 +106,7 @@ export function dettaglioCopie(partitaId: number, catalogo: string, doni?: reado
   const regalate = haColonnaUtente(getDb(), 'regalo_partita', 'copia_consumata')
     ? prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ? AND catalogo_chiave = ? AND copia_consumata = 1').pluck().get(partitaId, catalogo) as number
     : 0;
-  // Ondata 5 (lotto F-bis, utente 054): le copie usate da un turno con un esito che consuma o bruciate in un Isolamento
+  // Ondata 5 (lotto F-bis): le copie usate da un turno con un esito che consuma o bruciate in un Isolamento
   const usate = haTabellaUtente(getDb(), 'consumo_oggetto_partita')
     ? prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.consumo_oggetto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number
     : 0;

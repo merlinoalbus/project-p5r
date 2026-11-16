@@ -30,8 +30,8 @@ export const MOLTIPLICATORE_ARCANO = 1.5;
 export const MOLTIPLICATORE_INVITO = 1.2;
 /** Un moltiplicatore come lo scrive l'interfaccia: «×1,5» (L7-02: letto dalla costante, mai scritto a mano). */
 export const testoMoltiplicatore = (n: number): string => `×${n.toLocaleString('it-IT')}`;
-/** L13 (O10-2/O10-3): il rango in cui la guida fa scegliere la relazione romantica (lo stesso per tutti i Confidenti romanzabili, la regola
- *  della migrazione 325). Un solo punto per il server (`relazioneRomanticaService`) e per l'interfaccia (scheda del Confidente, spunta). */
+/** L13 (O10-2/O10-3): il rango in cui la guida fa scegliere la relazione romantica (lo stesso per tutti i Confidenti
+ *  romanzabili). Un solo punto per il server (`relazioneRomanticaService`) e per l'interfaccia (scheda del Confidente, spunta). */
 export const RANGO_DELLA_SCELTA_ROMANTICA = 9;
 /** L8-03 (G2): il rango massimo di un Confidente, lo stesso per tutti (lo schema della partita: `confidente_partita.rango` fra 0 e 10; le
  *  abilità arrivano a 10 per ognuno). Un solo punto, letto dal server, dalle regole condivise e dai conteggi del Covo. */
@@ -57,7 +57,7 @@ export const giocaLaSceltaRomantica = (rangoAtteso: number | null, rangoPartita:
 /** I sette Confidenti che ricevono il moltiplicatore dell'esame (G-016c, corretta da G-020 con Ann): gli altri non lo hanno mai. */
 export const CONFIDENTI_CON_BONUS_ESAME: readonly string[] = ['ryuji', 'ann', 'makoto', 'haru', 'sojiro', 'kawakami', 'kasumi'];
 /** Dove ci si è piazzati all'ultimo esame; vale fino ai risultati dell'esame successivo. L13 (ondata 7, O7-2): anche «sopra la media», il
- *  piazzamento che la guida premia con Fascino +2 (migrazione utente 057). */
+ *  piazzamento che la guida premia con Fascino +2. */
 export type PiazzamentoEsame = 'primo' | 'primi-10' | 'sopra-media' | 'altro';
 /** I piazzamenti in ordine, con il nome che l'interfaccia mostra: l'unico elenco (scelta alla spunta, Partita, premi degli esami, zod). */
 export const PIAZZAMENTI_ESAME: ReadonlyArray<{ chiave: PiazzamentoEsame; nome: string }> = [

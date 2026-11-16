@@ -3,8 +3,8 @@
 // ============================================================
 //
 // Tre oggetti «a riga» del registro dei ripristini (`righe.ts`). Sono elenchi di righe figlie: l'oggetto è il padre (il libro, il film, la nota) e il
-// valore della guida è la fotografia `seed_json` presa alla prima correzione, che sta in una tabella-fotografia propria con una riga per padre (migrazione
-// 227: `libro_posizione_foto`, `film_posizione_foto`, `nota_storica_legame_foto`; le tabelle padre hanno già un `seed_json` per altro e un oggetto con zero
+// valore della guida è la fotografia `seed_json` presa alla prima correzione, che sta in una tabella-fotografia propria con una riga per padre
+// (`libro_posizione_foto`, `film_posizione_foto`, `nota_storica_legame_foto`; le tabelle padre hanno già un `seed_json` per altro e un oggetto con zero
 // righe non potrebbe tenere la propria fotografia sulle righe).
 //
 //   - `libro-posizioni` (`libro_posizione`) e `film-posizioni` (`film_posizione`): dove si ottiene un libro, dove si guarda un film. Ogni posizione è un
@@ -35,7 +35,7 @@ function semeDi(foto: string, colonna: string, chiave: string): Valori | null {
   } catch { return null; }
 }
 
-/** Il padre ha una riga di fotografia (quelli nati dopo la migrazione la ricevono alla prima correzione). */
+/** Il padre ha una riga di fotografia (quelli senza la ricevono alla prima correzione). */
 function assicuraFoto(foto: string, colonna: string, chiave: string): void {
   prepared(`INSERT OR IGNORE INTO ${foto} (${colonna}) VALUES (?)`).run(chiave);
 }

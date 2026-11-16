@@ -6,7 +6,7 @@
 // gli esiti con un trofeo e con premi come oggetti per chiave con quantità; serve anche ai distintivi della Big Bang Burger». L'esito lo
 // dichiara l'attività (`attivita.esiti_json`, campo `oggetti` di `shared/esitiAttivita.ts`: un solo punto, la Comet Burger vinta → «Distintivo
 // numero due» e 3 «Big Bang Burger»); chi registra il turno (la spunta della voce del Diario o il + del contatore, tutte e due passano da
-// `attivitaService.registraTurno`) sceglie l'esito, e gli oggetti entrano nel registro `utente.oggetto_esito_turno` (utente 053), una riga per
+// `attivitaService.registraTurno`) sceglie l'esito, e gli oggetti entrano nel registro `utente.oggetto_esito_turno`, una riga per
 // oggetto del turno con le copie. Non è uno stato sì/no ma un registro che somma, come gli oggetti ricevuti dalle voci
 // (`oggetto_ottenuto_partita`): la lettura unica degli oggetti ottenuti (`oggettiOttenutiService`) e le copie possedute (`copieOggetti`) li
 // sommano agli altri. Togliendo il turno (`togliTurno`, l'unica strada che cancella un turno) le righe se ne vanno.
@@ -38,7 +38,7 @@ export function nomeOggettoCatalogo(chiave: string): string {
 
 const TABELLA = 'oggetto_esito_turno';
 
-/** La tabella c'è? (Uno schema di prima della utente 053 non ha oggetti dagli esiti: niente da scrivere né da togliere.) */
+/** La tabella c'è? (Uno schema vecchio non ha oggetti dagli esiti: niente da scrivere né da togliere.) */
 const conTabella = (): boolean => haTabellaUtente(getDb(), TABELLA);
 
 /**

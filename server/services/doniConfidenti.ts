@@ -4,16 +4,16 @@
 // ============================================================
 //
 // Decisione 21, precisazione dell'utente: gli oggetti ricevuti sono fra le cose che l'app gestisce. I doni dei Confidenti stanno nel catalogo
-// come ricompense (`ricompensa_oggetto`, fonte «confidente», una riga per dono con la nota della guida) ma nessuna partita li riceveva. La
-// migrazione 295 scrive per ciascun dono la REGOLA che lo fa ricevere, quando la guida la dà in termini che l'app conosce
+// come ricompense (`ricompensa_oggetto`, fonte «confidente», una riga per dono con la nota della guida). Ogni
+// dono porta la REGOLA che lo fa ricevere, quando la guida la dà in termini che l'app conosce
 // (`ricompensa_oggetto.condizioni_json`): il rango del Confidente (10, «al Rango massimo») e il giorno («19 marzo», «15 febbraio»). Il dono
 // vale come oggetto ricevuto finché la regola vale: nessuna copia in un'altra tabella, nessuna riga da tenere allineata quando il rango scende.
 // L13 (ondata 11, O11-1; risposta dell'utente del 2026-10-31 «Sì, in automatico» alla domanda «I doni "se fidanzata" arrivano da soli in base
 // alla relazione registrata nella partita?»): la regola si valuta con il valutatore unico (`condizioni/valutatore.ts`, `valutaInsieme`) sullo
 // stato leggero della partita (`statoPartitaSemafori`: ranghi, Doti, giorno, relazioni romantiche con il giorno d'inizio), non più con un
 // valutatore proprio che conosceva solo rango e giorno. Così una regola può dire anche «relazione romantica con Ann, iniziata entro il 24
-// dicembre» o «nessuna relazione romantica» (le condizioni `relazione-romantica` e `relazioni-romantiche`): i doni «se fidanzata» le
-// riceveranno con la loro migrazione (O11-2). Un dono vale solo se ogni condizione della regola è verde; una regola vuota non vale. Sola lettura.
+// dicembre» o «nessuna relazione romantica» (le condizioni `relazione-romantica` e `relazioni-romantiche`): sono le
+// condizioni dei doni «se fidanzata» (O11-2). Un dono vale solo se ogni condizione della regola è verde; una regola vuota non vale. Sola lettura.
 // Revisione di O11-1 (prestazioni: le copie di un oggetto si leggono per ogni oggetto di un elenco): chi legge le copie di un oggetto chiede
 // solo i suoi doni (`catalogo`), e le regole fatte solo di ranghi, Doti, giorno e relazioni si valutano sullo stato essenziale
 // (`statoPartitaEssenziale`), non su quello completo con Palazzi, scorta, pesca e meteo; il valutatore resta quello unico.
@@ -62,7 +62,7 @@ export function doniConfidentiOttenuti(partitaId: number, catalogo?: string): Do
   const essenziale = regole.every((x) => bastaLoStatoEssenziale(x.regola));
   const usaDoti = regole.some((x) => usaLeDoti(x.regola));
   const doti = !essenziale || usaDoti ? new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango])) : new Map<string, number>();
-  // una regola che cita una voce della guida (il rampino che Morgana dà nel Palazzo di Kamoshida, migrazione 332) vuole le voci segnate della
+  // una regola che cita una voce della guida (il rampino che Morgana dà nel Palazzo di Kamoshida) vuole le voci segnate della
   // partita, che stanno solo nello stato completo della disponibilità
   const st = essenziale ? statoPartitaEssenziale(partitaId, ranghiConfidenti(partitaId), doti)
     : regole.some((x) => usaLeVociDellaGuida(x.regola)) ? statoDisponibilitaPartita(partitaId) : statoPartitaSemafori(partitaId, ranghiConfidenti(partitaId), doti);

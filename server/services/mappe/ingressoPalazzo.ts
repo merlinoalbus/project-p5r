@@ -1,4 +1,4 @@
-/** Identificazione pura: condivisa da lettura e migrazioni, senza aprire un database globale. */
+/** Identificazione pura, senza aprire un database globale. */
 export function palazzoDiIngresso(spillo: { mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; seed_identita_json?: string | null }, destinazione: string | null, palazzi: ReadonlyMap<string, string>): string | null {
   let seed: string | null = null;
   if (spillo.seed_identita_json) {

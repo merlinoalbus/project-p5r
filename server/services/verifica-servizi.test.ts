@@ -1,7 +1,7 @@
 // ============================================================
-// Test della verifica completa del codice (2026-10-03), lotto servizi e DB: C1 lucchetto comune, C2 schema più nuovo,
-// C3 scrittura atomica, C4 chiavi esterne nella transazione della migrazione, C5 riapertura fallita, C6 transazioni,
-// B3' livello di Joker, B4' giornali della verifica, B5' giornali delle copie di avvio, B6' copie contate una volta.
+// Test della verifica completa del codice (2026-10-03), lotto servizi e DB: C1 lucchetto comune, C2 file di un'altra versione,
+// C3 scrittura atomica, C5 riapertura fallita, C6 transazioni, B3' livello di Joker, B4' giornali della verifica,
+// B6' copie contate una volta.
 // ============================================================
 //
 // Usa una cartella dati temporanea, come `impostazioniService.test.ts`: il servizio lavora su file reali.
@@ -14,8 +14,7 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { config } from '../config.js';
 import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { pulisciGiornaliOrfani, ruotaCopieDiAvvio } from '../db/backupService.js';
+import { VERSIONE_PARTITE } from '../db/versioneSchema.js';
 import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
 import { copiaDatabase, installaDatabase, riapriIstanza, ripristinaIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import { elencaDungeon } from './dungeonService.js';
@@ -31,7 +30,9 @@ let dataDir = '';
 
 beforeAll(() => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-verifica-servizi-'));
-  (config as { dataDir: string }).dataDir = dataDir;
+  // i due database stanno in `edizioneDir` e `partiteDir`, che senza le loro variabili d'ambiente valgono quanto `DATA_DIR` all'avvio:
+  // vanno portati nella cartella di prova insieme a `dataDir`, o la prova aprirebbe i file veri dell'istanza
+  Object.assign(config, { dataDir, edizioneDir: dataDir, partiteDir: dataDir });
   caricaPacchetto(initDb());
 });
 
@@ -64,10 +65,12 @@ describe('verifica servizi e DB', () => {
     expect(secondo.partite).toBe(true);
   });
 
-  it('C2: un file delle partite con uno schema più nuovo del codice non si ripristina', async () => {
-    const nuovo = await partiteConVersione(9999);
-    await expect(ripristinaIstanza(nuovo)).rejects.toMatchObject({ code: 'database-troppo-nuovo' });
-    expect(prepared('SELECT COUNT(*) AS n FROM persona').get()).toBeDefined(); // l'istanza è rimasta aperta
+  it('C2: un file delle partite di un\'altra versione, più nuova o più vecchia di quella che il codice legge, non si ripristina', async () => {
+    for (const versione of [9999, VERSIONE_PARTITE - 1]) {
+      const altro = await partiteConVersione(versione);
+      await expect(ripristinaIstanza(altro)).rejects.toMatchObject({ code: 'database-di-altra-versione', status: 400 });
+      expect(prepared('SELECT COUNT(*) AS n FROM persona').get()).toBeDefined(); // l'istanza è rimasta aperta
+    }
   });
 
   describe('C3: il database vivo si sostituisce atomicamente (installaDatabase)', () => {
@@ -147,46 +150,18 @@ describe('verifica servizi e DB', () => {
     });
   });
 
-  it('C4: una migrazione che viola una chiave esterna è annullata e resta da applicare', () => {
-    const versione = getDb().pragma('main.user_version', { simple: true }) as number;
-    const rotta = { id: versione + 1, name: 'prova_violazione', up: (db: Database.Database) => { db.prepare("INSERT INTO articolo (chiave, negozio_chiave, ordine, nome, categoria) VALUES ('art-orfano-c4', 'negozio-inesistente-c4', 0, 'Orfano', 'altro')").run(); } };
-    expect(() => runMigrations(getDb(), [rotta as never], [])).toThrow(/violazioni di integrità referenziale/);
-    expect(getDb().pragma('main.user_version', { simple: true })).toBe(versione);
-    expect(prepared("SELECT COUNT(*) AS n FROM articolo WHERE chiave = 'art-orfano-c4'").get()).toEqual({ n: 0 });
-    // e al giro dopo la si ritrova da applicare, non già «applicata»
-    expect(() => runMigrations(getDb(), [rotta as never], [])).toThrow(/violazioni di integrità referenziale/);
-  });
-
-  it('C4/F6: una violazione che c\'era già nei dati non blocca le migrazioni (finisce nel log); solo quelle nuove le annullano', () => {
-    const versione = getDb().pragma('main.user_version', { simple: true }) as number;
-    getDb().pragma('foreign_keys = OFF');
-    getDb().prepare("INSERT INTO articolo (chiave, negozio_chiave, ordine, nome, categoria) VALUES ('art-gia-orfano', 'negozio-sparito', 0, 'Già orfano', 'altro')").run();
-    getDb().pragma('foreign_keys = ON');
-    try {
-      const innocua = { id: versione + 1, name: 'prova_innocua', up: (db: Database.Database) => { db.prepare("UPDATE articolo SET nome = nome WHERE chiave = 'art-gia-orfano'").run(); } };
-      expect(() => runMigrations(getDb(), [innocua as never], [])).not.toThrow();
-      expect(getDb().pragma('main.user_version', { simple: true })).toBe(versione + 1);
-      const rotta = { id: versione + 2, name: 'prova_nuova_violazione', up: (db: Database.Database) => { db.prepare("INSERT INTO articolo (chiave, negozio_chiave, ordine, nome, categoria) VALUES ('art-nuovo-orfano', 'altro-sparito', 0, 'Nuovo', 'altro')").run(); } };
-      expect(() => runMigrations(getDb(), [rotta as never], [])).toThrow(/art|articolo/);
-      expect(getDb().pragma('main.user_version', { simple: true })).toBe(versione + 1);
-    } finally {
-      getDb().prepare("DELETE FROM articolo WHERE chiave IN ('art-gia-orfano', 'art-nuovo-orfano')").run();
-      getDb().pragma(`main.user_version = ${versione}`);
-    }
-  });
-
   it('C5: se dopo un errore anche la riapertura fallisce, l\'errore lo dice e indica la copia di sicurezza', async () => {
     const vera = config.dataDir;
     const rotta = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-riapertura-'));
     fs.mkdirSync(path.join(rotta, config.dbFileName)); // al posto del file c'è una cartella: SQLite non la apre
-    (config as { dataDir: string }).dataDir = rotta;
+    Object.assign(config, { dataDir: rotta, edizioneDir: rotta, partiteDir: rotta });
     let errore: unknown;
     try {
       await tornaAllaCopiaDiSicurezza(path.join(rotta, 'copia-inesistente'), new Error('scrittura fallita'), 'ripristino-fallito', 'Ripristino');
     } catch (err) {
       errore = err;
     } finally {
-      (config as { dataDir: string }).dataDir = vera;
+      Object.assign(config, { dataDir: vera, edizioneDir: vera, partiteDir: vera });
       fs.rmSync(rotta, { recursive: true, force: true });
       initDb();
     }
@@ -289,27 +264,7 @@ describe('verifica servizi e DB', () => {
     fs.rmSync(copia.percorso, { force: true });
   });
 
-  it('B5\': i giornali delle copie di avvio rimasti senza il loro database si tolgono; quelli di una copia presente restano', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-giornali-'));
-    for (const f of ['project-p5r-A.db-wal', 'project-p5r-A.db-shm', 'project-p5r-B.db', 'project-p5r-B.db-wal', 'project-p5r-B.partite.db-shm', 'altro.db-wal']) fs.writeFileSync(path.join(dir, f), 'x');
-    pulisciGiornaliOrfani(dir);
-    expect(fs.readdirSync(dir).sort()).toEqual(['altro.db-wal', 'project-p5r-B.db', 'project-p5r-B.db-wal']);
-    fs.rmSync(dir, { recursive: true, force: true });
-  });
-
-  it('B5\': la rotazione delle copie di avvio toglie con le copie vecchie anche le partite e i giornali di entrambe', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-rotazione-'));
-    const timbri = Array.from({ length: 9 }, (_, i) => `2026-10-0${i + 1}T00-00-00-000Z`);
-    for (const t of timbri) for (const f of [`project-p5r-${t}.db`, `project-p5r-${t}.db-wal`, `project-p5r-${t}.db-shm`, `project-p5r-${t}.partite.db`, `project-p5r-${t}.partite.db-wal`]) fs.writeFileSync(path.join(dir, f), 'x');
-    ruotaCopieDiAvvio(dir);
-    const restano = fs.readdirSync(dir);
-    // le due più vecchie se ne vanno per intero (5 file ciascuna), le sette più recenti restano con i loro giornali
-    for (const t of timbri.slice(0, 2)) expect(restano.filter((f) => f.includes(t))).toEqual([]);
-    for (const t of timbri.slice(2)) expect(restano.filter((f) => f.includes(t))).toHaveLength(5);
-    fs.rmSync(dir, { recursive: true, force: true });
-  });
-
-  it('B6\': una copia di avvio (gioco + partite) si conta una volta', () => {
+  it('B6\': una copia sciolta in `backups` (gioco + partite) si conta una volta', () => {
     const backups = path.join(dataDir, 'backups');
     fs.mkdirSync(backups, { recursive: true });
     const prima = statoIstanza().copieDiSicurezza;

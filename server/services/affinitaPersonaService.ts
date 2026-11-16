@@ -4,7 +4,7 @@
 //
 // Le affinità stanno in `persona_affinita(persona_id, elemento, codice)` e le leggono dal compendio la scheda Persona, l'Ombra, la Battaglia e le
 // operazioni della Stanza di Velluto: correggerle qui le cambia ovunque, senza altra copia. Ogni riga conserva il valore della guida
-// (`seed_codice`, migrazione 186) e dice se è stata corretta (`origine`: `seed` o `utente`): la scheda lo dice («corrette da te», «Guida: …»);
+// (`seed_codice`) e dice se è stata corretta (`origine`: `seed` o `utente`): la scheda lo dice («corrette da te», «Guida: …»);
 // non c'è un ritorno al valore della guida (decisione dell'utente del 10/11).
 // Le differenze proprie di un'Ombra (`ombra.affinita_proprie_json`) non si toccano: restano sopra la griglia della Persona.
 // ============================================================

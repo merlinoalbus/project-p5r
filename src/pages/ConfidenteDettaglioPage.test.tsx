@@ -26,7 +26,7 @@ const dettaglio: ConfidenteDettaglioDto = {
     { rango: 3, doti: [], testo: '' },
   ],
   dialoghi: [
-    // migrazione 309: i punti solo numerici (con `puntiAmore` dove il ramo amore dà altro), la nota senza i requisiti già strutturati
+    // i punti solo numerici (con `puntiAmore` dove il ramo amore dà altro), la nota senza i requisiti già strutturati
     { id: 1, rango: 1, etichetta: '1', note: 'Data consigliata 18 aprile.', scelte: [{ ordine: 1, testo: 'Hai farmaci speciali?', punti: 2, puntiAmore: null, romantica: false, avviso: null }] },
     { id: 2, rango: 2, etichetta: '2', note: 'Data consigliata 25 aprile.', scelte: [{ ordine: 1, testo: 'Voglio fare un test', punti: 3, puntiAmore: null, romantica: false, avviso: null }, { ordine: 2, testo: 'Vado via', punti: 0, puntiAmore: null, romantica: false, avviso: 'Da evitare' }] },
     { id: 3, rango: 9, etichetta: '9', note: '', scelte: [{ ordine: 1, testo: 'Ti amo', punti: 3, puntiAmore: null, romantica: true, avviso: null }, { ordine: 2, testo: 'Incredibile', punti: 0, puntiAmore: 2, romantica: false, avviso: null }] },

@@ -172,8 +172,8 @@ router.delete('/spilli/:id', validate({ params: paramsSpillo, body: bodyRimozion
   eliminaSpillo(Number(req.params.id), req.body);
   res.status(204).end();
 });
-/** I pezzi della planimetria (102): zone dell'immagine scelte nell'editor, posate altrove con le condizioni che li mostrano, in una o
- *  più copie (103). Il pezzo nasce con la sua prima copia; eliminata l'ultima copia se ne va anche il pezzo. */
+/** I pezzi della planimetria: zone dell'immagine scelte nell'editor, posate altrove con le condizioni che li mostrano, in una o
+ *  più copie. Il pezzo nasce con la sua prima copia; eliminata l'ultima copia se ne va anche il pezzo. */
 router.post('/:chiave/pezzi', validate({ params: paramsMappa, body: bodyCreaPezzo }), (req, res) => {
   res.status(201).json(creaPezzoMappa(String(req.params.chiave), req.body));
 });
@@ -190,7 +190,7 @@ router.put('/pezzi/copie/:id', validate({ params: paramsCopiaPezzo, body: bodyAg
 router.delete('/pezzi/copie/:id', validate({ params: paramsCopiaPezzo }), (req, res) => {
   res.json(eliminaCopiaPezzoMappa(Number(req.params.id)));
 });
-/** Le voci della guida che l'editor può collegare allo spillo (098): si collegano e scollegano con `/compendio/punti/:chiave/pin/:spillo`. */
+/** Le voci della guida che l'editor può collegare allo spillo: si collegano e scollegano con `/compendio/punti/:chiave/pin/:spillo`. */
 router.get('/spilli/:id/voci-collegabili', validate({ params: paramsSpillo }), (req, res) => {
   res.json(vociCollegabili(Number(req.params.id)));
 });

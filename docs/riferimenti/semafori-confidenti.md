@@ -23,10 +23,10 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 | `avviso` | 1 | **non blocca**: grigio con l'icona di avvertenza, da controllare nel gioco; non si conferma e non conta in «n di m requisiti» |
 | `confidente` | 1 | automatica: rango dell'altro Confidente nella partita |
 
-`manuale` (grigio finché confermato a mano) resta valutato per i file che lo usano ancora, ma nei dati non c'è più: la
-migrazione 090 ha convertito le sei righe manuali in eventi della partita da segnare.
+`manuale` (grigio finché confermato a mano) resta valutato per i file che lo usano ancora, ma nei dati non c'è più: le
+sei righe manuali sono diventate eventi della partita da segnare.
 
-## Requisiti da segnare come eventi (migrazione 090)
+## Requisiti da segnare come eventi
 
 | Confidente | Rango | Requisito | Evento di storia |
 |---|---|---|---|

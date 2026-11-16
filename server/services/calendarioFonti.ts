@@ -2,17 +2,17 @@
 // calendarioFonti — la data (e il tipo) di un evento del Calendario dalla sua fonte (L9 · R9-22, R9-21/2)
 // ============================================================
 //
-// Un evento di `evento_calendario` può portare la chiave della fonte (`fonte_chiave`, migrazione 211): il servizio del Calendario ne legge la data dalla
+// Un evento di `evento_calendario` può portare la chiave della fonte (`fonte_chiave`): il servizio del Calendario ne legge la data dalla
 // fonte e non da quella copiata nella riga, così la data si modifica in un solo punto. Le chiavi:
 //   - `esame:<esame>:inizio|fine` — primo e ultimo giorno d'esame (le righe `domanda` dell'esame, R9-18);
 //   - `scadenza:<dungeon>` — `dungeon.finestra_al`;
-//   - `furto:<dungeon>` — `dungeon.furto_consigliato_data` (migrazione 308), un consiglio; `lettera:<dungeon>` — il termine della lettera di sfida,
+//   - `furto:<dungeon>` — `dungeon.furto_consigliato_data`, un consiglio; `lettera:<dungeon>` — il termine della lettera di sfida,
 //     una scadenza: `dungeon.lettera_entro` o, senza, quello calcolato (L9-08, `shared/datePalazzo.letteraDelPalazzo`) (L13 O6-3: le date del
-//     Palazzo hanno una fonte sola; la 308 non le assegna a nessun evento esistente, perché nessuno ha titolo e data che dicano esattamente il
+//     Palazzo hanno una fonte sola; nessun evento della guida le porta, perché nessuno ha titolo e data che dicano esattamente il
 //     furto consigliato o il termine della lettera);
 //   - `sblocco:confidente:<confidente>:1` — il requisito di rango 1 di tipo `data` (`confidente_requisito`);
 //   - `vacanza:<giorno>` — il giorno stesso (vale finché il giorno non ha tempo libero intero);
-//   - `cantante-jazz:<giorno>` (migrazione 365) — identifica la serata; non ha una fonte da risolvere, vale la data della riga.
+//   - `cantante-jazz:<giorno>` — identifica la serata; non ha una fonte da risolvere, vale la data della riga.
 // Una chiave che non si risolve (fonte tolta o cambiata) lascia l'evento alla data della sua riga.
 // ============================================================
 
@@ -47,7 +47,7 @@ export function risolutoreFonti(): (chiave: string | null | undefined) => FonteE
       return al ? { data: al, tipo: 'scadenza' } : null;
     }
     if (p[0] === 'furto' && p.length === 2) {
-      // la colonna del furto arriva con la 308: su uno schema di prima la chiave non si risolve
+      // su uno schema senza la colonna del furto la chiave non si risolve
       if (!haColonnaMain(getDb(), 'dungeon', 'furto_consigliato_data')) return null;
       const d = prepared('SELECT furto_consigliato_data FROM dungeon WHERE chiave = ?').pluck().get(p[1]) as string | null | undefined;
       return d ? { data: d, tipo: 'consiglio' } : null;

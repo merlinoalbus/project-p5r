@@ -3,7 +3,7 @@
 // ============================================================
 //
 // L13, ondata 9, lotto O9-3. Istruzione dell'utente del 2026-10-31: «Televendite. é possibile non venga acquistato nessun set. in tal caso
-// viene meno la consegna.». Una voce può dichiarare quando si fa («Si fa solo se»: `voce_giornata.condizioni_json`, migrazione 320), con il
+// viene meno la consegna.». Una voce può dichiarare quando si fa («Si fa solo se»: `voce_giornata.condizioni_json`), con il
 // vocabolario unico delle condizioni (`shared/condizioniSpillo.ts`) e il valutatore unico della disponibilità (`condizioni/valutatore.ts`),
 // allo stato della partita al momento della voce (`statoAlMomento`: il giorno e la fascia della voce, tutto il resto com'è nella partita).
 // Senza condizioni la voce è sempre dovuta (tutte le voci di prima).
@@ -30,7 +30,7 @@ export const MASSIMO_CONDIZIONI_VOCE = 20;
 /** Ciò che serve di una riga di `voce_giornata` per valutarla. */
 export interface RigaVoceDovuta { uid: string; data: string; fascia: string; genere: string; condizioni_json?: string | null }
 
-/** La colonna delle condizioni c'è (dalla migrazione 320)? Le migrazioni di prima che usano i servizi girano su uno schema senza. */
+/** La colonna delle condizioni c'è? Uno schema vecchio non la ha. */
 export function conCondizioniVoce(): boolean {
   return haColonnaMain(getDb(), 'voce_giornata', 'condizioni_json');
 }

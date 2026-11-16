@@ -5,8 +5,7 @@
 // Nel rilascio `gioco.db` è un file dell'edizione, uguale a quello che si ripubblica: non c'è nulla da salvare. Quello che non si
 // rifà è `partite.db`, l'avanzamento di chi gioca. Si copia solo lo schema `utente` (API di backup online, sicura con il WAL)
 // all'avvio e ogni 6 ore, in `config.backupDir` (un volume a parte: se si perde quello delle partite le copie restano), tenendo
-// le ultime `COPIE_DA_TENERE`. A differenza del backup di avvio della preparazione (`backupService`) non ha niente da proteggere
-// prima di una migrazione, perciò una copia fallita è un errore nel log e non ferma l'istanza: giocare è più importante.
+// le ultime `COPIE_DA_TENERE`. Una copia fallita è un errore nel log e non ferma l'istanza: giocare è più importante.
 // ============================================================
 
 import fs from 'node:fs';

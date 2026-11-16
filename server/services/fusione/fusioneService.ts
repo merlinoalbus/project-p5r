@@ -190,7 +190,7 @@ function disponibilitaDi(partitaId?: number): Disponibilita {
     disp.registro.add(r.persona_id);
   }
   // La guida: la prima evocazione di una Persona DLC è gratuita, le successive costano yen. Conta «mai entrata in scorta» in questa partita:
-  // lo dice la riga del richiamo speso (utente 073), non lo storico, che l'utente può cancellare senza disfare l'acquisizione.
+  // lo dice la riga del richiamo speso, non lo storico, che l'utente può cancellare senza disfare l'acquisizione.
   disp.primoRichiamo = new Set((prepared(`SELECT p.id FROM persona p WHERE p.dlc = 1
     AND NOT EXISTS (SELECT 1 FROM persona_posseduta pp WHERE pp.partita_id = ? AND pp.persona_id = p.id)
     AND NOT EXISTS (SELECT 1 FROM utente.primo_richiamo_speso s WHERE s.partita_id = ? AND s.persona_id = p.id)`).all(partitaId, partitaId) as Array<{ id: number }>).map((r) => r.id));

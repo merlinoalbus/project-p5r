@@ -4,7 +4,7 @@
 //
 // «Mi serve la possibilità di modificare proprio la guida così da poter modificare/aggiornare, aggiungere, rimuovere le voci
 // della guida o correggerli agganciandoli ad elementi della mappa»; «lascia i punti come sono senza fare riconciliazioni».
-// Un punto si collega a uno o più pin delle planimetrie del suo Palazzo, e dal 2026-10-09 un pin a più punti (098: «Voci
+// Un punto si collega a uno o più pin delle planimetrie del suo Palazzo, e dal 2026-10-09 un pin a più punti («Voci
 // indipendenti», ognuna si segna da sola e il pin è fatto quando lo sono tutte). Da L4 §8.11 (NR4-1, 2026-10-20) ogni pin tiene il suo
 // segno e una voce è fatta quando lo sono tutti i suoi pin (in corso k/N se una parte).
 // ============================================================
@@ -45,7 +45,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
   const raccogli = (pin: number, si: boolean) => request(app).put(`/api/partite/${partita}/spilli/${pin}`).send({ raccolto: si }).expect(200);
   /** Imposta (o, con null, toglie) lo stato della voce nella partita di prova, pretendendo il 200. */
   const statoPunto = (punto: string, stato: string | null) => request(app).put(`/api/partite/${partita}/punti`).send({ punto, stato }).expect(200);
-  /** Le voci del pin `id` (`spillo_voce`, 098), in ordine di chiave. */
+  /** Le voci del pin `id` (`spillo_voce`), in ordine di chiave. */
   const vociDi = (id: number) => prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(id) as string[];
   /** Le voci del pin con quell'uid (l'id cambia quando un pacchetto lo reinserisce). */
   const vociDiUid = (uid: string) => vociDi(prepared('SELECT id FROM spillo WHERE uid = ?').pluck().get(uid) as number);
@@ -88,7 +88,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     await scollega(p.chiave, pinLiberi[0].id).expect(409);
   });
 
-  it('un pin si collega a più voci (098, 2026-10-09); fuori dal Palazzo si rifiuta', async () => {
+  it('un pin si collega a più voci (2026-10-09); fuori dal Palazzo si rifiuta', async () => {
     const a = await nuovoPunto('Primo');
     const b = await nuovoPunto('Secondo');
     await collega(a.chiave, pinLiberi[1].id).expect(200);
@@ -460,9 +460,9 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     await raccogli(pin.id, false);
   });
 
-  // ---- La voce in un campo suo (094): «Campo dedicato alla voce», scelta dell'utente del 2026-10-01 ----
+  // ---- La voce in un campo suo: «Campo dedicato alla voce», scelta dell'utente del 2026-10-01 ----
 
-  /** Un passaggio o una scala di Kamoshida, con la sua destinazione: prima della 094 non si poteva collegare a nessuna voce. */
+  /** Un passaggio o una scala di Kamoshida, con la sua destinazione, da collegare a una voce. */
   const pinConDestinazione = () => {
     const palazzi = palazzoDiOgniMappa();
     const righe = prepared("SELECT id, uid, mappa_chiave, riferimento_chiave FROM spillo WHERE tipo IN ('passaggio', 'scala') AND riferimento_tipo = 'mappa' AND uid IS NOT NULL ORDER BY id")
@@ -494,7 +494,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     await raccogli(pin.id, false);
     expect([raccolto(pin.uid), segnato(storia.chiave)]).toEqual([0, null]);
     await statoPunto(storia.chiave, null);
-    // un'altra voce lo prende anche lei (098: prima si rifiutava finché era di questa)
+    // un'altra voce lo prende anche lei
     const altra = await nuovoPunto('Altra storia', 'storia');
     await collega(altra.chiave, pin.id).expect(200);
     expect(vociDi(pin.id)).toEqual([altra.chiave, storia.chiave].sort());
@@ -550,14 +550,14 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     // reimportato così com'è: le due voci tornano
     importaMappe(esportaMappe(mappaLibero), { sovrascrivi: true });
     expect(vociDiUid(libero.uid)).toEqual([forziere.chiave, secondo.chiave].sort());
-    // com'era un pacchetto della 094-097: una voce sola, nel campo `voce`
+    // un pacchetto vecchio: una voce sola, nel campo `voce`
     const vecchio = esportaMappe(mappaLibero);
     const delVecchio = vecchio.mappe.flatMap((m) => m.spilli).find((s) => s.uid === libero.uid)!;
     delete delVecchio.voci;
     delVecchio.voce = secondo.chiave;
     importaMappe(vecchio, { sovrascrivi: true });
     expect(vociDiUid(libero.uid)).toEqual([secondo.chiave]);
-    // com'era un pacchetto prima della 094: la voce nel riferimento
+    // un pacchetto più vecchio ancora: la voce nel riferimento
     delete esportato.voci;
     esportato.riferimento = { tipo: 'punto', chiave: forziere.chiave };
     importaMappe(pacchetto, { sovrascrivi: true });
@@ -576,7 +576,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect(dto.riferimento).toEqual({ tipo: 'mappa', chiave: expect.any(String) });
     expect(prepared('SELECT riferimento_tipo, riferimento_chiave FROM spillo WHERE id = ?').get(pin.id)).toEqual({ riferimento_tipo: 'mappa', riferimento_chiave: pin.riferimento_chiave });
     expect(vociDi(pin.id)).toEqual([v.chiave]);
-    // già di una voce: un'altra si aggiunge, come dalla guida (098)
+    // già di una voce: un'altra si aggiunge, come dalla guida
     const altra = await nuovoPunto('Altra dall’editor', 'storia');
     await request(app).put(`/api/mappe/spilli/${pin.id}`).send({ riferimento: { tipo: 'punto', chiave: altra.chiave } }).expect(200);
     expect(vociDi(pin.id)).toEqual([altra.chiave, v.chiave].sort());
@@ -597,7 +597,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     const rovinato = esportaMappe(mappa);
     rovinato.mappe.flatMap((m) => m.spilli).find((s) => s.uid === libero.uid)!.voce = { chiave: 'x' } as unknown as string;
     expect(() => importaMappe(rovinato, { sovrascrivi: true })).toThrow(expect.objectContaining({ code: 'voce-non-valida' }));
-    // anche un elenco di voci rovinato (098)
+    // anche un elenco di voci rovinato
     const rovinato2 = esportaMappe(mappa);
     rovinato2.mappe.flatMap((m) => m.spilli).find((s) => s.uid === libero.uid)!.voci = [42] as unknown as string[];
     expect(() => importaMappe(rovinato2, { sovrascrivi: true })).toThrow(expect.objectContaining({ code: 'voce-non-valida' }));
@@ -611,7 +611,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     pinLiberi = pinLiberi.map((p) => ({ ...p, id: prepared('SELECT id FROM spillo WHERE uid = ?').pluck().get(p.uid) as number }));
   });
 
-  it('reimportando un pacchetto che tace sulla voce (di prima della 094) la voce resta al pin con lo stesso uid; uno che la dichiara vuota la toglie', async () => {
+  it('reimportando un pacchetto che tace sulla voce (un pacchetto vecchio) la voce resta al pin con lo stesso uid; uno che la dichiara vuota la toglie', async () => {
     const libero = pinLiberi[0];
     const p = await nuovoPunto('Forziere reimportato');
     await collega(p.chiave, libero.id).expect(200);
@@ -631,8 +631,8 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
   });
 
   it('reseed del seed: un pin invariato tiene id e voce; cambiato, torna con la voce; un pacchetto di prima (riferimento «punto») la dà nel campo suo', async () => {
-    // una planimetria d'origine «seed» di un Palazzo, con una porta del gioco (fino al 2026-10-31 erano le strutture fisse dei Memento,
-    // `nativo-rmap-190-2-0`, tolte dalla migrazione 322): Madarame, la prima in ordine di chiave; le due voci fra quelle che il pin accetta
+    // una planimetria d'origine «seed» di un Palazzo, con una porta del gioco (non le strutture fisse
+    // dei Memento, che non ci sono): Madarame, la prima in ordine di chiave; le due voci fra quelle che il pin accetta
     const palazzi = palazzoDiOgniMappa();
     const mappa = (prepared("SELECT m.chiave FROM mappa m WHERE m.origine = 'seed' AND EXISTS (SELECT 1 FROM spillo s WHERE s.mappa_chiave = m.chiave AND s.origine = 'seed' AND s.tipo = 'porta') ORDER BY m.chiave").pluck().all() as string[])
       .find((k) => palazzi.get(k) === 'madarame')!;
@@ -647,7 +647,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     importaMappe(muto(), { origine: 'seed' });
     expect(prepared('SELECT id FROM spillo WHERE uid = ?').pluck().get(pin.uid)).toBe(pin.id);
     expect(vociDiUid(pin.uid)).toEqual([v]);
-    // invariato anche dichiarando le stesse voci (098: si confrontano come insieme)
+    // invariato anche dichiarando le stesse voci (si confrontano come insieme)
     importaMappe(esportaMappe(mappa), { origine: 'seed' });
     expect(prepared('SELECT id FROM spillo WHERE uid = ?').pluck().get(pin.uid)).toBe(pin.id);
     // il seed lo cambia (il nome): il pin si toglie e si reinserisce con lo stesso uid e la sua voce, e da L3 (andata e ritorno
@@ -659,7 +659,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect(dopo.nome).toBe('Porta rinominata dal seed');
     expect(vociDiUid(pin.uid)).toEqual([v]);
     expect(dopo.id).toBe(pin.id);
-    // un pacchetto di prima della 094 dichiara la voce nel riferimento: diventa la voce del pin, il riferimento resta libero
+    // un pacchetto vecchio dichiara la voce nel riferimento: diventa la voce del pin, il riferimento resta libero
     const vecchio = muto();
     vecchio.mappe.flatMap((m) => m.spilli).find((s) => s.uid === pin.uid)!.riferimento = { tipo: 'punto', chiave: w };
     importaMappe(vecchio, { origine: 'seed' });

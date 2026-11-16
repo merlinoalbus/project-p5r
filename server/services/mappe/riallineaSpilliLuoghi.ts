@@ -5,7 +5,6 @@
 // Una regola dei dati che si rifà a ogni avvio e dopo ogni importazione (`regoleAllAvvio`): quando la corrispondenza fra tipo di luogo e tipo di
 // spillo (`shared/tipiLuogo`) cambia, si tocca **solo** lo spillo rimasto al tipo della vecchia corrispondenza; i pacchetti possono assegnare tipi
 // più fini (il bagno pubblico è «terme», non «lavanderia») e quelli restano. Non tocca gli spilli dell'utente.
-// Viveva in `sincronizzaMappe.ts`, tolto da L11 · B9 (la migrazione 027 ne ha una copia congelata).
 // ============================================================
 
 import { nowIso } from '../../db/dbService.js';

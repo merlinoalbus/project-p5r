@@ -36,7 +36,7 @@ import type {
 
 /**
  * Il testo di un oggetto dell'equipaggiamento nel compendio (elenco e oggetto dell'esecuzione di una Persona): le statistiche
- * (`statistiche.testo`, separate dall'effetto dalla migrazione 275) e poi l'effetto, come li dava la vecchia descrizione in un solo testo.
+ * (`statistiche.testo`, separate dall'effetto) e poi l'effetto, in un solo testo.
  */
 function testoOggettoCompendio(o: CatalogoOggettoDto): string {
   const statistiche = typeof o.statistiche?.testo === 'string' ? o.statistiche.testo.trim() : '';
@@ -75,7 +75,7 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
   };
   const prodotti = ricompensePerFonte('ricetta'); const materiali = materialiDelleRicette();
   const nomi = nomiCondizioniMemo();
-  // Ondata 5, lotto F (migrazione 279): l'effetto di una ricetta è quello del suo prodotto, nel catalogo
+  // Ondata 5, lotto F: l'effetto di una ricetta è quello del suo prodotto, nel catalogo
   const effettiProdotti = effettiDegliOggetti([...prodotti.values()].flat().map((p) => p.chiave));
   return { ...dati,
     scambi: [], listiniScambi: riferimentiListiniScambi(),
@@ -93,7 +93,7 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
     fabbricazione: { ...dati.fabbricazione, ricette: dati.fabbricazione.ricette.map((r) => ({ ...r,
       effetto: effettoDellaFonte(r.effetto, prodotti.get(r.attrezzo) ?? [], effettiProdotti),
       prodottiCatalogo: prodotti.get(r.attrezzo) ?? [], materialiCatalogo: materiali.get(r.attrezzo) ?? [],
-      // L8-03 (migrazione 340): quando si può fabbricare, con la frase; il testo «sblocco» della guida resta
+      // L8-03: quando si può fabbricare, con la frase; il testo «sblocco» della guida resta
       condizioni: condizioniDellaGuida(r.condizioniJson, nomi) })) },
     personalizzazioneArmi: { ...dati.personalizzazioneArmi, confidente: confidenteDellePersonalizzazioni(dati.personalizzazioneArmi.progressioneConfidente, nomi) },
     abiti: { ...dati.abiti, elenco: dati.abiti.elenco.flatMap((v) => {
@@ -136,7 +136,7 @@ interface RigaPersona {
   forza: number; magia: number; resistenza: number; agilita: number; fortuna: number; aree_mementos_json: string; piani_mementos: string | null;
   descrizione: string; fonte_descrizione: string;
   del_party: number; personaggio: string | null; forma: number | null; forma_di: number | null; deriva_da: number | null; chiave_forma: string | null; forma_condizioni_json: string | null;
-  /** Ondata 5 (lotto F-bis, migrazione 296): l'oggetto chiave che la fusione richiede; la colonna manca negli schemi di prima. */
+  /** Ondata 5 (lotto F-bis): l'oggetto chiave che la fusione richiede; la colonna manca negli schemi vecchi. */
   richiede_oggetto?: string | null;
   /** L8-07: lo stato della cattura (`sqlStatoCattura`, letto nella stessa SELECT): `provata`, `esclusa` o `da-verificare`. */
   stato_cattura: StatoCattura;
@@ -236,7 +236,7 @@ export function affinitaDi(perElemento: Map<string, string>): AffinitaDto[] {
 
 /**
  * R8-10/1: le affinità come le dà la guida, se l'utente ne ha corretta almeno una (altrimenti null: sono già quelle della guida). Il valore della
- * guida di ogni riga è `seed_codice` (migrazione 186); un elemento senza riga in tabella vale «-», come per la lettura.
+ * guida di ogni riga è `seed_codice`; un elemento senza riga in tabella vale «-», come per la lettura.
  */
 function affinitaGuidaDi(personaId: number): AffinitaDto[] | null {
   const righe = prepared('SELECT elemento, codice, origine, seed_codice FROM persona_affinita WHERE persona_id = ?').all(personaId) as Array<{ elemento: string; codice: string; origine: string; seed_codice: string | null }>;
@@ -426,8 +426,8 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const catalogoEsecuzione = oggettiPerFonte('equipaggiamento', originali.map((o) => String(o.id)));
   const identitaEsecuzione = (nome: string | null) => { const o = nome === null ? undefined : perNome.get(nome); return o ? catalogoEsecuzione.get(String(o.id)) : undefined; };
   const normale = identitaEsecuzione(r.oggetto); const allarme = identitaEsecuzione(r.oggetto_allarme);
-  // Ondata 5, lotto F (decisione 21): che cosa fa l'oggetto si legge solo dal catalogo (la copia in `traduzione` è tolta dalla 271),
-  // con le statistiche che la 275 ha separato dall'effetto
+  // Ondata 5, lotto F (decisione 21): che cosa fa l'oggetto si legge solo dal catalogo (in `traduzione` non c'è una copia),
+  // con le statistiche separate dall'effetto
   const descrizioneOggetto = (nome: string | null): string | null => {
     if (nome === null) return null;
     const o = identitaEsecuzione(nome);
@@ -535,8 +535,8 @@ export function elencaOggetti(f: { q?: string; categoria?: string } = {}): Ogget
     const c = catalogo.get(String(o.id));
     return { id: o.id, nome: o.nome, nomeIt: c?.nome ?? tOpz('oggetto', o.nome), categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
       vincolo: o.vincolo, vincoloNome: c ? typeof c.statistiche?.per === 'string' ? c.statistiche.per : null : tOpz('vincoloOggetto', o.vincolo),
-      // Ondata 5, lotto F (decisione 21): la resa italiana è solo l'oggetto del catalogo (statistiche ed effetto); la copia in `traduzione`
-      // (ambito descrizioneOggetto) è tolta dalla migrazione 271. Senza oggetto del catalogo non c'è una resa: vuoto, mai l'inglese.
+      // Ondata 5, lotto F (decisione 21): la resa italiana è solo l'oggetto del catalogo (statistiche ed effetto); in `traduzione`
+      // (ambito descrizioneOggetto) non c'è una copia. Senza oggetto del catalogo non c'è una resa: vuoto, mai l'inglese.
       descrizione: o.descrizione, descrizioneNome: c ? testoOggettoCompendio(c) : '',
       catalogo: c ? { chiave: c.chiave, nome: c.nome, casa: c.casa } : null, nomiAltri: c?.nomiAltri ?? [] };
   });
@@ -562,7 +562,7 @@ function regaloModificato(r: { catalogo_chiave: string | null; dove: string | nu
   if (!r.seed_json) return false;
   let f: Record<string, unknown>;
   try { f = JSON.parse(r.seed_json) as Record<string, unknown>; } catch { return false; }
-  if (typeof f.tipo === 'string') return false; // fotografia di prima della 212: non è la forma del registro
+  if (typeof f.tipo === 'string') return false; // fotografia vecchia: non è la forma del registro
   const attuali: Record<string, unknown> = { catalogo_chiave: r.catalogo_chiave, dove: r.dove, costo: r.costo, sconsigliato: r.sconsigliato === 1, nota: r.nota, reazione: r.reazione === null ? null : String(r.reazione) };
   return Object.keys(attuali).some((p) => p in f && !uguali(f[p] ?? null, attuali[p] ?? null));
 }
@@ -585,10 +585,10 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   if (!c) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
   const abilita = (prepared('SELECT rango, nome, descrizione FROM confidente_abilita WHERE confidente_chiave = ? ORDER BY rango, ordine').all(chiave) as Array<{ rango: number; nome: string; descrizione: string }>);
   const dialoghi = (prepared('SELECT id, rango, etichetta, note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ id: number; rango: number | null; etichetta: string; note: string; scelte_json: string }>)
-    // migrazione 309: i punti solo numerici (con il ramo amore), letti dall'unico lettore delle scelte
+    // i punti solo numerici (con il ramo amore), letti dall'unico lettore delle scelte
     .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: leggiScelteDialogo(d.scelte_json).map((s) => ({ ...s, puntiAmore: s.puntiAmore ?? null })) }));
   const conCatalogo = catalogoOggettiDisponibile();
-  // ondata 5 (migrazioni 255-256): la reazione è una colonna; su un file di gioco più vecchio «sconsigliato» vale +1 e il resto +3
+  // ondata 5: la reazione è una colonna; su un file di gioco che non la ha «sconsigliato» vale +1 e il resto +3
   const conReazione = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
   const righeRegali = (prepared(`SELECT ordine,nome,dove,costo,sconsigliato,${conReazione ? 'reazione' : 'NULL AS reazione'},${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`)
     .all(chiave) as Array<{
@@ -621,7 +621,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   });
   const regalabile = haColonnaMain(getDb(), 'confidente', 'regalabile')
     ? !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave) : righeRegali.length > 0;
-  // L13 (ondata 6, O6-2, migrazione 307): della riga si leggono solo note e fonti; giorni, fasce, luoghi e sblocco sono la disponibilità strutturata
+  // L13 (ondata 6, O6-2): della riga si leggono solo note e fonti; giorni, fasce, luoghi e sblocco sono la disponibilità strutturata
   const disp = prepared('SELECT note, note_generali, fonti_json FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { note: string; note_generali: string; fonti_json: string } | undefined;
   return {
     ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi, dotiIncontro: dotiIncontro(chiave),
@@ -630,7 +630,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
       { ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota }))
       .sort((a, b) => (b.reazione ?? 0) - (a.reazione ?? 0) || a.ordine - b.ordine),
     regalabile,
-    // L13 (O10-2): con il Confidente si può iniziare una relazione romantica (migrazioni 324-325)
+    // L13 (O10-2): con il Confidente si può iniziare una relazione romantica
     romanzabile: eRomanzabile(chiave),
     // L13 (ondata 11, O11-3): ogni dono con la sua regola in parole, generate dal dato (la scheda la mostra al posto della prosa della guida)
     oggettiRicompensa: ricompensePerFonte('confidente', [chiave], { condizione: condizioneDelDono }).get(chiave) ?? [],

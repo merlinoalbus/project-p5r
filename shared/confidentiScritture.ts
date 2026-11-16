@@ -13,7 +13,7 @@ export interface AbilitaRangoDto { rango: number; abilita: Array<{ nome: string;
 
 /**
  * Una scelta di dialogo, con i punti che dà: `punti` (null = la guida non ne dà, 0 = nessun punto) e, solo dove la guida dà un valore diverso
- * nel ramo amore, `puntiAmore` (migrazione 309: i punti sono solo numerici, il testo della guida «+3»/«♪♪» non c'è più).
+ * nel ramo amore, `puntiAmore` (i punti sono solo numerici, senza il testo della guida «+3»/«♪♪»).
  */
 export interface SceltaDialogo { ordine: number; testo: string; punti: number | null; puntiAmore?: number | null; romantica: boolean; avviso: string | null }
 

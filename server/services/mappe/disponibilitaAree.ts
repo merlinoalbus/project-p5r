@@ -6,11 +6,11 @@ import { condizioneConTesto, type RequisitoSpillo } from '../../../shared/condiz
 import type { RigaArea } from './casaMappa.js';
 
 /** Un'Area del mondo è raggiungibile solo quando è aperto il quartiere che la contiene e, se ne ha una, vale la sua condizione propria
- *  (`area.condizioni_json`, migrazione 303: il Covo dei Ladri dal 5 maggio). Senza partita è sempre raggiungibile. */
+ *  (`area.condizioni_json`: il Covo dei Ladri dal 5 maggio). Senza partita è sempre raggiungibile. */
 export function areaDisponibilePerPartita(a: Pick<RigaArea, 'quartiere_chiave' | 'condizioni_json'> & { chiave?: string | null }, partitaId?: number): boolean {
   if (partitaId === undefined) return true;
-  // senza quartiere e senza condizione propria (le Aree dei Palazzi e della città, di norma) non c'è nulla da valutare: com'era prima
-  // della 303, senza leggere inviti né righe per ognuna delle loro planimetrie (l'indice delle Mappe ne conta centinaia)
+  // senza quartiere e senza condizione propria (le Aree dei Palazzi e della città, di norma) non c'è nulla da valutare:
+  // si risponde senza leggere inviti né righe per ognuna delle loro planimetrie (l'indice delle Mappe ne conta centinaia)
   if (!a.quartiere_chiave && (a.condizioni_json === null || (a.condizioni_json === undefined && !a.chiave))) return true;
   const condizioni = condizioneEffettivaArea(a);
   if (!condizioni) return true;

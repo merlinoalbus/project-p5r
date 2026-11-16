@@ -4,13 +4,13 @@
 //
 // Decisione 21, precisazione: gli oggetti con effetti che incidono su ciò che l'app gestisce si modellano con i tipi dell'app. Un oggetto che si
 // usa esce dalle copie possedute: il concime della pianta (Gentilezza), i materiali della fabbricazione (Perizia, decisione 22), l'incenso
-// dell'Isolamento (statistiche della Persona). Un solo registro, `utente.consumo_oggetto_partita` (utente 054):
+// dell'Isolamento (statistiche della Persona). Un solo registro, `utente.consumo_oggetto_partita`:
 //   - un turno registrato con un esito che dichiara `consuma` (`attivita.esiti_json`, `shared/esitiAttivita.ts`) scrive una riga per oggetto
 //     (registrando il turno, dentro la sua transazione) e la toglie togliendolo: lo stesso percorso degli oggetti dati
 //     (`oggettiDegliEsitiService`) e del trofeo (`trofeiDegliEsitiService`);
 //   - un ciclo di Isolamento con un incenso del catalogo scrive una riga con l'evento dello storico; quella riga si annulla dagli «Oggetti
 //     ottenuti» (`annullaConsumoIsolamento`), perché l'Isolamento non ha un gesto che lo tolga;
-//   - 2026-10-28 (utente 055): una voce spuntata con l'effetto «oggetto restituito o venduto» scrive una riga per effetto (`fonte` «voce», con il
+//   - 2026-10-28: una voce spuntata con l'effetto «oggetto restituito o venduto» scrive una riga per effetto (`fonte` «voce», con il
 //     modo, il ricavo e il giorno della voce: `scriviUscitaDaVoce`) e la toglie togliendo la spunta. Lei sì controlla le copie (mai sotto zero:
 //     `effettiDiStatoService`), perché restituire o vendere ciò che non si possiede non ha senso.
 // Il consumo non chiede di avere le copie: chi gioca le ha prese in un modo che l'app può non conoscere (un'aggiunta a mano, una partita
@@ -26,7 +26,7 @@ import { nomeOggettoCatalogo, oggettiDelTurnoVerificati } from './oggettiDegliEs
 
 const TABELLA = 'consumo_oggetto_partita';
 
-/** La tabella c'è? (Uno schema di prima della utente 054 non registra consumi: niente da scrivere né da togliere.) */
+/** La tabella c'è? (Uno schema vecchio non registra consumi: niente da scrivere né da togliere.) */
 export const conRegistroConsumi = (): boolean => haTabellaUtente(getDb(), TABELLA);
 
 /**
@@ -69,10 +69,10 @@ export function copieConsumate(p: number, catalogo: string): number {
   return prepared(`SELECT COALESCE(SUM(quantita), 0) FROM utente.${TABELLA} WHERE partita_id = ? AND catalogo_chiave = ?`).pluck().get(p, catalogo) as number;
 }
 
-/** Il registro ha le uscite dalle voci (utente 055)? Senza, l'effetto «oggetto restituito o venduto» non ha dove scrivere. */
+/** Il registro ha le uscite dalle voci? Senza, l'effetto «oggetto restituito o venduto» non ha dove scrivere. */
 export const conUsciteDaVoce = (): boolean => conRegistroConsumi() && haColonnaUtente(getDb(), 'consumo_oggetto_partita', 'voce_uid');
 
-/** Una riga di uscita scritta da una voce (utente 055): l'oggetto restituito o venduto dall'effetto della voce. */
+/** Una riga di uscita scritta da una voce: l'oggetto restituito o venduto dall'effetto della voce. */
 export interface UscitaDaVoce { catalogo: string; quantita: number; modo: 'restituito' | 'venduto'; prezzo: number | null; giorno: string | null; creatoIl: string }
 
 /** L'uscita che l'effetto `effettoUid` della voce ha scritto nella partita, o null. Sola lettura. */

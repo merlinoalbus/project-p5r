@@ -11,11 +11,10 @@
 #   (3a. `rilascio`: lo stage dell'istanza pubblica in sola lettura, L12; si costruisce solo con `--target rilascio` e sta PRIMA del
 #      runtime di preparazione, che resta lo stage finale e quindi quello predefinito)
 #
-# Il pacchetto di gioco iniziale (pacchetto/gioco.db, senza immagini; il completo,
-# pacchetto/completo/, e' fuori da git e dall'immagine: si importa dall'app) viaggia
-# NELL'IMMAGINE con il file NOTICE delle attribuzioni: al primo boot il backend
-# lo copia sul volume /data (gioco.db), crea partite.db accanto e applica le
-# migrazioni. Non esiste più un seed JSON.
+# Il pacchetto di gioco iniziale (pacchetto/gioco.db e il modello pacchetto/partite-vuoto.db, senza immagini; il backup completo
+# dei dati di gioco, con le immagini, non entra nell'immagine: si importa dall'app) viaggia NELL'IMMAGINE con il file NOTICE delle
+# attribuzioni: al primo boot il backend copia gioco.db sul volume /data, crea partite.db accanto dal modello e verifica le
+# versioni dei due file. Non esiste un seed JSON.
 #
 # NB: tsx esegue i .ts direttamente a runtime → tsx/express/pino/
 # better-sqlite3/zod DEVONO stare in dependencies. pino-pretty no: in
@@ -50,7 +49,7 @@ RUN node -e "require('sharp')({create:{width:2,height:2,channels:4,background:'#
 # Si costruisce SOLO con `--target rilascio` (workflow docker-publish-rilascio.yml). Sta PRIMA dello stage finale apposta: senza `--target` Docker
 # costruisce l'ultimo stage, che resta quello di preparazione, quindi la pipeline di `main` non cambia di una riga.
 #   - punto d'avvio `server/rilascio.ts`: la modalità «rilascio» è scritta nel codice, non in una variabile dello stack (un errore di
-#     configurazione non può aprire le scritture), e non carica l'esecutore delle migrazioni;
+#     configurazione non può aprire le scritture);
 #   - NIENTE `pacchetto/`: i contenuti non nascono dall'immagine ma dal volume dell'edizione (prodotto da «Prepara edizione»), montato in sola lettura;
 #   - NIENTE cartella d'appoggio (`DEPOSITO_DIR`): nel rilascio non si importa e non si esporta nulla;
 #   - tre cartelle, tutte pre-create e di proprietà dell'utente non-root perché il volume nominato ne eredita il proprietario alla prima

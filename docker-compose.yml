@@ -33,11 +33,11 @@
 # container tra quelli monitorati per l'auto-update da GHCR (:latest).
 #
 # Il DB SQLite viene creato dal backend sul volume `project_p5r_data`
-# al primo avvio dal pacchetto iniziale (pacchetto/gioco.db, senza immagini) e
-# migrato; le partite stanno in partite.db; entrambi sopravvivono agli
-# aggiornamenti d'immagine.
+# al primo avvio dal pacchetto iniziale (pacchetto/gioco.db, senza immagini);
+# le partite stanno in partite.db, creato dal modello pacchetto/partite-vuoto.db;
+# entrambi sopravvivono agli aggiornamenti d'immagine.
 #
-# Il pacchetto COMPLETO (con le immagini, ~311 MB) arriva dalla CARTELLA D'APPOGGIO
+# Il backup COMPLETO dei dati di gioco (con le immagini, centinaia di MB) arriva dalla CARTELLA D'APPOGGIO
 # sul NAS, montata via NFS su /deposito: ci si deposita il file e da
 # Impostazioni → Pacchetto di gioco si sceglie quale importare. Il browser non
 # trasporta più nulla, quindi i limiti di corpo di nginx e del tunnel non contano.

@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Una domanda in classe e un cruciverba hanno UNA sola verità, la tabella della partita (`domanda_partita`, `cruciverba_partita`), e due
-// modi di segnarla: la pagina della Guida e la voce del Diario che li cita con un effetto di stato (migrazioni 157 e 158). Perché i due non
+// modi di segnarla: la pagina della Guida e la voce del Diario che li cita con un effetto di stato. Perché i due non
 // si separino, quando la voce c'è la spunta dalla Guida passa dallo STESSO gesto della voce: la voce risulta fatta anche nel Diario e nella
 // Home, e la Conoscenza compare come «Applica» sulla voce (D6: mai in automatico).
 //

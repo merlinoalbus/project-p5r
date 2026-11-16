@@ -5,7 +5,7 @@
 // Richiesta dell'utente: «nel memento le persona disponibili devono essere visualizzate con le loro immagini e cliccabili...
 // Le persone catturate o meno non influiscono sulla percentuale di completamento del memento. A seguire le richieste e poi gli
 // elementi Trama... unico tipo visto che nei memento è tutto random». Scelte: il tocco segna «catturata»; le voci di oggi che non
-// sono Persona «tutte Trama» (migrazione 100).
+// sono Persona «tutte Trama».
 // ============================================================
 
 import request from 'supertest';

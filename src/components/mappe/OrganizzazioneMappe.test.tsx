@@ -131,7 +131,7 @@ it.skip('L3 (AP3-4): una planimetria dell’infiltrazione porta dritto alla sua 
   expect(api.risolviMappa).toHaveBeenCalledWith('nativo-biblioteca');
 });
 
-it.skip('i passi di un Enigma rientrano sotto di lui (095), le altre voci no', async () => {
+it.skip('i passi di un Enigma rientrano sotto di lui, le altre voci no', async () => {
   /** Costruisce un punto della guida di tipo «nota» con id `punto:…` e il contenitore indicato (null = voce di primo livello, altrimenti l'Enigma di cui è un passo). */
   const voce = (id: string, nome: string, contenitore: string | null) => ({ id, nome, descrizione: '', tipo: 'nota', riferimento: { tipo: 'punto', chiave: id.slice(6) }, collezionabile: false, soloPosizione: false, ruolo: 'punto', contenitore });
   api.getContenutiMappa.mockResolvedValue({ mappa: 'palazzo', aree: [{ chiave: 'sala', nome: 'Sala', descrizione: '', note: '', mappe: [], punti: [voce('punto:e', 'La porta della torre', null), voce('punto:a', 'Tira la leva', 'punto:e'), voce('punto:f', 'Forziere', null)] }] });

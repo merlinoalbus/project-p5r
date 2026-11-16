@@ -47,23 +47,23 @@ import { verificaEliminazioneDiVendita, verificaModificaLuogo, verificaModificaP
 // non hanno `disponibile_dal`/`condizione`/`fonte` (prosa: si scrivono le condizioni), libri, film
 // e attività portano `effetti_json`; `fonte` resta colonna ma non si scrive più da qui.
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
-  // L5: con la sede valgono gli orari del luogo, salvo `eccezione_orari_json` quando la guida distingue il negozio (R5-12b); L4-02 (373):
-  // `orari_json` del negozio non c'è più, e chi non ha sede tiene i suoi orari come eccezione
-  // chiusura dell'ondata 5: `sconto_json`, lo sconto legato al rango di un Confidente (migrazione 254), il suo unico punto
+  // L5: con la sede valgono gli orari del luogo, salvo `eccezione_orari_json` quando la guida distingue il negozio (R5-12b); L4-02:
+  // `orari_json` del negozio non c'è, e chi non ha sede tiene i suoi orari come eccezione
+  // chiusura dell'ondata 5: `sconto_json`, lo sconto legato al rango di un Confidente, il suo unico punto
   // La posizione è solo `sede_chiave` (luogo → quartiere): il quartiere si deriva sempre, non si scrive.
   negozio: ['nome', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'sconto_json', 'note'],
   // `effetto_json`, `effetto` e `statistiche` non sono più dell'offerta (colonne tolte): il testo dell'effetto e le statistiche vivono
   // in un punto solo, l'oggetto del catalogo (`catalogo_oggetto.effetto`, `statistiche_json`).
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'nota', 'verificato'],
-  // L13 (ondata 7, O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca`, `effetto_json` dei libri e `dote`, `note`, `note_successive` dei
-  // film non si scrivono più: che cosa dà la lettura sono gli effetti, dove si ottiene sono articoli, posizioni e ricompense (il prezzo del
-  // libro è quello dell'articolo: colonna uscita con la 363)
+  // L13 (ondata 7, O7-4): `dove`, `dote`, `note`, `sblocca`, `effetto_json` dei libri e `dote`, `note`, `note_successive` dei
+  // film non si scrivono: che cosa dà la lettura sono gli effetti, dove si ottiene sono articoli, posizioni e ricompense (il prezzo del
+  // libro è quello dell'articolo)
   libro: ['condizioni_json', 'nome', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'sede_chiave', 'fascia',
     'costo', 'sessioni', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
-  // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` non è più una
-  // colonna (L11, migrazione 193: si ricava dagli orari) e i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
+  // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` non è una
+  // colonna (L11: si ricava dagli orari) e i `giorni_json` del luogo sono gli orari (L11)
   luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'orari_json', 'area_chiave', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
   cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],
@@ -155,7 +155,7 @@ function assicuraIdentitaLettura(tipo: TipoCatalogo, chiave: string, nome: strin
 
 /** Prima di M7 non legge/scrive la colonna nuova, neppure negli snapshot dei gesti esistenti. */
 function campiDisponibili(tipo: TipoCatalogo): readonly string[] {
-  // un file di gioco di prima della 254 non ha lo sconto del negozio: non si legge né si scrive
+  // un file di gioco vecchio non ha lo sconto del negozio: non si legge né si scrive
   if (tipo === 'negozio' && !haColonnaMain(getDb(), 'negozio', 'sconto_json')) return CAMPI.negozio.filter((c) => c !== 'sconto_json');
   return tipo === 'articolo' && !catalogoOggettiDisponibile() ? CAMPI[tipo].filter((c) => c !== 'catalogo_chiave' && c !== 'costo_json') : CAMPI[tipo];
 }
@@ -255,7 +255,7 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
 
 /** Le regole che valgono su ogni scrittura, prima di toccare la tabella: tracciamento dal tipo su un'attività nuova, dove il modulo non
  *  lo dice, e `effetti_json` sempre normalizzato (illeggibile → lista vuota). Che cosa dà un'attività lo dicono solo gli effetti e gli
- *  esiti: i campi vecchi (`doti_json`, tolto con la 362) non esistono più. Non tocca l'oggetto ricevuto. */
+ *  esiti: i campi vecchi (`doti_json`) non esistono. Non tocca l'oggetto ricevuto. */
 function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, esistente: Riga | null): Record<string, unknown> {
   const d = { ...dati };
   const pesca=tipo==='attivita'&&(d.pesca_regola_chiave!==undefined?d.pesca_regola_chiave:esistente?.pesca_regola_chiave)!=null;
@@ -281,7 +281,7 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
     if (conCatalogo && typeof chiave === 'string') {
       // L4-07: nome, categoria e «per chi» valgono solo per un'offerta senza legame; con il legame li dà l'oggetto del catalogo. Non si
       // copiano né si corregge l'identità dal listino: la riga collegata li ha vuoti (NOT NULL: nome vuoto, categoria «altro»), anche
-      // quando un'offerta che aveva i suoi viene collegata adesso (la migrazione 376 ha portato così le righe di prima, con l'archivio).
+      // quando un'offerta che aveva i suoi viene collegata adesso.
       for (const c of ['nome', 'categoria', 'per']) delete d[c];
       Object.assign(d, IDENTITA_DI_UN_OFFERTA_COLLEGATA);
       if ('catalogo_chiave' in dati && dati.catalogo_chiave !== esistente?.catalogo_chiave) { d.oggetto_fonte = null; d.oggetto_chiave = null; }

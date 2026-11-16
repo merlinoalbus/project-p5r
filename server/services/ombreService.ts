@@ -245,7 +245,7 @@ export function dettaglioOmbra(chiave: string, partita?: number): OmbraDettaglio
   return { ...base, affinita, affinitaProprie: proprie.size > 0, raggiungibilita: partita === undefined ? null : raggiungibilita(r, luoghi, fondibile), voci, note: r.note };
 }
 
-/** I conteggi misurati ora e il rapporto della migrazione che ha creato le Ombre (le decisioni ancora da prendere). */
+/** I conteggi misurati ora e il rapporto salvato sulla creazione delle Ombre (le decisioni ancora da prendere). */
 export function verificaOmbre(): OmbreVerificaDto {
   const uno = (sql: string): number => prepared(sql).pluck().get() as number;
   const personalita = Object.fromEntries(PERSONALITA_OMBRA.map((p) => [p, 0])) as Record<PersonalitaOmbra, number>;

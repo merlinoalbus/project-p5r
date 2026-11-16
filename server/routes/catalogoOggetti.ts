@@ -12,7 +12,7 @@ const router = Router();
 const chiave = (params: Record<string, unknown>) => `${String(params.categoria)}/${String(params.slug)}`;
 
 // Le rotte letterali («note-storiche/…», «legami») precedono categoria/slug: non sono oggetti chiamati come loro.
-/** F6: le note storiche della fonte (migrazione 139). Modifica (PUT); il testo attuale è una precondizione (409 se è cambiato nel frattempo). */
+/** F6: le note storiche della fonte. Modifica (PUT); il testo attuale è una precondizione (409 se è cambiato nel frattempo). */
 const paramsNotaStorica = schema.object({ chiave: schema.string().regex(/^[a-z0-9][a-z0-9-]{0,119}$/) });
 router.put('/note-storiche/:chiave', validate({
   params: paramsNotaStorica,

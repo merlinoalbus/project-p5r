@@ -32,7 +32,7 @@ import { descriviGiorni, descriviOrari, descriviOrariDelLuogo, leggiOrari, orari
 import type { LuogoDettaglioDto, LuogoDto, PresenzaLuogoDto } from '../../shared/types.js';
 import { ancoraPuntoVendita } from '../../shared/puntoVendita.js';
 
-/** Una riga di `luogo` (con le colonne della 115, assenti su uno schema di prima). */
+/** Una riga di `luogo` (con le colonne di L5, assenti su uno schema vecchio). */
 export interface RigaLuogo {
   chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string;
   confidenti_json: string; piatti_json: string | null; note: string | null; fonte: string; verificato: number; origine: string;

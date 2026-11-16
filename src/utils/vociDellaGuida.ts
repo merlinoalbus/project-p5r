@@ -7,7 +7,7 @@ import { puntoDescrittivo } from '../../shared/spilli';
 import type { PuntoInteresseDto } from '../types';
 
 /** Una voce descrittiva si legge e basta (niente stato, niente pin): la regola unica del server (`puntoDescrittivo`), con il carattere
- *  (un «Altro» permanente o rigenerabile si segna, 2026-10-31) e senza descrittive nelle aree dei dedali (099). */
+ *  (un «Altro» permanente o rigenerabile si segna, 2026-10-31) e senza descrittive nelle aree dei dedali. */
 export const voceDescrittiva = (p: Pick<PuntoInteresseDto, 'tipo' | 'areaDedalo' | 'carattere'>): boolean => puntoDescrittivo(p.tipo, p.areaDedalo, p.carattere);
 
 /** Quante voci sono segnate, senza le descrittive. */

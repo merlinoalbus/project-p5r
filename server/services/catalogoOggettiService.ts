@@ -107,7 +107,7 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   const consegneOggetto = partita === undefined ? [] : regaliDellaPartita(partita).filter((r) => r.catalogo === chiave);
   const regalati = new Set(consegneOggetto.map((r) => r.confidente));
   // ondata 5 (decisioni 13 e 21): a chi piace lo dice l'elenco dei regali, con la reazione (+3/+2/+1); un Confidente compare una volta, con la
-  // reazione più alta (su un file di gioco di prima della 256 «sconsigliato» vale +1, il resto +3)
+  // reazione più alta (su un file di gioco senza la colonna della reazione «sconsigliato» vale +1, il resto +3)
   const conReazione = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
   // revisione dei lotti D e D2: anche la nota della riga, perché la scheda dell'oggetto decida chi lo gradisce con lo stesso criterio della
   // scheda del Confidente (`fraIGraditi`); le note diverse delle righe dello stesso Confidente si uniscono, nessuna si perde
@@ -143,7 +143,7 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
     const voce = videogiochiTutti(partita).videogiochi.find((v) => v.chiave === videogioco.chiave);
     if (voce) lettura = { tipo: 'videogioco', voce };
   }
-  // F6: la nota storica della fonte è un dato (migrazione 139), legato all'oggetto del catalogo
+  // F6: la nota storica della fonte è un dato, legato all'oggetto del catalogo
   return { ...oggetto, noteStoriche: noteStoricheDi('catalogo', riga.chiave), inVendita, regalo, forzieri: forzieriDellOggetto(chiave, partita), ricompense: ricompenseDellOggetto(chiave),
     trasformazioni: trasformazioniDiJose(partita === undefined ? undefined : statoDisponibilitaPartita(partita), chiave),
     scambi: inVendita.filter((o) => o.costo !== null || o.costoDaVerificare), ricette, lettura,

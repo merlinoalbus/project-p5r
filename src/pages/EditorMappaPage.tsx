@@ -4,7 +4,7 @@
 // ============================================================
 //
 // Ogni modifica viene salvata subito tramite l'API (niente stato «non salvato» da perdere); il posizionamento degli spilli esiste solo qui.
-// Dal 2026-10-14 la sezione «Pezzi» (102): «Ritaglia pezzo» trasforma una zona dell'immagine scelta col mouse in un pezzo da posare,
+// Dal 2026-10-14 la sezione «Pezzi»: «Ritaglia pezzo» trasforma una zona dell'immagine scelta col mouse in un pezzo da posare,
 // ruotare, specchiare e mostrare con le condizioni (`FormPezzo`); sostituire l'immagine di una mappa con dei pezzi chiede conferma.
 // ============================================================
 
@@ -61,7 +61,7 @@ const SENZA_CONDIZIONI: RequisitoSpillo[] = [];
 
 /** Spillo copiato negli appunti dell'editor: tutti i campi tranne la posizione; sopravvive al cambio di mappa e alla ricarica della pagina. */
 export interface AppuntiSpillo { destinazione?: DestinazioneSpillo | null; tipo: TipoSpillo; nome: string; descrizione: string; riferimento: { tipo: TipoRiferimento; chiave: string } | null; condizioni: RequisitoSpillo[] }
-/** Le condizioni dello spillo (o di una copia di un pezzo, 103) senza il testo descrittivo del server (è il server a ricalcolarlo). */
+/** Le condizioni dello spillo (o di una copia di un pezzo) senza il testo descrittivo del server (è il server a ricalcolarlo). */
 const condizioniNude = (s: Pick<SpilloDto, 'condizioni'>): RequisitoSpillo[] => condizioniSenzaTesto(s.condizioni);
 const CHIAVE_APPUNTI = 'p5r.editor.appunti-spillo';
 /** L'id dell'istruzione sulle frecce nel modulo dello spillo: il pin selezionato sulla mappa la cita con `aria-describedby`. */
@@ -125,7 +125,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [predefinite, setPredefinite] = useState<{ mappa: string; condizioni: RequisitoSpillo[] }>({ mappa: chiave, condizioni: [] });
   const condizioniNuovi = predefinite.mappa === chiave ? predefinite.condizioni : SENZA_CONDIZIONI;
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
-  /** La copia di un pezzo della planimetria selezionata (102; copie dalla 103): uno spillo o una copia alla volta. */
+  /** La copia di un pezzo della planimetria selezionata: uno spillo o una copia alla volta. */
   const [copiaId, setCopiaId] = useState<number | null>(null);
   const [pinDaLuogo, setPinDaLuogo] = useState<{ spillo: SpilloDto; contesto: string } | null>(null);
   const [pinDaRimuovere, setPinDaRimuovere] = useState<{ spillo: SpilloDto; contesto: string } | null>(null);
@@ -138,7 +138,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null){setSezione('spilli');setCopiaId(null);} };
   /** Seleziona una copia di un pezzo (o nessuna): il pannello passa alla sezione «Pezzi» e lo spillo si deseleziona. */
   const selezionaCopia = (id: number | null) => { setCopiaId(id); if (id !== null) { setSezione('pezzi'); setSelezionatoId(null); } };
-  /** L'immagine nuova in attesa di conferma su una mappa con dei pezzi (102: 409 `mappa-con-pezzi`): un file caricato o, da L1 (F5),
+  /** L'immagine nuova in attesa di conferma su una mappa con dei pezzi (409 `mappa-con-pezzi`): un file caricato o, da L1 (F5),
    *  la pianta da scaricare dalla guida. `sostituisci` ripete la stessa operazione con la conferma; `ok` è l'avviso dopo. */
   const [immagineDaConfermare, setImmagineDaConfermare] = useState<{ messaggio: string; sostituisci: () => Promise<unknown>; ok: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -190,7 +190,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
     onSposta: (id, x, y) => void esegui(() => aggiornaSpillo(id, { x, y })),
     // doppio tocco su uno spostamento: si visita l'arrivo senza uscire dalla modifica
     onVisita: vai,
-    // i pezzi della planimetria (102): la zona trascinata con «Ritaglia pezzo» diventa un pezzo con la sua prima copia (103),
+    // i pezzi della planimetria: la zona trascinata con «Ritaglia pezzo» diventa un pezzo con la sua prima copia,
     // selezionata e pronta da posare; sulla mappa si trascinano le copie
     pezzi: {
       selezionatoId: copiaId,
@@ -340,7 +340,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
         />
       )}
       {dati && (
-        // la sostituzione dell'immagine di una mappa con dei pezzi (102): il messaggio del server dice quanti se ne vanno
+        // la sostituzione dell'immagine di una mappa con dei pezzi: il messaggio del server dice quanti se ne vanno
         <Modal titolo="Sostituire l’immagine di base?" aperta={immagineDaConfermare !== null} onChiudi={() => setImmagineDaConfermare(null)}
           azioni={<>
             <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setImmagineDaConfermare(null)}>Annulla</button>
@@ -401,7 +401,7 @@ interface PropsPannello {
   onSeleziona: (id: number | null) => void;
   onSalvaSpillo: (id: number, dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>;
   onEliminaSpillo: (id: number) => Promise<void>;
-  /** Collega (o scollega) una voce della guida a uno spillo (098). */
+  /** Collega (o scollega) una voce della guida a uno spillo. */
   onCollegaVoce: (id: number, voce: string, collega: boolean) => Promise<void>;
   onCreaMappaCollegata: (s: SpilloDto) => Promise<void>;
   onCreaLuogoDaPin: (s: SpilloDto) => void;
@@ -417,7 +417,7 @@ interface PropsPannello {
   onEsporta: () => void;
   onImporta: (file: File, sovrascrivi: boolean) => Promise<void>;
   onVai: (chiave: string) => void;
-  /** I pezzi della planimetria (102) e le loro copie (103): la copia selezionata (col pezzo), la selezione, il salvataggio,
+  /** I pezzi della planimetria e le loro copie: la copia selezionata (col pezzo), la selezione, il salvataggio,
    *  l'aggiunta di una copia accanto a quella selezionata e le eliminazioni (di una copia, o del pezzo con tutte le copie). */
   copiaSelezionata: CopiaPosata | null;
   /** Le dimensioni dell'immagine della mappa (null se non note). */
@@ -448,7 +448,7 @@ function PannelloEditor(p: PropsPannello) {
       <nav className="editor-mappa__sezioni" aria-label="Sezioni dell’editor">
         {[['spilli','Spilli'],['pezzi','Pezzi'],['mappa','Mappa'],['collegamenti','Collegamenti'],['file','File']].map(([id,nome]) => <button key={id} type="button" aria-pressed={sezione === id} onClick={() => setSezione(id)}>{nome}</button>)}
       </nav>
-      {/* I pezzi della planimetria (102, 2026-10-14): zone dell'immagine scelte dall'utente, cancellate e posate altrove con condizioni */}
+      {/* I pezzi della planimetria (2026-10-14): zone dell'immagine scelte dall'utente, cancellate e posate altrove con condizioni */}
       <div hidden={sezione !== 'pezzi'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Pezzi della planimetria">
         <h3 className="visore-mappa__intestazione">Pezzi</h3>
@@ -460,7 +460,7 @@ function PannelloEditor(p: PropsPannello) {
         {mappa.pezzi.length === 0
           ? <p className="m-0 testo-12 text-text-muted">Nessun pezzo su questa mappa.</p>
           : (
-            // ogni pezzo con le sue copie (103): il nome e la zona del ritaglio, poi una voce per copia
+            // ogni pezzo con le sue copie: il nome e la zona del ritaglio, poi una voce per copia
             <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Pezzi di questa mappa">
               {mappa.pezzi.map((pz) => (
                 <li key={pz.id}>
@@ -627,7 +627,7 @@ function PannelloEditor(p: PropsPannello) {
   );
 }
 
-interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onCreaLuogoDaPin: () => void; onChiudi: () => void; onVai: (chiave: string) => void; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
+interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onCreaLuogoDaPin: () => void; onChiudi: () => void; onVai: (chiave: string) => void; /** Collega o scollega una voce della guida. */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
 
 // L3 (AD6): i termini della gerarchia — il pin indica un luogo o, dentro il luogo, uno dei suoi punti vendita (la macchina)
 const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Punto vendita' }, { tipo: 'luogo', nome: 'Luogo' }, { tipo: 'confidente', nome: 'Confidente' }];
@@ -706,7 +706,7 @@ function CollegamentoCitta({ valore, salvato, tipoPin, disabilitato, onCambia }:
 }
 
 /**
- * «Voci della guida» del pin (098, scelta dell'utente del 2026-10-09: «Guida ed editor»): le voci a cui appartiene, ognuna con
+ * «Voci della guida» del pin (scelta dell'utente del 2026-10-09: «Guida ed editor»): le voci a cui appartiene, ognuna con
  * «Scollega», e «Aggiungi voce» fra quelle del suo Palazzo che si possono ancora collegare (`getVociCollegabili`). Ogni gesto si
  * salva subito, come «Collega pin» nella guida. Un pin fuori dai Palazzi, senza voci, non ne mostra niente.
  */

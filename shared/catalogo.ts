@@ -152,7 +152,7 @@ export function nomiCatalogo(nome: string, altri: readonly string[] = [], esteso
   return { nome: mostrato, nomiAltri: [...new Set([nome, ...altri].map((n) => n.trim()).filter((n) => n && n !== mostrato))] };
 }
 
-/** La categoria storica della merce non viene riscritta dalla migrazione. */
+/** Dalla categoria storica della merce, che nei dati resta com'è, alla categoria dell'oggetto. */
 export function categoriaOggettoDaArticolo(categoria: string): CategoriaOggetto {
   if (eCategoriaOggetto(categoria)) return categoria;
   if (['cura', 'sp', 'battaglia', 'stato', 'esplorazione'].includes(categoria)) return 'consumabile';
