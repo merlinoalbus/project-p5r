@@ -196,7 +196,7 @@ export function IndiceLuoghi() {
     {/* niente sottotitolo: le schede subito sotto dicono già che cosa c'è (Città, Palazzi, Memento, Da collocare) */}
     {/* la ricerca sta nella riga del titolo (a destra, o sotto il titolo sul telefono) e le schede da sole nella riga sotto:
         così l'intestazione resta entro il 30% dell'altezza a ogni formato */}
-    <IntestazionePagina compatta titolo="Luoghi della guida"
+    <IntestazionePagina compatta titolo="Luoghi della guida" illustrazione="illustrazioni/intestazione-luoghi"
       azioni={g && <div className="flex w-full min-w-[220px] md:w-72"><CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca un luogo" /></div>} />
     <PageState isLoading={gerarchia.inPrimoCaricamento} error={gerarchia.errore} onRetry={gerarchia.ricarica}>
       {/* la miniatura di una carta (O9-5) cambiata dalla sua finestra fa rileggere la gerarchia */}

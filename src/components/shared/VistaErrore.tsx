@@ -21,12 +21,35 @@ import { AssetImg } from './AssetImg';
 import { IconAlert, IconHome } from './icons';
 import { CollegamentoVisivo, PulsanteVisivo, type TonoPulsante } from './PulsanteVisivo';
 import { IconaAzione } from './IconaAzione';
+import { useAssetMulti } from '../../stores/assetStore';
+import type { CausaErrore } from '../../hooks/useCarica';
 
 /** Il titolo più usato: l'errore che non ha un nome più preciso. */
 export const TITOLO_ERRORE = 'Qualcosa è andato storto';
 
+/** L'illustrazione d'errore generica (con `autonoma`, `ErrorBoundary`, la dà il manifest): è anche il ripiego delle due specifiche. */
+const ILLUSTRAZIONE_ERRORE = 'illustrazioni/errore-senza-testo';
+
+/** L'illustrazione che dice la causa: `errore-offline` se il dispositivo è senza rete, `errore-server` se la rete cade, il server non risponde in tempo
+ *  o risponde 5xx; per ogni altra causa (e per ogni errore di codice) la generica. Se il file specifico non c'è nel manifest (o dà 404) ripiega
+ *  sulla generica, e se nemmeno quella c'è sull'icona: `AssetImg` segna mancante un file che non si carica e non lo richiede più. */
+function illustrazioneErrore(causa: CausaErrore | undefined): string {
+  if (causa === 'offline') return 'illustrazioni/errore-offline';
+  if (causa === 'rete' || causa === 'timeout' || causa === 'server') return 'illustrazioni/errore-server';
+  return ILLUSTRAZIONE_ERRORE;
+}
+
+/** La figura dell'errore con il suo ripiego (specifica → generica → icona). Un componente a sé: la variante `autonoma` di `ErrorBoundary` non usa nessuno store. */
+function FiguraErrore({ causa, className }: { causa: CausaErrore | undefined; className: string }) {
+  const specifica = illustrazioneErrore(causa);
+  const [urlSpecifica] = useAssetMulti([specifica]);
+  return <AssetImg nome={urlSpecifica ? specifica : ILLUSTRAZIONE_ERRORE} alt="" decorativa className={className} fallback={<IconAlert size={32} className="text-error-testo" />} />;
+}
+
 interface Props {
   titolo: string;
+  /** Il genere dell'errore (`causaErrore` di `useCarica`): sceglie l'illustrazione (offline, server, generica). */
+  causa?: CausaErrore;
   /** Che cosa è successo e che cosa resta (i dati salvati), in parole dell'utente. */
   spiegazione?: ReactNode;
   /** Il messaggio tecnico dell'errore, più piccolo e attenuato. */
@@ -42,7 +65,7 @@ interface Props {
 }
 
 /** Titolo, spiegazione, dettaglio e azioni di un errore, con la stessa gerarchia ovunque. */
-export function VistaErrore({ titolo, spiegazione, dettaglio, azioni, livello = 2, compatta = false, autonoma }: Props) {
+export function VistaErrore({ titolo, causa, spiegazione, dettaglio, azioni, livello = 2, compatta = false, autonoma }: Props) {
   const Titolo = livello === 1 ? 'h1' : 'h2';
   const fisso = autonoma !== undefined;
   const altezzaFigura = compatta ? 'max-h-[96px]' : 'max-h-[150px]';
@@ -56,7 +79,7 @@ export function VistaErrore({ titolo, spiegazione, dettaglio, azioni, livello = 
           ? <img src={autonoma.illustrazione} alt="" className={`${altezzaFigura} w-auto object-contain`} draggable={false} />
           : <IconAlert size={32} className="text-[color:var(--color-error-testo,#fb7c7c)]" />
       ) : (
-        <AssetImg nome="illustrazioni/errore-senza-testo" alt="" decorativa className={`${altezzaFigura} w-auto object-contain`} fallback={<IconAlert size={32} className="text-error-testo" />} />
+        <FiguraErrore causa={causa} className={`${altezzaFigura} w-auto object-contain`} />
       )}
       <Titolo className={`m-0 font-decor uppercase tracking-wide leading-none ${compatta ? 'testo-24' : 'testo-28'} ${fisso ? 'text-[color:var(--color-error-testo,#fb7c7c)]' : 'text-error-testo'}`}>
         {titolo}

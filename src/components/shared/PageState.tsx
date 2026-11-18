@@ -7,7 +7,7 @@ import { AssetImg } from './AssetImg';
 import { useAssetMulti } from '../../stores/assetStore';
 import { AzioneHome, AzioneRiprova, TITOLO_ERRORE, VistaErrore } from './VistaErrore';
 import { IntestazioneScheda } from './IntestazioneScheda';
-import type { CausaErrore } from '../../hooks/useCarica';
+import { causaDelMessaggio, type CausaErrore } from '../../hooks/useCarica';
 
 const FOTOGRAMMI = Array.from({ length: 8 }, (_, i) => `illustrazioni/caricamento-${i + 1}`);
 const ILLUSTRAZIONE_NEUTRA = 'illustrazioni/vuoto-persona-senza-testo';
@@ -56,7 +56,9 @@ function titoloPerCausa(causa: CausaErrore): string {
 }
 
 /** Switch uniforme caricamento / errore / contenuto per ogni pagina. */
-export function PageState({ isLoading, error, onRetry, causa = null, scheda, children }: PageStateProps) {
+export function PageState({ isLoading, error, onRetry, causa: causaPassata, scheda, children }: PageStateProps) {
+  // la causa passata dalla pagina, altrimenti quella con cui `useCarica` ha registrato questo messaggio: vale per ogni pagina, non solo per chi la passa
+  const causa = causaPassata !== undefined ? causaPassata : causaDelMessaggio(error);
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -69,6 +71,7 @@ export function PageState({ isLoading, error, onRetry, causa = null, scheda, chi
     const vista = (
       <VistaErrore
         titolo={titoloPerCausa(causa)}
+        causa={causa}
         spiegazione={error}
         azioni={<>
           {onRetry && <AzioneRiprova onClick={onRetry} />}
@@ -87,12 +90,31 @@ export function PageState({ isLoading, error, onRetry, causa = null, scheda, chi
   return <>{children}</>;
 }
 
+/**
+ * La figura di uno stato vuoto che sta dentro una riga o un riquadro (la ricerca senza risultati, il giorno senza voci): `illustrazioni/<nome>`
+ * se è nel manifest e si carica, altrimenti NIENTE (nessuno spazio, nessuna icona rotta, nessuna richiesta ripetuta: un 404 la segna mancante
+ * una volta sola, `AssetImg`). Appena il file è nel database compare da sola, alla riga di testo già mostrata si affianca la figura. L'altezza e
+ * il rapporto 3:2 delle illustrazioni di stato (1200×800) sono dichiarati, così quando arriva non sposta il testo. Decorativa: il testo accanto dice già tutto.
+ */
+export function FiguraVuoto({ illustrazione, className = '' }: { illustrazione: string; className?: string }) {
+  return (
+    <AssetImg
+      nome={`illustrazioni/${illustrazione}`}
+      alt=""
+      decorativa
+      className={`figura-vuoto shrink-0 ${className}`}
+      fallback={null}
+    />
+  );
+}
+
 interface EmptyStateProps {
   icon?: ReactNode;
   title: string;
   hint?: string;
   action?: ReactNode;
-  /** Nome dell'illustrazione dedicata (`illustrazioni/<nome>`); se manca si usa quella neutra, poi l'icona. */
+  /** Nome dell'illustrazione dedicata (`illustrazioni/<nome>`, es. `vuoto-ricerca`); se non è nel manifest o non si carica si usa quella neutra, poi
+   *  l'icona: la sostituzione sta tutta qui (`useAssetMulti` sceglie il nome, `AssetImg` segna mancante un file che dà 404 e ripiega, una volta sola). */
   illustrazione?: string;
   /** Il livello del titolo: h2 (default, lo stato vuoto sta sotto l'h1 della pagina), h1 quando è la pagina intera (la 404) o h3 sotto un h2. */
   livello?: 1 | 2 | 3;

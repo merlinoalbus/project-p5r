@@ -2231,8 +2231,10 @@
     .menu-voce { animation: none; }
     .fascia-giornata__freccia { transition: none; }
   }
-  .intestazione__illustrazione { max-height: 120px; width: auto; max-width: 40vw; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)); }
-  @media (max-width: 639px) { .intestazione__illustrazione { max-height: 64px; max-width: 26vw; } }
+  /* la figura quadrata (512×512) dell'intestazione: altezza e rapporto dichiarati (il suo arrivo non sposta il titolo), da 64 px a 120 px secondo l'altezza
+     della schermata (11%: 72 px a 657, 76 a 689), così l'intestazione non cresce oltre il 30% a nessun formato; sul telefono 64 px */
+  .intestazione__illustrazione { flex: none; height: clamp(64px, 11dvh, 120px); width: auto; aspect-ratio: 1; max-width: 40vw; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)); }
+  @media (max-width: 639px) { .intestazione__illustrazione { height: 64px; max-width: 26vw; } }
   /* ---- Sfondo a tema della sezione (asset «sfondi/*»): livello sotto il contenuto con velo scuro per la leggibilità ---- */
   .sfondo-sezione {
     position: absolute;
@@ -3418,4 +3420,23 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .scorta-anello::before { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: conic-gradient(var(--colore-anello) calc(var(--p) * 1turn), var(--color-border) 0);
     -webkit-mask: radial-gradient(circle, transparent 11px, #000 12px); mask: radial-gradient(circle, transparent 11px, #000 12px); }
   .scorta-anello--pronta { --colore-anello: var(--color-success); }
+}
+
+/* ---- Segni agganciati con la riserva SVG (prompt §30–§31, 2026-11-18): Trama collegata, Non dovuta, scorta pronta ---- */
+@layer components {
+  /* il ritratto della Trama collegata a un Confidente con il segno nell'angolo in basso a destra: il segno è fuori dal flusso (nessuno spostamento
+     quando il PNG sostituisce la riserva, stessa misura) e lascia il tocco al ritratto */
+  .immagine-azione { position: relative; display: inline-flex; flex: none; }
+  .immagine-azione__segno { position: absolute; right: -4px; bottom: -4px; display: inline-flex; width: 20px; height: 20px; pointer-events: none; }
+  /* «Non dovuta»: il segno davanti alla frase, sulla riga di base del testo da 12 px */
+  .segno-non-dovuta { display: inline-flex; vertical-align: text-bottom; margin-right: 6px; }
+  /* scorta pronta: il segno accanto a «n/N», che resta centrato sulla riga */
+  .scorta-voce__conta { display: inline-flex; align-items: center; gap: 6px; }
+  .scorta-voce__pronta { display: inline-flex; flex: none; }
+}
+
+/* ---- Figure di stato e di intestazione agganciate (prompt §33–§34, 2026-11-18): compaiono da sole quando il PNG è nel database ---- */
+@layer components {
+  /* la figura di uno stato vuoto dentro una riga o un riquadro: altezza e rapporto 3:2 (1200×800) dichiarati, così il suo arrivo non sposta il testo */
+  .figura-vuoto { height: min(96px, 14dvh); width: auto; aspect-ratio: 3 / 2; object-fit: contain; }
 }

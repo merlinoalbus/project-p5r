@@ -92,7 +92,7 @@ export function SkillPage() {
 
       <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
         {filtrate.length === 0 ? (
-          <EmptyState title="Nessuna skill corrisponde alla ricerca" />
+          <EmptyState illustrazione="vuoto-ricerca" title="Nessuna skill corrisponde alla ricerca" />
         ) : (
           <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light card py-0">
             {filtrate.map((s) => <RigaSkill key={s.id} s={s} />)}

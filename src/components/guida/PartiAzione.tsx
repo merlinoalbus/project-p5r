@@ -23,7 +23,7 @@ import { IconaCategoria } from './IconaCategoria';
 import { EmblemaDungeon } from './EmblemaDungeon';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
+import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 import { IconaSpillo } from '../mappe/IconaSpillo';
 import { PulsanteGuidaQuiz } from './GuidaQuiz';
 import { fraseMovimentoYen } from '../../../shared/yenAutomatici';
@@ -38,7 +38,22 @@ export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferi
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
-  if (a.riferimento?.tipo === 'confidente') return <ImmagineEntita ambito="confidente" chiave={a.riferimento.chiave} etichetta={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} />;
+  if (a.riferimento?.tipo === 'confidente') {
+    const nome = a.riferimentoTesto ?? a.riferimento.chiave;
+    const ritratto = <ImmagineEntita ambito="confidente" chiave={a.riferimento.chiave} etichetta={nome} dimensione={40} />;
+    if (a.tipo !== 'trama') return ritratto;
+    // Una Trama collegata a un Confidente mostra il ritratto di una voce Confidente: il segno nell'angolo le distingue (prompt §31). Il segno
+    // non occupa spazio (assoluto, fuori dal flusso) né prende il tocco (quello va al ritratto); il PNG `ui/segno-trama-confidente`, quando
+    // c'è, prende il posto della riserva SVG alla stessa misura
+    return (
+      <span className="immagine-azione">
+        {ritratto}
+        <span className="immagine-azione__segno" role="img" aria-label={`Collegata al Confidente ${nome}`}>
+          <IconaSegno chiave="trama-confidente" dimensione={20} />
+        </span>
+      </span>
+    );
+  }
   if (a.riferimento?.tipo === 'dungeon') return <EmblemaDungeon chiave={a.riferimento.chiave} nome={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} />;
   return <IconaCategoria categoria={a.tipo} dimensione={40} />;
 }
@@ -132,7 +147,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       )}
       {/* la guida del quiz del lavoro (il quiz dei codici a barre al Triple Seven), consultabile da ogni turno: in oro nei giorni del quiz */}
       {a.quiz?.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
-      {stato?.tipo === 'consigliata' && <span className="chip chip--oro testo-12" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
+      {stato?.tipo === 'consigliata' && <span className="chip chip--oro chip--icona testo-12" title={stato.motivo ?? undefined}><IconaSegno chiave="consigliata" dimensione={14} />Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
       {/* 2026-10-26 («le etichette di testo devono essere visibili solo se hanno senso»): il lucchetto e lo stile dicono già «bloccata»,
           il chip mostra solo la condizione che manca («dal 20 aprile»); la frase completa («Disponibile dal 20 aprile, oggi è il 18 aprile»)
           sta nel titolo e nel nome accessibile, come in `ChipDisponibilita` */}

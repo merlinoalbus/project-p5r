@@ -91,7 +91,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
       {lista.errore && <div className="testo-13 text-error-testo">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && visibili.length === 0 && (
-        <EmptyState illustrazione="vuoto-obiettivi" title={stato === 'aperto' ? 'Nessun obiettivo aperto' : 'Nessun obiettivo'} hint="Crea un obiettivo da qui o dalla scheda di una Persona («Aggiungi agli obiettivi»)." />
+        <EmptyState illustrazione="vuoto-obiettivi-senza-testo"title={stato === 'aperto' ? 'Nessun obiettivo aperto' : 'Nessun obiettivo'} hint="Crea un obiettivo da qui o dalla scheda di una Persona («Aggiungi agli obiettivi»)." />
       )}
       {visibili.length > 0 && (
         <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Obiettivi">

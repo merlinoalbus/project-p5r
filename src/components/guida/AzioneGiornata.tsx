@@ -17,6 +17,7 @@ import { avvisoSpunta, descriviEffetti } from '../../utils/percorso';
 import { dotiDaSegnareDaEffetti, testoDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import type { AzionePercorsoDto } from '../../types';
 import { SegnoStato } from '../shared/SegnoStato';
+import { IconaSegno } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { ComandiVoce, TestoSelezioneRiga, type GestoVoce, type SelezioneRiga } from './MenuVoce';
@@ -209,7 +210,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* D15: voce fatta = spunta rossa a sinistra e testo barrato in grigio (il segno fuori dal testo barrato: l'icona non si taglia) */}
         <span><SegnoStato stato={a.fatta ? 'fatto' : null} dimensione={14} className="mr-1.5 align-text-bottom" /><span className={a.fatta ? 'stato-fatto' : ''}>{a.azione}<TestoSelezioneRiga s={selezione} />{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span></span>
         {/* a pieno contrasto: dice perché la casella è spenta e che la giornata va avanti lo stesso */}
-        {nonDovuta && <span id={`non-dovuta-${a.uid}`} className="testo-12 text-text text-pretty break-words"><strong>Non dovuta:</strong> manca «{a.nonDovuta!.motivo}»</span>}
+        {nonDovuta && <span id={`non-dovuta-${a.uid}`} className="testo-12 text-text text-pretty break-words"><span className="segno-non-dovuta" aria-hidden="true"><IconaSegno chiave="non-dovuta" dimensione={14} /></span><strong>Non dovuta:</strong> manca «{a.nonDovuta!.motivo}»</span>}
         {!IN_RILASCIO && daCompletare && <span className="flex"><SegnoDaCompletare n={daCompletare.n} voce={a.azione} onApri={daCompletare.onApri} /></span>}
         <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined}
           onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined}

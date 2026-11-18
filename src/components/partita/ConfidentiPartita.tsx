@@ -22,7 +22,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { aggiornaConfidente, annullaUltimoConfidente, getConfidentiPartita, confermaRequisitoConfidente, impostaPiazzamentoEsame, isApiError } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
-import { PageState } from '../shared/PageState';
+import { PageState, FiguraVuoto } from '../shared/PageState';
 import { SchedeTab } from '../shared/SchedeTab';
 import { Modal } from '../shared/Modal';
 import { IconChevronRight } from '../shared/icons';
@@ -391,7 +391,12 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
                 </h3>
                 <div id={idElenco} hidden={!aperto} className="lg:min-h-0 lg:flex-1 lg:area-scorrevole lg:p-2">
                   {elenco.length === 0
-                    ? <p className="m-0 testo-13 text-text-secondary">Nessun Confidente è ancora avviabile: compariranno qui appena i requisiti del primo rango saranno soddisfatti (giorno di gioco, Dote sociale, Persona dell'arcano, Palazzo o richiesta).</p>
+                    ? (
+                      <div className="flex items-center gap-3">
+                        <FiguraVuoto illustrazione="vuoto-confidenti" />
+                        <p className="m-0 min-w-0 testo-13 text-text-secondary">Nessun Confidente è ancora avviabile: compariranno qui appena i requisiti del primo rango saranno soddisfatti (giorno di gioco, Dote sociale, Persona dell'arcano, Palazzo o richiesta).</p>
+                      </div>
+                    )
                     : (
                       <ul className="griglia-confidenti">
                         {elenco.map((c) => (

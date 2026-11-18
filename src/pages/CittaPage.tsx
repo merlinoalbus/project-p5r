@@ -70,7 +70,7 @@ export function CittaPage() {
         <div className="flex flex-col gap-4">
           {/* L2: la mappa e le schede portano allo stesso posto, la pagina del quartiere (prima la mappa apriva la planimetria
               nel mappamondo e le schede la pagina: due destinazioni per lo stesso gesto) */}
-          <IntestazionePagina titolo="La città" sottotitolo="La mappa di Tokyo con i suoi quartieri: tocca un quartiere sulla mappa o una scheda per aprirlo, con le sue aree, i luoghi, gli orari e gli sblocchi." />
+          <IntestazionePagina titolo="La città" illustrazione="illustrazioni/intestazione-luoghi" sottotitolo="La mappa di Tokyo con i suoi quartieri: tocca un quartiere sulla mappa o una scheda per aprirlo, con le sue aree, i luoghi, gli orari e gli sblocchi." />
           {/* Tokyo disegnata con gli elementi originali del gioco, viva col calendario: i
               quartieri compaiono quando si sbloccano, i Palazzi quando esistono. È **la** mappa
               di Tokyo, non una di due: sotto ci stava anche il visore della planimetria con la

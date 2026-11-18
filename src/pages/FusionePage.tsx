@@ -109,7 +109,7 @@ export function FusionePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <IntestazionePagina titolo="Fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : partiteCaricate ? ' (nessuna: solo contenuti base)' : ''}. Le Persona nella scorta sono evidenziate.</>} />
+      <IntestazionePagina titolo="Fusione" illustrazione="illustrazioni/intestazione-fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : partiteCaricate ? ' (nessuna: solo contenuti base)' : ''}. Le Persona nella scorta sono evidenziate.</>} />
       <PannelloVelluto velluto={velluto.dati ?? null} inCaricamento={!partiteCaricate || (attiva !== null && !velluto.dati)} errore={velluto.dati ? null : velluto.errore} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
       {/* Telefono (L11-07): la vista corrente con l'elenco di tutte, su una riga da 44 px. La fila di piastrelle ne lasciava metà fuori schermo e una griglia 4×2
           con icone e nomi costerebbe due file di piastrelle: il selettore è la forma che lascia più spazio al contenuto. */}
