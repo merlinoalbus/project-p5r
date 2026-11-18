@@ -863,3 +863,244 @@ resta la figura della famiglia (`catenaCategoria` in `src/utils/categorie.ts`).
 | `categoria-persona-tolta.png` | `personaTolta` | carta con la maschera tagliata in diagonale, la metà destra che si stacca |
 | `categoria-punti-confidente.png` | `puntiConfidente` | due mani che si stringono con tre note musicali che salgono |
 | `categoria-trofeo.png` | `trofeo` | coppa a due manici su base a gradino, con una stella sul corpo |
+
+## Priorità e ordine di generazione delle sezioni 30–34 (richieste del 2026-11-18)
+
+24 elementi censiti, **14 da generare ora** e **10 rimandati** (si generano solo se l'utente li chiede). Ordine consigliato:
+
+| Ordine | Sezione | Elementi | Priorità | Motivo |
+|---|---|---|---|---|
+| 1 | §33 stati vuoti ed errori | `vuoto-ricerca` (serve in 5 punti), poi `vuoto-giornata`, `errore-offline`, `errore-server`, `vuoto-confidenti`, `vuoto-proposte` | alta | oggi sono righe di testo nelle schermate più viste |
+| 2 | §31 | `segno-trama-confidente` | alta | l'unico modo di distinguere una Trama collegata a un Confidente dal ritratto di una voce Confidente |
+| 3 | §31 | `segno-consigliata`, `segno-non-dovuta` | media | oggi sono testo; il colore da solo non basta |
+| 4 | §34 | `intestazione-diario`, `-compendio`, `-fusione`, `-luoghi` | media | lo spazio `illustrazione` è vuoto; le quattro sicure |
+| 5 | §30 | `segno-scorta-pronta` | bassa | rinforza un colore con una figura; resta una sola richiesta attiva |
+| — | §30 | `segno-scorta-qualunque`, `segno-scorta-precisa` | rimandate | a 16 px sono quasi indistinguibili da `scheda-scorta` e da `scheda-persona-partita` |
+| — | §32 | i tre sigilli e le tre varianti `-senza-testo` | rimandati | nessun consumatore nel codice, duplicano il chip «Completato»; solo con il sì dell'utente |
+| — | §34 | `intestazione-home`, `intestazione-partita` | rimandate | l'intestazione di Partita ha padding e gap a 0 (`.intestazione--partita`) e sul telefono una riga di 44 px (`max-md:h-11`), quella della Home perde il sottotitolo a schermo basso: non c'è spazio misurato per una figura |
+
+## 30. Segni della scorta di una voce (3: 1 richiesta attiva, 2 rimandate) — `ui/segno-<chiave>.png` (128×128, trasparente) — richiesti il 2026-11-18
+
+**Perché servono.** L'elenco «In scorta» di una voce del Diario (`RequisitiVoce.tsx`) è fatto di chip con l'icona dell'arcano, il nome e un cerchio di
+spunta; la testata è la scritta «IN SCORTA», il contatore «n/N» e una barra. Tre cose si dicono oggi solo col colore o col testo: **tutto spuntato** («pronta»
+è il solo verde del contatore e della barra, `.scorta-voce--pronta`), **arcano intero** e **Persona precisa** (nel chip la seconda è solo il suffisso « · Nome»).
+Il colore da solo non basta (regola dei segni, §27): serve una figura piccola accanto al testo, che il testo non sostituisce.
+
+Stesse regole della §27: 128×128 trasparente, bianco/grigio/nero con **un solo accento rosso** `#e5352b`, niente oro, nessun testo, un soggetto solo,
+contorno nero spesso e uniforme, ombra rossa sfalsata in basso a destra, soggetto che occupa l'80% del quadrato (almeno 3 px liberi sul bordo). Chiavi nuove di
+`ChiaveSegno` (`IconaAzione.tsx`, oggi 12 chiavi, nessuna di queste): sono **da aggiungere con la riserva SVG, intervento di codice a parte che chiede il sì dell'utente**; la riga nel registro 7 di `fabbisogno.md` c'è già.
+
+| File | Priorità | Dove sta, accanto a che testo | Soggetto | A 16 px | A 24 px |
+|---|---|---|---|---|---|
+| `segno-scorta-pronta.png` | bassa, **richiesta attiva** | testata di `.scorta-voce` accanto a «n/N» quando tutte le caselle sono spuntate; riga ripiegata di una voce fatta | tre carte da gioco a ventaglio viste di fronte, una grande spunta bianca sulla carta centrale | restano il ventaglio e la spunta, senza dettagli sulle carte | carte distinte, spunta piena |
+| `segno-scorta-qualunque.png` | **rimandata** (quasi indistinguibile a 16 px da `scheda-scorta`) | chip di un requisito senza Persona (arcano intero), accanto al nome | pila di tre carte sovrapposte e sfalsate, viste dal dorso; sulla prima una maschera da ladro **vuota** in contorno tratteggiato | tre bordi sfalsati e il tratteggio | maschera tratteggiata leggibile |
+| `segno-scorta-precisa.png` | **rimandata** (quasi indistinguibile a 16 px da `scheda-persona-partita`) | chip di un requisito con una Persona specifica, accanto al suffisso « · Nome» | una sola carta frontale con la maschera piena e quattro angoli di mirino che la inquadrano | carta, maschera piena e angoli | mirino a quattro angoli distinti |
+
+Vanno tenuti **distinti fra loro e dalle figure già consegnate**: `scheda-scorta` (due carte sovrapposte: non una pila di tre), `scheda-persona-partita`
+(maschera davanti a tre carte a ventaglio), `segno-completati` (spunta dentro un cerchio spezzato), `azione-raggiunto` (spunta in cerchio). Qui la spunta sta **sulle carte**.
+
+Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0):
+
+```
+[blocco di stile §0] Segno minuscolo per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: tre carte da gioco verticali a ventaglio viste di fronte, con una grande spunta bianca sulla carta centrale. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso e uniforme, angoli tagliati in diagonale, un solo accento rosso #e5352b nel bordo di una carta, ombra rossa sfalsata in basso a destra. Soggetto all'80% del quadrato, margine libero di almeno 3 px. Nessun testo, nessun numero, niente oro. Deve leggersi a 16 px. → segno-scorta-pronta.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Segno minuscolo per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: una pila di tre carte da gioco sovrapposte e leggermente sfalsate viste dal dorso (motivo a rombi); sulla carta più in alto una maschera da ladro VUOTA disegnata solo in contorno tratteggiato. Forme piatte bianche #ececf1 e grigio #6f6f80 con contorno nero #0b0b0e spesso, angoli tagliati, accento rosso #e5352b nel tratteggio, ombra rossa sfalsata in basso a destra. Nessun testo, niente oro, distinta da due sole carte sovrapposte. Deve leggersi a 16 px. → segno-scorta-qualunque.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Segno minuscolo per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: una sola carta da gioco frontale con una maschera da ladro PIENA al centro, inquadrata da quattro angoli di mirino (due tratti a L per angolo). Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, mirino rosso #e5352b, ombra rossa sfalsata in basso a destra. Nessun testo, niente oro, niente ventaglio di carte. Deve leggersi a 16 px. → segno-scorta-precisa.png
+[prompt negativo §0]
+```
+
+Verifica di consegna: 128×128 esatti, alfa nativo, nessun pixel con alfa > 8 nel contorno di 3 px, leggibilità a 16 px su fondo `#0b0b0e`, `#23232d` e rosso `#d42d24` (chip spuntato), nome identico alla chiave.
+
+## 31. Segni di stato e di collegamento della voce (3) — `ui/segno-<chiave>.png` (128×128, trasparente) — richiesti il 2026-11-18
+
+**Perché servono.** Tre informazioni della riga d'azione sono solo parole o colore: la voce **Trama collegata a un Confidente** (da `14e44b6a`, il collegamento è facoltativo e non
+produce incontro, rango né effetti) mostra nel ritratto da 40 px la stessa faccia di una voce Confidente, e a colpo d'occhio le due non si distinguono (`ImmagineAzione`
+in `PartiAzione.tsx`); la **Consigliata** è un chip oro con la sola scritta (`chip--oro`); la **Non dovuta** è una riga di testo (`AzioneGiornata.tsx`). Il lucchetto di
+«bloccata» esiste già (`azione-bloccato`) e non si rifà. Stesse regole della §30; le chiavi nuove di `ChiaveSegno` sono **da aggiungere con la riserva SVG, intervento di codice a parte che chiede il sì dell'utente**.
+Per `segno-trama-confidente` i «3 px liberi» valgono per l'**alfa del contorno** (nessun pixel con alfa > 8 nei 3 px del bordo del file): il tassello rosso riempie il quadrato *dentro* quel margine, non fino al bordo.
+Priorità: `segno-trama-confidente` **alta**; `segno-consigliata` e `segno-non-dovuta` **media**.
+
+| File (priorità) | Dove sta | Soggetto | A 16 px | A 24 px | A 44 px |
+|---|---|---|---|---|---|
+| `segno-trama-confidente.png` (alta) | angolo in basso a destra del ritratto da 40 px (sovrapposto, 18–20 px) delle voci Trama collegate a un Confidente | tassello quadrato rosso `#e5352b` a taglio diagonale, dentro un biglietto da visita bianco con l'angolo piegato e un anello di catena sul lato sinistro; il tassello **riempie** il quadrato (separa la figura dal ritratto) | biglietto bianco su rosso e anello come un punto | catena distinta | angolo piegato e due righe sul biglietto |
+| `segno-consigliata.png` (media) | chip «Consigliata», 14 px, accanto al testo | lampadina a ritaglio con cinque raggi taglienti, **riempita di bianco** (il giallo lo dà il chip dell'app, nella figura niente oro) | lampadina e raggi come tacche | attacco a vite visibile | filamento a zig-zag |
+| `segno-non-dovuta.png` (media) | riga «Non dovuta: manca …», 14 px, davanti alla frase | foglio con l'angolo piegato e due righe, attraversato da una barra diagonale spessa rossa che esce dai bordi del foglio | foglio e barra | righe distinte | angolo piegato e barra con bordo nero |
+
+Distinte da `azione-annulla` (croce in cerchio), `segno-da-verificare` (lente su un punto interrogativo), `azione-bloccato` (lucchetto) e `categoria-trama`
+(biglietto da visita con l'angolo piegato, senza tassello: **qui il biglietto sta dentro un tassello rosso con la catena**).
+
+Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0):
+
+```
+[blocco di stile §0] Segno minuscolo da sovrapporre all'angolo di un ritratto, PNG 128×128 con sfondo trasparente: un tassello quadrato rosso #e5352b con due angoli tagliati in diagonale che riempie il quadrato (almeno 3 px liberi sul bordo), contorno nero #0b0b0e spesso; dentro un biglietto da visita bianco #ececf1 con l'angolo in alto a destra piegato e un anello di catena sul lato sinistro che lo aggancia. Ombra rossa sfalsata in basso a destra solo sul contorno esterno. Nessun testo, nessuna lettera sul biglietto, niente oro. Deve leggersi a 18 px. → segno-trama-confidente.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Segno minuscolo per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: una lampadina a ritaglio riempita di bianco #ececf1 con contorno nero #0b0b0e spesso e cinque raggi taglienti attorno, attacco a vite grigio #6f6f80, filamento a zig-zag; un solo accento rosso #e5352b nei raggi, ombra rossa sfalsata in basso a destra. Nessun testo, niente oro, niente giallo. Deve leggersi a 14 px. → segno-consigliata.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Segno minuscolo per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: un foglio verticale bianco #ececf1 con l'angolo in alto a destra piegato e due righe corte (barre), contorno nero #0b0b0e spesso, attraversato da una barra diagonale spessa rossa #e5352b con bordo nero che esce dai bordi del foglio; ombra rossa sfalsata in basso a destra. Nessun testo, nessun cerchio attorno (non è «annulla»), niente oro. Deve leggersi a 14 px. → segno-non-dovuta.png
+[prompt negativo §0]
+```
+
+Verifica di consegna: come §30; in più `segno-trama-confidente` deve restare leggibile **sopra** un ritratto qualunque a 18 px (provare su due ritratti chiari e su uno scuro).
+
+## 32. Sigilli di completamento (3 sigilli × 2 varianti = 6, **tutti rimandati: priorità bassa, solo con il sì dell'utente**) — `ui/sigillo-<chiave>.png` e `ui/sigillo-<chiave>-senza-testo.png` (512×192, trasparente) — richiesti il 2026-11-18
+
+**Perché servono.** L'avanzamento è la promessa del Diario («percorso al 100%») e l'app non festeggia mai il traguardo: un Palazzo completato è un chip di testo
+(`livello.testo === 'Completato'` in `DungeonPage.tsx` e `DungeonDettaglioPage.tsx`), una giornata con tutte le voci fatte non cambia aspetto (`PercorsoPage.tsx`, la riga
+del selettore giorno mostra solo «fatte/azioni»). Un timbro è il segno più P5 per dire «chiuso»: grosso, un po' storto, con i bordi sfaldati dal retino. È l'unico
+gruppo di questo giro che porta lettere: **testo solo in italiano, e per ognuno esiste la variante `-senza-testo`** (cornice vuota, il testo lo scrive l'app con il proprio
+font se il generatore sbaglia le lettere).
+
+Regole: 512×192, trasparente, **inclinato di circa −6°** dentro il canvas (almeno 3 px liberi su tutti i bordi anche dopo la rotazione); doppio filetto, angoli
+tagliati, lettere maiuscole a ritaglio di giornale, usura a retino (puntini) solo **dentro** il segno, mai sul bordo del canvas; colori pieni senza trasparenze parziali
+se non sui bordi antialias. Si legge a **96–160 px di larghezza** (sovrapposto all'angolo dell'emblema di un Palazzo o accanto al selettore del giorno): sotto i 96 px
+si usa la variante senza testo.
+
+| File | Testo | Dove sta | Colori | Soggetto |
+|---|---|---|---|---|
+| `sigillo-completato.png` | COMPLETATO | Palazzo o Memento completato (chip `Completato`, sovrapposto all'emblema) | rosso `#e5352b` pieno, filetti neri, testo bianco | timbro rettangolare a doppio filetto, ai lati due piccole stelle |
+| `sigillo-concluso.png` | CONCLUSO | Palazzo concluso (Tesoro rubato, non completato al 100%) | bianco `#ececf1` con filetti neri e testo nero, ombra rossa sfalsata | timbro a rombo allungato, con una spunta prima del testo |
+| `sigillo-giornata.png` | GIORNATA COMPLETA (due righe) | giornata del Diario con tutte le voci fatte, accanto al selettore del giorno con «fatte/azioni» (`PercorsoPage.tsx`; il chip «Oggi nella partita» compare solo se il giorno mostrato è quello corrente, quindi non è il suo posto) | nero `#0b0b0e` con filetti bianchi, testo bianco, un'unica stella rossa | timbro quasi quadrato, sole e luna ai due lati del testo |
+| `…-senza-testo.png` (×3) | — | stessa posizione | stessi colori | stessa cornice, al posto del testo una fascia vuota del colore di fondo |
+
+Distinti da `badge-*` (§7.3, etichette a parallelogramma, non timbri), da `timbro-ottenuto` e `timbro-vuoto` (i Timbri dei Mementos, che sono oggetti di gioco) e da `segno-completati`.
+
+Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0; per la variante senza testo sostituire «testo» con «fascia vuota»):
+
+```
+[blocco di stile §0] Timbro di gomma di completamento per l'interfaccia di Persona 5 Royal, PNG 512×192 con sfondo trasparente, inclinato di circa -6 gradi, con almeno 3 px liberi su tutti i bordi del canvas: rettangolo a doppio filetto con angoli tagliati in diagonale, riempimento rosso pieno #e5352b, filetti neri #0b0b0e, due piccole stelle a cinque punte ai lati, al centro la scritta in maiuscolo a ritaglio di giornale bianca "COMPLETATO" (testo in italiano, nessun'altra parola). Usura a retino di puntini solo dentro il timbro. Nessun oro, nessun'altra scritta. → sigillo-completato.png ; variante: stessa cornice con una fascia vuota rossa al posto del testo → sigillo-completato-senza-testo.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Timbro di completamento per l'interfaccia di Persona 5 Royal, PNG 512×192 con sfondo trasparente, inclinato di circa -6 gradi, almeno 3 px liberi sui bordi: forma a rombo allungato con angoli tagliati, riempimento bianco #ececf1, filetti e testo neri #0b0b0e, ombra rossa #e5352b sfalsata in basso a destra, a sinistra una spunta spessa, al centro la scritta in maiuscolo "CONCLUSO" (testo in italiano, nessun'altra parola). Usura a retino solo dentro il timbro. Nessun oro. → sigillo-concluso.png ; variante con fascia vuota al posto del testo → sigillo-concluso-senza-testo.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Timbro di completamento per l'interfaccia di Persona 5 Royal, PNG 512×192 con sfondo trasparente, inclinato di circa -6 gradi, almeno 3 px liberi sui bordi: forma quasi quadrata con angoli tagliati, riempimento nero #0b0b0e con doppio filetto bianco #ececf1, ai due lati un sole a raggi netti e una luna crescente, al centro su due righe la scritta in maiuscolo bianca "GIORNATA" e "COMPLETA" (testo in italiano, nessun'altra parola), una sola stella rossa #e5352b in alto. Usura a retino solo dentro il timbro. Nessun oro. → sigillo-giornata.png ; variante con fascia vuota al posto delle due righe → sigillo-giornata-senza-testo.png
+[prompt negativo §0]
+```
+
+Verifica di consegna: 512×192 esatti, alfa nativo, nessun pixel con alfa > 8 nel contorno di 3 px (la rotazione non deve toccare il bordo), lettere accentate assenti (le tre parole non ne hanno), leggibilità del testo a 160 px; se le lettere sono sbagliate si consegna la variante senza testo e si scrive nel registro 7.
+
+## 33. Stati vuoti ed errori nuovi (6, priorità alta) — `illustrazioni/<chiave>.png` (1200×800, trasparente, nel database) — richiesti il 2026-11-18
+
+**Perché servono.** Le illustrazioni di stato esistenti sono otto (`vuoto-persona`, `vuoto-partita`, `vuoto-obiettivi`, `vuoto-piani`, `vuoto-cicli`, `vuoto-storico`, `errore`,
+`caricamento`) e coprono le schede della Partita; quel che l'utente vede più spesso resta una riga di testo: il **giorno senza voci** del Diario, la **ricerca senza risultati**
+(Diario, scorta, filtri del Compendio), il **«Nessun Confidente è ancora avviabile»**, e i due modi in cui una pagina non si carica — **offline** e **server non raggiungibile** — che
+`VistaErrore` rende entrambi con l'unica `errore-senza-testo` anche se i titoli sono già distinti (`titoloPerCausa`, `PageState.tsx`).
+
+**Priorità: alta** (ordine: `vuoto-ricerca`, che serve in cinque punti, poi `vuoto-giornata`, `errore-offline`, `errore-server`, `vuoto-confidenti`, `vuoto-proposte`).
+
+**Regola per le figure nuove di §33 e §34: sono senza lettere, quindi il nome del file è la chiave senza suffisso e non esiste nessuna variante `-senza-testo`.** Le illustrazioni
+vecchie che hanno lettere (`vuoto-persona`, `vuoto-partita`, `vuoto-obiettivi`, `vuoto-piani`, `vuoto-cicli`, `vuoto-storico`, `errore`) **restano con il loro nome e con le loro due varianti**. Titolo e suggerimento li scrive sempre l'app
+(`EmptyState`, `VistaErrore`). Oggi l'uso è misto: 404, illustrazione neutra e `VistaErrore` usano le `-senza-testo`, mentre i cinque `EmptyState` che passano `illustrazione` (`CicliSalvati.tsx`
+`vuoto-cicli`, `ObiettiviPartita.tsx` `vuoto-obiettivi`, `PianiSalvati.tsx` `vuoto-piani`, `ScortaPersona.tsx` `vuoto-persona`, `StoricoPartita.tsx` `vuoto-storico`) caricano la variante **con** testo
+(`EmptyState` costruisce `illustrazioni/${illustrazione}` senza suffisso), quindi mostrano le lettere dell'immagine insieme al titolo scritto dall'app. **Punto aperto** (registrato in `fabbisogno.md` e in `ROADMAP.md`):
+ricollegare quei cinque stati alla variante `-senza-testo`; è un intervento di codice a parte che chiede il sì dell'utente. Il nome del file nuovo è la chiave che il codice passerà a `illustrazione`.
+
+Regole comuni (§8): inchiostro bianco e nero più rosso, retino nelle ombre, soggetto **centrato con molto vuoto intorno**, composizione che regge a **80 px di altezza**
+(404 e pagine compatte, `max-h-[min(80px,9dvh)]`) e a 200 px (stato vuoto normale); nessun personaggio riconoscibile; nessun testo; almeno 3 px liberi sul bordo.
+
+| File | Dove | Scena |
+|---|---|---|
+| `vuoto-giornata.png` | giorno senza voci nel Diario (`GiornoGuida.tsx`, fasce vuote) e «giorno non coperto dalle fonti» | agenda aperta a due pagine bianche, sulla sinistra un sole e sulla destra una luna a ritaglio; una matita appoggiata in diagonale e una maschera bianca che sbircia dal bordo |
+| `vuoto-ricerca.png` | «Nessuna voce del Diario contiene …» (`RicercaDiario.tsx`), «Nessuna Persona corrisponde ai filtri» (`ScortaPersona.tsx`), filtri del Compendio, delle Skill e del Glossario | grande lente d'ingrandimento che inquadra un foglio vuoto con tre righe tratteggiate, un punto interrogativo a ritaglio che sale, ombra lunga |
+| `vuoto-confidenti.png` | «Nessun Confidente è ancora avviabile» (`ConfidentiPartita.tsx`, gruppo degli attivi a inizio partita) | bancone del Leblanc con due sgabelli vuoti e uno smartphone sul piano con una bolla di messaggio a tre puntini; tazza fumante |
+| `errore-offline.png` | pagina senza rete (`causa === 'offline'`) | spina elettrica staccata dalla presa con una scintilla rossa fra i due poli, onde di segnale barrate da una diagonale |
+| `errore-server.png` | server non raggiungibile (`causa === 'rete'` o `'timeout'`) | torre di tre cassetti di server con un lampo rosso che la attraversa, un lucchetto appeso a un cassetto, filo di fumo; distinta dalla ghigliottina inceppata di `errore` |
+| `vuoto-proposte.png` | «Nessuna proposta in questo periodo» (`DaCompletarePage.tsx`, riga di stato sotto i filtri) | cassetta delle lettere aperta e vuota, con un biglietto da visita piegato che pende dalla fessura e un calendario a strappo accanto; ombra lunga |
+
+Distinte da `vuoto-persona` (maschera su un tavolo con lampada), `vuoto-partita` (sedia vuota nella cella), `vuoto-storico` (orologio con pagina strappata) e `errore`.
+
+**Già esistente, non si chiede.** «Nessuna partita ancora» (`GestionePartite.tsx`, Impostazioni) e «Nessuna partita attiva» (`PartitaPage.tsx`) hanno già la figura `illustrazioni/vuoto-partita`
+(e `vuoto-partita-senza-testo`) fra i file consegnati: il difetto è nel codice, che non la passa (`PartitaPage` non dà `illustrazione`; `GestionePartite` è una riga di testo). Ricollegamento nel
+codice, punto aperto in `fabbisogno.md` e in `ROADMAP.md`.
+
+Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0):
+
+```
+[blocco di stile §0] Illustrazione di stato vuoto a due colori, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, PNG 1200×800 con sfondo trasparente, composizione centrata con molto spazio vuoto intorno, silhouette leggibile anche a 80 px di altezza. Scena: un'agenda aperta a due pagine bianche, sulla pagina sinistra un sole a raggi netti e sulla destra una luna crescente a ritaglio, una matita appoggiata in diagonale e una maschera bianca da ladro che sbircia dal bordo dell'agenda. Nessun testo, nessun personaggio riconoscibile, niente oro. → vuoto-giornata.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di stato vuoto a due colori, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, PNG 1200×800 con sfondo trasparente, composizione centrata con molto spazio vuoto, silhouette leggibile a 80 px di altezza. Scena: una grande lente d'ingrandimento che inquadra un foglio vuoto con tre righe tratteggiate, un punto interrogativo a ritaglio rosso che sale dal foglio, ombra lunga e inclinata. Nessun testo (il punto interrogativo è un segno, non una parola), niente oro. → vuoto-ricerca.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di stato vuoto a due colori, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, PNG 1200×800 con sfondo trasparente, composizione centrata con molto spazio vuoto, silhouette leggibile a 80 px di altezza. Scena: il bancone di un piccolo caffè con due sgabelli vuoti, sul piano uno smartphone con una bolla di messaggio a tre puntini e una tazza fumante. Nessun personaggio, nessun testo, niente oro. → vuoto-confidenti.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di errore a due colori, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, PNG 1200×800 con sfondo trasparente, composizione centrata con molto spazio vuoto, silhouette leggibile a 80 px di altezza. Scena: una spina elettrica staccata dalla presa, i due poli separati da una scintilla rossa a forma di stella, in alto tre onde di segnale barrate da una diagonale nera. Nessun testo, niente oro. → errore-offline.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di errore a due colori, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, PNG 1200×800 con sfondo trasparente, composizione centrata con molto spazio vuoto, silhouette leggibile a 80 px di altezza. Scena: una torre di tre cassetti di server sovrapposti attraversata da un lampo rosso, un lucchetto appeso al cassetto in mezzo e un filo di fumo che sale dal cassetto in alto; non una ghigliottina. Nessun testo, niente oro. → errore-server.png
+[prompt negativo §0]
+```
+
+```
+[blocco di stile §0] Illustrazione di stato vuoto a due colori, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, PNG 1200×800 con sfondo trasparente, composizione centrata con molto spazio vuoto, silhouette leggibile a 80 px di altezza. Scena: una cassetta delle lettere aperta e vuota, un biglietto da visita piegato che pende dalla fessura, accanto un calendario a strappo con la pagina staccata. Nessun testo, nessun numero leggibile, niente oro. → vuoto-proposte.png
+[prompt negativo §0]
+```
+
+Consegna: si caricano nel database con `PUT /api/immagini/illustrazioni/<chiave>` (PNG come corpo, `Content-Type: image/png`). Verifica: 1200×800 esatti, alfa nativo, nessun pixel con alfa > 8 nel contorno di 3 px.
+
+## 34. Illustrazioni di intestazione delle pagine principali (4 da generare, priorità media; 2 rimandate) — `illustrazioni/intestazione-<chiave>.png` (512×512, trasparente, nel database) — richieste il 2026-11-18
+
+**Perché servono.** `IntestazionePagina` ha uno spazio per un'illustrazione a destra del titolo (`illustrazione`, classe `intestazione__illustrazione`: al massimo 120 px di altezza e 40vw, 64 px e 26vw sul
+telefono) e **nessuno dei 28 file che usano `<IntestazionePagina>` (27 pagine più il componente `IndiceLuoghi.tsx`) lo riempie**: le intestazioni sono tutte e solo titolo a tasselli e sottotitolo.
+Le pagine più frequentate non hanno un segno proprio oltre alla voce di menu. **L'altezza dell'intestazione con la figura è da misurare pagina per pagina a 1366×657, 1280×689, 1024×690 e 375 di larghezza: l'intestazione deve restare entro il 30%
+dell'altezza della schermata**; il limite di 120 px (64 px sul telefono) riguarda la figura, non l'intestazione intera. Per questo `intestazione-partita` e `intestazione-home` sono **rimandate**: l'intestazione della Partita ha padding e gap a 0
+(`.intestazione--partita`, `tailwind.css`) e usa `azioniInRiga azioniAccanto`, cioè sul telefono una riga di 44 px (`max-md:h-11 max-md:overflow-x-auto`); la Home a schermo basso nasconde il sottotitolo per stare nel limite. Si tengono
+`intestazione-diario`, `-compendio`, `-fusione`, `-luoghi`, da misurare comunque al collegamento.
+
+**Una sola figura piena e silhouette alta contrasto**, perché a 64 px di altezza (telefono) e col `drop-shadow` del CSS devono restare un'icona grande, non una scena. Regole comuni:
+512×512 trasparente, soggetto che occupa l'85% del quadrato con almeno 3 px liberi su tutti i bordi (anche se poggia su una base), bianco/nero/rosso, retino nelle
+ombre, nessun testo, nessun personaggio riconoscibile, niente oro. Il collegamento nel codice (`illustrazione` sulle pagine) è un intervento di codice a parte, che chiede il sì dell'utente.
+
+| File | Pagina | Soggetto | Distinta da |
+|---|---|---|---|
+| `intestazione-home.png` (**rimandata**, fino alla misura) | Home | valigetta del ladro aperta da cui sporgono una carta da gioco, una chiave e un biglietto da visita piegato | il logo (`identita/logo`, maschera) |
+| `intestazione-partita.png` (**rimandata**, fino alla misura) | Partita | taccuino rilegato con una maschera da ladro sulla copertina e tre segnalibri di lunghezza diversa che sporgono dall'alto | `nav-partita` (maschera sola), `scheda-compendio` (libro aperto) |
+| `intestazione-diario.png` | Guida giorno per giorno | calendario da tavolo a spirale con un giorno cerchiato a mano, un sole e una luna ai due lati della testata e una spunta rossa sul giorno | `guida/percorso` (foglio di calendario con freccia), `vuoto-giornata` |
+| `intestazione-compendio.png` | Compendio | pila di tre carte Persona viste di fronte, sfalsate, con silhouette di maschere diverse | `arcani/*` (le carte degli Arcani), `nav-compendio` |
+| `intestazione-fusione.png` | Fusione | due carte che convergono verso un lampo, sotto il lampo la lama di una ghigliottina | `nav-fusione` (frecce che convergono) |
+| `intestazione-luoghi.png` | Luoghi, Palazzi, Mappe | profilo cittadino in un unico blocco: castello a due torri, torre radio e imbocco di un tunnel della metropolitana | `guida/mappe` (mappa ripiegata con spillo), `palazzi/*` (stemmi) |
+
+Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0). I primi due, per `intestazione-home` e `intestazione-partita`, sono **rimandati**: si usano solo dopo la misura dell'intestazione e il sì dell'utente.
+
+```
+[blocco di stile §0] Illustrazione di intestazione per l'interfaccia di Persona 5 Royal, PNG 512×512 con sfondo trasparente, un unico soggetto centrato a figura piena che occupa l'85% del quadrato, silhouette ad alto contrasto leggibile a 64 px di altezza, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, angoli tagliati. Soggetto: una valigetta da ladro aperta da cui sporgono una carta da gioco, una chiave antica e un biglietto da visita con l'angolo piegato. Nessun testo, nessun personaggio, niente oro. → intestazione-home.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di intestazione per l'interfaccia di Persona 5 Royal, PNG 512×512 con sfondo trasparente, un unico soggetto a figura piena all'85% del quadrato, silhouette ad alto contrasto leggibile a 64 px, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre. Soggetto: un taccuino rilegato con una maschera da ladro bianca sulla copertina nera e tre segnalibri rossi di lunghezza diversa che sporgono dall'alto. Nessun testo, nessun personaggio, niente oro. → intestazione-partita.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di intestazione per l'interfaccia di Persona 5 Royal, PNG 512×512 con sfondo trasparente, un unico soggetto a figura piena all'85% del quadrato, silhouette ad alto contrasto leggibile a 64 px, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre. Soggetto: un calendario da tavolo a spirale con un giorno cerchiato a mano e una grande spunta rossa su quel giorno, un sole a raggi netti e una luna crescente ai due lati della testata. Nessun numero leggibile, nessun testo, niente oro. → intestazione-diario.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di intestazione per l'interfaccia di Persona 5 Royal, PNG 512×512 con sfondo trasparente, un unico soggetto a figura piena all'85% del quadrato, silhouette ad alto contrasto leggibile a 64 px, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre. Soggetto: una pila di tre carte verticali sfalsate viste di fronte, su ognuna la silhouette piena di una maschera diversa; la carta in alto con il bordo rosso. Nessun testo, nessun numero romano, niente oro, non le carte degli Arcani. → intestazione-compendio.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di intestazione per l'interfaccia di Persona 5 Royal, PNG 512×512 con sfondo trasparente, un unico soggetto a figura piena all'85% del quadrato, silhouette ad alto contrasto leggibile a 64 px, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre. Soggetto: due carte inclinate che convergono verso un lampo rosso e, sotto il lampo, la lama triangolare di una ghigliottina. Nessun testo, niente oro, nessun sangue. → intestazione-fusione.png
+[prompt negativo §0]
+```
+```
+[blocco di stile §0] Illustrazione di intestazione per l'interfaccia di Persona 5 Royal, PNG 512×512 con sfondo trasparente, un unico soggetto a figura piena all'85% del quadrato, silhouette ad alto contrasto leggibile a 64 px, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre. Soggetto: un profilo cittadino in un unico blocco, a sinistra un castello a due torri, al centro una torre radio a traliccio, a destra l'imbocco ad arco di un tunnel della metropolitana con due binari; nessuna copia di edifici reali. Nessun testo, niente oro. → intestazione-luoghi.png
+[prompt negativo §0]
+```
+
+Consegna: nel database con `PUT /api/immagini/illustrazioni/<chiave>`. Verifica: 512×512 esatti, alfa nativo, nessun pixel con alfa > 8 nel contorno di 3 px, leggibilità a 64 px di altezza su fondo `#0b0b0e` e `#14141a`.
