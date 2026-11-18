@@ -29,8 +29,9 @@ interface Props {
 export function RequisitiVoce({ a, partitaId, onCambiata }: Props) {
   const [occupate, setOccupate] = useState<ReadonlySet<string>>(new Set());
   const vivo = useRef(true);
-  // l'ultima richiesta partita: una risposta più vecchia (due caselle toccate di seguito) non riporta indietro la voce
-  const ultima = useRef(0);
+  // le richieste partono una alla volta, in ordine: ogni risposta contiene gli effetti di tutte le precedenti, quindi con due caselle toccate di
+  // seguito la voce mostrata è sempre quella più recente e nessuna risposta può riportarla indietro
+  const coda = useRef<Promise<void>>(Promise.resolve());
   useEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
   const requisiti = a.requisiti;
   if (!requisiti?.length) return null;
@@ -40,16 +41,19 @@ export function RequisitiVoce({ a, partitaId, onCambiata }: Props) {
   const cambia = async (r: RequisitoVoceDto, fatto: boolean) => {
     if (partitaId === null) return;
     const chiave = chiaveRequisito(r.arcana, r.persona);
-    const numero = ++ultima.current;
     setOccupate((s) => new Set(s).add(chiave));
-    try {
-      const agg = await impostaRequisitoVoce(partitaId, a.uid, r.arcana, r.persona, fatto);
-      if (vivo.current && numero === ultima.current) onCambiata(agg);
-    } catch (err) {
-      if (vivo.current) notifica('error', err instanceof Error ? err.message : 'Casella non aggiornata.');
-    } finally {
-      if (vivo.current) setOccupate((s) => { const n = new Set(s); n.delete(chiave); return n; });
-    }
+    const richiesta = async () => {
+      try {
+        const agg = await impostaRequisitoVoce(partitaId, a.uid, r.arcana, r.persona, fatto);
+        if (vivo.current) onCambiata(agg);
+      } catch (err) {
+        if (vivo.current) notifica('error', err instanceof Error ? err.message : 'Casella non aggiornata.');
+      } finally {
+        if (vivo.current) setOccupate((s) => { const n = new Set(s); n.delete(chiave); return n; });
+      }
+    };
+    coda.current = coda.current.then(richiesta);
+    await coda.current;
   };
   return (
     <>
