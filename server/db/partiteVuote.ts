@@ -28,29 +28,30 @@ export function percorsoModelloPartite(): string {
 }
 
 /** Un oggetto di `sqlite_master` con il suo testo di creazione. */
-interface OggettoSchema { type: string; name: string; sql: string }
+export interface OggettoSchema { type: string; name: string; sql: string }
 
 /** Un nome fra virgolette doppie, con le virgolette interne raddoppiate. */
 const virgolette = (nome: string): string => `"${nome.replaceAll('"', '""')}"`;
 
 /**
- * Il testo di creazione di un oggetto del modello, con il nome qualificato dallo schema `utente`.
+ * Il testo di creazione di un oggetto preso da un altro file (il modello o il pacchetto), con il nome qualificato dallo schema
+ * della connessione in cui va creato (`utente` per le partite, `main` per i dati di gioco).
  *
  * In `sqlite_master` il testo è senza schema («CREATE TABLE partita (…)», «CREATE TABLE "partita" (…)»): eseguito così com'è
  * creerebbe l'oggetto in `main`. Lo schema si inserisce subito prima del nome, lasciando il resto del testo identico carattere per
  * carattere (l'impronta dello schema si calcola su quel testo). Il nome può essere nudo o fra virgolette doppie, parentesi quadre,
  * accenti gravi o apici, e può seguire un `IF NOT EXISTS`. Un testo che non comincia così non si indovina: errore.
  */
-function qualificaConUtente(oggetto: OggettoSchema): string {
+export function qualificaConSchema(oggetto: OggettoSchema, schema: 'main' | 'utente'): string {
   const inizio = /^\s*CREATE\s+(?:UNIQUE\s+)?(?:TABLE|INDEX|TRIGGER|VIEW)\s+(?:IF\s+NOT\s+EXISTS\s+)?/i.exec(oggetto.sql);
   const resto = inizio ? oggetto.sql.slice(inizio[0].length) : '';
   const traDelimitatori = [virgolette(oggetto.name), `[${oggetto.name}]`, `\`${oggetto.name.replaceAll('`', '``')}\``, `'${oggetto.name.replaceAll("'", "''")}'`];
   // il nome nudo deve finire lì: «partita» non è l'inizio di «partita_x»
   const nudo = resto.startsWith(oggetto.name) && !/^[\p{L}\p{N}_$]/u.test(resto.slice(oggetto.name.length));
   if (!inizio || !(nudo || traDelimitatori.some((forma) => resto.startsWith(forma)))) {
-    throw new Error(`Il modello del file delle partite ha un oggetto con un testo di creazione non riconosciuto (${oggetto.type} «${oggetto.name}»): la struttura non si può riprodurre.`);
+    throw new Error(`Il file di origine ha un oggetto con un testo di creazione non riconosciuto (${oggetto.type} «${oggetto.name}»): la struttura non si può riprodurre.`);
   }
-  return `${inizio[0]}utente.${resto}`;
+  return `${inizio[0]}${schema}.${resto}`;
 }
 
 /** Vero se lo schema `utente` della connessione non ha nessuna tabella (escluse quelle interne di SQLite). */
@@ -87,7 +88,7 @@ export function creaPartiteDalModelloSeMancano(db: Database.Database, modello: s
       const tabelleDelModello = oggetti.filter((o) => o.type === 'table');
       // prima le tabelle e le loro righe, poi indici, trigger e viste: i trigger che vietano le modifiche non vedono la copia
       for (const t of tabelleDelModello) {
-        db.exec(qualificaConUtente(t));
+        db.exec(qualificaConSchema(t, 'utente'));
         const colonne = (db.prepare(`SELECT name FROM pragma_table_info(?, '${ALIAS_MODELLO}')`).all(t.name) as Array<{ name: string }>).map((c) => virgolette(c.name)).join(', ');
         db.prepare(`INSERT INTO utente.${virgolette(t.name)} (${colonne}) SELECT ${colonne} FROM ${ALIAS_MODELLO}.${virgolette(t.name)}`).run();
       }
@@ -102,7 +103,7 @@ export function creaPartiteDalModelloSeMancano(db: Database.Database, modello: s
       if (tabelleDelModello.some((t) => t.name === 'yen_automatico_inizio')) {
         db.prepare('UPDATE utente.yen_automatico_inizio SET dal = ? WHERE id = 1').run(new Date().toISOString());
       }
-      for (const o of oggetti) if (o.type !== 'table') db.exec(qualificaConUtente(o));
+      for (const o of oggetti) if (o.type !== 'table') db.exec(qualificaConSchema(o, 'utente'));
       db.pragma(`utente.user_version = ${versione}`);
     })();
   } finally {

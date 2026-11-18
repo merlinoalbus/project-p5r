@@ -2,12 +2,18 @@
 // versioneSchema — le versioni dei due database che questa versione dell'app sa leggere
 // ============================================================
 //
-// L'app apre `gioco.db` e `partite.db` così come sono: non converte niente. Ogni file porta la propria versione in
-// `PRAGMA user_version`, e il codice ne legge una sola per file: quella scritta qui. Un file di un'altra versione non si apre, non
-// si importa e non si ripristina: il codice leggerebbe e scriverebbe tabelle che non corrispondono al suo modello.
+// L'app apre `gioco.db` e `partite.db` e non converte i dati. Ogni file porta la propria versione in `PRAGMA user_version`, e il
+// codice ne legge una sola per file: quella scritta qui. Un file di un'altra versione non si apre, non si importa e non si
+// ripristina: il codice leggerebbe e scriverebbe tabelle che non corrispondono al suo modello.
+//
+// L'unica eccezione, deliberata e in un solo punto (`passaggioVersione.ts`), riguarda i file dell'istanza all'avvio della
+// preparazione: uno alla versione IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove (additivo; per le partite con copia di sicurezza prima) e
+// diventa quello atteso, perché una versione rilasciata deve partire sui dati già in uso. «Importa», anteprima, ripristino,
+// edizione di rilascio e script non passano da lì e rifiutano un file di un'altra versione, la precedente compresa.
 //
 // Chi cambia la struttura o i dati di uno dei due file alza la costante corrispondente insieme al file che l'app distribuisce
-// (`pacchetto/gioco.db` per i dati di gioco, `pacchetto/partite-vuoto.db` per le partite).
+// (`pacchetto/gioco.db` per i dati di gioco, `pacchetto/partite-vuoto.db` per le partite) e, se ha aggiunto strutture, riscrive il
+// passaggio additivo di `passaggioVersione.ts` (toglie quello della versione prima).
 // ============================================================
 
 import type Database from 'better-sqlite3';
@@ -42,7 +48,8 @@ export function messaggioVersioneDiversa(file: FileVersionato, trovata: number, 
 
 /**
  * Verifica che i due file della connessione (`main` = gioco.db, `utente` = partite.db) siano alla versione attesa. Lancia
- * `ErroreVersioneDati` al primo che non lo è; non scrive niente.
+ * `ErroreVersioneDati` al primo che non lo è; non scrive niente. All'avvio della preparazione la precede
+ * `portaAllaVersioneAttuale` (che porta alla versione attesa un file alla versione immediatamente precedente).
  */
 export function verificaVersioni(db: Database.Database): void {
   const gioco = db.pragma('main.user_version', { simple: true }) as number;

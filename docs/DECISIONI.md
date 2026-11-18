@@ -95,14 +95,29 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   database di gioco per scelta dell'utente, con attribuzione in `NOTICE`.
 
 ## 3. Persistenza, pacchetto e istanze
-- **Niente migrazioni: i due file si aprono alla versione attesa**. `gioco.db` e `partite.db` portano ciascuno la propria versione
-  (`PRAGMA user_version`), e il codice ne legge una sola per file: `VERSIONE_GIOCO` e `VERSIONE_PARTITE` in
-  `server/db/versioneSchema.ts`. Un file di un'altra versione fa fermare l'avvio, con un messaggio che dice quale file e che cosa
-  fare; «Importa» e il ripristino lo rifiutano. Non c'è conversione automatica dei dati. L'avanzamento (`partite.db`) si
-  copia da solo all'avvio e ogni 6 ore in `data/backups` (le ultime 40); `gioco.db` si salva dal backup dell'istanza. Un'istanza nuova nasce dal
-  pacchetto: `pacchetto/gioco.db` per i dati di gioco (senza immagini) e `pacchetto/partite-vuoto.db` per il file delle partite. Un
-  cambio di struttura o di dati si applica a mano sui dati dell'istanza, e nello stesso cambiamento si aggiornano le due costanti e i
-  due file del pacchetto (`npm run pacchetto` rifà `gioco.db`; `partite-vuoto.db` si aggiorna a mano).
+- **Niente migrazioni: i due file si aprono alla versione attesa, con un solo passaggio additivo dalla precedente**. `gioco.db` e
+  `partite.db` portano ciascuno la propria versione (`PRAGMA user_version`), e il codice ne legge una sola per file:
+  `VERSIONE_GIOCO` e `VERSIONE_PARTITE` in `server/db/versioneSchema.ts`. Un file di un'altra versione fa fermare l'avvio, con un
+  messaggio che dice quale file e che cosa fare; «Importa», l'anteprima, il ripristino, l'edizione di rilascio e gli script lo
+  rifiutano, la versione precedente compresa. I dati non si convertono mai.
+  **Unica eccezione, deliberata e in un solo punto** (`server/db/passaggioVersione.ts`, chiamato dall'avvio della preparazione): un
+  file dell'istanza alla versione IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove (tabelle e indici mancanti, con il testo
+  di creazione identico a quello dei file del pacchetto), così una versione rilasciata parte sui dati già in produzione senza
+  intervento a mano. Il passaggio è additivo (non modifica né toglie niente), idempotente (un file alla versione attesa non si tocca e
+  non scrive nel log) e in una transazione con la nuova versione. Il file delle partite (piccolo, insostituibile) è preceduto da una
+  copia di sicurezza in `data/backups` (`prima-del-passaggio-partite-<versione>-<momento>.db`, un nome fuori dalla rotazione delle copie
+  periodiche, da togliere a mano quando non serve più); il file dei dati di gioco no (è grande per le immagini e riceve solo strutture
+  vuote, in una transazione). Se la copia non riesce, o una struttura esiste già, l'avvio si ferma senza scrivere. Dopo il passaggio
+  un'immagine dell'app della versione precedente non riparte sui file passati: serve ripristinare la copia delle partite e togliere le
+  strutture aggiunte. Ogni futuro cambio di struttura porta lo stesso passaggio additivo nello stesso
+  cambiamento che alza la costante, e toglie quello della versione prima.
+  **I dati non vengono convertiti**: ciò che il passaggio crea nasce vuoto. Le cinque voci della Stanza di Velluto in produzione
+  restano a testo finché l'utente non compone il loro elenco nell'editor; il pacchetto per le istanze nuove le ha già convertite.
+  L'avanzamento (`partite.db`) si copia da solo all'avvio e ogni 6 ore in `data/backups` (le ultime 40); `gioco.db` si salva dal
+  backup dell'istanza. Un'istanza nuova nasce dal pacchetto: `pacchetto/gioco.db` per i dati di gioco (senza immagini) e
+  `pacchetto/partite-vuoto.db` per il file delle partite. Un cambio di struttura o di dati aggiorna nello stesso cambiamento le due
+  costanti, il passaggio additivo e i due file del pacchetto (`npm run pacchetto` rifà `gioco.db`; `partite-vuoto.db` si aggiorna a
+  mano); un cambio di dati senza strutture nuove si applica a mano sui dati dell'istanza.
 - Dati di gioco in `gioco.db`, partite in `partite.db`, sulla stessa connessione (schema `utente`): sostituire il DB di gioco non
   tocca l'avanzamento.
 - Le immagini vivono in `gioco.db` (tabella `immagine`), tranne quelle del compendio e di `ui/`, che stanno in `public/asset/`.
@@ -126,7 +141,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   blocca niente, e non c'è un controllo in CI.
 - **Due istanze dallo stesso codice**: preparazione (scrittura dei contenuti, un solo proprietario) e rilascio (contenuti in sola lettura,
   partite per utente). La modalità è fissata nella build (punto d'avvio `server/rilascio.ts`, `VITE_MODALITA=rilascio`), mai in una
-  variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non converte i dati e si ferma se l'edizione non
+  variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non converte i dati, non esegue il passaggio additivo e si ferma se l'edizione non
   coincide con il manifesto.
 - **Provenienza dei dati nel rilascio (D10, 01/11)**: chi gioca non vede da dove viene un dato né le note per chi lo corregge (collegamenti
   alle fonti, «da fonte secondaria», «Da verificare» delle aree, incertezze delle fonti, provenienze degli esiti della negoziazione,
