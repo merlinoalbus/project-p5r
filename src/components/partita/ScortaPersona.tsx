@@ -125,7 +125,7 @@ export function ScortaPersona({ partitaId }: Props) {
       {/* capienza in testa: quanti posti sono occupati e quando salgono (dal rango di Igor) */}
       <IntestazioneCapienza quante={dati?.length ?? 0} capienza={capienza.dati ?? null} />
       {dati && dati.length === 0 && (
-        <EmptyState illustrazione="vuoto-persona-senza-testo"title="La scorta è vuota" hint="Aggiungi le Persona che possiedi nel gioco: livello, skill e statistiche vengono precompilati dal compendio." />
+        <EmptyState illustrazione="vuoto-persona-senza-testo" title="La scorta è vuota" hint="Aggiungi le Persona che possiedi nel gioco: livello, skill e statistiche vengono precompilati dal compendio." />
       )}
       {dati && (
         <>
