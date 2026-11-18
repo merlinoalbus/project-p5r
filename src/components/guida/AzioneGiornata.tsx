@@ -8,7 +8,7 @@
 // metà (note, esiti, acquisti) non sopravvivono a una voce cambiata altrove.
 // ============================================================
 
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { getConfidentiPartita, getVocePercorso, impostaAzionePercorso } from '../../services/api';
 import { giocaLaSceltaRomantica } from '../../../shared/puntiConfidenti';
 import { fraseRelazione } from '../../../shared/descriviEffettiSpunta';
@@ -180,6 +180,13 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const nonDovuta = !a.fatta && !!a.nonDovuta;
   // la prima spunta vuole tutte le caselle «In scorta» spuntate (il server risponde comunque 409); l'annullo di una voce fatta è sempre libero
   const scortaIncompleta = !a.fatta && !!a.requisiti?.some((r) => r.fatto !== true);
+  const scortaFatti = a.requisiti?.filter((r) => r.fatto === true).length ?? 0;
+  const scortaTotale = a.requisiti?.length ?? 0;
+  const conAnello = scortaTotale > 0 && !a.fatta;
+  const casella = (
+    <input type="checkbox" className={`w-5 h-5 shrink-0 ${conAnello ? '' : 'mt-2'}`} checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || scortaIncompleta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)}
+      aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={[nonDovuta ? `non-dovuta-${a.uid}` : '', scortaIncompleta ? idContatoreScorta(a.uid) : ''].filter(Boolean).join(' ') || undefined} />
+  );
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
     <li id={`voce-${a.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''} ${classeRiga ?? ''} ${classeSelezioneRiga(selezione)}`} aria-current={evidenziata ? 'true' : undefined}
@@ -187,8 +194,16 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       {maniglia}
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {/* L13 (O9-3): una voce non dovuta nella partita non si spunta (il server risponde 409): la casella è spenta e il motivo sta sotto il testo */}
-      {partitaId && <label className={`touch flex items-start justify-center shrink-0 -my-1 pr-1 ${nonDovuta ? 'cursor-not-allowed' : 'cursor-pointer'}`}><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || scortaIncompleta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)}
-        aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={[nonDovuta ? `non-dovuta-${a.uid}` : '', scortaIncompleta ? idContatoreScorta(a.uid) : ''].filter(Boolean).join(' ') || undefined} /></label>}
+      {/* con un elenco «In scorta» la casella ha attorno l'anello d'avanzamento (arco rosso che cresce con le caselle spuntate, verde e pieno quando si può spuntare);
+          da spenta dice perché nel `title` e nella descrizione (il contatore n/N dell'elenco) */}
+      {partitaId && (
+        <label className={`touch flex items-start justify-center shrink-0 -my-1 pr-1 ${nonDovuta || scortaIncompleta ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+          title={scortaIncompleta ? `In scorta: ${scortaFatti}/${scortaTotale}. Spunta le caselle che mancano.` : undefined}>
+          {conAnello
+            ? <span className={`scorta-anello ${scortaIncompleta ? '' : 'scorta-anello--pronta'}`} style={{ '--p': scortaFatti / scortaTotale } as CSSProperties}>{casella}</span>
+            : casella}
+        </label>
+      )}
       <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 testo-13 min-w-0 flex-1">
         {/* D15: voce fatta = spunta rossa a sinistra e testo barrato in grigio (il segno fuori dal testo barrato: l'icona non si taglia) */}
