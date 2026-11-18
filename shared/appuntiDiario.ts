@@ -18,6 +18,7 @@
 
 import type { FasciaGioco } from './types.js';
 import type { RequisitoSpillo } from './condizioniSpillo.js';
+import type { RequisitoVoceInput } from './requisitiVoce.js';
 
 /** Il nome del formato: lo riconosce chi legge gli appunti, mai un testo qualsiasi. */
 export const FORMATO_APPUNTI_DIARIO = 'p5r-diario-voci';
@@ -75,6 +76,8 @@ export interface VoceAppunti {
   rangoAtteso: number | null;
   /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»); assente negli appunti di prima e per una voce senza (= sempre). */
   condizioni?: RequisitoSpillo[];
+  /** I requisiti «da avere in scorta» della voce (`shared/requisitiVoce.ts`); assente negli appunti di prima e per una voce senza. Le caselle delle partite non viaggiano. */
+  requisiti?: RequisitoVoceInput[];
   effetti: EffettiAppunti;
   /** L'insieme ordinato delle infiltrazioni della voce (chiavi di `dungeon_area`). */
   infiltrazioni: string[];
@@ -123,6 +126,7 @@ export type CodiceRilievoIncolla =
   | 'riferimento-non-valido'
   | 'voce-non-valida'
   | 'infiltrazioni-non-applicabili'
+  | 'requisiti-non-validi'
   | 'effetti-da-correggere'
   | 'eventi-calendario'
   | 'proposte-aperte'

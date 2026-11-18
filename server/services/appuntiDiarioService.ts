@@ -35,6 +35,8 @@ import { normalizzaEffettoVoce, type EffettoVoce } from '../../shared/effettiVoc
 import { TIPI_RIFERIMENTO_AZIONE } from '../../shared/effettiAzione.js';
 import { dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo.js';
 import { condizioniDaSalvare, condizioniDellaVoce } from './voceDovuta.js';
+import { controllaRequisitiVoce, leggiRequisitiVoci, salvaRequisitiVoce } from './requisitiVoceService.js';
+import type { RequisitoVoceInput } from '../../shared/requisitiVoce.js';
 import {
   FORMATO_APPUNTI_DIARIO, VERSIONE_APPUNTI_DIARIO, type AppuntiDiario, type EsitoAnnulloIncollaDto, type EsitoIncollaDto, type PianoIncollaDto,
   type RichiestaEseguiIncolla, type RichiestaIncollaVoci, type RilievoIncolla, type StatoVoceIncolla, type VoceAppunti, type VoceSaltataIncolla,
@@ -70,10 +72,12 @@ function infiltrazioniDellaVoce(uid: string): string[] {
 
 // ---- L'istantanea per gli appunti ----
 
-/** Una voce com'è nel file di gioco, per gli appunti: tutti i campi del modulo, gli effetti della spunta con i loro valori, le infiltrazioni. */
+/** Una voce com'è nel file di gioco, per gli appunti: tutti i campi del modulo, gli effetti della spunta con i loro valori, le infiltrazioni, i requisiti in scorta. */
 function istantaneaVoce(r: RigaVoce): VoceAppunti {
   // la fonte com'è: una fonte storica o incoerente passa «da correggere», col suo testo e il motivo (la copia resta da correggere uguale)
   const fonte = leggiEffettiVocePerMostrare(r.uid);
+  // i requisiti «da avere in scorta» del canone, senza le caselle (sono delle partite e non viaggiano)
+  const requisiti = (leggiRequisitiVoci(undefined, { voceUid: r.uid }).get(r.uid) ?? []).map((q) => ({ arcana: q.arcana, persona: q.persona }));
   return {
     uid: r.uid,
     origine: { giorno: r.data, fascia: fasciaDi(r), posto: r.ordine, indiceGuida: r.indice_guida },
@@ -82,6 +86,7 @@ function istantaneaVoce(r: RigaVoce): VoceAppunti {
     riferimentoTesto: r.riferimento_testo, rangoAtteso: r.rango_atteso,
     // L13 (O9-3): «Si fa solo se», solo se la voce ne ha
     ...(condizioniDellaVoce(r).length ? { condizioni: condizioniDellaVoce(r) } : {}),
+    ...(requisiti.length ? { requisiti } : {}),
     effetti: { stato: fonte.stato, elementi: fonte.effetti.map((e) => ({ uid: e.uid, effetto: e.effetto, origine: e.origine })), rawLegacy: fonte.rawLegacy, motivo: fonte.motivo },
     infiltrazioni: infiltrazioniDellaVoce(r.uid),
     daRivedere: r.da_rivedere === 1,
@@ -115,6 +120,8 @@ interface DettaglioVoce {
   senzaNonValida: boolean;
   /** Copia: le infiltrazioni che si possono legare alla copia. */
   infiltrazioni: string[];
+  /** Copia: i requisiti «da avere in scorta» che si possono dare alla copia (arcani e Persone che esistono ancora e stanno insieme). */
+  requisiti: RequisitoVoceInput[];
 }
 
 interface Piano { dto: PianoIncollaDto; dettagli: DettaglioVoce[]; ancora: RigaVoce | null }
@@ -144,7 +151,7 @@ function rilieviDiData(effetti: ReadonlyArray<{ uid: string; effetto: EffettoVoc
 }
 
 /** Il rilievo di disponibilità di una voce di Confidente nel giorno e nella fascia di destinazione (lo stesso avviso della voce). */
-function rilieviDiDisponibilita(r: Pick<RigaVoce, 'genere' | 'riferimento_tipo' | 'riferimento_chiave' | 'rango_atteso'>, giorno: string, fascia: FasciaGioco, voceIndice: number, azione: string): RilievoIncolla[] {
+function rilieviDiDisponibilita(r: Pick<RigaVoce, 'genere' | 'tipo' | 'riferimento_tipo' | 'riferimento_chiave' | 'rango_atteso'>, giorno: string, fascia: FasciaGioco, voceIndice: number, azione: string): RilievoIncolla[] {
   const avvisi = avvisiDisponibilitaDellaVoce({ ...r, data: giorno, fascia }).avvisiDisponibilita ?? [];
   return avvisi.map((a) => ({ codice: 'disponibilita' as const, gravita: 'conferma' as const, voceIndice, testo: `«${breve(azione)}» ${nomeFascia(fascia)} del ${giornoTesto(giorno)}: ${a.testo}` }));
 }
@@ -180,7 +187,7 @@ function infiltrazioniApplicabili(v: VoceAppunti, riferimentoValido: boolean): {
 /** Il piano della copia di una voce: dati riconosciuti, rilievi, stato. */
 function pianoCopia(v: VoceAppunti, indice: number, giorno: string, fasciaDest: FasciaGioco, rilievi: RilievoIncolla[]): DettaglioVoce {
   const azione = v.azione.trim();
-  const d: DettaglioVoce = { indice, voce: v, fasciaDest, stato: 'pronta', effetti: [], segnalati: new Set(), riferimentoNonValido: false, soloSenzaSegnalati: false, maiIncollabile: false, senzaNonValida: false, infiltrazioni: [] };
+  const d: DettaglioVoce = { indice, voce: v, fasciaDest, stato: 'pronta', effetti: [], segnalati: new Set(), riferimentoNonValido: false, soloSenzaSegnalati: false, maiIncollabile: false, senzaNonValida: false, infiltrazioni: [], requisiti: [] };
   const mio = (r: RilievoIncolla) => rilievi.push(r);
   // il tipo d'azione si copia com'è (una voce di prima con un tipo fuori elenco si legge «altro», come l'originale)
   if (!azione || !GENERI.has(v.genere)) {
@@ -246,6 +253,12 @@ function pianoCopia(v: VoceAppunti, indice: number, giorno: string, fasciaDest: 
   d.infiltrazioni = inf.valide;
   if (inf.scartate.length) mio({ codice: 'infiltrazioni-non-applicabili', gravita: 'conferma', voceIndice: indice,
     testo: `«${breve(azione)}»: ${inf.scartate.length === 1 ? 'un’infiltrazione non esiste più o non è' : `${inf.scartate.length} infiltrazioni non esistono più o non sono`} del Palazzo della voce: la copia ne resta senza.` });
+  // i requisiti «da avere in scorta»: quelli che stanno ancora insieme nei dati di gioco; se non stanno, la copia nasce senza e lo si dice
+  if (v.requisiti?.length) {
+    const c = v.genere === 'azione' ? controllaRequisitiVoce(v.requisiti) : null;
+    if (c?.ok) d.requisiti = c.requisiti;
+    else mio({ codice: 'requisiti-non-validi', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}»: i requisiti da avere in scorta non si possono incollare (${c ? c.motivo : 'solo un’azione ne ha'}): la copia ne resta senza.` });
+  }
   // ciò che la copia non eredita, detto prima (la voce d'origine, se c'è ancora, lo tiene)
   if (prepared('SELECT 1 FROM voce_giornata WHERE uid = ?').get(v.uid)) {
     const eventi = prepared('SELECT COUNT(*) FROM evento_calendario_voce WHERE voce_uid = ?').pluck().get(v.uid) as number;
@@ -257,7 +270,7 @@ function pianoCopia(v: VoceAppunti, indice: number, giorno: string, fasciaDest: 
     if (proposta) mio({ codice: 'proposta-infiltrazioni', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» ha una proposta d’infiltrazioni salvata: la copia non la eredita (se la riconosce dal testo la ricalcola).` });
   }
   if (v.daRivedere) mio({ codice: 'da-rivedere', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» è da rivedere: la copia nasce senza il segno (resta sull’originale).` });
-  for (const r of v.genere === 'azione' && !d.riferimentoNonValido && v.riferimento ? rilieviDiDisponibilita({ genere: v.genere, riferimento_tipo: v.riferimento.tipo, riferimento_chiave: v.riferimento.chiave, rango_atteso: v.rangoAtteso }, giorno, fasciaDest, indice, azione) : []) mio(r);
+  for (const r of v.genere === 'azione' && !d.riferimentoNonValido && v.riferimento ? rilieviDiDisponibilita({ genere: v.genere, tipo: v.tipo, riferimento_tipo: v.riferimento.tipo, riferimento_chiave: v.riferimento.chiave, rango_atteso: v.rangoAtteso }, giorno, fasciaDest, indice, azione) : []) mio(r);
   d.stato = d.soloSenzaSegnalati ? 'con-rilievi' : rilievi.some((r) => r.voceIndice === indice && r.gravita === 'conferma') ? 'con-rilievi' : 'pronta';
   return d;
 }
@@ -271,7 +284,7 @@ function rimuoviRaccordi(e: EffettoVoce, tolti: ReadonlySet<string>): EffettoVoc
 
 /** Il piano dello spostamento di una voce tagliata: è ancora dove era? Rilievi del giorno di destinazione e delle partite. */
 function pianoTaglio(v: VoceAppunti, indice: number, giorno: string, fasciaDest: FasciaGioco, gia: ReadonlySet<string>, rilievi: RilievoIncolla[]): DettaglioVoce {
-  const d: DettaglioVoce = { indice, voce: v, fasciaDest, stato: 'pronta', effetti: [], segnalati: new Set(), riferimentoNonValido: false, soloSenzaSegnalati: false, maiIncollabile: false, senzaNonValida: false, infiltrazioni: [] };
+  const d: DettaglioVoce = { indice, voce: v, fasciaDest, stato: 'pronta', effetti: [], segnalati: new Set(), riferimentoNonValido: false, soloSenzaSegnalati: false, maiIncollabile: false, senzaNonValida: false, infiltrazioni: [], requisiti: [] };
   const r = prepared('SELECT * FROM voce_giornata WHERE uid = ?').get(v.uid) as RigaVoce | undefined;
   if (!r) {
     rilievi.push({ codice: 'eliminata', gravita: 'info', voceIndice: indice, testo: `«${breve(v.azione)}» non c’è più (eliminata dopo il taglio): non si sposta e non si ricrea. Se serve, è nel Cestino.` });
@@ -338,7 +351,7 @@ export function pianoIncolla(r: RichiestaIncollaVoci): PianoIncollaDto {
 
 /** La copia di una voce in un giorno e fascia: voce nuova (uid nuovo), effetti con uid nuovi registrati, infiltrazioni. Restituisce l'uid. */
 function inserisciCopia(
-  v: VoceAppunti, effetti: IstantaneaEffettiVoce, infiltrazioni: readonly string[], riferimento: VoceAppunti['riferimento'], giorno: string,
+  v: VoceAppunti, effetti: IstantaneaEffettiVoce, infiltrazioni: readonly string[], requisiti: readonly RequisitoVoceInput[], riferimento: VoceAppunti['riferimento'], giorno: string,
   fascia: FasciaGioco, ordine: number, opz: { verifica: boolean; operazione: string }
 ): { uid: string; mappaEffetti: Record<string, string> } {
   const uid = nuovoId(), adesso = nowIso();
@@ -354,6 +367,8 @@ function inserisciCopia(
   if (condizioni) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
   const mappa = scriviEffettiDaIstantanea(uid, effetti, { verifica: opz.verifica, registro: { origine: 'copia-voce', operazione: opz.operazione, daVoce: v.uid } });
   if (infiltrazioni.length) infiltrazioni.forEach((k, i) => prepared('INSERT INTO voce_infiltrazione (voce_uid, ordine, infiltrazione_chiave) VALUES (?, ?, ?)').run(uid, i, k));
+  // i requisiti «da avere in scorta» (le stesse verifiche del modulo della voce); le caselle delle partite non si copiano
+  if (requisiti.length) salvaRequisitiVoce(uid, requisiti, v.genere);
   return { uid, mappaEffetti: Object.fromEntries(mappa) };
 }
 
@@ -436,7 +451,7 @@ export function incollaVoci(r: RichiestaEseguiIncolla): EsitoIncollaDto {
       effettiTolti += tolti.size;
       const fonte: IstantaneaEffettiVoce = { stato: d.voce.effetti.stato, effetti, rawLegacy: d.voce.effetti.rawLegacy, motivo: d.voce.effetti.motivo };
       const riferimento = d.riferimentoNonValido ? null : d.voce.riferimento;
-      const c = inserisciCopia(d.voce, fonte, d.infiltrazioni, riferimento, r.giorno, d.fasciaDest, 1000000 + i, { verifica: true, operazione: id });
+      const c = inserisciCopia(d.voce, fonte, d.infiltrazioni, d.requisiti, riferimento, r.giorno, d.fasciaDest, 1000000 + i, { verifica: true, operazione: id });
       arrivate.push({ uid: c.uid, fascia: d.fasciaDest, daVoce: d.voce.uid, mappaEffetti: c.mappaEffetti });
     });
     for (const f of ['giorno', 'sera'] as const) {
@@ -476,7 +491,7 @@ export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number):
         if (!e) throw httpErrors.conflict('effetto-non-copiabile', `«${breve(r.azione)}»: un effetto della spunta non si riconosce integralmente e la copia lo perderebbe. Correggilo dal modulo della voce, poi copiala.`);
         return { uid: x.uid, effetto: e, origine: x.origine };
       }), rawLegacy: v.effetti.rawLegacy, motivo: v.effetti.motivo };
-      const c = inserisciCopia(v, fonte, v.infiltrazioni, v.riferimento, t.giorno, t.fascia, 1000000 + i, { verifica: false, operazione: id });
+      const c = inserisciCopia(v, fonte, v.infiltrazioni, v.requisiti ?? [], v.riferimento, t.giorno, t.fascia, 1000000 + i, { verifica: false, operazione: id });
       return { uid: c.uid, fascia: t.fascia, daVoce: r.uid, mappaEffetti: c.mappaEffetti };
     });
     collocaInFascia(t.giorno, t.fascia, copiate.map((c) => c.uid), null);

@@ -131,6 +131,8 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   punto_partita: ['spunta di una voce nelle partite', 'spunte delle voci nelle partite'], spillo_partita: ['stato di un pin nelle partite', 'stati dei pin nelle partite'],
   timbri_dedalo_partita: ['conteggio dei timbri nelle partite', 'conteggi dei timbri nelle partite'],
   spunta_voce_partita: ['spunta del diario nelle partite', 'spunte del diario nelle partite'],
+  voce_requisito_scorta: ['requisito da avere in scorta', 'requisiti da avere in scorta'],
+  spunta_requisito_voce_partita: ['casella di un requisito in scorta nelle partite', 'caselle dei requisiti in scorta nelle partite'],
   // L8: le Ombre
   ombra_luogo: ['luogo d’incontro di un’Ombra', 'luoghi d’incontro delle Ombre'], ombra_voce: ['collegamento voce-Ombra', 'collegamenti voce-Ombra'],
   // L4

@@ -41,6 +41,9 @@ import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import { CondizioniEditor } from './CondizioniEditor';
 import { IconaAzione } from '../shared/IconaAzione';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { Selettore } from '../shared/Selettore';
+import { MASSIMO_REQUISITI_VOCE } from '../../../shared/requisitiVoce';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -101,6 +104,8 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
       posizione: postoIniziale(fascia), struttura: proposta ? strutturaConProposta(salvata, proposta) : salvata,
       // L13 (O9-3): quando la voce è dovuta («Si fa solo se»); vuoto = sempre
       condizioni: (voce?.condizioni ?? []) as RequisitoSpillo[],
+      // i requisiti «da avere in scorta» (arcani o Persona specifiche, in ordine); vuoto = nessuno
+      requisiti: (voce?.requisiti ?? []).map((r): RequisitoBozza => ({ arcana: r.arcana, persona: r.persona })),
     };
   });
   const [campi, setCampi] = useState(iniziali);
@@ -108,6 +113,7 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   // L6-06: le due finestre sopra la voce, la griglia di «Quale» (si apre anche scegliendo il tipo, nell'altra colonna) e «Si fa solo se»
   const [qualeAperta, setQualeAperta] = useState(false);
   const [condizioniAperte, setCondizioniAperte] = useState(false);
+  const [scortaAperta, setScortaAperta] = useState(false);
   const scrittura = useRef(false);
   /** Unisce una modifica parziale ai campi del modulo. */
   const imposta = (p: Partial<typeof campi>) => setCampi((c) => ({ ...c, ...p }));
@@ -146,6 +152,8 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     const effettiSalvati = s.fonteEffetti?.stato === 'convertita' && s.fonteEffetti.effetti.length > 0;
     // «Si fa solo se» si manda solo se è cambiato (una voce nuova: solo se ne ha); un promemoria lo perde dal server
     const condizioniCambiate = JSON.stringify(campi.condizioni) !== JSON.stringify(iniziali.condizioni);
+    // «Da avere in scorta» si manda solo se è cambiato (assente = invariato; `[]` toglie tutto); un promemoria lo perde dal server
+    const requisitiCambiati = JSON.stringify(campi.requisiti) !== JSON.stringify(iniziali.requisiti);
     const dati: DatiVoceGiornata = {
       genere: campi.genere, azione: testo, note: note || null, fascia: campi.fascia,
       ...(spostata ? { posizione: posto } : {}),
@@ -153,6 +161,7 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
       // collegamento nuovo è solo quello che l'utente ha scelto (in «Quale» o con «Collega»). Gli effetti salvati restano intatti.
       ...(azione ? { tipo: s.tipo, riferimento: s.riferimento, rangoAtteso: s.rangoAtteso,
         ...(condizioniCambiate ? { condizioni: campi.condizioni } : {}),
+        ...(requisitiCambiati ? { requisiti: campi.requisiti } : {}),
         ...(canoniciModificati ? { effettiVoce: { effetti: s.effettiVoce!, ...(s.fonteEffetti ? { revisioneEffettiAttesa: s.fonteEffetti.revisione } : {}) } } : {}),
         ...(produceModificato ? { produce: s.produce } : {}),
       } : perdeEffetti ? { tipo: 'altro' as const, riferimento: null, rangoAtteso: null,
@@ -218,6 +227,7 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   // e si modificano nella loro finestra: una riga ciascuno finché non si toccano, e il corpo della voce resta sotto gli 800 px a 1280
   const nomeFascia = campi.fascia === 'giorno' ? 'di giorno' : 'di sera';
   const riepilogoCondizioni = campi.condizioni.length === 0 ? 'Nessuna condizione: la voce si fa sempre.' : `${campi.condizioni.length} ${campi.condizioni.length === 1 ? 'condizione' : 'condizioni'}: la voce è dovuta solo se valgono.`;
+  const riepilogoScorta = campi.requisiti.length === 0 ? 'Nessuno' : `${campi.requisiti.length} ${campi.requisiti.length === 1 ? 'voce' : 'voci'}`;
   const colonnaDestra = (
     <div className="voce-colonna">
       {azione && elenchi && <SceltaTipoQuale parte="quale" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} qualeAperta={qualeAperta} onQualeAperta={setQualeAperta} />}
@@ -240,6 +250,21 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
             </button>
           </h3>
         </section>
+      )}
+      {/* i requisiti «da avere in scorta»: arcani o Persona specifiche, nella loro finestra; servono gli elenchi, quindi la riga aspetta che arrivino */}
+      {azione && (
+        <section className="ripiegabile ripiegabile--semplice" aria-label="Da avere in scorta">
+          <h3 className="m-0 ripiegabile__titolo">
+            <button type="button" className="ripiegabile__interruttore touch" aria-haspopup="dialog" disabled={occupato || !elenchi} title="Modifica l’elenco da avere in scorta" onClick={() => setScortaAperta(true)}>
+              <span className="ripiegabile__freccia" aria-hidden="true"><IconaAzione chiave="modifica" dimensione={18} /></span>
+              <span className="ripiegabile__nome">Da avere in scorta</span>
+              <span className="ripiegabile__riepilogo">{riepilogoScorta}</span>
+            </button>
+          </h3>
+        </section>
+      )}
+      {azione && scortaAperta && elenchi && (
+        <FinestraRequisitiVoce requisiti={campi.requisiti} elenchi={elenchi} onApplica={(r) => imposta({ requisiti: r })} onChiudi={() => setScortaAperta(false)} />
       )}
       {azione && condizioniAperte && (
         <FinestraCondizioniVoce condizioni={campi.condizioni} onApplica={(c) => imposta({ condizioni: c })} onChiudi={() => setCondizioniAperte(false)} />
@@ -275,7 +300,7 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
           {colonnaSinistra}
           {colonnaDestra}
         </div>
-        {perdeEffetti && <p className="m-0 testo-12 text-warning" role="status">Diventando un promemoria, la voce perde tipo, collegamento ed effetti della spunta.</p>}
+        {perdeEffetti && <p className="m-0 testo-12 text-warning" role="status">Diventando un promemoria, la voce perde tipo, collegamento, effetti della spunta ed elenco da avere in scorta.</p>}
         <p className="m-0 testo-12 text-text-muted">La modifica cambia la guida per tutte le partite ed entra nel backup dei dati di gioco che scarichi.</p>
       </div>
     </FinestraModifica>
@@ -294,6 +319,72 @@ function FinestraCondizioniVoce({ condizioni, onApplica, onChiudi }: { condizion
       <div className="flex flex-col gap-3 min-w-0">
         <p className="m-0 testo-12 text-text-muted text-pretty">Senza condizioni la voce si fa sempre. Con condizioni false al giorno della voce, nella partita è «Non dovuta» e non ferma la giornata. Le condizioni applicate si salvano con la voce.</p>
         <CondizioniEditor condizioni={bozza} onCambia={setBozza} massimo={20} apertoDiPartenza />
+      </div>
+    </FinestraModifica>
+  );
+}
+
+/** Un requisito della bozza: l'arcano (chiave inglese) e, se specifico, l'id della Persona. */
+type RequisitoBozza = { arcana: string; persona: number | null };
+
+/**
+ * «Da avere in scorta» in una finestra sopra la voce: gli arcani necessari, ciascuno con una Persona specifica facoltativa. Le regole del server sono
+ * impedite già qui: per ogni arcano o c'è una riga sola con «qualunque Persona» o ci sono più righe con Persona diverse (mai un doppione, mai
+ * l'arcano intero insieme a una sua Persona). «Applica» mette la bozza nella voce, che la salva con il suo «Salva».
+ */
+function FinestraRequisitiVoce({ requisiti, elenchi, onApplica, onChiudi }: { requisiti: RequisitoBozza[]; elenchi: ElenchiVoce; onApplica: (r: RequisitoBozza[]) => void; onChiudi: () => void }) {
+  const [bozza, setBozza] = useState(requisiti);
+  const { arcani, persone } = elenchi.effetti;
+  const nomeArcano = (chiave: string) => arcani.find((a) => a.chiave === chiave)?.nome ?? chiave;
+  const dellArcano = (chiave: string) => persone.filter((p) => p.arcanaChiave === chiave);
+  const sposta = (i: number, verso: -1 | 1) => setBozza((b) => { const n = [...b]; [n[i], n[i + verso]] = [n[i + verso], n[i]]; return n; });
+  /** Le Persona di un arcano non ancora scelte (in nessuna riga della bozza). */
+  const libere = (chiave: string) => dellArcano(chiave).filter((p) => !bozza.some((r) => r.persona === p.id));
+  // un arcano si aggiunge se non c'è per intero e, avendo già Persona specifiche, se ne resta una libera da proporre
+  const daAggiungere = arcani.filter((a) => !bozza.some((r) => r.arcana === a.chiave && r.persona === null) && (!bozza.some((r) => r.arcana === a.chiave) || libere(a.chiave).length > 0));
+  const aggiungi = (chiave: string) => {
+    if (!chiave) return;
+    // con Persona specifiche già scelte l'arcano intero non è ammesso: la nuova riga parte dalla prima Persona libera
+    const prima = bozza.some((r) => r.arcana === chiave) ? libere(chiave)[0]?.id ?? null : null;
+    setBozza((b) => [...b, { arcana: chiave, persona: prima }]);
+  };
+  return (
+    <FinestraModifica titolo="Da avere in scorta" titoloSalva="Applica" onChiudi={onChiudi} sporca={JSON.stringify(bozza) !== JSON.stringify(requisiti)}
+      onSalva={() => { onApplica(bozza); onChiudi(); }}>
+      <div className="flex flex-col gap-3 min-w-0">
+        <p className="m-0 testo-12 text-text-muted text-pretty">Nel Diario la voce mostra una casella per ogni voce di questo elenco e si completa solo con tutte spuntate. Le caselle sono un promemoria: non toccano la scorta. L’elenco applicato si salva con la voce.</p>
+        {bozza.length > 0 && (
+          <ol className="m-0 flex list-none flex-col gap-1.5 p-0">
+            {bozza.map((r, i) => {
+              const nome = nomeArcano(r.arcana);
+              const altreDelloStessoArcano = bozza.some((x, j) => j !== i && x.arcana === r.arcana);
+              const opzioni = dellArcano(r.arcana).filter((p) => p.id === r.persona || !bozza.some((x) => x.persona === p.id))
+                .map((p) => ({ chiave: String(p.id), nome: p.nomeIt, dettaglio: `Liv. ${p.livello}` }));
+              // una Persona salvata che non è più nell'elenco resta visibile
+              if (r.persona !== null && !opzioni.some((o) => o.chiave === String(r.persona))) opzioni.unshift({ chiave: String(r.persona), nome: `Persona ${r.persona}`, dettaglio: '' });
+              return (
+                <li key={`${r.arcana}#${r.persona ?? ''}`} className="card flex flex-wrap items-end gap-1 p-1.5">
+                  <div role="group" aria-label={`${i + 1}. ${nome}`} className="flex min-w-[12rem] flex-1 flex-col gap-1">
+                    <span className="font-semibold testo-13">{i + 1}. {nome}</span>
+                    {/* con altre righe dello stesso arcano la Persona è obbligatoria: «qualunque» sarebbe l'arcano intero accanto a una sua Persona */}
+                    <Selettore etichetta="Persona specifica" etichettaSopra valore={r.persona === null ? '' : String(r.persona)} {...(altreDelloStessoArcano ? {} : { vuoto: '— qualunque —' })}
+                      opzioni={opzioni} onCambia={(k) => setBozza((b) => b.map((x, j) => (j === i ? { ...x, persona: k === '' ? null : Number(k) } : x)))} />
+                  </div>
+                  <span className="flex flex-wrap items-center gap-1">
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su ${nome}`} disabled={i === 0} onClick={() => sposta(i, -1)} />
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù ${nome}`} disabled={i === bozza.length - 1} onClick={() => sposta(i, 1)} />
+                    <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli" className="whitespace-nowrap" aria-label={`Togli ${nome}`} onClick={() => setBozza((b) => b.filter((_, j) => j !== i))} />
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+        {bozza.length < MASSIMO_REQUISITI_VOCE && daAggiungere.length > 0 && (
+          <Selettore etichetta="Aggiungi arcano" etichettaSopra valore="" vuoto="— scegli —" ricerca="sempre"
+            opzioni={daAggiungere.map((a) => ({ chiave: a.chiave, nome: a.nome, dettaglio: bozza.some((r) => r.arcana === a.chiave) ? 'un’altra Persona' : undefined }))}
+            onCambia={aggiungi} />
+        )}
       </div>
     </FinestraModifica>
   );

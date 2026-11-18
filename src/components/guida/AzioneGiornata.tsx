@@ -24,6 +24,8 @@ import { classeSelezioneRiga } from '../../utils/selezioneRiga';
 import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
 import { DaRivedereVoce, InfiltrazioniVoce } from './InfiltrazioniVoce';
 import { RisposteVoce } from './RisposteVoce';
+import { RequisitiVoce } from './RequisitiVoce';
+import { idContatoreScorta } from '../../utils/requisitiVoce';
 import { RicevuteVoce } from './RicevuteVoce';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
@@ -176,6 +178,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const stato = a.fatta ? null : a.stato;
   // L13 (O9-3, «in tal caso viene meno la consegna»): le condizioni «Si fa solo se» della voce sono false al suo giorno (solo su una voce non spuntata)
   const nonDovuta = !a.fatta && !!a.nonDovuta;
+  // la prima spunta vuole tutte le caselle «In scorta» spuntate (il server risponde comunque 409); l'annullo di una voce fatta è sempre libero
+  const scortaIncompleta = !a.fatta && !!a.requisiti?.some((r) => r.fatto !== true);
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
     <li id={`voce-${a.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''} ${classeRiga ?? ''} ${classeSelezioneRiga(selezione)}`} aria-current={evidenziata ? 'true' : undefined}
@@ -183,8 +187,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       {maniglia}
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {/* L13 (O9-3): una voce non dovuta nella partita non si spunta (il server risponde 409): la casella è spenta e il motivo sta sotto il testo */}
-      {partitaId && <label className={`touch flex items-start justify-center shrink-0 -my-1 pr-1 ${nonDovuta ? 'cursor-not-allowed' : 'cursor-pointer'}`}><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)}
-        aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={nonDovuta ? `non-dovuta-${a.uid}` : undefined} /></label>}
+      {partitaId && <label className={`touch flex items-start justify-center shrink-0 -my-1 pr-1 ${nonDovuta ? 'cursor-not-allowed' : 'cursor-pointer'}`}><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || scortaIncompleta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)}
+        aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={[nonDovuta ? `non-dovuta-${a.uid}` : '', scortaIncompleta ? idContatoreScorta(a.uid) : ''].filter(Boolean).join(' ') || undefined} /></label>}
       <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 testo-13 min-w-0 flex-1">
         {/* D15: voce fatta = spunta rossa a sinistra e testo barrato in grigio (il segno fuori dal testo barrato: l'icona non si taglia) */}
@@ -203,6 +207,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
           infiltrazioni={<InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />} />
         {/* le risposte migliori dell'avanzamento della voce Confidente, fra le sue note (progetto dei Confidenti, 2026-10-24) */}
         <RisposteVoce a={a} />
+        {/* l'elenco «da avere in scorta» (caselle manuali della partita): la casella di completamento resta spenta finché ne manca una */}
+        <RequisitiVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
         {pendente && <p role="status" className="m-0 text-warning">Un’operazione su questa voce non è stata confermata: completala dall’elenco «Operazioni da completare» sopra le voci, poi potrai spuntare la voce.</p>}
         {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}

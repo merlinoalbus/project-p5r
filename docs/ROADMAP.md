@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: versione 390 dei dati di gioco e 74 delle partite (`server/db/versioneSchema.ts`).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: versione 391 dei dati di gioco e 75 delle partite (`server/db/versioneSchema.ts`).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -38,6 +38,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
   trofei, sblocchi, Persona, inviti, letture, pesca, domande, esami) e la spunta che li applica e li annulla.
 - Voci con condizione «Si fa solo se», effetti con condizione «Vale solo se», voci con alternative (televendite), esiti scelti alla
   spunta, ricevute della spunta.
+- Requisiti «da avere in scorta» di una voce (arcani o Persona specifiche, con la casella manuale per partita che condiziona la prima
+  spunta): l'elenco si compone nell'editor della voce e le caselle stanno nella scheda della voce (`requisitiVoceService.ts`,
+  `PUT /partite/:id/percorso/requisiti`); le cinque voci della Stanza di Velluto che li elencavano a testo (23/4, 27/5, 2/6, 8/6, 21/6) sono
+  convertite. Le altre voci con arcani a testo (equipaggiare o creare una Persona, non averla in scorta) si convertono a richiesta.
 - Modifica completa delle voci; copia, taglio e incolla (anche fra giorni) e appunti fissi nella preparazione, raggruppati in categorie
   apribili e riordinati trascinando. Nella finestra della voce la griglia di «Quale» e l'editor «Si fa solo se» si aprono in finestre
   loro, e il corpo della voce resta sotto gli 800 px a 1280.

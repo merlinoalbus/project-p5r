@@ -79,7 +79,7 @@ const PAROLE_CONTENUTO: ReadonlyArray<{ tabelle: readonly string[]; uno: string;
   { tabelle: ['pezzo_mappa'], uno: 'pezzo ritagliato', molti: 'pezzi ritagliati' },
   { tabelle: ['immagine', 'spillo_immagine'], uno: 'immagine', molti: 'immagini' },
   { tabelle: ['richiesta'], uno: 'Richiesta', molti: 'Richieste' },
-  { tabelle: ['punto_partita', 'spillo_partita', 'spunta_voce_partita', 'timbri_dedalo_partita'], uno: 'segno nelle partite', molti: 'segni nelle partite' },
+  { tabelle: ['punto_partita', 'spillo_partita', 'spunta_voce_partita', 'spunta_requisito_voce_partita', 'timbri_dedalo_partita'], uno: 'segno nelle partite', molti: 'segni nelle partite' },
   { tabelle: ['voce_giornata'], uno: 'voce del Diario', molti: 'voci del Diario' },
   { tabelle: ['acquisto_partita'], uno: 'presenza d’acquisto precedente', molti: 'presenze d’acquisto precedenti' },
   { tabelle: ['acquisto_registrato'], uno: 'consumazione', molti: 'consumazioni' },

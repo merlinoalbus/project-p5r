@@ -7,11 +7,14 @@
 //      completo dei dati di gioco si importa da Impostazioni e sostituisce il file); senza nessuno dei due, FATALE
 //   1. initDb()        — apertura di gioco.db + partite.db, FATALE su errore
 //   2. creaPartiteDalModelloSeMancano() — un partite.db senza tabelle nasce da pacchetto/partite-vuoto.db, FATALE su errore
-//   3. verificaVersioni() — i due file devono essere alla versione che il codice legge, FATALE altrimenti (nessuna conversione);
+//   3. portaAllaVersioneAttuale() — un file alla versione IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove (additivo, con copia di
+//      sicurezza in DATA_DIR/backups prima di scrivere, tutto in una transazione): così una versione rilasciata parte sui dati già in
+//      uso; un file già alla versione attesa non si tocca, uno di un'altra versione nemmeno; FATALE se il passaggio non riesce
+//   4. verificaVersioni() — i due file devono essere alla versione che il codice legge, FATALE altrimenti (i dati non si convertono mai);
 //      poi il censimento delle tabelle delle partite (`avvisaCensimentoPartite`): un avviso nel log se una tabella o una colonna
 //      di riferimento non è classificata
-//   4. regole sui dati — nomi e uid degli spilli, spilli dei luoghi, miniature orfane (rieseguite a ogni avvio)
-//   5. createApp() + listen(porta) + copie dell'avanzamento delle partite (all'avvio e ogni 6 ore, in DATA_DIR/backups)
+//   5. regole sui dati — nomi e uid degli spilli, spilli dei luoghi, miniature orfane (rieseguite a ogni avvio)
+//   6. createApp() + listen(porta) + copie dell'avanzamento delle partite (all'avvio e ogni 6 ore, in DATA_DIR/backups)
 //
 // Arresto: su SIGINT/SIGTERM (Ctrl-C, docker stop) si chiude il server
 // HTTP, si esegue `PRAGMA optimize` e si chiude la connessione SQLite.
@@ -23,6 +26,7 @@ import { config } from './config.js';
 import { logger } from './utils/logger.js';
 import { closeDb, initDb } from './db/dbService.js';
 import { creaPartiteDalModelloSeMancano } from './db/partiteVuote.js';
+import { portaAllaVersioneAttuale } from './db/passaggioVersione.js';
 import { verificaVersioni } from './db/versioneSchema.js';
 import { createApp } from './bootstrap.js';
 
@@ -62,9 +66,18 @@ try {
 }
 
 try {
+  // l'unica eccezione al «i dati non si convertono»: un file alla versione immediatamente precedente riceve le strutture nuove (additivo,
+  // per le partite con copia di sicurezza prima); ogni passaggio fatto è nel log, e senza niente da fare non scrive né logga
+  portaAllaVersioneAttuale(initDb());
+} catch (err) {
+  console.error('[project-p5r] FATALE: passaggio alla versione attuale dei dati fallito (il file che non è riuscito resta com\'era):', err);
+  process.exit(1);
+}
+
+try {
   verificaVersioni(initDb());
 } catch (err) {
-  // un file di un'altra versione non si apre e non si converte: il messaggio dice quale file, a che versione è e che cosa fare
+  // un file di un'altra versione (che non sia la precedente, già portata qui sopra) non si apre e non si converte: il messaggio dice quale file, a che versione è e che cosa fare
   console.error('[project-p5r] FATALE: versione dei dati diversa da quella attesa:', err);
   process.exit(1);
 }

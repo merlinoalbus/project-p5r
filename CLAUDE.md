@@ -31,10 +31,11 @@ Dove documento e codice dissentono, vale il codice.
   `/pacchetto` restano per compatibilità.
 - **Boot del backend** (`server/index.ts`): `assicuraPacchettoIniziale` (se `gioco.db` manca, lo copia da `pacchetto/gioco.db`,
   senza immagini) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `creaPartiteDalModelloSeMancano` (un
-  `partite.db` senza tabelle nasce da `pacchetto/partite-vuoto.db`) → `verificaVersioni` (i due file devono essere alle versioni
+  `partite.db` senza tabelle nasce da `pacchetto/partite-vuoto.db`) → `portaAllaVersioneAttuale` (un file alla versione immediatamente
+  precedente riceve le sole strutture nuove; copia di sicurezza delle partite prima) → `verificaVersioni` (i due file devono essere alle versioni
   `VERSIONE_GIOCO` e `VERSIONE_PARTITE` di `server/db/versioneSchema.ts`, altrimenti l'avvio si ferma) → censimento delle partite
-  (avviso nel log) → `regoleAllAvvio` → effetti di stato mai applicati (proposte nell'elenco da approvare) → `listen` → copia di `partite.db` in `data/backups` (subito e ogni 6 ore). Nessuna
-  conversione automatica dei dati: un cambio di struttura si applica a mano (vedi `docs/DECISIONI.md`).
+  (avviso nel log) → `regoleAllAvvio` → effetti di stato mai applicati (proposte nell'elenco da approvare) → `listen` → copia di `partite.db` in `data/backups` (subito e ogni 6 ore). I dati non
+  si convertono mai; l'unica eccezione è quel passaggio additivo dalla versione precedente, un solo punto (vedi `docs/DECISIONI.md`).
 - Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/`.
 - Risposte API: successo `{ data }`, errore `{ error: { code, message, details? }, requestId }`; 404 JSON su `/api/*`.
 - Frontend: pagine in `src/pages/`, componenti in `src/components/<area>/`, stato in `src/stores/` (zustand), chiamate in
