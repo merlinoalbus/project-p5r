@@ -2844,6 +2844,14 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .selettore-icone__icona { display:inline-flex; line-height:0; }
 .selettore-icone__nome { text-align:center; overflow-wrap:normal; word-break:normal; hyphens:auto; }
 @media (max-width: 767px) { .selettore-icone__tessera, .selettore-icone--compatto .selettore-icone__tessera { max-width:none; min-width:0; flex:0 1 calc(33.333% - 4px); } }
+/* Griglia fitta (i 22 arcani dell'elenco «da avere in scorta»): colonne uguali che si adattano alla larghezza, figura da 32 px sopra e nome
+   su una riga (puntini se lungo: il `title` lo dà per intero). Accesa: fondo pieno e triangolo bianco con la spunta sull'angolo, così
+   lo stato si legge anche senza il colore. Fuori dai layer come le altre regole del selettore, dopo quelle del telefono per batterle. */
+.selettore-icone--griglia { display:grid; grid-template-columns:repeat(auto-fill, minmax(72px, 1fr)); gap:4px; }
+.selettore-icone--griglia .selettore-icone__tessera, .selettore-icone--griglia.selettore-icone--compatto .selettore-icone__tessera { position:relative; flex:none; min-width:0; max-width:none; min-height:58px; padding:4px 2px 3px; gap:2px; transition:background-color .12s ease-out, border-color .12s ease-out; }
+.selettore-icone--griglia .selettore-icone__nome { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; hyphens:manual; }
+.selettore-icone__spunta { position:absolute; top:0; right:0; width:18px; height:18px; display:inline-flex; align-items:flex-start; justify-content:flex-end; background:#fff; color:var(--color-primary-fondo); clip-path:polygon(0 0, 100% 0, 100% 100%); box-sizing:border-box; padding:1px 1px 0 0; }
+.selettore-icone__spunta > svg { width:11px; height:11px; stroke-width:3; }
 /* Le categorie del listino lungo (`ListinoNegozio`): le stesse tessere, a scelta singola, dentro una `FilaScorrevole`. Dal tablet in su
    vanno a capo come le altre; sul telefono stanno su una riga sola che scorre, con la figura accanto al nome e alte 44 px, così i
    comandi sopra l'elenco restano entro il 30% della schermata. Il fuoco sta dentro la tessera: la fila taglia ciò che esce. */
@@ -3341,4 +3349,73 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   }
   .fotogramma { animation: none !important; }
   .fotogramma:first-child { opacity: 1; }
+}
+
+/* ============================================================
+   «Da avere in scorta» — editor (finestra) e voce del Diario
+   ============================================================
+   Editor: 22 tessere di arcani (`SelettoreIcone griglia`) e, sotto, una riga da 44 px per ogni arcano scelto (figura, nome, Persona
+   facoltativa, «+» e «×»). Voce: una fila di chip interruttore a capo, uno per requisito, con l'avanzamento n/N. Il rosso pieno è lo
+   «spuntato» di tutta l'app; il verde dice «pronta» (tutte le caselle spuntate: la voce si può completare). */
+@layer components {
+  .scorta-editor { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .scorta-editor__conta { margin: 0; font-size: var(--testo-12); color: var(--color-text-secondary); }
+  .scorta-righe { display: flex; flex-direction: column; gap: 3px; margin: 0; padding: 0; list-style: none; }
+  .scorta-riga { display: grid; grid-template-areas: "arcano persona azioni"; grid-template-columns: minmax(0, 10.5rem) minmax(0, 1fr) auto; align-items: center; gap: 4px 8px;
+    min-height: 44px; padding: 0 2px 0 8px; border-left: 3px solid var(--color-primary); background: var(--color-bg-tertiary); }
+  .scorta-riga--seguente { border-left-color: color-mix(in srgb, var(--color-primary) 40%, transparent); }
+  .scorta-riga__arcano { grid-area: arcano; display: flex; align-items: center; gap: 8px; min-width: 0; font-size: var(--testo-13); font-weight: 600; }
+  .scorta-riga__arcano > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scorta-riga__persona { grid-area: persona; min-width: 0; }
+  .scorta-riga__persona .selettore--compatto { display: block; width: 100%; }
+  .scorta-riga__persona .selettore--compatto .selettore__scelta { width: 100%; }
+  .scorta-riga__azioni { grid-area: azioni; display: flex; align-items: center; gap: 0; }
+  .scorta-riga__azioni .btn { padding-inline: 6px; }
+  @media (max-width: 559px) {
+    .scorta-riga { grid-template-areas: "arcano azioni" "persona persona"; grid-template-columns: minmax(0, 1fr) auto; padding-bottom: 4px; }
+    .scorta-riga--seguente { grid-template-areas: "persona azioni"; grid-template-columns: minmax(0, 1fr) auto; }
+    .scorta-riga--seguente .scorta-riga__arcano { display: none; }
+  }
+  /* le figure degli arcani scelti, in miniatura, nella riga che apre la finestra */
+  .scorta-miniature { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+
+  /* ---- la voce del Diario ---- */
+  .scorta-voce { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 2px 0; }
+  .scorta-voce__testata { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: var(--testo-12); color: var(--color-text-secondary); }
+  button.scorta-voce__testata { width: 100%; min-height: 44px; padding: 0 4px; border: 0; background: transparent; font: inherit; font-size: var(--testo-12); text-align: left; cursor: pointer; }
+  button.scorta-voce__testata:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
+  .scorta-voce__titolo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: var(--testo-13); color: var(--color-text); }
+  .scorta-voce__conta { font-variant-numeric: tabular-nums; font-weight: 700; font-size: var(--testo-13); color: var(--color-text); }
+  .scorta-voce--pronta .scorta-voce__conta { color: var(--color-success-testo); }
+  .scorta-voce__barra { position: relative; flex: 0 1 8rem; min-width: 3rem; height: 4px; background: var(--color-border); overflow: hidden; }
+  .scorta-voce__barra > span { position: absolute; inset: 0 auto 0 0; background: var(--color-primary); transition: width .2s ease-out, background-color .2s ease-out; }
+  .scorta-voce--pronta .scorta-voce__barra > span { background: var(--color-success); }
+  .scorta-voce__freccia { display: inline-flex; margin-left: auto; color: var(--color-text-muted); transition: transform .15s ease-out; }
+  button.scorta-voce__testata[aria-expanded="false"] .scorta-voce__freccia { transform: rotate(-90deg); }
+  .scorta-voce__riepilogo { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px; min-width: 0; }
+  .scorta-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+  .scorta-chips > li { display: flex; min-width: 0; max-width: 100%; }
+  .scorta-chip { position: relative; display: inline-flex; align-items: center; gap: 7px; min-width: 0; max-width: 100%; min-height: 44px; padding: 4px 8px 4px 6px;
+    border: 1px solid var(--color-border-input); background: var(--color-bg-tertiary); color: var(--color-text); font-size: var(--testo-13); line-height: 1.15; cursor: pointer;
+    transition: background-color .15s ease-out, border-color .15s ease-out, opacity .15s ease-out; -webkit-tap-highlight-color: transparent; }
+  .scorta-chip:hover { border-color: var(--color-text-secondary); }
+  .scorta-chip:has(input:focus-visible) { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
+  .scorta-chip--spuntato { background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); color: var(--color-text-on-primary); }
+  .scorta-chip--spuntato:hover { background: var(--color-primary-fondo-hover); border-color: var(--color-primary-fondo-hover); }
+  .scorta-chip--occupato { opacity: .65; cursor: progress; }
+  .scorta-chip--lettura { cursor: default; }
+  .scorta-chip--lettura:hover { border-color: var(--color-border-input); }
+  .scorta-chip__nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .scorta-chip__persona { font-weight: 400; opacity: .8; }
+  .scorta-chip__segno { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 2px solid var(--color-border-input); border-radius: 50%; color: var(--color-primary-fondo);
+    transition: background-color .15s ease-out, border-color .15s ease-out; }
+  .scorta-chip--spuntato .scorta-chip__segno { background: #fff; border-color: #fff; }
+  .scorta-chip__segno > svg { width: 12px; height: 12px; stroke-width: 3.2; transform: scale(0); transition: transform .18s cubic-bezier(.2, 1.4, .4, 1); }
+  .scorta-chip--spuntato .scorta-chip__segno > svg { transform: scale(1); }
+
+  /* l'anello d'avanzamento attorno alla casella di completamento: l'arco rosso cresce con le caselle spuntate, a n/N si fa verde e pieno */
+  .scorta-anello { --p: 0; --colore-anello: var(--color-primary); position: relative; display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; margin-top: 3px; }
+  .scorta-anello::before { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: conic-gradient(var(--colore-anello) calc(var(--p) * 1turn), var(--color-border) 0);
+    -webkit-mask: radial-gradient(circle, transparent 11px, #000 12px); mask: radial-gradient(circle, transparent 11px, #000 12px); }
+  .scorta-anello--pronta { --colore-anello: var(--color-success); }
 }

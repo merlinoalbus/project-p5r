@@ -41,8 +41,9 @@ import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import { CondizioniEditor } from './CondizioniEditor';
 import { IconaAzione } from '../shared/IconaAzione';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { Selettore } from '../shared/Selettore';
+import { SelettoreIcone } from '../shared/SelettoreIcone';
+import { IconaArcano } from '../shared/IconaArcano';
 import { MASSIMO_REQUISITI_VOCE } from '../../../shared/requisitiVoce';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 
@@ -258,7 +259,13 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
             <button type="button" className="ripiegabile__interruttore touch" aria-haspopup="dialog" disabled={occupato || !elenchi} title="Modifica l’elenco da avere in scorta" onClick={() => setScortaAperta(true)}>
               <span className="ripiegabile__freccia" aria-hidden="true"><IconaAzione chiave="modifica" dimensione={18} /></span>
               <span className="ripiegabile__nome">Da avere in scorta</span>
-              <span className="ripiegabile__riepilogo">{riepilogoScorta}</span>
+              <span className="ripiegabile__riepilogo">{campi.requisiti.length === 0 ? riepilogoScorta : (
+                <span className="scorta-miniature" title={riepilogoScorta}>
+                  {campi.requisiti.slice(0, 12).map((r, i) => <IconaArcano key={i} arcana={r.arcana} dimensione={22} />)}
+                  {campi.requisiti.length > 12 && <span>+{campi.requisiti.length - 12}</span>}
+                  <span className="sr-only">{riepilogoScorta}</span>
+                </span>
+              )}</span>
             </button>
           </h3>
         </section>
@@ -326,65 +333,88 @@ function FinestraCondizioniVoce({ condizioni, onApplica, onChiudi }: { condizion
 
 /** Un requisito della bozza: l'arcano (chiave inglese) e, se specifico, l'id della Persona. */
 type RequisitoBozza = { arcana: string; persona: number | null };
+/** Una riga della finestra: il requisito con un numero proprio, che non cambia scegliendo la Persona (il campo non si rimonta). */
+type RigaScorta = RequisitoBozza & { k: number };
 
 /**
- * «Da avere in scorta» in una finestra sopra la voce: gli arcani necessari, ciascuno con una Persona specifica facoltativa. Le regole del server sono
- * impedite già qui: per ogni arcano o c'è una riga sola con «qualunque Persona» o ci sono più righe con Persona diverse (mai un doppione, mai
- * l'arcano intero insieme a una sua Persona). «Applica» mette la bozza nella voce, che la salva con il suo «Salva».
+ * «Da avere in scorta» in una finestra sopra la voce. In alto le tessere dei 22 arcani (tocco = dentro o fuori); sotto, una riga da 44 px per
+ * ogni arcano scelto, con la Persona specifica facoltativa («Qualunque Persona» se non si sceglie), «+» per un'altra Persona dello stesso arcano e
+ * «×» per togliere la riga. L'ordine è quello degli arcani (della tabella di fusione), poi della Persona: non si sposta a mano. Le regole del
+ * server sono impedite già qui: per ogni arcano o c'è una riga sola con «qualunque Persona» o ci sono più righe con Persona diverse (mai un
+ * doppione, mai l'arcano intero insieme a una sua Persona). «Applica» mette la bozza nella voce, che la salva con il suo «Salva».
  */
 function FinestraRequisitiVoce({ requisiti, elenchi, onApplica, onChiudi }: { requisiti: RequisitoBozza[]; elenchi: ElenchiVoce; onApplica: (r: RequisitoBozza[]) => void; onChiudi: () => void }) {
-  const [bozza, setBozza] = useState(requisiti);
   const { arcani, persone } = elenchi.effetti;
-  const nomeArcano = (chiave: string) => arcani.find((a) => a.chiave === chiave)?.nome ?? chiave;
-  const dellArcano = (chiave: string) => persone.filter((p) => p.arcanaChiave === chiave);
-  const sposta = (i: number, verso: -1 | 1) => setBozza((b) => { const n = [...b]; [n[i], n[i + verso]] = [n[i + verso], n[i]]; return n; });
-  /** Le Persona di un arcano non ancora scelte (in nessuna riga della bozza). */
-  const libere = (chiave: string) => dellArcano(chiave).filter((p) => !bozza.some((r) => r.persona === p.id));
-  // un arcano si aggiunge se non c'è per intero e, avendo già Persona specifiche, se ne resta una libera da proporre
-  const daAggiungere = arcani.filter((a) => !bozza.some((r) => r.arcana === a.chiave && r.persona === null) && (!bozza.some((r) => r.arcana === a.chiave) || libere(a.chiave).length > 0));
-  const aggiungi = (chiave: string) => {
-    if (!chiave) return;
-    // con Persona specifiche già scelte l'arcano intero non è ammesso: la nuova riga parte dalla prima Persona libera
-    const prima = bozza.some((r) => r.arcana === chiave) ? libere(chiave)[0]?.id ?? null : null;
-    setBozza((b) => [...b, { arcana: chiave, persona: prima }]);
+  const prossimoK = useRef(requisiti.length);
+  const [righe, setRighe] = useState<RigaScorta[]>(() => requisiti.map((r, k) => ({ ...r, k })));
+  const personeDi = (chiave: string) => persone.filter((p) => p.arcanaChiave === chiave).sort((x, y) => x.livello - y.livello || x.nomeIt.localeCompare(y.nomeIt));
+  const pieno = righe.length >= MASSIMO_REQUISITI_VOCE;
+  /** L'elenco com'è salvato: arcani nell'ordine della tabella di fusione, poi Persone per livello (l'arcano intero, che è solo, non ha Persona). */
+  const normalizzate = (b: readonly RequisitoBozza[]): RequisitoBozza[] => {
+    const posArcano = new Map(arcani.map((a, i) => [a.chiave, i]));
+    const posPersona = new Map(persone.map((p) => [p.id, p.livello * 100000 + p.id]));
+    return b.map(({ arcana, persona }) => ({ arcana, persona }))
+      .sort((x, y) => (posArcano.get(x.arcana) ?? 999) - (posArcano.get(y.arcana) ?? 999) || (posPersona.get(x.persona ?? 0) ?? 0) - (posPersona.get(y.persona ?? 0) ?? 0));
   };
+  const scelti = arcani.filter((a) => righe.some((r) => r.arcana === a.chiave));
+  /** Le Persona di un arcano non ancora scelte (in nessuna riga). */
+  const libere = (chiave: string) => personeDi(chiave).filter((p) => !righe.some((r) => r.persona === p.id));
+  const nuovaRiga = (arcana: string, persona: number | null) => { const k = prossimoK.current++; setRighe((b) => [...b, { k, arcana, persona }]); };
+  /** Una tessera toccata: l'arcano entra (arcano intero) o esce con tutte le sue righe. */
+  const alterna = (chiave: string) => {
+    if (righe.some((r) => r.arcana === chiave)) setRighe((b) => b.filter((r) => r.arcana !== chiave));
+    else if (!pieno) nuovaRiga(chiave, null);
+  };
+  const cambiaPersona = (k: number, persona: number | null) => setRighe((b) => b.map((r) => (r.k === k ? { ...r, persona } : r)));
+  const togli = (k: number) => setRighe((b) => b.filter((r) => r.k !== k));
+  const conta = scelti.length === 0 ? 'Tocca gli arcani da avere in scorta'
+    : `${scelti.length} ${scelti.length === 1 ? 'scelto' : 'scelti'}${righe.length > scelti.length ? ` · ${righe.length} voci` : ''}${pieno ? ` (massimo ${MASSIMO_REQUISITI_VOCE})` : ''}`;
   return (
-    <FinestraModifica titolo="Da avere in scorta" titoloSalva="Applica" onChiudi={onChiudi} sporca={JSON.stringify(bozza) !== JSON.stringify(requisiti)}
-      onSalva={() => { onApplica(bozza); onChiudi(); }}>
-      <div className="flex flex-col gap-3 min-w-0">
-        <p className="m-0 testo-12 text-text-muted text-pretty">Nel Diario la voce mostra una casella per ogni voce di questo elenco e si completa solo con tutte spuntate. Le caselle sono un promemoria: non toccano la scorta. L’elenco applicato si salva con la voce.</p>
-        {bozza.length > 0 && (
-          <ol className="m-0 flex list-none flex-col gap-1.5 p-0">
-            {bozza.map((r, i) => {
-              const nome = nomeArcano(r.arcana);
-              const altreDelloStessoArcano = bozza.some((x, j) => j !== i && x.arcana === r.arcana);
-              const opzioni = dellArcano(r.arcana).filter((p) => p.id === r.persona || !bozza.some((x) => x.persona === p.id))
-                .map((p) => ({ chiave: String(p.id), nome: p.nomeIt, dettaglio: `Liv. ${p.livello}` }));
-              // una Persona salvata che non è più nell'elenco resta visibile
-              if (r.persona !== null && !opzioni.some((o) => o.chiave === String(r.persona))) opzioni.unshift({ chiave: String(r.persona), nome: `Persona ${r.persona}`, dettaglio: '' });
-              return (
-                <li key={`${r.arcana}#${r.persona ?? ''}`} className="card flex flex-wrap items-end gap-1 p-1.5">
-                  <div role="group" aria-label={`${i + 1}. ${nome}`} className="flex min-w-[12rem] flex-1 flex-col gap-1">
-                    <span className="font-semibold testo-13">{i + 1}. {nome}</span>
-                    {/* con altre righe dello stesso arcano la Persona è obbligatoria: «qualunque» sarebbe l'arcano intero accanto a una sua Persona */}
-                    <Selettore etichetta="Persona specifica" etichettaSopra valore={r.persona === null ? '' : String(r.persona)} {...(altreDelloStessoArcano ? {} : { vuoto: '— qualunque —' })}
-                      opzioni={opzioni} onCambia={(k) => setBozza((b) => b.map((x, j) => (j === i ? { ...x, persona: k === '' ? null : Number(k) } : x)))} />
-                  </div>
-                  <span className="flex flex-wrap items-center gap-1">
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su ${nome}`} disabled={i === 0} onClick={() => sposta(i, -1)} />
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù ${nome}`} disabled={i === bozza.length - 1} onClick={() => sposta(i, 1)} />
-                    <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli" className="whitespace-nowrap" aria-label={`Togli ${nome}`} onClick={() => setBozza((b) => b.filter((_, j) => j !== i))} />
-                  </span>
-                </li>
-              );
+    <FinestraModifica titolo="Da avere in scorta" titoloSalva="Applica" onChiudi={onChiudi} sporca={JSON.stringify(normalizzate(righe)) !== JSON.stringify(normalizzate(requisiti))}
+      onSalva={() => { onApplica(normalizzate(righe)); onChiudi(); }}>
+      <div className="scorta-editor">
+        <SelettoreIcone multiplo griglia compatto etichetta="Arcani da avere in scorta" valore={scelti.map((a) => a.chiave)}
+          // l'interruttore comunica l'elenco nuovo: la tessera toccata è la sola che differisce dal precedente
+          onCambia={(nuovi) => { const toccata = nuovi.find((c) => !scelti.some((a) => a.chiave === c)) ?? scelti.find((a) => !nuovi.includes(a.chiave))?.chiave; if (toccata) alterna(toccata); }}
+          opzioni={arcani.map((a) => ({ chiave: a.chiave, nome: a.nome, icona: <IconaArcano arcana={a.chiave} dimensione={32} /> }))} />
+        <p className="scorta-editor__conta" role="status">{conta}</p>
+        {scelti.length > 0 && (
+          <ul className="scorta-righe">
+            {scelti.flatMap((a) => {
+              const dellArcano = righe.filter((r) => r.arcana === a.chiave);
+              const personeArcano = personeDi(a.chiave);
+              return dellArcano.map((r, i) => {
+                const opzioni = personeArcano.filter((p) => p.id === r.persona || !righe.some((x) => x.persona === p.id))
+                  .map((p) => ({ chiave: String(p.id), nome: p.nomeIt, dettaglio: `Liv. ${p.livello}` }));
+                // una Persona salvata che non è più nell'elenco resta visibile
+                if (r.persona !== null && !opzioni.some((o) => o.chiave === String(r.persona))) opzioni.unshift({ chiave: String(r.persona), nome: `Persona ${r.persona}`, dettaglio: '' });
+                const nomePersona = opzioni.find((o) => o.chiave === String(r.persona))?.nome;
+                const piuRighe = dellArcano.length > 1;
+                return (
+                  <li key={r.k} className={`scorta-riga ${i > 0 ? 'scorta-riga--seguente' : ''}`}>
+                    <span className="scorta-riga__arcano" aria-hidden={i > 0 ? true : undefined}>
+                      {i === 0 && <><IconaArcano arcana={a.chiave} dimensione={28} /><span>{a.nome}</span></>}
+                    </span>
+                    <div className="scorta-riga__persona">
+                      {/* con altre righe dello stesso arcano la Persona è obbligatoria: «qualunque» sarebbe l'arcano intero accanto a una sua Persona */}
+                      <Selettore compatto etichetta={`Persona di ${a.nome}`} valore={r.persona === null ? '' : String(r.persona)} {...(piuRighe ? {} : { vuoto: 'Qualunque Persona' })}
+                        opzioni={opzioni} onCambia={(c) => cambiaPersona(r.k, c === '' ? null : Number(c))} />
+                    </div>
+                    <span className="scorta-riga__azioni">
+                      {i === dellArcano.length - 1 && r.persona !== null && libere(a.chiave).length > 0 && (
+                        <button type="button" className="btn btn-ghost btn-sm" disabled={pieno} title={`Un’altra Persona di ${a.nome}`} aria-label={`Aggiungi un’altra Persona di ${a.nome}`}
+                          onClick={() => nuovaRiga(a.chiave, libere(a.chiave)[0]?.id ?? null)}><IconaAzione chiave="piu" dimensione={20} /></button>
+                      )}
+                      <button type="button" className="btn btn-ghost btn-sm" title={piuRighe ? 'Togli questa Persona' : `Togli ${a.nome}`} aria-label={piuRighe && nomePersona ? `Togli ${nomePersona} (${a.nome})` : `Togli ${a.nome}`}
+                        onClick={() => togli(r.k)}><IconaAzione chiave="chiudi" dimensione={20} /></button>
+                    </span>
+                  </li>
+                );
+              });
             })}
-          </ol>
+          </ul>
         )}
-        {bozza.length < MASSIMO_REQUISITI_VOCE && daAggiungere.length > 0 && (
-          <Selettore etichetta="Aggiungi arcano" etichettaSopra valore="" vuoto="— scegli —" ricerca="sempre"
-            opzioni={daAggiungere.map((a) => ({ chiave: a.chiave, nome: a.nome, dettaglio: bozza.some((r) => r.arcana === a.chiave) ? 'un’altra Persona' : undefined }))}
-            onCambia={aggiungi} />
-        )}
+        <p className="m-0 testo-12 text-text-muted text-pretty">Nel Diario ogni voce è una casella da spuntare a mano: un promemoria, non tocca la scorta.</p>
       </div>
     </FinestraModifica>
   );
