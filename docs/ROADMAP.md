@@ -274,9 +274,6 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
 - Generare le figure nuove con i prompt di `docs/grafica/prompt-immagini.md` §30–§34 (ordine e priorità in testa alla sezione, registro
   in `docs/grafica/fabbisogno.md`): 14 da generare ora (6 stati vuoti ed errori §33, 3 segni §31, 4 intestazioni §34, più
   `segno-scorta-pronta` §30, che è a priorità bassa: 6+3+4+1 = 14) e 10 rimandati (2 segni di §30, 6 sigilli §32, 2 intestazioni §34).
-- Ricollegare nel codice i cinque stati vuoti che caricano la variante con testo (`CicliSalvati`, `ObiettiviPartita`, `PianiSalvati`,
-  `ScortaPersona`, `StoricoPartita`) alla variante `-senza-testo`, e agganciare `vuoto-partita` (già consegnata) a `PartitaPage` e
-  `GestionePartite`: interventi di codice a parte, servono il sì dell'utente.
-- Agganciare nel codice le figure nuove quando arrivano: chiavi nuove di `ChiaveSegno` con la riserva SVG, `illustrazione` di
-  `EmptyState` e `IntestazionePagina` (dopo aver misurato l'intestazione a 1366×657, 1280×689, 1024×690 e 375), scelta di `VistaErrore`
-  per causa; serve il sì dell'utente.
+- Stati vuoti, errori e intestazioni (§33–§34) sono agganciati nel codice con ripiego: le figure compaiono da sole appena sono nel database
+  con `PUT /api/immagini/illustrazioni/<chiave>` (registro in `docs/grafica/fabbisogno.md`). `intestazione-home` e `intestazione-partita` non si
+  collegano (misura del 2026-11-18: costano spazio a schermate di lavoro).

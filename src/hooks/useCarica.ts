@@ -61,6 +61,27 @@ function causaDi(err: unknown): CausaErrore {
   return isApiError(err) && err.status >= 500 ? 'server' : null;
 }
 
+// La causa degli ultimi errori di lettura per messaggio: `PageState` riceve solo il messaggio (`error={x.errore}`, decine di pagine) e da qui
+// ricava il titolo e l'illustrazione giusti («Sei offline», «Server non raggiungibile») senza che ogni pagina debba passare `causa`. Poche voci:
+// i messaggi di rete sono tre frasi fisse, quelli del server sono quelli recenti.
+const causePerMessaggio = new Map<string, Exclude<CausaErrore, null>>();
+const MASSIMO_CAUSE_RICORDATE = 30;
+
+function ricordaCausa(messaggio: string, causa: CausaErrore): void {
+  causePerMessaggio.delete(messaggio);
+  if (causa === null) return;
+  causePerMessaggio.set(messaggio, causa);
+  if (causePerMessaggio.size > MASSIMO_CAUSE_RICORDATE) {
+    const piuVecchia = causePerMessaggio.keys().next();
+    if (!piuVecchia.done) causePerMessaggio.delete(piuVecchia.value);
+  }
+}
+
+/** La causa con cui una lettura è fallita con questo messaggio (`null` se non è di rete né 5xx o se non è un errore di `useCarica`). */
+export function causaDelMessaggio(messaggio: string | null): CausaErrore {
+  return messaggio ? causePerMessaggio.get(messaggio) ?? null : null;
+}
+
 // Le letture montate la cui ultima lettura è fallita per la rete o per il server, con la loro `ricarica`: quando la connessione torna
 // si rileggono tutte insieme (evento `online`, o una qualunque lettura che torna riuscita), non solo quella su cui si preme «Riprova».
 const fallitePerRete = new Map<object, () => Promise<void>>();
@@ -192,6 +213,7 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
       .catch((err: unknown) => {
         const messaggio = err instanceof Error ? err.message : 'Errore di caricamento';
         const causa = causaDi(err);
+        ricordaCausa(messaggio, causa);
         const prima = esitoRef.current;
         // rilettura fallita con dati già mostrati per le stesse dipendenze: restano al loro posto, l'errore si dichiara a parte
         // (anche se i dati mostrati sono quelli della cache: la pagina non sparisce per una rilettura silenziosa andata male)

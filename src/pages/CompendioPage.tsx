@@ -217,6 +217,7 @@ export function CompendioPage() {
           al 36% dell'altezza (limite 30%); ora è sotto il 25%. Da 640 px resta com'era. */}
       <IntestazionePagina
         titolo="Compendio"
+        illustrazione="illustrazioni/intestazione-compendio"
         sottotitolo={telefono ? undefined : descrizione}
         azioni={
           <>
@@ -296,7 +297,7 @@ export function CompendioPage() {
 
       <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
         {filtrate.length === 0 ? (
-          <EmptyState title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello, a cambiare arcano o a togliere i filtri di affinità e immagine." />
+          <EmptyState illustrazione="vuoto-ricerca" title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello, a cambiare arcano o a togliere i filtri di affinità e immagine." />
         ) : vista === 'piastrelle' ? (
           // piastrelle orizzontali: due colonne da 640, tre da 1280 (a 1024 con tre colonne accanto all'arte restavano 117 px e le piastrelle
           // arrivavano a 258 px d'altezza); quattro solo oltre i 2200 px, perché prima restino larghe e leggibili

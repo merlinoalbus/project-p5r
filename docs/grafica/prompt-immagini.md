@@ -877,7 +877,7 @@ resta la figura della famiglia (`catenaCategoria` in `src/utils/categorie.ts`).
 | 5 | §30 | `segno-scorta-pronta` | bassa | rinforza un colore con una figura; resta una sola richiesta attiva |
 | — | §30 | `segno-scorta-qualunque`, `segno-scorta-precisa` | rimandate | a 16 px sono quasi indistinguibili da `scheda-scorta` e da `scheda-persona-partita` |
 | — | §32 | i tre sigilli e le tre varianti `-senza-testo` | rimandati | nessun consumatore nel codice, duplicano il chip «Completato»; solo con il sì dell'utente |
-| — | §34 | `intestazione-home`, `intestazione-partita` | rimandate | l'intestazione di Partita ha padding e gap a 0 (`.intestazione--partita`) e sul telefono una riga di 44 px (`max-md:h-11`), quella della Home perde il sottotitolo a schermo basso: non c'è spazio misurato per una figura |
+| — | §34 | `intestazione-home`, `intestazione-partita` | rimandate | l'intestazione di Partita ha padding e gap a 0 (`.intestazione--partita`) e sul telefono una riga di 44 px (`max-md:h-11`), quella della Home perde il sottotitolo a schermo basso: misurato il 2026-11-18, con la figura rientrano nel 30% ma costano spazio a schermate di lavoro (§34), quindi non si collegano |
 
 ## 30. Segni della scorta di una voce (3: 1 richiesta attiva, 2 rimandate) — `ui/segno-<chiave>.png` (128×128, trasparente) — richiesti il 2026-11-18
 
@@ -1001,10 +1001,9 @@ Verifica di consegna: 512×192 esatti, alfa nativo, nessun pixel con alfa > 8 ne
 
 **Regola per le figure nuove di §33 e §34: sono senza lettere, quindi il nome del file è la chiave senza suffisso e non esiste nessuna variante `-senza-testo`.** Le illustrazioni
 vecchie che hanno lettere (`vuoto-persona`, `vuoto-partita`, `vuoto-obiettivi`, `vuoto-piani`, `vuoto-cicli`, `vuoto-storico`, `errore`) **restano con il loro nome e con le loro due varianti**. Titolo e suggerimento li scrive sempre l'app
-(`EmptyState`, `VistaErrore`). Oggi l'uso è misto: 404, illustrazione neutra e `VistaErrore` usano le `-senza-testo`, mentre i cinque `EmptyState` che passano `illustrazione` (`CicliSalvati.tsx`
-`vuoto-cicli`, `ObiettiviPartita.tsx` `vuoto-obiettivi`, `PianiSalvati.tsx` `vuoto-piani`, `ScortaPersona.tsx` `vuoto-persona`, `StoricoPartita.tsx` `vuoto-storico`) caricano la variante **con** testo
-(`EmptyState` costruisce `illustrazioni/${illustrazione}` senza suffisso), quindi mostrano le lettere dell'immagine insieme al titolo scritto dall'app. **Punto aperto** (registrato in `fabbisogno.md` e in `ROADMAP.md`):
-ricollegare quei cinque stati alla variante `-senza-testo`; è un intervento di codice a parte che chiede il sì dell'utente. Il nome del file nuovo è la chiave che il codice passerà a `illustrazione`.
+(`EmptyState`, `VistaErrore`). Gli stati che hanno lettere nell'immagine si usano solo nella variante `-senza-testo`: la usano i cinque `EmptyState` di `CicliSalvati`, `ObiettiviPartita`,
+`PianiSalvati`, `ScortaPersona` e `StoricoPartita`, la 404, `PartitaPage` e `GestionePartite`. Il nome del file nuovo è la chiave che il codice passa a `illustrazione`; il codice è già collegato e
+le figure compaiono da sole quando sono nel database (`PUT /api/immagini/illustrazioni/<chiave>`), con ripiego sull'illustrazione neutra (`EmptyState`), su niente (`FiguraVuoto`) o su `errore-senza-testo` (`VistaErrore`).
 
 Regole comuni (§8): inchiostro bianco e nero più rosso, retino nelle ombre, soggetto **centrato con molto vuoto intorno**, composizione che regge a **80 px di altezza**
 (404 e pagine compatte, `max-h-[min(80px,9dvh)]`) e a 200 px (stato vuoto normale); nessun personaggio riconoscibile; nessun testo; almeno 3 px liberi sul bordo.
@@ -1056,17 +1055,15 @@ Consegna: si caricano nel database con `PUT /api/immagini/illustrazioni/<chiave>
 
 ## 34. Illustrazioni di intestazione delle pagine principali (4 da generare, priorità media; 2 rimandate) — `illustrazioni/intestazione-<chiave>.png` (512×512, trasparente, nel database) — richieste il 2026-11-18
 
-**Perché servono.** `IntestazionePagina` ha uno spazio per un'illustrazione a destra del titolo (`illustrazione`, classe `intestazione__illustrazione`: al massimo 120 px di altezza e 40vw, 64 px e 26vw sul
-telefono) e **nessuno dei 28 file che usano `<IntestazionePagina>` (27 pagine più il componente `IndiceLuoghi.tsx`) lo riempie**: le intestazioni sono tutte e solo titolo a tasselli e sottotitolo.
-Le pagine più frequentate non hanno un segno proprio oltre alla voce di menu. **L'altezza dell'intestazione con la figura è da misurare pagina per pagina a 1366×657, 1280×689, 1024×690 e 375 di larghezza: l'intestazione deve restare entro il 30%
-dell'altezza della schermata**; il limite di 120 px (64 px sul telefono) riguarda la figura, non l'intestazione intera. Per questo `intestazione-partita` e `intestazione-home` sono **rimandate**: l'intestazione della Partita ha padding e gap a 0
-(`.intestazione--partita`, `tailwind.css`) e usa `azioniInRiga azioniAccanto`, cioè sul telefono una riga di 44 px (`max-md:h-11 max-md:overflow-x-auto`); la Home a schermo basso nasconde il sottotitolo per stare nel limite. Si tengono
-`intestazione-diario`, `-compendio`, `-fusione`, `-luoghi`, da misurare comunque al collegamento.
+**Perché servono.** `IntestazionePagina` ha uno spazio per un'illustrazione a destra del titolo (`illustrazione`, classe `intestazione__illustrazione`: altezza `clamp(64px, 11dvh, 120px)` e al più 40vw, 64 px e 26vw sul
+telefono), accanto alla riga del titolo. Collegate (ripiego «nulla»: senza il file nessuno spazio, con il file compare da sola): Diario (`PercorsoPage`, non con la ricerca attiva), Compendio, Fusione e
+Luoghi (`IndiceLuoghi`, `DungeonPage`, `CittaPage`) con `intestazione-diario`, `-compendio`, `-fusione`, `-luoghi`. **Misurato il 2026-11-18** (figura presente, 1366×657, 1280×689, 1024×690, 768×1024, 375×812): l'intestazione resta al più
+al 21,9% dell'altezza della schermata. `intestazione-partita` e `intestazione-home` **non si collegano**: la figura le porta nel 30% (Home al più 12,0%, Partita 11,3%) ma costa spazio a schermate di lavoro (Home 47→78 px a 1366×657 e 38→74 a 375×812;
+Partita 46→74 e a 1024 la fila dei dati perde ~92 px di larghezza), vedi `fabbisogno.md`; non si generano se l'utente non lo chiede.
 
 **Una sola figura piena e silhouette alta contrasto**, perché a 64 px di altezza (telefono) e col `drop-shadow` del CSS devono restare un'icona grande, non una scena. Regole comuni:
 512×512 trasparente, soggetto che occupa l'85% del quadrato con almeno 3 px liberi su tutti i bordi (anche se poggia su una base), bianco/nero/rosso, retino nelle
-ombre, nessun testo, nessun personaggio riconoscibile, niente oro. Il collegamento nel codice (`illustrazione` sulle pagine) è un intervento di codice a parte, che chiede il sì dell'utente.
-
+ombre, nessun testo, nessun personaggio riconoscibile, niente oro.
 | File | Pagina | Soggetto | Distinta da |
 |---|---|---|---|
 | `intestazione-home.png` (**rimandata**, fino alla misura) | Home | valigetta del ladro aperta da cui sporgono una carta da gioco, una chiave e un biglietto da visita piegato | il logo (`identita/logo`, maschera) |
@@ -1076,7 +1073,7 @@ ombre, nessun testo, nessun personaggio riconoscibile, niente oro. Il collegamen
 | `intestazione-fusione.png` | Fusione | due carte che convergono verso un lampo, sotto il lampo la lama di una ghigliottina | `nav-fusione` (frecce che convergono) |
 | `intestazione-luoghi.png` | Luoghi, Palazzi, Mappe | profilo cittadino in un unico blocco: castello a due torri, torre radio e imbocco di un tunnel della metropolitana | `guida/mappe` (mappa ripiegata con spillo), `palazzi/*` (stemmi) |
 
-Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0). I primi due, per `intestazione-home` e `intestazione-partita`, sono **rimandati**: si usano solo dopo la misura dell'intestazione e il sì dell'utente.
+Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0). I primi due, per `intestazione-home` e `intestazione-partita`, sono **rimandati**: la misura (§34, 2026-11-18) ne sconsiglia il collegamento; si usano solo se l'utente lo chiede.
 
 ```
 [blocco di stile §0] Illustrazione di intestazione per l'interfaccia di Persona 5 Royal, PNG 512×512 con sfondo trasparente, un unico soggetto centrato a figura piena che occupa l'85% del quadrato, silhouette ad alto contrasto leggibile a 64 px di altezza, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, angoli tagliati. Soggetto: una valigetta da ladro aperta da cui sporgono una carta da gioco, una chiave antica e un biglietto da visita con l'angolo piegato. Nessun testo, nessun personaggio, niente oro. → intestazione-home.png

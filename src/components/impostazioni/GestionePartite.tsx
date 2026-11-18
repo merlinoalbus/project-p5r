@@ -13,6 +13,7 @@ import { IconaAzione, IconaScheda } from '../shared/IconaAzione';
 import { conferma } from '../../stores/confermaStore';
 import { TitoloSezione } from '../shared/TitoloSezione';
 import { AzioneRiprova } from '../shared/VistaErrore';
+import { FiguraVuoto } from '../shared/PageState';
 
 /** Gestione delle partite multiple. */
 export function GestionePartite() {
@@ -63,7 +64,12 @@ export function GestionePartite() {
             <span className="flex-1 min-w-0 break-words testo-13 text-error-testo">{errore}</span>
             <AzioneRiprova tono="secondario" inCorso={caricamento} onClick={() => { if (!caricamento) void carica(); }} />
           </div>
-        ) : caricata && <p className="m-0 testo-13 text-text-muted">Nessuna partita ancora.</p>
+        ) : caricata && (
+          <div className="flex items-center gap-3">
+            <FiguraVuoto illustrazione="vuoto-partita-senza-testo" />
+            <p className="m-0 testo-13 text-text-muted">Nessuna partita ancora.</p>
+          </div>
+        )
       ) : (
         <ul className="m-0 p-0 list-none divide-y divide-border-light">
           {partite.map((p) => (

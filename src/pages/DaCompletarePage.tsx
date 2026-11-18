@@ -26,6 +26,7 @@ import { ModuloVoceGiornata } from '../components/guida/ModuloVoceGiornata';
 import { dataGiocoTesto } from '../utils/dateGioco';
 import { ordineGioco } from '../../shared/condizioniSpillo';
 import type { AzionePercorsoDto } from '../types';
+import { FiguraVuoto } from '../components/shared/PageState';
 import type { PropostaConversioneDto, StatoProposta } from '../../shared/proposteConversione';
 
 type FiltroStato = StatoProposta | 'tutte';
@@ -73,7 +74,12 @@ export function DaCompletarePage() {
           <Campo etichetta="Al" senzaGruppo aiuto="«nessuna» = fino alla fine" errore={periodoRovescio ? 'Il giorno finale viene prima di quello iniziale.' : undefined}><SelettoreData etichetta="Al" facoltativa valore={a} onCambia={setA} /></Campo>
         </div>
         <Segmenti etichetta="Stato" valore={stato} opzioni={STATI} onCambia={setStato} />
-        {lista.dati && <p className="m-0 testo-13 text-text-secondary" role="status">{n === 0 ? 'Nessuna proposta in questo periodo.' : n === 1 ? '1 proposta' : `${n} proposte`}</p>}
+        {lista.dati && (
+          <div className="flex items-center gap-3">
+            {n === 0 && <FiguraVuoto illustrazione="vuoto-proposte" />}
+            <p className="m-0 testo-13 text-text-secondary" role="status">{n === 0 ? 'Nessuna proposta in questo periodo.' : n === 1 ? '1 proposta' : `${n} proposte`}</p>
+          </div>
+        )}
       </section>
       {lista.inPrimoCaricamento && <p role="status" className="m-0">Un attimo…</p>}
       {lista.errore && <p role="alert" className="m-0 text-error-testo">{lista.errore}</p>}

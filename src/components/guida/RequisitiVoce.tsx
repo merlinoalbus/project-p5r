@@ -18,6 +18,7 @@ import { chiaveRequisito, type RequisitoVoceDto } from '../../../shared/requisit
 import type { AzionePercorsoDto } from '../../types';
 import { IconGiu } from '../shared/iconeGuida';
 import { IconaArcano } from '../shared/IconaArcano';
+import { IconaSegno } from '../shared/IconaAzione';
 import { idContatoreScorta, nomeRequisito } from '../../utils/requisitiVoce';
 
 interface Props {
@@ -72,6 +73,8 @@ export function RequisitiVoce({ a, partitaId, onCambiata }: Props) {
     <span id={idContatoreScorta(a.uid)} className="scorta-voce__conta">
       <span className="sr-only">In scorta: </span>{conCaselle ? `${fatti}/${totale}` : totale}
       {pronta && <span className="sr-only"> pronta</span>}
+      {/* tutte le caselle spuntate (e a voce fatta, nella riga ripiegata): il testo «pronta» c'è già per il lettore di schermo, il segno lo dice a colpo d'occhio */}
+      {pronta && <span className="scorta-voce__pronta" aria-hidden="true"><IconaSegno chiave="scorta-pronta" dimensione={16} /></span>}
     </span>
   );
   const titolo = <span className="scorta-voce__titolo">In scorta</span>;

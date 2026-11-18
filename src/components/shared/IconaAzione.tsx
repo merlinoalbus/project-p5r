@@ -45,7 +45,77 @@ export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'letture' | 'progres
  * **accanto all'etichetta**, mai al posto del numero, e a 14–16 px basta a distinguere una
  * tessera dall'altra prima di leggerla. */
 export type ChiaveSegno = 'iniziati' | 'completati' | 'sessioni' | 'visioni' | 'round' | 'medaglie' | 'catalogo' | 'sfide'
-  | 'si-apre' | 'furto' | 'scade' | 'da-verificare';
+  | 'si-apre' | 'furto' | 'scade' | 'da-verificare'
+  // Agganciate il 2026-11-18 (prompt §30 e §31): la Trama collegata a un Confidente, la Consigliata, la Non dovuta, la scorta pronta.
+  | 'trama-confidente' | 'consigliata' | 'non-dovuta' | 'scorta-pronta';
+
+// Le riserve dei quattro segni di §30–§31: figure piatte con la palette dei prompt (bianco #ececf1, grigio #6f6f80, nero #0b0b0e, un solo accento
+// rosso #e5352b), contorno nero uniforme e ombra rossa sfalsata in basso a destra. Colori fissi di proposito: il segno sta sopra un ritratto
+// (Trama collegata), dentro un chip oro, accanto a una frase e a un contatore verde, e deve restare lo stesso su ognuno di questi fondi.
+const BIANCO = '#ececf1';
+const GRIGIO = '#6f6f80';
+const NERO = '#0b0b0e';
+const ROSSO = '#e5352b';
+
+function SvgSegno({ d, children }: { d: number; children: ReactNode }) {
+  return <svg width={d} height={d} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{children}</svg>;
+}
+
+/** Tassello rosso a due angoli tagliati con dentro un biglietto da visita dall'angolo piegato e l'anello di una catena (§31). */
+function SegnoTramaConfidente({ d }: { d: number }) {
+  return (
+    <SvgSegno d={d}>
+      <path d="M5 1.5h17.5v17L18.5 22.5H1.5V5z" fill={ROSSO} stroke={NERO} strokeWidth={1.6} />
+      <path d="M9.5 6h6l3.5 3.5V18h-9.5z" fill={BIANCO} stroke={NERO} strokeWidth={1.2} />
+      <path d="M15.5 6v3.5H19" stroke={NERO} strokeWidth={1.1} />
+      <path d="M12 13.5h5M12 16h3.2" stroke={NERO} strokeWidth={1.1} />
+      <circle cx="8.2" cy="12" r="2.3" stroke={NERO} strokeWidth={3.4} />
+      <circle cx="8.2" cy="12" r="2.3" stroke={BIANCO} strokeWidth={1.6} />
+    </SvgSegno>
+  );
+}
+
+/** Lampadina riempita di bianco con cinque raggi rossi e l'attacco a vite grigio (§31). */
+function SegnoConsigliata({ d }: { d: number }) {
+  const bulbo = 'M12 5.2a5.2 5.2 0 0 0-3 9.5c.5.4.8.9.8 1.5v.8h4.4v-.8c0-.6.3-1.1.8-1.5A5.2 5.2 0 0 0 12 5.2z';
+  return (
+    <SvgSegno d={d}>
+      <path d={bulbo} fill={ROSSO} transform="translate(.9 .9)" />
+      <path d="M12 1.2v2M4.4 4.6l1.4 1.4M19.6 4.6l-1.4 1.4M1.8 11h2M20.2 11h2" stroke={ROSSO} strokeWidth={1.7} />
+      <path d={bulbo} fill={BIANCO} stroke={NERO} strokeWidth={1.4} />
+      <path d="M10.3 12.4l1.7-1.8 1.7 1.8" stroke={NERO} strokeWidth={1} />
+      <rect x="9.6" y="17.2" width="4.8" height="3.2" rx=".8" fill={GRIGIO} stroke={NERO} strokeWidth={1.2} />
+      <path d="M10.6 22h2.8" stroke={NERO} strokeWidth={1.4} />
+    </SvgSegno>
+  );
+}
+
+/** Foglio con l'angolo piegato e due righe, attraversato da una barra diagonale rossa dal bordo nero che esce dal foglio (§31). */
+function SegnoNonDovuta({ d }: { d: number }) {
+  return (
+    <SvgSegno d={d}>
+      <path d="M6 3h8l4.5 4.5V21H6z" fill={ROSSO} transform="translate(.9 .9)" />
+      <path d="M6 3h8l4.5 4.5V21H6z" fill={BIANCO} stroke={NERO} strokeWidth={1.4} />
+      <path d="M14 3v4.5h4.5" stroke={NERO} strokeWidth={1.2} />
+      <path d="M9 11.5h5M9 14.5h4" stroke={NERO} strokeWidth={1.3} />
+      <path d="M2.8 20.2L21.2 3.8" stroke={NERO} strokeWidth={5} strokeLinecap="butt" />
+      <path d="M3.4 19.6L20.6 4.4" stroke={ROSSO} strokeWidth={3} strokeLinecap="butt" />
+    </SvgSegno>
+  );
+}
+
+/** Tre carte a ventaglio viste di fronte, la centrale con una grande spunta bianca (§30). */
+function SegnoScortaPronta({ d }: { d: number }) {
+  return (
+    <SvgSegno d={d}>
+      <g transform="rotate(-22 12 21)"><rect x="7.6" y="3.6" width="8.8" height="15" rx="1.2" fill={BIANCO} stroke={NERO} strokeWidth={1.2} /></g>
+      <g transform="rotate(22 12 21)"><rect x="7.6" y="3.6" width="8.8" height="15" rx="1.2" fill={BIANCO} stroke={ROSSO} strokeWidth={1.4} /></g>
+      <rect x="7.6" y="3.6" width="8.8" height="15" rx="1.2" fill={GRIGIO} stroke={NERO} strokeWidth={1.4} />
+      <path d="M9.4 11.4l2.1 2.2 3.5-4.4" stroke={NERO} strokeWidth={3.4} />
+      <path d="M9.4 11.4l2.1 2.2 3.5-4.4" stroke={BIANCO} strokeWidth={1.8} />
+    </SvgSegno>
+  );
+}
 
 const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = {
   'regalo': (d) => <IconRegalo size={d} />,
@@ -167,6 +237,10 @@ const RISERVA_SEGNO: Record<ChiaveSegno, (dimensione: number) => ReactNode> = {
   scade: (d) => <IconAllarme size={d} />,
   // Documento con la lente: è esattamente ciò che il cartellino dice, «va controllato».
   'da-verificare': (d) => <IconDettagli size={d} />,
+  'trama-confidente': (d) => <SegnoTramaConfidente d={d} />,
+  consigliata: (d) => <SegnoConsigliata d={d} />,
+  'non-dovuta': (d) => <SegnoNonDovuta d={d} />,
+  'scorta-pronta': (d) => <SegnoScortaPronta d={d} />,
 };
 
 interface Props<C extends string> {

@@ -29,6 +29,7 @@ import { giornoDellaSettimana } from '../../../shared/date';
 import { dataGiocoTesto, meseGioco } from '../../utils/dateGioco';
 import { descrizioneRicerca, nomeTipoVoce as nomeTipo, testoSufficiente, tipoDaIndirizzo, type RitornoRicercaDiario } from '../../utils/ricercaDiario';
 import type { RicercaDiario } from '../../hooks/useRicercaDiario';
+import { FiguraVuoto } from '../shared/PageState';
 
 // ---------------------------------------------------------------- barra
 
@@ -211,9 +212,12 @@ export function RisultatiRicercaDiario({ q, tipo, ricerca, conPartita, voceDiRit
       <p className="m-0 testo-14 text-text-secondary" role="status" aria-live="polite" aria-atomic="true">{riepilogo}</p>
       {errore && <div><PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprova} /></div>}
       {dati && dati.totale === 0 && (
-        <div className="card flex flex-col items-start gap-2">
-          <p className="m-0">Nessuna voce del Diario {dati.q ? <>contiene «{dati.q}» in «Che cosa fare» o nelle note</> : 'è di questo tipo'}{dati.tipo && dati.q ? <> fra le voci «{nomeTipo(dati.tipo)}»</> : null}.</p>
-          {senzaTipo > 0 && <PulsanteVisivo compatto icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo="Cerca in tutti i tipi" dettaglio={voci(senzaTipo)} onClick={onTogliTipo} />}
+        <div className="card flex items-center gap-3 sm:gap-4">
+          <FiguraVuoto illustrazione="vuoto-ricerca" />
+          <div className="flex min-w-0 flex-col items-start gap-2">
+            <p className="m-0">Nessuna voce del Diario {dati.q ? <>contiene «{dati.q}» in «Che cosa fare» o nelle note</> : 'è di questo tipo'}{dati.tipo && dati.q ? <> fra le voci «{nomeTipo(dati.tipo)}»</> : null}.</p>
+            {senzaTipo > 0 && <PulsanteVisivo compatto icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo="Cerca in tutti i tipi" dettaglio={voci(senzaTipo)} onClick={onTogliTipo} />}
+          </div>
         </div>
       )}
       {gruppi.length > 0 && (

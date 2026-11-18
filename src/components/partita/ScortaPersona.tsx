@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { aggiornaPosseduta, aggiungiPosseduta, getCapienzaScorta, getPersone, getPossedute, getSkills, isApiError, rimuoviPosseduta, getCompendioPartita, registraPosseduta, urlSkills } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
-import { PageState, EmptyState } from '../shared/PageState';
+import { PageState, EmptyState, FiguraVuoto } from '../shared/PageState';
 import { Modal } from '../shared/Modal';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { Selettore } from '../shared/Selettore';
@@ -125,7 +125,7 @@ export function ScortaPersona({ partitaId }: Props) {
       {/* capienza in testa: quanti posti sono occupati e quando salgono (dal rango di Igor) */}
       <IntestazioneCapienza quante={dati?.length ?? 0} capienza={capienza.dati ?? null} />
       {dati && dati.length === 0 && (
-        <EmptyState illustrazione="vuoto-persona" title="La scorta è vuota" hint="Aggiungi le Persona che possiedi nel gioco: livello, skill e statistiche vengono precompilati dal compendio." />
+        <EmptyState illustrazione="vuoto-persona-senza-testo" title="La scorta è vuota" hint="Aggiungi le Persona che possiedi nel gioco: livello, skill e statistiche vengono precompilati dal compendio." />
       )}
       {dati && (
         <>
@@ -191,7 +191,12 @@ export function ScortaPersona({ partitaId }: Props) {
               </li>
             ))}
           </ul>
-          {dati.length > 0 && visibili.length === 0 && <p className="m-0 py-3 testo-13 text-text-muted">Nessuna Persona corrisponde ai filtri.</p>}
+          {dati.length > 0 && visibili.length === 0 && (
+            <div className="flex items-center gap-3 py-3">
+              <FiguraVuoto illustrazione="vuoto-ricerca" />
+              <p className="m-0 testo-13 text-text-muted">Nessuna Persona corrisponde ai filtri.</p>
+            </div>
+          )}
         </>
       )}
 

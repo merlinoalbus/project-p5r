@@ -31,6 +31,7 @@ import { FasciaGiornata, IconaFascia } from './FasciaGiornata';
 import { IconGiu } from '../shared/iconeGuida';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { FiguraVuoto } from '../shared/PageState';
 import { urlHttp } from '../../../shared/urlHttp';
 import { Modal } from '../shared/Modal';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
@@ -498,6 +499,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         {(!inAlto || tramaIntera) && g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
         {(!inAlto || tramaIntera) && g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary-testo">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
         {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
+        {/* il giorno senza voci o non coperto: la figura, se c'è (`vuoto-giornata`), una sola volta e fuori dalla Home (lì lo spazio è contato) */}
+        {!inAlto && (!g.coperto || g.azioni.length === 0) && <FiguraVuoto illustrazione="vuoto-giornata" className="self-start" />}
         {!inAlto && fonte}
       </section>
       {/* copiare o spostare voci in un altro giorno (2026-10-12): la scelta a caselle, per chi non usa il mouse; con voci già selezionate

@@ -73,7 +73,7 @@ export function GlossarioPage() {
         {dati && dati.length === 0 ? (
           <EmptyState title="Glossario non ancora disponibile" hint="Questa versione dei dati di gioco non contiene i termini del glossario." />
         ) : filtrati.length === 0 ? (
-          <EmptyState title="Nessun termine corrisponde alla ricerca" />
+          <EmptyState illustrazione="vuoto-ricerca" title="Nessun termine corrisponde alla ricerca" />
         ) : (
           [...perCategoria.entries()].map(([cat, termini]) => (
             <section key={cat} className="card">

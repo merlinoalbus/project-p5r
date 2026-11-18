@@ -45,6 +45,7 @@ function ContenutoErrore({ errore, compatto = false, onIndietro, onRiprova }: Pr
     <VistaErrore
       livello={compatto ? 2 : 1}
       compatta={compatto}
+      causa={offline ? 'offline' : null}
       titolo={offline ? 'Sei offline' : chunk ? "L'app è stata aggiornata" : TITOLO_ERRORE}
       spiegazione={offline
         ? 'Sei offline: questa pagina non si può caricare ora. Riprova quando torna la connessione; i dati che hai in corso nelle altre schede restano dove sono.'
