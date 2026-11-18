@@ -217,6 +217,11 @@ export const bodyAzionePercorso = z.object({
   /** L13 (O10-2): la scelta romantica alla spunta del passaggio al rango 9 di un Confidente romanzabile (assente = la relazione non cambia). */
   relazioneRomantica: z.boolean().optional(),
 }).strict().refine((d) => d.fatta || (!d.acquisti?.length&&!d.pesche?.length&&!d.scelteEsito?.length&&d.relazioneRomantica === undefined), 'Esiti e fatti osservati si dichiarano quando si registra la visita, non quando si toglie la spunta.');
+/** La casella di un requisito «da avere in scorta» di una voce, nella partita (promemoria manuale): arcano e, se il requisito è una Persona
+ *  specifica, il suo id; `persona` assente o null = il requisito è l'arcano intero. Che la voce abbia quel requisito lo verifica il servizio (404). */
+export const bodyRequisitoPercorso = z.object({
+  uid: uidVoce, arcana: z.string().trim().min(1).max(40), persona: z.number().int().min(1).nullable().optional(), fatto: z.boolean(),
+}).strict();
 export const bodyGiornoCorrente = z.object({ data: dataGioco });
 
 // ---- Meteo della partita ----

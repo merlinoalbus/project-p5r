@@ -14,9 +14,9 @@ import type Database from 'better-sqlite3';
 import { config } from '../config.js';
 
 /** La versione di `gioco.db` (schema `main`) che il codice legge. */
-export const VERSIONE_GIOCO = 390;
+export const VERSIONE_GIOCO = 391;
 /** La versione di `partite.db` (schema `utente`) che il codice legge. */
-export const VERSIONE_PARTITE = 74;
+export const VERSIONE_PARTITE = 75;
 
 /** Quale dei due file dell'istanza ha una versione diversa da quella attesa. */
 export type FileVersionato = 'gioco' | 'partite';

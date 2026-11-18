@@ -431,10 +431,27 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   la Richiesta.
 - Una voce può dichiarare quando è dovuta («Si fa solo se»): se la condizione è falsa la voce è «Non dovuta», non si spunta e non ferma
   la fascia.
+- Una voce (solo un'azione, non un promemoria) può avere un elenco «da avere in scorta»: ogni requisito è un arcano (una Persona qualunque
+  di quell'arcano) o una Persona specifica di un arcano, scelti nell'editor della voce; al massimo 30, nessun doppione, mai un arcano intero
+  insieme a una sua Persona, mai una Persona del gruppo. L'elenco è del canone (vale per tutte le partite e lo porta il pacchetto); la
+  casella di ogni requisito è invece della partita ed è un promemoria manuale, indipendente dalla scorta: non la legge né la scrive.
+  La prima spunta della voce è consentita solo con tutte le caselle spuntate (409 `requisiti-incompleti`, «Mancano n caselle della
+  scorta»); l'annullo è sempre libero, le caselle restano com'erano togliendo la spunta, e una voce già spuntata non si rompe se dopo
+  le si aggiunge un requisito. Togliere un requisito dall'elenco cancella la sua casella in tutte le partite; un'azione che diventa
+  promemoria perde l'elenco; eliminare la voce cancella anche le caselle (il Cestino le rimette con lei). La copia di una voce copia i
+  requisiti, mai le caselle. Le cinque voci della Stanza di Velluto che lo scrivevano a parole nelle note (23 aprile, 27 maggio, 2, 8 e 21
+  giugno) hanno l'elenco strutturato, 25 requisiti in tutto, e le note senza l'elenco (resta di 27 maggio «Per Fede puoi provare ad
+  evocare una Fenice.»); il 23 aprile cita le Persona Agathion, Mandrake, Berith e Pixie, le altre gli arcani interi. L'edizione di
+  rilascio va rifatta per portare la struttura (versione 391 dei dati di gioco, 75 delle partite).
 - Nella finestra della voce «Quale» e «Si fa solo se» sono una riga ciascuno; la griglia di «Quale» e l'editor delle condizioni si aprono
   in una finestra loro, larga quanto quella della voce, così il corpo della voce sta sotto gli 800 px a 1280 qualunque sia l'elenco o il
   numero delle condizioni. Scegliere un tipo che si collega apre da sé la griglia; toccare una tessera sceglie e la chiude. «Applica» mette le condizioni
   nella voce, che le salva con «Salva».
+- Il tipo della voce decide a che cosa si collega (`RIFERIMENTO_DI_TIPO` in `shared/effettiAzione.ts`); domanda/esame, Stanza di Velluto e
+  Altro non si collegano a niente. Una voce «Trama» può collegarsi a un Confidente quando l'evento di storia riguarda l'interazione con lui:
+  il collegamento è facoltativo (`COLLEGAMENTO_FACOLTATIVO`: nessun «Scegli il Confidente», la griglia non si apre da sola) e non produce
+  incontro, rango atteso, note né avviso di disponibilità, che restano del solo tipo «Confidente»; la scheda del Confidente e i suggerimenti
+  della voce la leggono come ogni collegamento.
 - Un effetto della voce può dichiarare quando vale («Vale solo se»), con lo stesso vocabolario e lo stesso valutatore, allo stato della
   partita al giorno della voce: solo yen, oggetto ricevuto, Persona, trofeo e sblocco. Con la condizione falsa l'effetto non si applica, non
   diventa proposta e nella partita non si mostra; fuori dalla partita «Il gioco dà» lo dice con «Solo se». La condizione si legge alla

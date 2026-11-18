@@ -107,6 +107,10 @@ export const confermaRequisitoConfidente = (id: number, chiave: string, rango: n
  *  incontro con un Confidente) e dice se la partita è passata al giorno dopo. L13 (O10-3): `relazioneRomantica` è la scelta romantica alla spunta
  *  del passaggio al rango 9 di un Confidente romanzabile (assente = la relazione non cambia; solo spuntando). */
 export const impostaAzionePercorso = (id: number, uid: string, fatta: boolean, noteRisposta?: 1 | 2 | 3, acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], scelteEsito?: SceltaEsitoSpunta[], relazioneRomantica?: boolean): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { uid, fatta, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti !== undefined ? { acquisti } : {}), ...(pesche !== undefined ? { pesche } : {}), ...(scelteEsito?.length ? { scelteEsito } : {}), ...(fatta && relazioneRomantica !== undefined ? { relazioneRomantica } : {}) }, { maxRetries: 0 });
+/** La casella «da avere in scorta» di un requisito di una voce nella partita: promemoria manuale (non legge né scrive la scorta). `persona` null =
+ *  il requisito è l'arcano intero. Idempotente; risponde con la voce riletta. */
+export const impostaRequisitoVoce = (id: number, uid: string, arcana: string, persona: number | null, fatto: boolean): Promise<AzionePercorsoDto> =>
+  apiPut(`/partite/${id}/percorso/requisiti`, { uid, arcana, ...(persona !== null ? { persona } : {}), fatto });
 /** Giorno corrente della partita (calendario di gioco); la risposta porta anche la partita aggiornata da riportare nello store. */
 export const impostaGiornoCorrente = (id: number, data: string): Promise<GiornoCorrenteDto> => apiPut(`/partite/${id}/giorno`, { data });
 /** Il meteo di un giorno nella partita, di giorno e di sera. */

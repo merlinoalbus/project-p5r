@@ -28,6 +28,7 @@ import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.
 import type { MeteoPartita } from './meteoPartita.js';
 import type { CarattereVoce } from './caratteriVoce.js';
 import type { CompletamentoPalazzo } from './completamentoGuida.js';
+import type { RequisitoVoceDto, RequisitoVoceInput } from './requisitiVoce.js';
 import type { QuizAttivita } from './quizAttivita.js';
 import type { Osservazione, Statistiche } from './statistiche.js';
 import type { StatoAcquistiArticoloDto } from './acquisti.js';
@@ -1560,6 +1561,10 @@ export interface AzionePercorsoDto {
   /** L13 (O9-3): nella partita la voce NON è dovuta (le sue condizioni sono false al suo giorno): non si spunta e non blocca l'avanzamento.
    *  Solo su una voce non spuntata (una voce già spuntata resta com'è); `motivo` è la condizione che manca, in parole. */
   nonDovuta?: { motivo: string };
+  /** I requisiti «da avere in scorta» della voce (arcani o Persona specifiche, nell'ordine dell'elenco), solo per un'azione che ne ha; assente =
+   *  nessuno. Con `?partita=`, ognuno porta la sua casella manuale (`fatto`): la spunta della voce è consentita solo con tutte le caselle
+   *  spuntate (409 `requisiti-incompleti`). Le caselle sono un promemoria: non leggono né scrivono la scorta della partita. */
+  requisiti?: RequisitoVoceDto[];
   /** Identità stabile: le spunte delle partite si agganciano a questa. */
   uid: string;
   /** Giorno del calendario di gioco ('MM-GG'); «giorno» e non «data» per l'envelope `{ data }` delle risposte. */
@@ -1728,7 +1733,9 @@ export interface ElenchiEffettiVoceDto {
   /** Inviti dei Confidenti: `chiave` è «confidente/MM-GG». */
   inviti: Array<{ chiave: string; confidente: string; confidenteNome: string; data: string | null; nota: string }>;
   /** Le Persona dell'effetto «Persona registrata»: non quelle del gruppo (i Demoni del Tesoro sì, e entrano in scorta come le altre). */
-  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number }>;
+  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; arcanaChiave: string; livello: number }>;
+  /** Gli arcani (chiave inglese e nome italiano, nell'ordine della tabella di fusione), per i requisiti «da avere in scorta» di una voce. */
+  arcani: Array<{ chiave: string; nome: string }>;
   /** L13 (ondata 3): gli oggetti del catalogo (effetto «oggetto ricevuto», ricompense delle Richieste) e i trofei (effetto «trofeo»). */
   /** 2026-10-28: `prestito` = un'offerta lo dà in prestito (regola «restituzione»: Biblioteca, DVD a noleggio), per l'effetto «Restituito». */
   oggetti?: Array<{ chiave: string; nome: string; categoria: string; prestito?: true }>;
@@ -1750,6 +1757,9 @@ export interface DatiVoceGiornata {
   rangoAtteso?: number | null;
   /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»); vuoto = sempre. Solo per un'azione (un promemoria non ne ha). */
   condizioni?: RequisitoSpillo[];
+  /** I requisiti «da avere in scorta» (solo per un'azione): non inviato = invariati, `[]` = li toglie tutti; l'elenco inviato sostituisce quello di
+   *  prima e conserva l'ordine. Il server verifica arcani e Persone (400 `requisiti-non-validi`, `requisiti-solo-azione`). */
+  requisiti?: RequisitoVoceInput[];
   /** Effetti della spunta (solo per un'azione). */
   produce?: EffettoAzione[];
   /** CAS della fonte unica, richiesto quando si modificano gli effetti di una voce già presente. */

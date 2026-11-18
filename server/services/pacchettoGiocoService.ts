@@ -102,6 +102,10 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'spillo_partita', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },
   // la giornata è canone del file di gioco: un pacchetto che non ha più una voce lascia la sua spunta senza voce
   { tabella: 'spunta_voce_partita', colonna: 'voce_uid', entita: 'voce della giornata', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  // le caselle dei requisiti «da avere in scorta» di una voce: una voce, un arcano o una Persona che spariscono le lasciano orfane (`persona_id` 0 = qualunque Persona)
+  { tabella: 'spunta_requisito_voce_partita', colonna: 'voce_uid', entita: 'voce della giornata (requisito in scorta)', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'spunta_requisito_voce_partita', colonna: 'arcana_chiave', entita: 'arcano (requisito in scorta)', tabellaGioco: 'arcana', colonnaGioco: 'chiave' },
+  { tabella: 'spunta_requisito_voce_partita', colonna: 'persona_id', entita: 'Persona (requisito in scorta)', tabellaGioco: 'persona', colonnaGioco: 'id', filtro: 'persona_id <> 0' },
   { tabella: 'punto_partita', colonna: 'punto_chiave', entita: 'punto della guida', tabellaGioco: 'punto_interesse', colonnaGioco: 'chiave' },
   // le divergenze conservate «da verificare» (L4): un pin o una voce che spariscono le lasciano orfane
   { tabella: 'divergenza_partita', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },

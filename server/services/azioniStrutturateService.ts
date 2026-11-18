@@ -341,9 +341,11 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
     domande: (prepared('SELECT id, data AS giorno, domanda AS testo, tipo FROM domanda ORDER BY ordine').all() as ElenchiEffettiVoceDto['domande']),
     cruciverba: prepared('SELECT data, indizio FROM cruciverba ORDER BY ordine').all() as ElenchiEffettiVoceDto['cruciverba'],
     inviti: prepared(`SELECT i.chiave, i.confidente_chiave AS confidente, c.nome AS confidenteNome, i.data, i.nota FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave ORDER BY c.ordine, i.data`).all() as ElenchiEffettiVoceDto['inviti'],
-    // le Persona del gruppo non si registrano né entrano in scorta (`assicuraNonDelGruppo`, 409): non si offrono
+    // le Persona del gruppo non si registrano né entrano in scorta (`assicuraNonDelGruppo`, 409): non si offrono (né fra gli effetti né fra i requisiti in scorta)
     persone: (prepared('SELECT id, nome, arcana, livello FROM persona WHERE del_party = 0 ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number }>)
-      .map((p) => ({ id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: t('arcana', p.arcana), livello: p.livello })),
+      .map((p) => ({ id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: t('arcana', p.arcana), arcanaChiave: p.arcana, livello: p.livello })),
+    // gli arcani (chiave inglese e nome italiano) nell'ordine della tabella di fusione: i requisiti «da avere in scorta» di una voce li scelgono da qui
+    arcani: (prepared('SELECT chiave FROM arcana ORDER BY ordine').all() as Array<{ chiave: string }>).map((a) => ({ chiave: a.chiave, nome: t('arcana', a.chiave) })),
     // L13 (ondata 3): gli oggetti del catalogo visibili e i trofei, scelti per nome negli effetti «oggetto ricevuto» e «trofeo»
     // 2026-10-28: `prestito` per gli oggetti che un'offerta dà con la regola «restituzione» (Biblioteca, DVD a noleggio): l'effetto «Restituito» li propone
     oggetti: (prepared(`SELECT c.chiave, c.nome, c.categoria, EXISTS (SELECT 1 FROM articolo a WHERE a.catalogo_chiave = c.chiave AND json_valid(a.rifornimento_json)

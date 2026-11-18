@@ -29,7 +29,7 @@ import { AcquistiNegozioVoce } from './AcquistiNegozioVoce';
 import { eArticoloDelNegozio } from '../../utils/effettiDellaVoce';
 import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { EffettiNonConvertibili } from './EditorEffettiVoce';
-import { RIFERIMENTO_DI_TIPO, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
+import { COLLEGAMENTO_FACOLTATIVO, RIFERIMENTO_DI_TIPO, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
 import { NOME_QUALE } from '../../utils/elencoQuale';
 import { campiCompleti, effettoCompleto, type CampiStrutturati } from '../../utils/azioneStrutturata';
 import { Ripiegabile } from '../shared/Ripiegabile';
@@ -122,8 +122,8 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi, parte = 'tutto', qu
     }))) return;
     onCambia(cambiaCollegamento(valore, tipo, nuovoRif, ctx));
     // L6-06: un tipo nuovo che si collega a qualcosa apre subito la finestra di «Quale» (prima il tipo, poi l'elenco filtrato): un tocco
-    // per il tipo e uno per l'elemento, come quando la griglia stava nella voce
-    if (tipo !== valore.tipo && !nuovoRif && tipoQuale(tipo, null)) apriQuale(true);
+    // per il tipo e uno per l'elemento, come quando la griglia stava nella voce; un collegamento facoltativo (la trama) non si chiede
+    if (tipo !== valore.tipo && !nuovoRif && tipoQuale(tipo, null) && !COLLEGAMENTO_FACOLTATIVO.has(tipo)) apriQuale(true);
   };
   const tipoGrid = (
     <div className="flex flex-col gap-1.5">
@@ -195,7 +195,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apert
       contesto = frase(valore.tipo === 'esame'
         ? 'La domanda del giorno si aggiunge qui sotto con «Aggiungi un effetto» → «Domanda risposta»: la spunta la segna come risposta.'
         : 'L’evento di storia si aggiunge qui sotto con «Aggiungi un effetto» → «Evento di storia»: la spunta lo segna avvenuto.');
-    } else if (tq && (!rif || rif.tipo !== tq)) {
+    } else if (tq && !COLLEGAMENTO_FACOLTATIVO.has(valore.tipo) && (!rif || rif.tipo !== tq)) {
       contesto = frase(valore.tipo === 'acquisto'
         ? 'Scegli il negozio in «Quale»: qui compariranno gli articoli da segnare comprati.'
         : `Scegli ${NOME_QUALE[tq].toLowerCase()} in «Quale»: l’effetto che gli corrisponde si aggiunge da solo a questo elenco (o si riconosce fra quelli che ci sono già).`);
@@ -213,7 +213,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apert
   }
   // L6-06: «Spuntando succede» è ripiegato (una riga di riepilogo) per una voce che c'è già; si apre da sé con una voce nuova, con qualcosa da
   // completare o con effetti da correggere (formato storico o non convertibile), e si tiene aperto finché c'è da completare
-  const quale = tq && (!rif || rif.tipo !== tq) ? NOME_QUALE[tq].toLowerCase() : null;
+  const quale = tq && !COLLEGAMENTO_FACOLTATIVO.has(valore.tipo) && (!rif || rif.tipo !== tq) ?NOME_QUALE[tq].toLowerCase() : null;
   const frasi = (righe ?? []).map((r) => (effettoCompleto(r.effetto) ? fraseEffetto(r.effetto, nomi) : `${NOME_FAMIGLIA_EFFETTO[r.effetto.tipo]}: da completare`));
   const rangoAtteso = valore.tipo === 'confidente' && valore.rangoAtteso !== null ? `Rango atteso ${valore.rangoAtteso === RANGO_MASSIMO_CONFIDENTE ? 'MAX' : valore.rangoAtteso}` : null;
   const riepilogo = righe === undefined

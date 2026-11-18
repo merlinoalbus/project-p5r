@@ -127,6 +127,7 @@ const ANAGRAFICA: Record<string, Anagrafica> = {
   voce_giornata: paginaDi('Voce del diario', '/guida/percorso'),
   voce_effetto: paginaDi('Effetto di una voce del diario', '/guida/percorso'),
   voce_infiltrazione: paginaDi('Infiltrazione di una voce del diario', '/guida/percorso'),
+  voce_requisito_scorta: paginaDi('Persona richiesta in scorta di una voce del diario', '/guida/percorso'),
   voce_oggetto: paginaDi('Oggetto di una voce della guida', '/guida/oggetti'),
   regola_pesca: paginaDi('Regola di pesca', '/guida/attivita'),
   catalogo_oggetto: paginaDi('Oggetto del catalogo', '/guida/oggetti'),

@@ -54,6 +54,8 @@ import { fasciaDellaVoce } from './prezziArticoli.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { condizioniDaSalvare, condizioniDellaVoce, nonDovutePerGiorno, valutatoreEffettiCondizionati, valutatoreVociDovute, verificaVoceDovuta } from './voceDovuta.js';
+import { impostaRequisitoVoce, leggiRequisitiVoci, salvaRequisitiVoce, verificaRequisitiVoce } from './requisitiVoceService.js';
+import type { RequisitoVoceDto } from '../../shared/requisitiVoce.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -279,6 +281,8 @@ interface Contesto { fatte: Map<string, EffettiAzioneDto | null>;
   /** Le voci spuntate con la ricevuta illeggibile, col motivo (F3-1): risultano «da correggere». */
   illeggibili: Map<string, string>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz>;
   oggetti: ReturnType<typeof riferimentiOggettiPerFonti>;
+  /** I requisiti «da avere in scorta» delle voci (uid → elenco in ordine), letti una volta per la giornata; con la partita portano le caselle. */
+  requisiti: Map<string, RequisitoVoceDto[]>;
   /** La partita (L3: per l'infiltrazione che «Entra» apre). */
   partita?: number;
   /** L13 (O9-3): il motivo per cui una voce non è dovuta nella partita (null = dovuta), con lo stato letto una volta per la giornata. */
@@ -319,14 +323,14 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz'], fonte: StatoEffettiV
 }
 
 /**
- * R9-03: l'avviso di disponibilità di una voce d'incontro. Il Confidente è valutato al giorno e alla fascia della voce, con il rango che la voce
+ * R9-03: l'avviso di disponibilità di una voce d'incontro (tipo «confidente»: una scena di trama collegata a un Confidente non è un incontro e non avvisa). Il Confidente è valutato al giorno e alla fascia della voce, con il rango che la voce
  * porta (`rango_atteso`); il meteo non c'è (la voce non è un momento della partita), quindi la pioggia non produce avvisi. Solo un avviso,
  * mai un blocco; le voci non si spostano né si riscrivono. L13 (O10-2): `relazioneRomantica` è quella della partita, dalla mappa dei suoi
  * Confidenti (`ConfidentePartitaDto.relazioneRomantica`); vale solo per gli incontri dopo il rango della scelta romantica (`relazioneAlRango`);
  * senza partita non la sappiamo (null) e una fascia che dipende dalla relazione non avvisa.
  */
-export function avvisiDisponibilitaDellaVoce(r: Pick<RigaVoce, 'genere' | 'riferimento_tipo' | 'riferimento_chiave' | 'data' | 'fascia' | 'rango_atteso'>, relazioneRomantica: boolean | null = null): Pick<AzionePercorsoDto, 'avvisiDisponibilita'> {
-  if (r.genere !== 'azione' || r.riferimento_tipo !== 'confidente' || !r.riferimento_chiave) return {};
+export function avvisiDisponibilitaDellaVoce(r: Pick<RigaVoce, 'genere' | 'tipo' | 'riferimento_tipo' | 'riferimento_chiave' | 'data' | 'fascia' | 'rango_atteso'>, relazioneRomantica: boolean | null = null): Pick<AzionePercorsoDto, 'avvisiDisponibilita'> {
+  if (r.genere !== 'azione' || r.tipo !== 'confidente' || r.riferimento_tipo !== 'confidente' || !r.riferimento_chiave) return {};
   // la pioggia dei requisiti del rango la legge il verdetto (fonte unica), ma senza meteo non produce avvisi; un giorno del
   // calendario escluso (`date`) è un avviso di giorno come quello della settimana
   const esito = verdettoDelConfidente(r.riferimento_chiave, { data: r.data, fascia: fasciaDi(r), festivo: eGiornoFestivo(r.data), piove: false, rango: r.rango_atteso !== null ? r.rango_atteso - 1 : null,
@@ -444,8 +448,11 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   // L13 (O9-3): «Si fa solo se» e, nella partita, la voce non spuntata le cui condizioni sono false al suo giorno (una spuntata resta storia)
   const condizioni = spuntabile ? condizioniDellaVoce(r) : [];
   const motivoNonDovuta = condizioni.length > 0 && ctx.nonDovuta && !ctx.fatte.has(r.uid) ? ctx.nonDovuta(r) : null;
+  // i requisiti «da avere in scorta» (solo un'azione); con la partita, ognuno con la sua casella
+  const requisiti = spuntabile ? ctx.requisiti.get(r.uid) : undefined;
   return {
     ...v, validataConSpunte: voceValidataConSpunte(r), effettiVoce: fonte, ...(condizioni.length ? { condizioni } : {}), ...(motivoNonDovuta ? { nonDovuta: { motivo: motivoNonDovuta } } : {}),
+    ...(requisiti?.length ? { requisiti } : {}),
     ricevuteEffetti, ...(applicato.length ? { applicatoDallaSpunta: applicato } : {}), ...(statiNonApplicati.length ? { statiNonApplicati } : {}),
     ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
@@ -453,7 +460,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
       (s.tipo === 'turno' || s.tipo === 'lavoro') && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}),
     ...(yenAutomatici.length ? { yenAutomatici } : {}),
     ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
-    ...avvisiDisponibilitaDellaVoce(r, r.riferimento_tipo === 'confidente' && r.riferimento_chiave ? ctx.conf?.get(r.riferimento_chiave)?.relazioneRomantica ?? null : null),
+    ...avvisiDisponibilitaDellaVoce(r, r.tipo === 'confidente' && r.riferimento_tipo === 'confidente' && r.riferimento_chiave ? ctx.conf?.get(r.riferimento_chiave)?.relazioneRomantica ?? null : null),
     ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
     // L13 (decisione 4): a voce fatta, gli articoli segnati e quelli in alternativa aggiunti dopo la spunta (il riepilogo non nega un acquisto mai chiesto)
     // L13 (O10-5): e gli yen registrati dei turni, perché la riga del turno dica la ricevuta e non l'istruzione della spunta
@@ -803,16 +810,17 @@ export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<strin
     const nascoste = new Set(ingressiConclusiNascosti(partitaId).map((v) => v.uid));
     if (nascoste.size > 0) return vociDelGiorno(data, partitaId, conf).filter((v) => !nascoste.has(v.uid));
   }
-  const ctx = contestoDelDiario(leggiSpunte(partitaId, data), partitaId, conf);
+  const ctx = contestoDelDiario(leggiSpunte(partitaId, data), partitaId, { data }, conf);
   return righeDelGiorno(data).map((r) => voceDto(r, ctx));
 }
 
 /** Il contesto con cui si compone una voce: le spunte lette, i Confidenti (della partita, se non li ha già chi chiama), i dati di gioco dalla
- *  memoria (`datiDiGiocoDelDiario`) e i valutatori delle condizioni, che leggono lo stato della partita solo se una voce ha condizioni. */
-function contestoDelDiario(spunte: ReturnType<typeof leggiSpunte>, partitaId: number | undefined, conf?: Map<string, ConfidentePartitaDto> | null): Contesto {
+ *  memoria (`datiDiGiocoDelDiario`), i requisiti «da avere in scorta» (del giorno o della sola voce, con le caselle della partita) e i
+ *  valutatori delle condizioni, che leggono lo stato della partita solo se una voce ha condizioni. */
+function contestoDelDiario(spunte: ReturnType<typeof leggiSpunte>, partitaId: number | undefined, ambito: { data?: string; voceUid?: string }, conf?: Map<string, ConfidentePartitaDto> | null): Contesto {
   const gioco = datiDiGiocoDelDiario();
   return {
-    fatte: spunte.fatte, illeggibili: spunte.illeggibili,
+    fatte: spunte.fatte, illeggibili: spunte.illeggibili, requisiti: leggiRequisitiVoci(partitaId, ambito),
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
     nomi: gioco.nomi, quiz: gioco.quiz, partita: partitaId,
     oggetti: gioco.oggetti,
@@ -830,7 +838,16 @@ function contestoDelDiario(spunte: ReturnType<typeof leggiSpunte>, partitaId: nu
 export function voceDelGiorno(uid: string, partitaId?: number): AzionePercorsoDto {
   if (partitaId !== undefined) verificaPartita(partitaId);
   const r = rigaVoce(uid);
-  return voceDto(r, contestoDelDiario(leggiSpunte(partitaId, undefined, uid), partitaId));
+  return voceDto(r, contestoDelDiario(leggiSpunte(partitaId, undefined, uid), partitaId, { voceUid: uid }));
+}
+
+/**
+ * Spunta o toglie la casella di un requisito «da avere in scorta» della voce nella partita (`PUT /api/partite/:id/percorso/requisiti`) e risponde
+ * con la voce com'è ora. Un promemoria manuale, indipendente dalla scorta; idempotente (`impostaRequisitoVoce`).
+ */
+export function impostaRequisitoDellaVoce(partitaId: number, uid: string, arcana: string, persona: number | null, fatto: boolean): AzionePercorsoDto {
+  getDb().transaction(() => impostaRequisitoVoce(partitaId, uid, arcana, persona, fatto))();
+  return voceDelGiorno(uid, partitaId);
 }
 
 /** Per l'indice dei giorni: quante azioni (le voci che si spuntano) ha ogni giorno e quante sono fatte nella partita. */
@@ -921,7 +938,7 @@ interface TipoERiferimento { tipo: string; riferimentoTipo: string | null; rifer
  * L6-03: l'avviso (mai un rifiuto) per una voce il cui collegamento è di un genere diverso da quello che il suo tipo chiede
  * (`RIFERIMENTO_DI_TIPO`: un negozio su un lavoro, un film su una Dote). Solo per una coppia NUOVA: la creazione, o una modifica che cambia il
  * tipo o il collegamento. Una voce salvata senza cambiarli (le voci della guida con un collegamento di altro genere) non avvisa e il suo
- * collegamento resta identico. Un tipo senza collegamento proprio (`RIFERIMENTO_DI_TIPO` nullo: domanda, trama, Stanza di Velluto, altro) con un
+ * collegamento resta identico. Un tipo senza collegamento proprio (`RIFERIMENTO_DI_TIPO` nullo: domanda, Stanza di Velluto, altro) con un
  * collegamento è anch'esso fuori dalla coppia attesa; senza collegamento non c'è niente da dire.
  */
 function avvisoCollegamento(nuovo: TipoERiferimento, prima?: TipoERiferimento): string | undefined {
@@ -969,6 +986,8 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
       VALUES (?, ?, ?, 1000000, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, data, fascia, genere, azione, noteValide(d.note) ?? null, genere === 'azione' ? d.tipo ?? 'altro' : 'altro',
       riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento?.testo ?? null, d.rangoAtteso ?? null, adesso, adesso);
     if (condizioni) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
+    // i requisiti «da avere in scorta» (solo un'azione; 400 se non validi): con la voce già scritta, nella stessa transazione
+    if (d.requisiti !== undefined) salvaRequisitiVoce(uid, d.requisiti, genere);
     inizializzaEffettiVoce(uid, genere === 'azione' ? d.effettiVoce?.effetti.map(e => e.effetto) ?? produce ?? [] : [], 'utente');
     posiziona(data, fascia, uid, d.posizione);
   })();
@@ -1010,6 +1029,10 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
       riferimento === undefined ? r.riferimento_testo : riferimento?.testo ?? null, d.rangoAtteso === undefined ? r.rango_atteso : d.rangoAtteso,
       nowIso(), uid);
     if (condizioni !== undefined) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
+    // i requisiti «da avere in scorta»: l'elenco inviato sostituisce quello di prima (e toglie le caselle dei soli requisiti tolti, in tutte le
+    // partite); un'azione che diventa promemoria li perde, con le loro caselle (un promemoria non si spunta)
+    if (d.requisiti !== undefined) salvaRequisitiVoce(uid, d.requisiti, genere);
+    else if (genere !== 'azione' && genereDi(r) === 'azione') salvaRequisitiVoce(uid, [], genere);
     // L13 (decisione 2): con il collegamento ormai scritto, un effetto «yen» non sta accanto a un film, un'attività o una Richiesta che porta già i suoi yen
     if (riferimento !== undefined) verificaYenVoce(uid);
     if (fascia !== fasciaDi(r)) {
@@ -1072,6 +1095,8 @@ export function eliminaVoce(uid: string): string[] {
     const avvisi = preparaRimozioneEffettiVoce(uid, { annullaLegacy: annullaEffettiAzione });
     prepared('DELETE FROM voce_giornata WHERE uid = ?').run(uid);
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
+    // le caselle dei requisiti «da avere in scorta» in ogni partita (i requisiti stessi se ne vanno con la voce, per cascata)
+    prepared('DELETE FROM spunta_requisito_voce_partita WHERE voce_uid = ?').run(uid);
     revocaEventiDellaVoceInOgniPartita(uid); // R10-22 (N5): come togliendo la spunta, gli eventi legati alla voce non restano nello Storico
     // L3: l'insieme d'infiltrazioni e la proposta della voce se ne vanno con lei (la chiave è l'uid, senza vincolo)
     prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
@@ -1115,6 +1140,9 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       // L13 (O9-3, «in tal caso viene meno la consegna»): una voce non dovuta nella partita non si spunta (409 `voce-non-dovuta`, col motivo);
       // una già spuntata resta (sopra), e togliendole la spunta si annulla come sempre
       verificaVoceDovuta(partitaId, r);
+      // i requisiti «da avere in scorta»: la prima spunta vuole tutte le caselle spuntate (409 `requisiti-incompleti`); l'annullo e una
+      // spunta già presente (sopra) non li controllano mai
+      verificaRequisitiVoce(partitaId, uid);
       // R10-22: gli eventi che i setter scrivono mentre la spunta applica i suoi effetti portano il legame con la voce e si revocano togliendola
       const { effettiLegacy: effetti, avvisi } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
         applicaLegacy: (id, produce: EffettoLegacyVoce[], scelte) => applicaEffettiAzione(id, { ...v, produce, scelte, invito: haInvitoDelConfidente(uid, v.riferimento), voceUid: uid, ordineVoce: r.ordine, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
