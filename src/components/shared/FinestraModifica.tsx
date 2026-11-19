@@ -42,6 +42,12 @@ interface Props {
   /** Un `aria-label` più preciso del titolo per il modulo (lettori di schermo). */
   nomeModulo?: string;
   /**
+   * Finestra ancorata in alto e di altezza fissa (sul telefono il foglio alto quanto lo schermo): per le finestre in cui si tocca ripetutamente
+   * una griglia che cambia il contenuto («Da avere in scorta»). Centrata e alta quanto il contenuto, la finestra cresceva a ogni tocco e il
+   * suo bordo superiore risaliva, portando le tessere via da sotto il dito. Le altre finestre non cambiano.
+   */
+  ancorata?: boolean;
+  /**
    * L13 (ondata 4a): i dati da modificare non sono ancora arrivati. La finestra è già QUESTA (stesso titolo, stesso piè, «Salva» spento) e
    * mostra «Un attimo…» al posto del corpo, o l'errore se la lettura non è riuscita: quando i dati arrivano cambia solo il corpo, la
    * finestra non si smonta e non si rimonta (prima un guscio di caricamento a parte spariva e ne nasceva un'altra, col fuoco perso).
@@ -54,7 +60,7 @@ interface Props {
 }
 
 /** Una finestra di modifica: titolo, corpo a sezioni che scorre, piè fisso con Elimina / Annulla / Salva. */
-export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Salva', salvabile = true, occupato = false, sporca = false, onElimina, titoloElimina = 'Elimina', azioniExtra, stretta, nomeModulo, caricamento = false, erroreCaricamento = null, errore = null, children }: Props) {
+export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Salva', salvabile = true, occupato = false, sporca = false, onElimina, titoloElimina = 'Elimina', azioniExtra, stretta, nomeModulo, ancorata = false, caricamento = false, erroreCaricamento = null, errore = null, children }: Props) {
   const inAttesa = caricamento || !!erroreCaricamento;
   /** Chiude, chiedendo conferma se ci sono modifiche non salvate (non durante un salvataggio). */
   const chiudi = async () => {
@@ -77,7 +83,7 @@ export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Sal
         <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={titoloSalva} disabled={occupato || !salvabile || inAttesa} onClick={() => void onSalva()} />
       </div>
     )}>
-      <form className="finestra-modifica" aria-label={nomeModulo ?? titolo} onSubmit={invia}>
+      <form className={`finestra-modifica ${ancorata ? 'finestra-modifica--ancorata' : ''}`} aria-label={nomeModulo ?? titolo} onSubmit={invia}>
         {erroreCaricamento ? <p role="alert" className="m-0 text-error-testo">{erroreCaricamento}</p> : caricamento ? <p role="status" className="m-0">Un attimo…</p> : children}
       </form>
     </Modal>

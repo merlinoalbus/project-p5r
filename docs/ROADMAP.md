@@ -40,8 +40,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
   spunta, ricevute della spunta.
 - Requisiti «da avere in scorta» di una voce (arcani o Persona specifiche, con la casella manuale per partita che condiziona la prima
   spunta): l'elenco si compone nell'editor della voce e le caselle stanno nella scheda della voce (`requisitiVoceService.ts`,
-  `PUT /partite/:id/percorso/requisiti`); le cinque voci della Stanza di Velluto che li elencavano a testo (23/4, 27/5, 2/6, 8/6, 21/6) sono
-  convertite. Le altre voci con arcani a testo (equipaggiare o creare una Persona, non averla in scorta) si convertono a richiesta.
+  `PUT /partite/:id/percorso/requisiti`); gli elenchi li ha composti l'utente in produzione (48 requisiti su 8 voci, dal 23/4 al 28/6) e il
+  pacchetto, rifatto dalla produzione, li porta. Le altre voci con arcani a testo (equipaggiare o creare una Persona, non averla in scorta) si convertono a richiesta.
 - Modifica completa delle voci; copia, taglio e incolla (anche fra giorni) e appunti fissi nella preparazione, raggruppati in categorie
   apribili e riordinati trascinando. Nella finestra della voce la griglia di «Quale» e l'editor «Si fa solo se» si aprono in finestre
   loro, e il corpo della voce resta sotto gli 800 px a 1280.
@@ -233,7 +233,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
   jsx-a11y): la correzione c'è solo nella 11, una versione maggiore che ESLint 10 e typescript-eslint non accettano ancora; da riprendere
   quando la accetteranno.
 - Edizione di rilascio con schema partite 70: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
-  copia e col sì dell'utente; finché resta l'edizione attuale il rilascio funziona.
+  copia e col sì dell'utente, fino alla 74; dalla 74 alla 75 lo porta da solo l'avvio del rilascio (passaggio additivo). Finché resta
+  l'edizione attuale il rilascio funziona.
 - Da L11-04, orfani reali sulla copia della produzione del 01/11 (letti, nessuna correzione fatta): 106 ricevute delle spunte e 13 proposte
   personali citano voci del Diario che non ci sono più (riferimenti già controllati prima), e con i riferimenti nuovi 24 + 27 righe del
   censimento degli stati e 6 movimenti automatici di yen. Sono fotografie di voci eliminate: l'anteprima dell'«Importa» ora le elenca.
@@ -271,9 +272,6 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
 - Caricare nell'istanza di preparazione le 4 illustrazioni delle attività nuove (`docs/grafica/asset-generati/2026-10-29/attivita/`:
   estrazione della lotteria, concimare la pianta, fabbricazione degli strumenti, fabbricazione di Kawakami) con
   `PUT /api/immagini/attivita/<chiave>`; poi la cartella si toglie dal repository.
-- Generare le figure nuove con i prompt di `docs/grafica/prompt-immagini.md` §30–§34 (ordine e priorità in testa alla sezione, registro
-  in `docs/grafica/fabbisogno.md`): 14 da generare ora (6 stati vuoti ed errori §33, 3 segni §31, 4 intestazioni §34, più
-  `segno-scorta-pronta` §30, che è a priorità bassa: 6+3+4+1 = 14) e 10 rimandati (2 segni di §30, 6 sigilli §32, 2 intestazioni §34).
-- Stati vuoti, errori e intestazioni (§33–§34) sono agganciati nel codice con ripiego: le figure compaiono da sole appena sono nel database
-  con `PUT /api/immagini/illustrazioni/<chiave>` (registro in `docs/grafica/fabbisogno.md`). `intestazione-home` e `intestazione-partita` non si
-  collegano (misura del 2026-11-18: costano spazio a schermate di lavoro).
+- Caricare nell'istanza di preparazione le 10 illustrazioni di stato e d'intestazione (`docs/grafica/asset-generati/2026-11-18/illustrazioni/`:
+  6 stati vuoti ed errori §33, 4 intestazioni §34) con `PUT /api/immagini/illustrazioni/<chiave>`; il codice è già collegato e le mostra appena
+  sono nel database (registro in `docs/grafica/fabbisogno.md`).

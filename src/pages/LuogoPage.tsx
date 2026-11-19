@@ -111,7 +111,7 @@ export function LuogoPage() {
   };
 
   return (
-    <PageState isLoading={dati.caricamento && !l} error={dati.errore} onRetry={() => void dati.ricarica()}
+    <PageState carica={dati}
       scheda={{ titolo: 'Luogo', ripiego: quartiere ? `/guida/citta/${encodeURIComponent(quartiere)}` : '/guida/citta' }}>
       {l && (() => {
         const nonAncora = l.presenza?.sbloccato === false;

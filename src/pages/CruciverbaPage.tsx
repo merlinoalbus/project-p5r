@@ -147,7 +147,7 @@ export function CruciverbaPage() {
     setTimeout(() => document.getElementById(ancoraGiorno(prossimo.giorno))?.scrollIntoView({ behavior: comportamentoScorrimento(), block: 'start' }), 0);
   };
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Cruciverba di Leblanc" sottotitolo={<>{d.totale} cruciverba sul tavolo di Leblanc (la sera, senza consumare tempo): ogni risposta esatta vale Conoscenza <Note n={1} />.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.risolti} risolti.` : ' Attiva una partita per spuntare quelli risolti.'}</>} />

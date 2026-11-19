@@ -113,7 +113,7 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
     for (const k of ['scheda', 'gruppo', 'categoria', 'per', 'ordine']) dopo.delete(k);
     return dopo;
   }, { replace: true });
-  return <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
+  return <PageState carica={dati}>
     <section className="flex min-w-0 flex-col gap-2" aria-label="Catalogo degli oggetti">
       <div className="flex flex-wrap items-center gap-2">
         <CampoRicerca className="max-sm:basis-full" valore={q} onCambia={(v) => cambia('q', v)} segnaposto="Cerca per nome o effetto…" />

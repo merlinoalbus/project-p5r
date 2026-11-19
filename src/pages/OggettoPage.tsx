@@ -93,7 +93,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
   const cartolina = o?.chiave === CARTOLINA;
   const altriDestinatari = (o?.partita?.destinatari ?? []).filter((d) => !graditi.some((r) => r.confidente === d.confidente));
   const gruppiConsegne = raggruppaConsegne(o?.partita?.consegne ?? [], (x) => ({ chiave: x.confidente, nome: x.nomeConfidente, casa: `/confidenti/${encodeURIComponent(x.confidente)}` }));
-  return <PageState isLoading={dati.caricamento && !o} error={dati.errore} onRetry={() => void dati.ricarica()} scheda={{ titolo: 'Oggetto', ripiego: '/guida/oggetti' }}>
+  return <PageState carica={dati} scheda={{ titolo: 'Oggetto', ripiego: '/guida/oggetti' }}>
     {o && <div className="flex min-w-0 flex-col gap-3">
       {/* Lotto B (punto 6): «Modifica | Elimina» venivano prima di che cosa fa l'oggetto; ora stanno nel menu «Modifica ⋯» dell'intestazione */}
       <IntestazioneScheda ripiego="/guida/oggetti" titolo={o.nome} chip={<span className="chip">{CATEGORIA_OGGETTO[o.categoria].nome}</span>}

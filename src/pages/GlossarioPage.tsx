@@ -24,7 +24,8 @@ const idTermine = (chiave: string) => `elemento-${slug(chiave)}`;
 /** Glossario italiano ↔ inglese dei termini di gioco, con ricerca e filtro per categoria. */
 export function GlossarioPage() {
   useDocumentTitle('Glossario');
-  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getTermini(), [], { cacheUrl: URL_TERMINI });
+  const glossario = useCarica(() => getTermini(), [], { cacheUrl: URL_TERMINI });
+  const { dati } = glossario;
   // L10-04: ricerca e categoria nell'indirizzo (`?q=…&categoria=…`; `elemento` è già della ricerca globale, qui sotto)
   const { valori: { q, categoria: categoriaChiesta }, imposta } = useFiltriIndirizzo({ q: '', categoria: '' });
   // `?elemento=<chiave>` (la «casa» di un termine nella ricerca globale) porta in vista il termine e lo evidenzia
@@ -69,7 +70,7 @@ export function GlossarioPage() {
           ))}
         </div>
       </div>
-      <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
+      <PageState carica={glossario}>
         {dati && dati.length === 0 ? (
           <EmptyState title="Glossario non ancora disponibile" hint="Questa versione dei dati di gioco non contiene i termini del glossario." />
         ) : filtrati.length === 0 ? (

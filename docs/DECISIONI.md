@@ -96,23 +96,18 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 
 ## 3. Persistenza, pacchetto e istanze
 - **Niente migrazioni: i due file si aprono alla versione attesa, con un solo passaggio additivo dalla precedente**. `gioco.db` e
-  `partite.db` portano ciascuno la propria versione (`PRAGMA user_version`), e il codice ne legge una sola per file:
-  `VERSIONE_GIOCO` e `VERSIONE_PARTITE` in `server/db/versioneSchema.ts`. Un file di un'altra versione fa fermare l'avvio, con un
-  messaggio che dice quale file e che cosa fare; «Importa», l'anteprima, il ripristino, l'edizione di rilascio e gli script lo
-  rifiutano, la versione precedente compresa. I dati non si convertono mai.
-  **Unica eccezione, deliberata e in un solo punto** (`server/db/passaggioVersione.ts`, chiamato dall'avvio della preparazione): un
-  file dell'istanza alla versione IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove (tabelle e indici mancanti, con il testo
-  di creazione identico a quello dei file del pacchetto), così una versione rilasciata parte sui dati già in produzione senza
-  intervento a mano. Il passaggio è additivo (non modifica né toglie niente), idempotente (un file alla versione attesa non si tocca e
-  non scrive nel log) e in una transazione con la nuova versione. Il file delle partite (piccolo, insostituibile) è preceduto da una
-  copia di sicurezza in `data/backups` (`prima-del-passaggio-partite-<versione>-<momento>.db`, un nome fuori dalla rotazione delle copie
-  periodiche, da togliere a mano quando non serve più); il file dei dati di gioco no (è grande per le immagini e riceve solo strutture
-  vuote, in una transazione). Se la copia non riesce, o una struttura esiste già, l'avvio si ferma senza scrivere. Dopo il passaggio
-  un'immagine dell'app della versione precedente non riparte sui file passati: serve ripristinare la copia delle partite e togliere le
-  strutture aggiunte. Ogni futuro cambio di struttura porta lo stesso passaggio additivo nello stesso
-  cambiamento che alza la costante, e toglie quello della versione prima.
-  **I dati non vengono convertiti**: ciò che il passaggio crea nasce vuoto. Le cinque voci della Stanza di Velluto in produzione
-  restano a testo finché l'utente non compone il loro elenco nell'editor; il pacchetto per le istanze nuove le ha già convertite.
+  `partite.db` portano ciascuno la propria versione (`PRAGMA user_version`); il codice ne legge una per file (`VERSIONE_GIOCO` e
+  `VERSIONE_PARTITE` in `server/db/versioneSchema.ts`) e un file di un'altra versione fa fermare l'avvio, con un messaggio che dice
+  quale file e che cosa fare. L'unica eccezione è `server/db/passaggioVersione.ts`, chiamato solo dai due avvii: un file alla versione
+  IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove, con il testo di creazione identico a quello dei file distribuiti
+  (`pacchetto/`; nel rilascio, che non ha il pacchetto, il `partite-vuoto.db` dell'edizione). Additivo (non modifica, non toglie, non
+  converte: ciò che crea nasce vuoto), idempotente, in una transazione con la nuova versione. La preparazione lo applica ai due file, il
+  rilascio solo a `partite.db` (il suo `gioco.db` è l'edizione, in sola lettura, già alla versione del codice). Prima di toccare le partite
+  se ne fa una copia di sicurezza nella cartella delle copie (`prima-del-passaggio-partite-<versione>-<momento>.db`, fuori dalla rotazione,
+  da togliere a mano); se non riesce, o una struttura esiste già, l'avvio si ferma senza scrivere. Dopo il passaggio un'immagine della
+  versione precedente non riparte sui file passati. «Importa», l'anteprima, il ripristino, «Prepara edizione» e gli script accettano solo
+  la versione attuale: **i backup di prima del passaggio (dati di gioco 390, partite 74) non si importano né si ripristinano più**. Ogni
+  cambio di struttura porta il suo passaggio nello stesso cambiamento che alza la costante, e toglie quello della versione prima.
   L'avanzamento (`partite.db`) si copia da solo all'avvio e ogni 6 ore in `data/backups` (le ultime 40); `gioco.db` si salva dal
   backup dell'istanza. Un'istanza nuova nasce dal pacchetto: `pacchetto/gioco.db` per i dati di gioco (senza immagini) e
   `pacchetto/partite-vuoto.db` per il file delle partite. Un cambio di struttura o di dati aggiorna nello stesso cambiamento le due
@@ -141,8 +136,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   blocca niente, e non c'è un controllo in CI.
 - **Due istanze dallo stesso codice**: preparazione (scrittura dei contenuti, un solo proprietario) e rilascio (contenuti in sola lettura,
   partite per utente). La modalità è fissata nella build (punto d'avvio `server/rilascio.ts`, `VITE_MODALITA=rilascio`), mai in una
-  variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non converte i dati, non esegue il passaggio additivo e si ferma se l'edizione non
-  coincide con il manifesto.
+  variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non converte i dati, porta il solo `partite.db` dalla versione
+  immediatamente precedente col passaggio additivo e si ferma se dopo il passaggio l'edizione non coincide con il manifesto.
 - **Provenienza dei dati nel rilascio (D10, 01/11)**: chi gioca non vede da dove viene un dato né le note per chi lo corregge (collegamenti
   alle fonti, «da fonte secondaria», «Da verificare» delle aree, incertezze delle fonti, provenienze degli esiti della negoziazione,
   affidabilità delle regole), né i comandi di chi prepara i contenuti. Le fonti (guida italiana di allgamestaff, meteo di wikiwiki.jp,
@@ -454,10 +449,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   scorta»); l'annullo è sempre libero, le caselle restano com'erano togliendo la spunta, e una voce già spuntata non si rompe se dopo
   le si aggiunge un requisito. Togliere un requisito dall'elenco cancella la sua casella in tutte le partite; un'azione che diventa
   promemoria perde l'elenco; eliminare la voce cancella anche le caselle (il Cestino le rimette con lei). La copia di una voce copia i
-  requisiti, mai le caselle. Le cinque voci della Stanza di Velluto che lo scrivevano a parole nelle note (23 aprile, 27 maggio, 2, 8 e 21
-  giugno) hanno l'elenco strutturato, 25 requisiti in tutto, e le note senza l'elenco (resta di 27 maggio «Per Fede puoi provare ad
-  evocare una Fenice.»); il 23 aprile cita le Persona Agathion, Mandrake, Berith e Pixie, le altre gli arcani interi. L'edizione di
-  rilascio va rifatta per portare la struttura (versione 391 dei dati di gioco, 75 delle partite).
+  requisiti, mai le caselle. Gli elenchi li compone l'utente nell'editor della voce, nell'istanza di produzione; il pacchetto è rifatto da
+  lì e li porta così (48 requisiti su 8 voci, dal 23 aprile al 28 giugno: sei della Stanza di Velluto, una di Palazzo e una di
+  Confidente; il 23 aprile con quattro Persona specifiche, le altre con arcani interi). L'edizione di rilascio va rifatta per portare
+  i dati di gioco alla versione 391; le partite del rilascio passano da sole dalla 74 alla 75.
 - Nella finestra della voce «Quale» e «Si fa solo se» sono una riga ciascuno; la griglia di «Quale» e l'editor delle condizioni si aprono
   in una finestra loro, larga quanto quella della voce, così il corpo della voce sta sotto gli 800 px a 1280 qualunque sia l'elenco o il
   numero delle condizioni. Scegliere un tipo che si collega apre da sé la griglia; toccare una tessera sceglie e la chiude. «Applica» mette le condizioni
@@ -465,8 +460,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Il tipo della voce decide a che cosa si collega (`RIFERIMENTO_DI_TIPO` in `shared/effettiAzione.ts`); domanda/esame, Stanza di Velluto e
   Altro non si collegano a niente. Una voce «Trama» può collegarsi a un Confidente quando l'evento di storia riguarda l'interazione con lui:
   il collegamento è facoltativo (`COLLEGAMENTO_FACOLTATIVO`: nessun «Scegli il Confidente», la griglia non si apre da sola) e non produce
-  incontro, rango atteso, note né avviso di disponibilità, che restano del solo tipo «Confidente»; la scheda del Confidente e i suggerimenti
-  della voce la leggono come ogni collegamento.
+  incontro, note né avviso di disponibilità, e non ha rango atteso (il server rifiuta un rango inviato con una trama, 400
+  `rango-non-per-trama`, e una voce che diventa trama perde il suo). L'avviso di disponibilità resta per ogni altra voce collegata a un
+  Confidente, di qualunque tipo (incontro, Stanza di Velluto con Igor o le Gemelle e il rango atteso, Palazzo, acquisto); la scheda del
+  Confidente e i suggerimenti della voce leggono la trama come ogni collegamento.
 - Un effetto della voce può dichiarare quando vale («Vale solo se»), con lo stesso vocabolario e lo stesso valutatore, allo stato della
   partita al giorno della voce: solo yen, oggetto ricevuto, Persona, trofeo e sblocco. Con la condizione falsa l'effetto non si applica, non
   diventa proposta e nella partita non si mostra; fuori dalla partita «Il gioco dà» lo dice con «Solo se». La condizione si legge alla

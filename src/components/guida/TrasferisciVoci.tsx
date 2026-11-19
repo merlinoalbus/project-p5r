@@ -80,7 +80,7 @@ function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onC
   };
   return (
     <Modal titolo={`${verbo} ${quanteVoci(voci.length)} in un altro giorno`} aperta onChiudi={onChiudi}>
-      <PageState isLoading={indice.caricamento && !indice.dati} error={indice.errore} onRetry={() => void indice.ricarica()}>
+      <PageState carica={indice}>
         <div className="flex flex-col gap-3 testo-13">
           <p className="m-0 text-text-secondary">
             {quanteVoci(voci.length)} {diGiorno > 0 && diGiorno < voci.length ? `(${diGiorno} di giorno, ${voci.length - diGiorno} di sera)` : diGiorno === voci.length ? 'di giorno' : 'di sera'} {dataGiocoConArticolo(giorno, 'di')}.{' '}

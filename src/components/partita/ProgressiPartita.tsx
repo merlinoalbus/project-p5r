@@ -170,7 +170,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   })();
 
   return (
-    <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
+    <PageState carica={dati} isLoading={dati.inPrimoCaricamento && !p}>
       {p && (
         <div className="progressi-struttura">
           {/* L6-01: le quattro tessere sono schede con le frecce (Inizio e Fine, Tab sulla tessera aperta); le tessere restano quelle di prima */}

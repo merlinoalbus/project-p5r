@@ -119,7 +119,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca chiave o testo…" />
         <button type="button" className={`chip touch ${soloUtente ? 'chip--attivo' : ''}`} onClick={() => { setSoloUtente((v) => !v); setQRichiesta(q); }} aria-pressed={soloUtente}>Solo modificate</button>
       </div>
-      <PageState isLoading={voci.inPrimoCaricamento} error={voci.errore} onRetry={() => void voci.ricarica()}>
+      <PageState carica={voci}>
         {/* L'elenco scorre con la pagina, non in un riquadro suo (L13: era uno scroll dentro lo scroll, 1991 px in 411/485). Nessun tetto: l'ambito più grande, gli effetti delle skill, ha oggi 512 voci */}
         <ul className="m-0 p-0 list-none divide-y divide-border-light">
           {mancante && (

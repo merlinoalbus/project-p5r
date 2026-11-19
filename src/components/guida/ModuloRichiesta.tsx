@@ -144,7 +144,7 @@ function ModuloRichiestaReale({ chiave, iniziale = {}, onChiudi, onCambiata }: P
   if (!dati.dati || !altri.dati || (chiave && !richiesta)) {
     return (
       <Modal titolo={titolo} aperta onChiudi={onChiudi} larga>
-        <PageState isLoading={(dati.caricamento && !dati.dati) || (altri.caricamento && !altri.dati)} error={dati.errore ?? altri.errore} onRetry={() => { void dati.ricarica(); void altri.ricarica(); }}>
+        <PageState carica={[dati, altri]}>
           {dati.dati && altri.dati && <p className="m-0 testo-13 text-text-muted" role="status">Questa Richiesta non c’è più.</p>}
         </PageState>
       </Modal>

@@ -39,7 +39,7 @@ export function DungeonPage() {
   const dati = useCarica(async () => soloPalazzi(await getDungeons(attiva?.id)), [attiva?.id]);
   const sugg = useSuggerimenti();
   return (
-    <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {dati.dati && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Palazzi" illustrazione="illustrazioni/intestazione-luoghi" sottotitolo="Infiltrazioni e punti di interesse di ogni Palazzo; con una partita segni ciò che hai ottenuto. Iweleth è un dedalo dei Memento."

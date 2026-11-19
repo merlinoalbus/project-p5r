@@ -159,7 +159,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
     </li>;
   };
 
-  return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+  return <PageState carica={dati}>
     {d && <CatalogoDaCompletare
       soloChiave={soloChiave}
       intestazione={<IntestazionePagina titolo="Libri" sottotitolo={partitaId

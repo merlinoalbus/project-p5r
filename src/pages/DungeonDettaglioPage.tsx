@@ -521,7 +521,7 @@ export function DungeonDettaglioPage() {
   };
 
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}
+    <PageState carica={dati}
       scheda={{ titolo: chiave === 'mementos' ? 'Memento' : 'Palazzo', ripiego: '/guida/dungeon' }}>
       {d && area && (
         // **Da 1024 px il Palazzo sta in una schermata** (richiesta dell'utente, 2026-09-29): «componenti che

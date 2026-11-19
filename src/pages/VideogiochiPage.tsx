@@ -124,7 +124,7 @@ export function VideogiochiPage() {
   const griglia = 'm-0 grid list-none grid-cols-1 gap-3 p-0 md:grid-cols-2 xl:grid-cols-3';
 
   return (
-    <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {dati.dati && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Videogiochi"

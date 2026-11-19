@@ -46,7 +46,8 @@ const RigaSkill = memo(function RigaSkill({ s }: { s: SkillRiassuntoDto }) {
 export function SkillPage() {
   useDocumentTitle('Skill');
   const glossario = useGlossarioStore((s) => s.glossario);
-  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
+  const catalogoSkill = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
+  const { dati } = catalogoSkill;
   // L10-04: ricerca ed elemento nell'indirizzo (`?q=…&elemento=…`): tornando da una skill il filtro c'è ancora, e si condivide
   const { valori: { q, elemento }, imposta } = useFiltriIndirizzo({ q: '', elemento: '' }, { elemento: ORDINE_ELEMENTI_SKILL });
 
@@ -90,7 +91,7 @@ export function SkillPage() {
         ))}
       </FilaScorrevole>
 
-      <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
+      <PageState carica={catalogoSkill}>
         {filtrate.length === 0 ? (
           <EmptyState illustrazione="vuoto-ricerca" title="Nessuna skill corrisponde alla ricerca" />
         ) : (

@@ -150,7 +150,7 @@ function rilieviDiData(effetti: ReadonlyArray<{ uid: string; effetto: EffettoVoc
   return out;
 }
 
-/** Il rilievo di disponibilità di una voce di Confidente nel giorno e nella fascia di destinazione (lo stesso avviso della voce). */
+/** Il rilievo di disponibilità di una voce collegata a un Confidente (non di trama) nel giorno e nella fascia di destinazione (lo stesso avviso della voce). */
 function rilieviDiDisponibilita(r: Pick<RigaVoce, 'genere' | 'tipo' | 'riferimento_tipo' | 'riferimento_chiave' | 'rango_atteso'>, giorno: string, fascia: FasciaGioco, voceIndice: number, azione: string): RilievoIncolla[] {
   const avvisi = avvisiDisponibilitaDellaVoce({ ...r, data: giorno, fascia }).avvisiDisponibilita ?? [];
   return avvisi.map((a) => ({ codice: 'disponibilita' as const, gravita: 'conferma' as const, voceIndice, testo: `«${breve(azione)}» ${nomeFascia(fascia)} del ${giornoTesto(giorno)}: ${a.testo}` }));
@@ -361,7 +361,9 @@ function inserisciCopia(
   // rilievo `riferimento-non-valido` lo dice prima)
   prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, indice_guida, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, giorno, fascia, ordine, v.genere, v.azione.trim(), v.note === null || v.note.trim() === '' ? null : v.note,
-    v.genere === 'azione' ? v.tipo : 'altro', riferimento?.tipo ?? null, riferimento?.chiave ?? null, v.riferimentoTesto, v.rangoAtteso, adesso, adesso);
+    v.genere === 'azione' ? v.tipo : 'altro', riferimento?.tipo ?? null, riferimento?.chiave ?? null, v.riferimentoTesto,
+    // una trama non ha rango atteso (`rangoDaSalvare` di `giornataService`): neanche la sua copia
+    v.genere === 'azione' && v.tipo === 'trama' ? null : v.rangoAtteso, adesso, adesso);
   // L13 (O9-3): la copia porta «Si fa solo se» (le stesse verifiche del modulo della voce: 400 se una condizione non si riconosce)
   const condizioni = condizioniDaSalvare(v.condizioni, v.genere);
   if (condizioni) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);

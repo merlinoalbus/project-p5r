@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMeteoStore } from '../stores/meteoStore';
 import { getPercorsoGiorno, getPercorsoIndice, impostaFasciaGioco, impostaGiornoCorrente, impostaMeteoGiorno } from '../services/api';
 import type { MeteoPartita } from '../../shared/meteoPartita';
-import { useCarica, type CausaErrore } from './useCarica';
+import { causaTransitoria, useCarica, type CausaErrore } from './useCarica';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useSuggerimentiStore } from '../stores/suggerimentiStore';
@@ -86,7 +86,7 @@ export function useOggi(partitaId: number): Oggi {
   const indice = useCarica(() => getPercorsoIndice(partitaId), [partitaId]);
   const [dataScelta, setDataScelta] = useState<string | null>(null);
   // lettura fallita per la rete o per il server: si mostra l'ultima buona di questa partita (se c'è), col suo orario
-  const indiceVecchio = indice.dati === null && indice.errore !== null && indice.causaErrore !== null ? ultimiIndici.get(partitaId) ?? null : null;
+  const indiceVecchio = indice.dati === null && indice.errore !== null && causaTransitoria(indice.causaErrore) ? ultimiIndici.get(partitaId) ?? null : null;
   const datiIndice = indice.dati ?? indiceVecchio?.dati ?? null;
   const data = dataScelta ?? datiIndice?.dataCorrente ?? datiIndice?.giorni[0]?.giorno ?? null;
   // il meteo segnato dalla finestra del cambio di giorno (`MeteoAlCambioGiorno`) cambia la giornata mostrata: si rilegge
@@ -116,7 +116,7 @@ export function useOggi(partitaId: number): Oggi {
   const [occupato, setOccupato] = useState(false);
   // la fascia vive nella partita dello store: cambiandola si ricaricano da sole mappa incorporata, negozi e articoli
   const fascia = usePartitaStore((s) => (s.attiva?.id === partitaId ? s.attiva.fasciaGioco ?? 'giorno' : 'giorno'));
-  const giornoVecchio = giorno.dati === null && giorno.errore !== null && giorno.causaErrore !== null && data ? ultimiGiorni.get(chiaveGiorno(partitaId, data)) ?? null : null;
+  const giornoVecchio = giorno.dati === null && giorno.errore !== null && causaTransitoria(giorno.causaErrore) && data ? ultimiGiorni.get(chiaveGiorno(partitaId, data)) ?? null : null;
   const g = giorno.dati ?? giornoVecchio?.dati ?? null;
   // una lettura buona si ricorda per la prossima volta che la rete manca
   const letturaIndice = indice.dati;

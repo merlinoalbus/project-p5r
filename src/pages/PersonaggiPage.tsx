@@ -103,7 +103,7 @@ export function PersonaggiPage() {
   // `?elemento=<chiave>` (la «casa» di un personaggio nella ricerca globale) porta in vista la carta e la evidenzia
   useElementoDaIndirizzo(!!d);
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Personaggi" sottotitolo="Il cast di Persona 5 Royal presentato senza spoiler: chi sono, il loro ruolo, le Persona, le armi e il ruolo in battaglia; ogni Confidente rimanda alla sua scheda con risposte e abilità." />

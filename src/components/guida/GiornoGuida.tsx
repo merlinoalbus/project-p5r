@@ -422,8 +422,9 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
             ))}
           </ul>
         )}
+        {/* una fascia vuota in un giorno che ha voci nell'altra lo dice; nel giorno senza voci lo dice una volta sola la scheda del giorno, qui sopra */}
         {scelte ? (voci.length === 0 && <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} da scegliere.</p>) : voci.length === 0
-          ? <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno{IN_RILASCIO ? '.' : ': con «Aggiungi» metti una cosa da fare o un promemoria.'}</p>
+          ? g.azioni.length > 0 && <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno{IN_RILASCIO ? '.' : ': con «Aggiungi» metti una cosa da fare o un promemoria.'}</p>
           : (
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
               {voci.map((v, i) => eEvento(v)
@@ -498,9 +499,15 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           : (g.trama ? <p className={`m-0 ${tramaLunga && !tramaIntera ? (inAlto ? 'line-clamp-1' : 'line-clamp-2') : ''}`}>{g.trama}</p> : <p className="m-0 text-text-muted">Nessun evento di trama annotato.</p>)}
         {(!inAlto || tramaIntera) && g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
         {(!inAlto || tramaIntera) && g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary-testo">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
-        {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
-        {/* il giorno senza voci o non coperto: la figura, se c'è (`vuoto-giornata`), una sola volta e fuori dalla Home (lì lo spazio è contato) */}
-        {!inAlto && (!g.coperto || g.azioni.length === 0) && <FiguraVuoto illustrazione="vuoto-giornata" className="self-start" />}
+        {/* Il giorno senza voci lo dice una volta sola, qui: la figura (`vuoto-giornata`, se c'è; non nella Home, dove lo spazio è contato) e una
+            frase sulla stessa riga; le due fasce restano con «Aggiungi» e senza frase propria. Il perché di un giorno non coperto lo dice già la
+            trama del giorno, quindi qui non si ripete. */}
+        {g.azioni.length === 0 && (
+          <div className="flex items-center gap-3 sm:gap-4">
+            {!inAlto && <FiguraVuoto illustrazione="vuoto-giornata" />}
+            <p className="m-0 min-w-0 text-text-muted">{g.coperto ? 'Nessuna voce in questo giorno' : 'Nessuna azione consigliata'}{IN_RILASCIO ? '.' : ': con «Aggiungi» metti una cosa da fare o un promemoria.'}</p>
+          </div>
+        )}
         {!inAlto && fonte}
       </section>
       {/* copiare o spostare voci in un altro giorno (2026-10-12): la scelta a caselle, per chi non usa il mouse; con voci già selezionate

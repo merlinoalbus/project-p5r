@@ -55,7 +55,7 @@ function ModuloPersonaReale(props: Props) {
   if (!persone.dati) {
     return (
       <Modal titolo={titolo} aperta onChiudi={onChiudi}>
-        <PageState isLoading={persone.caricamento} error={persone.errore} onRetry={() => void persone.ricarica()}>{null}</PageState>
+        <PageState carica={persone}>{null}</PageState>
       </Modal>
     );
   }

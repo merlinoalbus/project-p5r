@@ -82,6 +82,8 @@ function nomeDi(rif: NonNullable<CampiStrutturati['riferimento']>, elenchi: Elen
 }
 /** Il nome dell'elemento collegato, dagli elenchi. */
 const nomeCollegato = (valore: CampiStrutturati, elenchi: ElenchiVoce): string | null => (valore.riferimento ? nomeDi(valore.riferimento, elenchi) : null);
+/** Titolo e sottotitolo del collegamento facoltativo della Trama. */
+const TESTI_FACOLTATIVO = { titolo: 'Personaggio coinvolto (facoltativo)', sottotitolo: 'Solo per ritrovare l’evento con quel personaggio: non cambia il rango.' };
 const nomeGenere = (tipo: string): string => TIPI_RIFERIMENTO_AZIONE.find((g) => g.chiave === tipo)?.nome.toLowerCase() ?? tipo;
 
 /**
@@ -151,7 +153,9 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi, parte = 'tutto', qu
       )}
       {tq && (
         <SceltaQuale tipo={tq} elenchi={elenchi.azione} valore={rif && rif.tipo === tq ? rif.chiave : ''} soloTurni={valore.tipo === 'lavoro'}
-          onCambia={(chiave) => void applica(valore.tipo, chiave ? { tipo: tq, chiave } : null)} finestraAperta={finestraQuale} onFinestra={apriQuale} />
+          onCambia={(chiave) => void applica(valore.tipo, chiave ? { tipo: tq, chiave } : null)} finestraAperta={finestraQuale} onFinestra={apriQuale}
+          // la Trama: il personaggio di un evento di storia, facoltativo e senza rango (`COLLEGAMENTO_FACOLTATIVO`); non la scelta obbligatoria di una voce Confidente
+          facoltativo={COLLEGAMENTO_FACOLTATIVO.has(valore.tipo) ? TESTI_FACOLTATIVO : undefined} />
       )}
     </div>
   );

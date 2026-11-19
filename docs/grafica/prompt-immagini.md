@@ -866,7 +866,7 @@ resta la figura della famiglia (`catenaCategoria` in `src/utils/categorie.ts`).
 
 ## Priorità e ordine di generazione delle sezioni 30–34 (richieste del 2026-11-18)
 
-24 elementi censiti, **14 da generare ora** e **10 rimandati** (si generano solo se l'utente li chiede). Ordine consigliato:
+24 elementi censiti: **14 generati e consegnati** (i 4 segni in `public/asset/ui/`, in uso; le 10 illustrazioni in `docs/grafica/asset-generati/2026-11-18/illustrazioni/`, da caricare nel database) e **10 rimandati** (si generano solo se l'utente li chiede). Ordine in cui sono stati generati:
 
 | Ordine | Sezione | Elementi | Priorità | Motivo |
 |---|---|---|---|---|
@@ -877,7 +877,7 @@ resta la figura della famiglia (`catenaCategoria` in `src/utils/categorie.ts`).
 | 5 | §30 | `segno-scorta-pronta` | bassa | rinforza un colore con una figura; resta una sola richiesta attiva |
 | — | §30 | `segno-scorta-qualunque`, `segno-scorta-precisa` | rimandate | a 16 px sono quasi indistinguibili da `scheda-scorta` e da `scheda-persona-partita` |
 | — | §32 | i tre sigilli e le tre varianti `-senza-testo` | rimandati | nessun consumatore nel codice, duplicano il chip «Completato»; solo con il sì dell'utente |
-| — | §34 | `intestazione-home`, `intestazione-partita` | rimandate | l'intestazione di Partita ha padding e gap a 0 (`.intestazione--partita`) e sul telefono una riga di 44 px (`max-md:h-11`), quella della Home perde il sottotitolo a schermo basso: misurato il 2026-11-18, con la figura rientrano nel 30% ma costano spazio a schermate di lavoro (§34), quindi non si collegano |
+| — | §34 | `intestazione-home`, `intestazione-partita` | non collegate | la figura costa da 31 a 72 px di altezza a schermate di lavoro e alla Partita toglie spazio alla fila dei dati (§34); si collegano con una riga per pagina solo se l'utente lo chiede |
 
 ## 30. Segni della scorta di una voce (3: 1 richiesta attiva, 2 rimandate) — `ui/segno-<chiave>.png` (128×128, trasparente) — richiesti il 2026-11-18
 
@@ -992,10 +992,10 @@ Verifica di consegna: 512×192 esatti, alfa nativo, nessun pixel con alfa > 8 ne
 
 ## 33. Stati vuoti ed errori nuovi (6, priorità alta) — `illustrazioni/<chiave>.png` (1200×800, trasparente, nel database) — richiesti il 2026-11-18
 
-**Perché servono.** Le illustrazioni di stato esistenti sono otto (`vuoto-persona`, `vuoto-partita`, `vuoto-obiettivi`, `vuoto-piani`, `vuoto-cicli`, `vuoto-storico`, `errore`,
-`caricamento`) e coprono le schede della Partita; quel che l'utente vede più spesso resta una riga di testo: il **giorno senza voci** del Diario, la **ricerca senza risultati**
-(Diario, scorta, filtri del Compendio), il **«Nessun Confidente è ancora avviabile»**, e i due modi in cui una pagina non si carica — **offline** e **server non raggiungibile** — che
-`VistaErrore` rende entrambi con l'unica `errore-senza-testo` anche se i titoli sono già distinti (`titoloPerCausa`, `PageState.tsx`).
+**Perché servono.** Le illustrazioni di stato di prima sono otto (`vuoto-persona`, `vuoto-partita`, `vuoto-obiettivi`, `vuoto-piani`, `vuoto-cicli`, `vuoto-storico`, `errore`,
+`caricamento`) e coprono le schede della Partita; queste sei danno una figura a quel che l'utente vede più spesso: il **giorno senza voci** del Diario, la **ricerca senza risultati**
+(Diario, scorta, filtri del Compendio; anche «Non trovato»), il **«Nessun Confidente è ancora avviabile»**, le proposte da completare e i due modi in cui una pagina non si carica — **offline** e
+**server non raggiungibile** — che `VistaErrore` distingue per causa (`illustrazioniErrore`, `VistaErrore.tsx`). Consegnate in `docs/grafica/asset-generati/2026-11-18/illustrazioni/`, da caricare nel database.
 
 **Priorità: alta** (ordine: `vuoto-ricerca`, che serve in cinque punti, poi `vuoto-giornata`, `errore-offline`, `errore-server`, `vuoto-confidenti`, `vuoto-proposte`).
 
@@ -1053,27 +1053,27 @@ Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo 
 
 Consegna: si caricano nel database con `PUT /api/immagini/illustrazioni/<chiave>` (PNG come corpo, `Content-Type: image/png`). Verifica: 1200×800 esatti, alfa nativo, nessun pixel con alfa > 8 nel contorno di 3 px.
 
-## 34. Illustrazioni di intestazione delle pagine principali (4 da generare, priorità media; 2 rimandate) — `illustrazioni/intestazione-<chiave>.png` (512×512, trasparente, nel database) — richieste il 2026-11-18
+## 34. Illustrazioni di intestazione delle pagine principali (4 consegnate, da caricare nel database; 2 non collegate) — `illustrazioni/intestazione-<chiave>.png` (512×512, trasparente, nel database) — richieste il 2026-11-18
 
 **Perché servono.** `IntestazionePagina` ha uno spazio per un'illustrazione a destra del titolo (`illustrazione`, classe `intestazione__illustrazione`: altezza `clamp(64px, 11dvh, 120px)` e al più 40vw, 64 px e 26vw sul
-telefono), accanto alla riga del titolo. Collegate (ripiego «nulla»: senza il file nessuno spazio, con il file compare da sola): Diario (`PercorsoPage`, non con la ricerca attiva), Compendio, Fusione e
-Luoghi (`IndiceLuoghi`, `DungeonPage`, `CittaPage`) con `intestazione-diario`, `-compendio`, `-fusione`, `-luoghi`. **Misurato il 2026-11-18** (figura presente, 1366×657, 1280×689, 1024×690, 768×1024, 375×812): l'intestazione resta al più
-al 21,9% dell'altezza della schermata. `intestazione-partita` e `intestazione-home` **non si collegano**: la figura le porta nel 30% (Home al più 12,0%, Partita 11,3%) ma costa spazio a schermate di lavoro (Home 47→78 px a 1366×657 e 38→74 a 375×812;
-Partita 46→74 e a 1024 la fila dei dati perde ~92 px di larghezza), vedi `fabbisogno.md`; non si generano se l'utente non lo chiede.
+telefono), accanto alla riga del titolo, chiesta in miniatura da 160 px. Collegate (ripiego «nulla»: senza il file nessuno spazio, con il file compare da sola): Diario (`PercorsoPage`, non con la ricerca attiva), Compendio, Fusione e
+Luoghi (`IndiceLuoghi`, `DungeonPage`, `CittaPage`) con `intestazione-diario`, `-compendio`, `-fusione`, `-luoghi`; con la figura l'intestazione resta entro il 30% dell'altezza a ogni formato. I quattro PNG sono in
+`docs/grafica/asset-generati/2026-11-18/illustrazioni/`. **`intestazione-home` e `intestazione-partita` non sono collegate**: la figura costa da 31 a 72 px di altezza a schermate di lavoro e alla Partita toglie spazio alla fila dei dati e
+delle scorciatoie. Non si generano; se l'utente lo chiede si collegano con una riga per pagina (`illustrazione` di `IntestazionePagina`).
 
 **Una sola figura piena e silhouette alta contrasto**, perché a 64 px di altezza (telefono) e col `drop-shadow` del CSS devono restare un'icona grande, non una scena. Regole comuni:
 512×512 trasparente, soggetto che occupa l'85% del quadrato con almeno 3 px liberi su tutti i bordi (anche se poggia su una base), bianco/nero/rosso, retino nelle
 ombre, nessun testo, nessun personaggio riconoscibile, niente oro.
 | File | Pagina | Soggetto | Distinta da |
 |---|---|---|---|
-| `intestazione-home.png` (**rimandata**, fino alla misura) | Home | valigetta del ladro aperta da cui sporgono una carta da gioco, una chiave e un biglietto da visita piegato | il logo (`identita/logo`, maschera) |
-| `intestazione-partita.png` (**rimandata**, fino alla misura) | Partita | taccuino rilegato con una maschera da ladro sulla copertina e tre segnalibri di lunghezza diversa che sporgono dall'alto | `nav-partita` (maschera sola), `scheda-compendio` (libro aperto) |
+| `intestazione-home.png` (**non collegata**) | Home | valigetta del ladro aperta da cui sporgono una carta da gioco, una chiave e un biglietto da visita piegato | il logo (`identita/logo`, maschera) |
+| `intestazione-partita.png` (**non collegata**) | Partita | taccuino rilegato con una maschera da ladro sulla copertina e tre segnalibri di lunghezza diversa che sporgono dall'alto | `nav-partita` (maschera sola), `scheda-compendio` (libro aperto) |
 | `intestazione-diario.png` | Guida giorno per giorno | calendario da tavolo a spirale con un giorno cerchiato a mano, un sole e una luna ai due lati della testata e una spunta rossa sul giorno | `guida/percorso` (foglio di calendario con freccia), `vuoto-giornata` |
 | `intestazione-compendio.png` | Compendio | pila di tre carte Persona viste di fronte, sfalsate, con silhouette di maschere diverse | `arcani/*` (le carte degli Arcani), `nav-compendio` |
 | `intestazione-fusione.png` | Fusione | due carte che convergono verso un lampo, sotto il lampo la lama di una ghigliottina | `nav-fusione` (frecce che convergono) |
 | `intestazione-luoghi.png` | Luoghi, Palazzi, Mappe | profilo cittadino in un unico blocco: castello a due torri, torre radio e imbocco di un tunnel della metropolitana | `guida/mappe` (mappa ripiegata con spillo), `palazzi/*` (stemmi) |
 
-Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0). I primi due, per `intestazione-home` e `intestazione-partita`, sono **rimandati**: la misura (§34, 2026-11-18) ne sconsiglia il collegamento; si usano solo se l'utente lo chiede.
+Prompt pronti (anteporre il blocco di stile del §0, in coda il prompt negativo del §0). I primi due, per `intestazione-home` e `intestazione-partita`, non si usano: le due pagine non sono collegate (vedi sopra); si usano solo se l'utente chiede di collegarle.
 
 ```
 [blocco di stile §0] Illustrazione di intestazione per l'interfaccia di Persona 5 Royal, PNG 512×512 con sfondo trasparente, un unico soggetto centrato a figura piena che occupa l'85% del quadrato, silhouette ad alto contrasto leggibile a 64 px di altezza, bianco e nero più rosso #e5352b, tratto a inchiostro, retino nelle ombre, angoli tagliati. Soggetto: una valigetta da ladro aperta da cui sporgono una carta da gioco, una chiave antica e un biglietto da visita con l'angolo piegato. Nessun testo, nessun personaggio, niente oro. → intestazione-home.png

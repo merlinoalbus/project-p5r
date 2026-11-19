@@ -197,7 +197,7 @@ export function QuartierePage() {
     document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' });
   }, [q, hash]);
   return (
-    <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()} scheda={{ titolo: 'Quartiere', ripiego: '/guida/citta' }}>
+    <PageState carica={dati} scheda={{ titolo: 'Quartiere', ripiego: '/guida/citta' }}>
       {q && (
         <div className="flex flex-col gap-4">
           {/* L'illustrazione della mappa del quartiere (regola unica di L1), con sopra la sagoma della mappa di Tokyo, la stessa che si è

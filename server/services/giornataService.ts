@@ -323,14 +323,16 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz'], fonte: StatoEffettiV
 }
 
 /**
- * R9-03: l'avviso di disponibilità di una voce d'incontro (tipo «confidente»: una scena di trama collegata a un Confidente non è un incontro e non avvisa). Il Confidente è valutato al giorno e alla fascia della voce, con il rango che la voce
+ * R9-03: l'avviso di disponibilità di una voce collegata a un Confidente, di qualunque tipo (l'incontro, ma anche la Stanza di Velluto con Igor
+ * o le Gemelle, un Palazzo, un acquisto) tranne la «trama»: un evento di storia collegato facoltativamente a un Confidente non è un incontro,
+ * non dipende dalla sua disponibilità e non avvisa. Il Confidente è valutato al giorno e alla fascia della voce, con il rango che la voce
  * porta (`rango_atteso`); il meteo non c'è (la voce non è un momento della partita), quindi la pioggia non produce avvisi. Solo un avviso,
  * mai un blocco; le voci non si spostano né si riscrivono. L13 (O10-2): `relazioneRomantica` è quella della partita, dalla mappa dei suoi
  * Confidenti (`ConfidentePartitaDto.relazioneRomantica`); vale solo per gli incontri dopo il rango della scelta romantica (`relazioneAlRango`);
  * senza partita non la sappiamo (null) e una fascia che dipende dalla relazione non avvisa.
  */
 export function avvisiDisponibilitaDellaVoce(r: Pick<RigaVoce, 'genere' | 'tipo' | 'riferimento_tipo' | 'riferimento_chiave' | 'data' | 'fascia' | 'rango_atteso'>, relazioneRomantica: boolean | null = null): Pick<AzionePercorsoDto, 'avvisiDisponibilita'> {
-  if (r.genere !== 'azione' || r.tipo !== 'confidente' || r.riferimento_tipo !== 'confidente' || !r.riferimento_chiave) return {};
+  if (r.genere !== 'azione' || r.tipo === 'trama' || r.riferimento_tipo !== 'confidente' || !r.riferimento_chiave) return {};
   // la pioggia dei requisiti del rango la legge il verdetto (fonte unica), ma senza meteo non produce avvisi; un giorno del
   // calendario escluso (`date`) è un avviso di giorno come quello della settimana
   const esito = verdettoDelConfidente(r.riferimento_chiave, { data: r.data, fascia: fasciaDi(r), festivo: eGiornoFestivo(r.data), piove: false, rango: r.rango_atteso !== null ? r.rango_atteso - 1 : null,
@@ -460,7 +462,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
       (s.tipo === 'turno' || s.tipo === 'lavoro') && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}),
     ...(yenAutomatici.length ? { yenAutomatici } : {}),
     ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
-    ...avvisiDisponibilitaDellaVoce(r, r.tipo === 'confidente' && r.riferimento_tipo === 'confidente' && r.riferimento_chiave ? ctx.conf?.get(r.riferimento_chiave)?.relazioneRomantica ?? null : null),
+    ...avvisiDisponibilitaDellaVoce(r, r.tipo !== 'trama' && r.riferimento_tipo === 'confidente' && r.riferimento_chiave ? ctx.conf?.get(r.riferimento_chiave)?.relazioneRomantica ?? null : null),
     ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
     // L13 (decisione 4): a voce fatta, gli articoli segnati e quelli in alternativa aggiunti dopo la spunta (il riepilogo non nega un acquisto mai chiesto)
     // L13 (O10-5): e gli yen registrati dei turni, perché la riga del turno dica la ricevuta e non l'istruzione della spunta
@@ -962,6 +964,18 @@ function testoValido(x: string | undefined): string | undefined {
 /** Le note senza spazi ai bordi: undefined se non inviate (restano com'erano), null se nulle o vuote. */
 const noteValide = (n: string | null | undefined) => (n === undefined ? undefined : n === null || n.trim() === '' ? null : n.trim());
 
+/**
+ * Il rango atteso da scrivere, dato il tipo che la voce avrà. Una «trama» non ha rango (il collegamento facoltativo a un Confidente non è un
+ * incontro): un rango inviato con lei è un 400 `rango-non-per-trama`, come gli effetti o i requisiti inviati a un promemoria; il rango che la
+ * voce aveva prima di diventare trama se ne va, come le condizioni di un'azione che diventa promemoria. Gli altri tipi lo tengono com'è
+ * (`prima`) se non arriva.
+ */
+function rangoDaSalvare(tipo: string, inviato: number | null | undefined, prima: number | null): number | null {
+  if (tipo !== 'trama') return inviato === undefined ? prima : inviato;
+  if (inviato !== undefined && inviato !== null) throw httpErrors.badRequest('rango-non-per-trama', 'Una voce di trama non ha un rango atteso: il rango lo porta solo l’incontro con il Confidente.');
+  return null;
+}
+
 /** Aggiunge una voce alla giornata (canone, per tutte le partite), al posto indicato della fascia (in fondo se omesso). */
 export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number): AzionePercorsoDto {
   // la partita (per rispondere con lo stato) si controlla prima di scrivere: un 404 dopo aver cambiato la guida mentirebbe
@@ -974,6 +988,8 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
   const { riferimento, produce } = struttura(d);
   // L13 (O9-3): «Si fa solo se» (solo per un'azione; vuoto = sempre)
   const condizioni = condizioniDaSalvare(d.condizioni, genere);
+  const tipo = genere === 'azione' ? d.tipo ?? 'altro' : 'altro';
+  const rangoAtteso = rangoDaSalvare(tipo, d.rangoAtteso, null);
   const uid = randomBytes(16).toString('hex');
   const adesso = nowIso();
   getDb().transaction(() => {
@@ -983,8 +999,8 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
     if (genere !== 'azione' && d.effettiVoce?.effetti.length) throw httpErrors.badRequest('effetti-solo-azione', 'Solo un’azione può avere effetti della spunta.');
     // gli effetti vanno solo in `voce_effetto` (`inizializzaEffettiVoce`)
     prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, indice_guida, created_at, updated_at)
-      VALUES (?, ?, ?, 1000000, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, data, fascia, genere, azione, noteValide(d.note) ?? null, genere === 'azione' ? d.tipo ?? 'altro' : 'altro',
-      riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento?.testo ?? null, d.rangoAtteso ?? null, adesso, adesso);
+      VALUES (?, ?, ?, 1000000, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, data, fascia, genere, azione, noteValide(d.note) ?? null, tipo,
+      riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento?.testo ?? null, rangoAtteso, adesso, adesso);
     if (condizioni) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
     // i requisiti «da avere in scorta» (solo un'azione; 400 se non validi): con la voce già scritta, nella stessa transazione
     if (d.requisiti !== undefined) salvaRequisitiVoce(uid, d.requisiti, genere);
@@ -1005,6 +1021,8 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
   const { riferimento } = struttura(d, r);
   // L13 (O9-3): «Si fa solo se» cambia solo se arriva; una cosa da fare che diventa promemoria le perde (un promemoria non si spunta)
   const condizioni = condizioniDaSalvare(d.condizioni ?? (genere !== 'azione' && r.condizioni_json ? [] : undefined), genere);
+  const tipo = genere === 'azione' ? d.tipo ?? r.tipo : 'altro';
+  const rangoAtteso = rangoDaSalvare(tipo, d.rangoAtteso, r.rango_atteso);
   // L13 (decisione 19): che cosa hanno fatto gli effetti di stato cambiati nelle partite che hanno già spuntato la voce, per la risposta
   const applicazioniEffetti = getDb().transaction((): AzionePercorsoDto['applicazioniEffetti'] => {
     let applicazioni: AzionePercorsoDto['applicazioniEffetti'] = undefined;
@@ -1024,9 +1042,9 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
     }
     // gli effetti li salva `salvaEffettiVoce` in `voce_effetto`
     prepared(`UPDATE voce_giornata SET azione = ?, note = ?, genere = ?, fascia = ?, tipo = ?, riferimento_tipo = ?, riferimento_chiave = ?, riferimento_testo = ?, rango_atteso = ?, updated_at = ? WHERE uid = ?`).run(
-      azione ?? r.azione, d.note === undefined ? r.note : noteValide(d.note), genere, fascia, genere === 'azione' ? d.tipo ?? r.tipo : 'altro',
+      azione ?? r.azione, d.note === undefined ? r.note : noteValide(d.note), genere, fascia, tipo,
       riferimento === undefined ? r.riferimento_tipo : riferimento?.tipo ?? null, riferimento === undefined ? r.riferimento_chiave : riferimento?.chiave ?? null,
-      riferimento === undefined ? r.riferimento_testo : riferimento?.testo ?? null, d.rangoAtteso === undefined ? r.rango_atteso : d.rangoAtteso,
+      riferimento === undefined ? r.riferimento_testo : riferimento?.testo ?? null, rangoAtteso,
       nowIso(), uid);
     if (condizioni !== undefined) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
     // i requisiti «da avere in scorta»: l'elenco inviato sostituisce quello di prima (e toglie le caselle dei soli requisiti tolti, in tutte le

@@ -107,11 +107,7 @@ export function PersonaDellaPartita({ partitaId }: Props) {
   const visibili = lista.slice(0, quante);
 
   return (
-    <PageState
-      isLoading={tutte.inPrimoCaricamento || possedute.inPrimoCaricamento || compendio.inPrimoCaricamento}
-      error={tutte.errore ?? possedute.errore ?? compendio.errore}
-      onRetry={() => { void tutte.ricarica(); void possedute.ricarica(); void compendio.ricarica(); }}
-    >
+    <PageState carica={[tutte, possedute, compendio]}>
       {/* L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda riempie l'altezza; conteggi, ricerca e filtri stanno in una fila ferma
           (le due righe di prima diventano una: `lg:contents`; a 1024 px, se non ci stanno, vanno a capo) e l'elenco scorre nella sua area con
           bordo, su due colonne di righe da 44 px, con «Mostra altre» in fondo all'area. Sotto i 1024 px tutto come prima, con la pagina che

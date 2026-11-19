@@ -67,7 +67,7 @@ export function OggettiOttenuti({ partitaId }: { partitaId: number }) {
   return (
     <section className="card flex flex-col gap-2" aria-label="Oggetti ottenuti">
       <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave="catalogo" dimensione={14} />Oggetti ottenuti</span>
-      <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+      <PageState carica={dati}>
         {d && (d.totali.length === 0
           ? <p className="m-0 testo-13 text-text-muted text-pretty">Nessun oggetto ancora: arrivano spuntando le voci del Diario che danno un oggetto, con gli esiti delle attività che ne danno (le sfide vinte della Big Bang Burger), completando le Richieste che ne danno e con i doni dei Confidenti al rango massimo. Qui compaiono anche gli oggetti comprati che usi (il concime della pianta, i materiali della fabbricazione, gli incensi dell’Isolamento).</p>
           : (

@@ -26,7 +26,7 @@ import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
 import { DaRivedereVoce, InfiltrazioniVoce } from './InfiltrazioniVoce';
 import { RisposteVoce } from './RisposteVoce';
 import { RequisitiVoce } from './RequisitiVoce';
-import { idContatoreScorta } from '../../utils/requisitiVoce';
+import { idMotivoScorta } from '../../utils/requisitiVoce';
 import { RicevuteVoce } from './RicevuteVoce';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
@@ -184,9 +184,19 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const scortaFatti = a.requisiti?.filter((r) => r.fatto === true).length ?? 0;
   const scortaTotale = a.requisiti?.length ?? 0;
   const conAnello = scortaTotale > 0 && !a.fatta;
+  const scortaMancano = scortaTotale - scortaFatti;
+  // il richiamo all'elenco «In scorta»: cresce a ogni tentativo di completare la voce con caselle mancanti (`RequisitiVoce` porta il fuoco alla prima)
+  const [richiamoScorta, setRichiamoScorta] = useState(0);
+  // con caselle «In scorta» mancanti la casella non è `disabled` ma `aria-disabled`: resta raggiungibile (la descrizione dice quante ne mancano) e
+  // un tocco, Spazio o Invio non spuntano ma portano alla prima casella mancante; le altre ragioni la spengono come prima
+  const richiamaScorta = () => setRichiamoScorta((n) => n + 1);
   const casella = (
-    <input type="checkbox" className={`w-5 h-5 shrink-0 ${conAnello ? '' : 'mt-2'}`} checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || scortaIncompleta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)}
-      aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={[nonDovuta ? `non-dovuta-${a.uid}` : '', scortaIncompleta ? idContatoreScorta(a.uid) : ''].filter(Boolean).join(' ') || undefined} />
+    <input type="checkbox" className={`w-5 h-5 shrink-0 ${conAnello ? '' : 'mt-2'}`} checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')}
+      aria-disabled={scortaIncompleta || undefined}
+      onClick={scortaIncompleta ? (e) => { e.preventDefault(); richiamaScorta(); } : undefined}
+      onKeyDown={scortaIncompleta ? (e) => { if (e.key === 'Enter') { e.preventDefault(); richiamaScorta(); } } : undefined}
+      onChange={(e) => { if (!scortaIncompleta) void cambia(e.target.checked); }}
+      aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={[nonDovuta ? `non-dovuta-${a.uid}` : '', scortaIncompleta ? idMotivoScorta(a.uid) : ''].filter(Boolean).join(' ') || undefined} />
   );
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
@@ -195,13 +205,20 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       {maniglia}
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {/* L13 (O9-3): una voce non dovuta nella partita non si spunta (il server risponde 409): la casella è spenta e il motivo sta sotto il testo */}
-      {/* con un elenco «In scorta» la casella ha attorno l'anello d'avanzamento (arco rosso che cresce con le caselle spuntate, verde e pieno quando si può spuntare);
-          da spenta dice perché nel `title` e nella descrizione (il contatore n/N dell'elenco) */}
+      {/* con un elenco «In scorta» la casella ha attorno l'anello d'avanzamento (arco rosso che cresce con le caselle spuntate, verde e pieno quando si
+          può spuntare) e sotto una didascalia: «Mancano n» (anche descrizione della casella) o, a N/N, «Pronta» con il suo segno */}
       {partitaId && (
-        <label className={`touch flex items-start justify-center shrink-0 -my-1 pr-1 ${nonDovuta || scortaIncompleta ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+        <label className={`touch flex shrink-0 -my-1 ${conAnello ? 'scorta-casella' : 'items-start justify-center pr-1'} ${nonDovuta || scortaIncompleta ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           title={scortaIncompleta ? `In scorta: ${scortaFatti}/${scortaTotale}. Spunta le caselle che mancano.` : undefined}>
           {conAnello
-            ? <span className={`scorta-anello ${scortaIncompleta ? '' : 'scorta-anello--pronta'}`} style={{ '--p': scortaFatti / scortaTotale } as CSSProperties}>{casella}</span>
+            ? (
+              <>
+                <span className={`scorta-anello ${scortaIncompleta ? '' : 'scorta-anello--pronta'}`} style={{ '--p': scortaFatti / scortaTotale } as CSSProperties}>{casella}</span>
+                {scortaIncompleta
+                  ? <span id={idMotivoScorta(a.uid)} className="scorta-casella__motivo">Mancano {scortaMancano}<span className="sr-only"> su {scortaTotale} Persone da spuntare in scorta</span></span>
+                  : <span className="scorta-casella__pronta"><IconaSegno chiave="scorta-pronta" dimensione={14} />Pronta</span>}
+              </>
+            )
             : casella}
         </label>
       )}
@@ -224,7 +241,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* le risposte migliori dell'avanzamento della voce Confidente, fra le sue note (progetto dei Confidenti, 2026-10-24) */}
         <RisposteVoce a={a} />
         {/* l'elenco «da avere in scorta» (caselle manuali della partita): la casella di completamento resta spenta finché ne manca una */}
-        <RequisitiVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
+        <RequisitiVoce a={a} partitaId={partitaId} onCambiata={onCambiata} richiamo={richiamoScorta} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
         {pendente && <p role="status" className="m-0 text-warning">Un’operazione su questa voce non è stata confermata: completala dall’elenco «Operazioni da completare» sopra le voci, poi potrai spuntare la voce.</p>}
         {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}

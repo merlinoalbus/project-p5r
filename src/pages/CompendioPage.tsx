@@ -97,7 +97,8 @@ export function CompendioPage() {
   const glossario = useGlossarioStore((s) => s.glossario);
   const vista = usePreferenzeStore((s) => s.vistaPersona);
   const impostaVista = usePreferenzeStore((s) => s.impostaVistaPersona);
-  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersone({ delGruppo: true }), [], { cacheUrl: urlPersone({ delGruppo: true }) });
+  const elencoPersone = useCarica(() => getPersone({ delGruppo: true }), [], { cacheUrl: urlPersone({ delGruppo: true }) });
+  const { dati } = elencoPersone;
   const [params, setParams] = useSearchParams();
   // L10-04: scorta e Registro della partita attiva, per i segni delle piastrelle (una lettura per la pagina; niente senza partita)
   const { segni } = useSegniPersonaPartita();
@@ -295,7 +296,7 @@ export function CompendioPage() {
         )}
       </div>
 
-      <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
+      <PageState carica={elencoPersone}>
         {filtrate.length === 0 ? (
           <EmptyState illustrazione="vuoto-ricerca" title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello, a cambiare arcano o a togliere i filtri di affinità e immagine." />
         ) : vista === 'piastrelle' ? (

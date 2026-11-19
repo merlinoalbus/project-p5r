@@ -63,7 +63,8 @@ export function ConfidenteDettaglioPage() {
   // R10-27: nel pannello sopra il diario la scheda si legge e basta: i semafori non si confermano né si correggono da lì
   const nelPannello = useInPannello();
   const attiva = usePartitaStore((s) => s.attiva);
-  const { dati: c, inPrimoCaricamento, errore, ricarica } = useCarica(() => getConfidenteDettaglio(chiave), [chiave]);
+  const confidenteLetto = useCarica(() => getConfidenteDettaglio(chiave), [chiave]);
+  const { dati: c, ricarica } = confidenteLetto;
   // per id della partita e Confidente; ai cambi di stato della partita si rilegge senza azzerare (`mio`, Rango e semafori restano)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- della partita conta l'id; `chiave` non entra nella lettura ma la rifà al cambio di Confidente
   const stato = useCarica(() => (attiva ? getConfidentiPartita(attiva.id) : Promise.resolve(null)), [attiva?.id, chiave]);
@@ -193,7 +194,7 @@ export function ConfidenteDettaglioPage() {
 
   return (
     <>
-    <PageState isLoading={inPrimoCaricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()} scheda={{ titolo: 'Confidente', ripiego: '/confidenti' }}>
+    <PageState carica={confidenteLetto} error={confidenteLetto.errore || erroreInformativo} scheda={{ titolo: 'Confidente', ripiego: '/confidenti' }}>
       {c && !erroreInformativo && (
         <div className="flex flex-col gap-4">
           {/* Lotto B (punto 6): l'azione di gioco è il pulsante primario; gli strumenti di modifica stanno nel menu «Modifica ⋯», che

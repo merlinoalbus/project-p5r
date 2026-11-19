@@ -205,7 +205,7 @@ export function DomandePage() {
   };
 
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {d && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Domande in classe, esami e quiz in TV" sottotitolo={<>Le risposte giuste per ogni data di gioco. {partitaId ? `Nella partita «${attiva?.nome}» hai segnato ${d.fatte} domande su ${d.totale}; ` : 'Attiva una partita per segnare le domande fatte; '}

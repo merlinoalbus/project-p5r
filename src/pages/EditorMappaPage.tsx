@@ -107,7 +107,8 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [giornoCorrente, setGiornoCorrente] = useState(false);
   const conGiorno = giornoCorrente && !!attiva;
   // eslint-disable-next-line react-hooks/exhaustive-deps -- `momento` (giorno, fascia, meteo) non entra nella lettura: al suo cambio si rilegge
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, conGiorno ? attiva.id : undefined), [chiave, conGiorno, attiva?.id, momento]);
+  const mappaLetta = useCarica(() => getMappa(chiave, conGiorno ? attiva.id : undefined), [chiave, conGiorno, attiva?.id, momento]);
+  const { dati, caricamento, errore, ricarica } = mappaLetta;
   // eslint-disable-next-line react-hooks/exhaustive-deps -- `chiave` non entra nella lettura: l'albero si rilegge al cambio di mappa
   const albero = useCarica(() => getAlberoMappe(), [chiave]);
   // elenchi per le condizioni di visibilità (Confidenti, quartieri, richieste, Palazzi): una volta per pagina
@@ -244,7 +245,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   };
 
   return (
-    <><PageState isLoading={caricamento && !dati} error={errore} onRetry={ricarica}>
+    <><PageState carica={mappaLetta}>
       {dati && (
         <VisoreMappa
           key={dati.chiave}
