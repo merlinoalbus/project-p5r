@@ -500,12 +500,13 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         {(!inAlto || tramaIntera) && g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
         {(!inAlto || tramaIntera) && g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary-testo">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
         {/* Il giorno senza voci lo dice una volta sola, qui: la figura (`vuoto-giornata`, se c'è; non nella Home, dove lo spazio è contato) e una
-            frase sulla stessa riga; le due fasce restano con «Aggiungi» e senza frase propria. Il perché di un giorno non coperto lo dice già la
-            trama del giorno, quindi qui non si ripete. */}
+            frase sulla stessa riga; le due fasce restano con «Aggiungi» e senza frase propria. Il perché di un giorno non coperto (nessuna voce
+            nella guida, `coperto`) di solito lo dice la trama del giorno e qui non si ripete; con la trama vuota la frase lo dice lei, altrimenti
+            il motivo si perderebbe. */}
         {g.azioni.length === 0 && (
           <div className="flex items-center gap-3 sm:gap-4">
             {!inAlto && <FiguraVuoto illustrazione="vuoto-giornata" />}
-            <p className="m-0 min-w-0 text-text-muted">{g.coperto ? 'Nessuna voce in questo giorno' : 'Nessuna azione consigliata'}{IN_RILASCIO ? '.' : ': con «Aggiungi» metti una cosa da fare o un promemoria.'}</p>
+            <p className="m-0 min-w-0 text-text-muted">{g.coperto ? 'Nessuna voce in questo giorno' : !g.trama.trim() ? 'Giorno non coperto dalle fonti, nessuna azione consigliata' : 'Nessuna azione consigliata'}{IN_RILASCIO ? '.' : ': con «Aggiungi» metti una cosa da fare o un promemoria.'}</p>
           </div>
         )}
         {!inAlto && fonte}

@@ -8,24 +8,27 @@
 // `requisiti-incompleti`); l'annullo è libero. Una chiamata per cambio, senza ottimismo: il chip cambia quando il server ha risposto; mentre una
 // richiesta è in corso il chip è appena attenuato (resta col fuoco, il tocco è ignorato) e il nuovo conteggio si annuncia con garbo.
 //
-// Il chip è compatto (32 px visivi, 44 px di tocco con un'area invisibile sopra e sotto, mai sovrapposta a quella della fila accanto: le file
-// distano 12 px): la figura dell'arcano con, nell'angolo, il cerchio della casella (vuoto, o rosso con la spunta), e il nome breve — la Persona
-// se è specifica (l'arcano lo dice la figura), altrimenti l'arcano — fino a due righe, con il nome completo nel titolo e nel nome accessibile.
-// Spuntato non è un rosso pieno (che nell'app vuol dire «fatto», D15): contorno rosso e fondo scuro, testo attenuato.
+// Il chip è compatto (32 px visivi, 44 px di tocco con un'area invisibile 6 px sopra e 6 px sotto, mai sovrapposta a quella della fila
+// accanto: le file distano 12 px): la figura — il ritratto della Persona se è specifica, altrimenti la figura dell'arcano — con, nell'angolo,
+// il cerchio della casella (vuoto, o rosso con la spunta), e il nome breve — la Persona se è specifica, altrimenti l'arcano — fino a due
+// righe, con il nome completo (Persona e arcano) nel titolo e nel nome accessibile. Spuntato non è un rosso pieno (che nell'app vuol dire
+// «fatto», D15): contorno rosso e fondo scuro, testo attenuato; a N/N contorno e cerchio passano al verde di «Pronta», come barra e anello.
 //
-// Sotto i 768 px (o con la colonna delle voci stretta) l'elenco esce dalla colonna del testo e prende tutta la larghezza della voce, sotto
-// casella e immagine: il rientro della colonna si misura (`--scorta-rientro`) e il CSS lo usa come margine negativo solo lì.
+// L'elenco è una fila a sé della voce, a tutta larghezza sotto casella, immagine, testo e comandi (`AzioneGiornata`, `.azione > .scorta-voce`):
+// la griglia prende tutte le colonne che la voce consente a ogni formato. I clic dentro l'elenco non selezionano la voce (`AzioneGiornata`).
 // Finché la voce non è fatta la griglia è sempre in vista; a voce fatta si riduce a una riga (figure in miniatura e «N/N») che si apre dal
 // tocco (la voce si rimonta quando cambia `fatta`, vedi `Azione`). Senza partita i chip si leggono soltanto.
 // ============================================================
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { impostaRequisitoVoce } from '../../services/api';
+import { useEffect, useRef, useState } from 'react';
+import { getPersone, impostaRequisitoVoce } from '../../services/api';
+import { epocaCacheGioco } from '../../services/api/cacheGioco';
 import { notifica } from '../../stores/notificationStore';
 import { chiaveRequisito, type RequisitoVoceDto } from '../../../shared/requisitiVoce';
-import type { AzionePercorsoDto } from '../../types';
+import type { AzionePercorsoDto, PersonaRiassuntoDto } from '../../types';
 import { IconGiu } from '../shared/iconeGuida';
 import { IconaArcano } from '../shared/IconaArcano';
+import { AnteprimaPersona } from '../shared/AnteprimaPersona';
 import { nomeBreveRequisito, nomeRequisito } from '../../utils/requisitiVoce';
 
 interface Props {
@@ -37,12 +40,34 @@ interface Props {
   richiamo?: number;
 }
 
-/** Quante figure mostra al massimo la riga ripiegata (le altre diventano «+N»): la riga sta in una sola linea anche a 375 px. */
-const FIGURE_RIPIEGATA = 6;
-/** Sotto questa larghezza della colonna del testo l'elenco esce dalla colonna e prende tutta la riga della voce (tre chip da 112 px e spazi). */
-const COLONNA_MINIMA = 348;
+/** Quante figure mostra al massimo la riga ripiegata (le altre diventano «+N»): la riga, larga quanto la voce, sta in una sola linea anche a
+ *  360 px di schermo (275 px di voce: titolo, «n/N», cinque figure da 22, «+N» e freccia ne occupano circa 270; con sei, a 375 il «+N» si tagliava). */
+const FIGURE_RIPIEGATA = 5;
 /** Per quanto restano evidenziate le caselle mancanti dopo un tentativo di completare la voce. */
 const DURATA_RICHIAMO_MS = 1600;
+
+/**
+ * Le Persona del compendio per id, per il ritratto delle Persona specifiche: il requisito porta solo l'id e il nome italiano, il ritratto
+ * vuole il nome canonico. Una sola lettura condivisa da tutte le voci (si rifà se nel frattempo il canone è cambiato: epoca della cache dei
+ * dati di gioco); una lettura fallita si riprova alla voce seguente, e intanto il chip mostra la figura dell'arcano.
+ */
+let lettura: { epoca: number; persone: Promise<ReadonlyMap<number, PersonaRiassuntoDto>> } | null = null;
+function personePerId(): Promise<ReadonlyMap<number, PersonaRiassuntoDto>> {
+  const epoca = epocaCacheGioco();
+  if (!lettura || lettura.epoca !== epoca) {
+    const corrente = { epoca, persone: getPersone().then((l) => new Map(l.map((p) => [p.id, p]))) };
+    corrente.persone.catch(() => { if (lettura === corrente) lettura = null; });
+    lettura = corrente;
+  }
+  return lettura.persone;
+}
+
+/** La figura di un requisito: il ritratto della Persona se è specifica (e nota), altrimenti la figura dell'arcano. Decorativa: il nome lo dà il chip. */
+function FiguraRequisito({ r, persona, dimensione }: { r: RequisitoVoceDto; persona: PersonaRiassuntoDto | undefined; dimensione: number }) {
+  return persona
+    ? <AnteprimaPersona nome={persona.nome} etichetta={persona.nomeIt} dimensione={dimensione} contieni className="scorta-chip__ritratto" />
+    : <IconaArcano arcana={r.arcana} dimensione={dimensione} />;
+}
 
 /** Il segno di spunta del cerchio sulla figura: compare con un piccolo rimbalzo (movimento ridotto: nessuna transizione, regola globale). */
 function SegnoSpunta() {
@@ -65,28 +90,16 @@ export function RequisitiVoce({ a, partitaId, onCambiata, richiamo = 0 }: Props)
   const coda = useRef<Promise<void>>(Promise.resolve());
   useEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
   const requisiti = a.requisiti;
-  const conRequisiti = !!requisiti?.length;
-  // il rientro della colonna del testo nella riga della voce (maniglia, casella, immagine e spazi): il CSS lo usa come margine negativo quando
-  // l'elenco deve prendere tutta la larghezza della voce. Si rimisura quando la riga o la colonna cambiano misura (la didascalia della casella
-  // cambia larghezza fra «Mancano n» e «Pronta»)
-  useLayoutEffect(() => {
-    const el = sezione.current;
-    const colonna = el?.parentElement;
-    const riga = el?.closest('li');
-    if (!el || !colonna || !riga) return;
-    const misura = () => {
-      const inizioRiga = riga.getBoundingClientRect().left + riga.clientLeft + (parseFloat(getComputedStyle(riga).paddingLeft) || 0);
-      el.style.setProperty('--scorta-rientro', `${Math.max(0, Math.round(colonna.getBoundingClientRect().left - inizioRiga))}px`);
-      // colonna stretta a qualunque larghezza di schermo (il Diario a mezza pagina in Home e in Partita › Oggi): l'elenco prende la riga intera.
-      // Un attributo e non una classe: React riscrive `className` a ogni render, `data-piena` non lo tocca
-      el.toggleAttribute('data-piena', colonna.clientWidth < COLONNA_MINIMA);
-    };
-    misura();
-    const osservatore = new ResizeObserver(misura);
-    osservatore.observe(riga);
-    osservatore.observe(colonna);
-    return () => osservatore.disconnect();
-  }, [conRequisiti]);
+  // il ritratto delle Persona specifiche (solo se la voce ne ha): finché l'elenco non arriva, o se non arriva, la figura dell'arcano
+  const conPersone = !!requisiti?.some((r) => r.persona !== null);
+  const [persone, setPersone] = useState<ReadonlyMap<number, PersonaRiassuntoDto> | null>(null);
+  useEffect(() => {
+    if (!conPersone) return;
+    let attivo = true;
+    personePerId().then((m) => { if (attivo) setPersone(m); }).catch(() => undefined);
+    return () => { attivo = false; };
+  }, [conPersone]);
+  const personaDi = (r: RequisitoVoceDto) => (r.persona === null ? undefined : persone?.get(r.persona));
   // un tentativo di completare la voce con caselle mancanti: il fuoco alla prima che manca (con lo scorrimento minimo) e le mancanti evidenziate
   useEffect(() => {
     if (!richiamo || !sezione.current) return;
@@ -145,13 +158,13 @@ export function RequisitiVoce({ a, partitaId, onCambiata, richiamo = 0 }: Props)
       </div>
     )
     : conCaselle
-      // a voce fatta: una riga con «N/N», le figure in miniatura (al più sei, poi «+N») e subito dopo la freccia, che apre e chiude la griglia
+      // a voce fatta: una riga con «N/N», le figure in miniatura (al più cinque, poi «+N») e subito dopo la freccia, che apre e chiude la griglia
       ? (
         <button type="button" className="scorta-voce__testata" aria-expanded={aperta} title={aperta ? 'Chiudi: In scorta' : 'Apri: In scorta'} onClick={() => setAperta((v) => !v)}>
           {titolo}{conta}
           {!aperta && (
             <span className="scorta-voce__riepilogo" aria-hidden="true">
-              {requisiti.slice(0, FIGURE_RIPIEGATA).map((r) => <IconaArcano key={chiaveRequisito(r.arcana, r.persona)} arcana={r.arcana} dimensione={20} />)}
+              {requisiti.slice(0, FIGURE_RIPIEGATA).map((r) => <FiguraRequisito key={chiaveRequisito(r.arcana, r.persona)} r={r} persona={personaDi(r)} dimensione={20} />)}
               {nascoste > 0 && <span className="scorta-voce__altre">+{nascoste}</span>}
             </span>
           )}
@@ -172,8 +185,8 @@ export function RequisitiVoce({ a, partitaId, onCambiata, richiamo = 0 }: Props)
             const nome = nomeRequisito(r);
             const contenuto = (
               <>
-                <span className="scorta-chip__figura">
-                  <IconaArcano arcana={r.arcana} dimensione={24} />
+                <span className="scorta-chip__figura" aria-hidden="true">
+                  <FiguraRequisito r={r} persona={personaDi(r)} dimensione={24} />
                   {conCaselle && <span className="scorta-chip__segno" aria-hidden="true"><SegnoSpunta /></span>}
                 </span>
                 <span className="scorta-chip__nome">{nomeBreveRequisito(r)}</span>

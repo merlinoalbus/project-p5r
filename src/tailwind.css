@@ -2182,22 +2182,13 @@
   .menu-modifica__voci[hidden] { display: none; }
   .menu-modifica__voci > .btn, .menu-modifica__voci > * > .btn { width: 100%; justify-content: flex-start; }
   /* C9: i comandi di una voce del Diario (MenuVoce): Modifica, Elimina e «⋯», sempre in fila. Il loro posto nella riga (`.comandi-voce__posto`,
-     con sotto le ricevute della spunta): da 640 px una colonna a destra del testo; sul telefono, se ci sono i comandi, una fila a sé in fondo
-     alla voce, allineata a destra (la riga va già a capo, `flex-wrap`). Così sul telefono i tre pulsanti non tolgono al testo la loro
-     larghezza (la riga ha già maniglia, casella e immagine) e la voce cresce di una fila sola da 44 px, non di tre impilate (rilievo della
-     verifica: impilati, anche una voce di una riga arrivava a 132 px). Senza comandi (rilascio: solo le ricevute) il posto resta a destra */
+     con sotto le ricevute della spunta) è una colonna a destra del testo; con la voce stretta passa a destra nella prima fila, col testo a
+     tutta larghezza sotto (la «voce stretta», fuori dai layer in fondo al blocco «Da avere in scorta») */
   .comandi-voce { display: flex; flex-direction: row; align-items: center; flex-shrink: 0; }
   .comandi-voce__posto { display: flex; flex-direction: column; align-items: flex-end; align-self: flex-start; flex-shrink: 0; }
-  @media (max-width: 639px) {
-    .comandi-voce__posto:has(> .comandi-voce) { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; margin-top: -4px; }
-  }
-  /* L1-01 (schizzo approvato il 31/10): la stessa fila a sé quando è stretta la COLONNA delle voci, non lo schermo (Partita/Oggi e Home
-     mettono il Diario in mezza larghezza da 768 px, e il testo scendeva fino a 5 px). Soglia 460 px: la riga più carica ha 301 px fissi
-     (maniglia 44, casella 44, immagine 40, comandi 132, spazi), e al testo ne restano almeno 160 */
+  /* la colonna delle voci è un contenitore: la «voce stretta» vale anche quando è stretta la COLONNA, non lo schermo (L1-01: Partita/Oggi e
+     Home mettono il Diario in mezza larghezza da 768 px) */
   ul:has(> li.azione) { container: voci-giorno / inline-size; }
-  @container voci-giorno (max-width: 460px) {
-    .comandi-voce__posto:has(> .comandi-voce) { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; margin-top: -4px; }
-  }
   /* L1-02 (schizzo approvato il 31/10): da 768 px la griglia delle Doti ha l'altezza della pagina, e la stella a misura fissa usciva dalla
      card (sopra le schede e con la barra di pagina). La card è contenitore in larghezza; il riquadro della stella prende l'altezza che
      resta (fino al lato naturale: 540 px, o la larghezza meno il margine del 12% per lato) e la stella è il quadrato più grande che ci
@@ -3389,8 +3380,10 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .scorta-tessera__persone { justify-content: center; gap: 2px; height: 44px; padding: 0 3px; border-top: 1px solid rgb(255 255 255 / .35); background: rgb(0 0 0 / .28); font-size: var(--testo-12); }
   .scorta-tessera__persone:hover { background: rgb(0 0 0 / .42); }
   .scorta-tessera__testo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .scorta-tessera__nomi { display: flex; flex: 0 1 auto; flex-direction: column; align-items: flex-start; min-width: 0; line-height: 1.15; }
+  .scorta-tessera__nomi > .scorta-tessera__testo { max-width: 100%; }
+  .scorta-tessera__altre { font-weight: 700; font-variant-numeric: tabular-nums; }
   .scorta-tessera__ritratti { display: inline-flex; flex: none; }
-  .scorta-tessera__ritratti > .scorta-figura + .scorta-figura { margin-left: -8px; }
   .scorta-tessera__ritratti .scorta-figura > span { border-color: #fff; }
   .scorta-tessera__freccia { flex: none; opacity: .85; }
   .scorta-tessera__arcano:focus-visible, .scorta-tessera__persone:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
@@ -3474,14 +3467,13 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   /* (l'editor della finestra e la riga che la apre stanno nel blocco «Scelta della scorta», qui sopra) */
 
   /* ---- la voce del Diario (`RequisitiVoce`, casella di completamento in `AzioneGiornata`) ----
-     Testata su una riga (titolo e «n/N» mai spezzati, la barra prende il resto); sotto, una griglia di chip a colonne uguali (112 px minimi, e
-     comunque tre colonne sul telefono: 5–6 a 1280, 3 a 375). Il chip è 32 px visivi; il tocco arriva a 44 px con un'area invisibile 6 px sopra e
-     6 px sotto, e le file distano 12 px: le aree di due file non si sovrappongono mai. Sotto i 768 px, o con la colonna del testo più stretta di
-     tre chip (`data-piena`, il Diario a mezza pagina in Home e in Partita › Oggi), l'elenco esce dalla colonna del testo e prende tutta la
-     larghezza della voce: `--scorta-rientro` è il rientro della colonna, misurato da `RequisitiVoce`. */
+     L'elenco è una fila a sé della voce, a tutta larghezza (`flex-basis: 100%` nella riga che va a capo), sotto casella, immagine, testo e
+     comandi a ogni formato: la griglia prende tutte le colonne che la voce consente (8 a 1280, 6 a 1024, 3 a 375). Testata su una riga (titolo
+     e «n/N» mai spezzati, la barra prende il resto); sotto, la griglia di chip a colonne uguali (112 px minimi; sul telefono tre colonne). Il
+     chip è 32 px visivi; il tocco arriva a 44 px con un'area invisibile 6 px sopra e 6 px sotto, e le file distano 12 px: le aree di due file
+     si toccano senza sovrapporsi. */
   .scorta-voce { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 2px 0; }
-  .scorta-voce[data-piena] { margin-left: calc(-1 * var(--scorta-rientro, 0px)); }
-  @media (max-width: 767px) { .scorta-voce { margin-left: calc(-1 * var(--scorta-rientro, 0px)); } }
+  .azione > .scorta-voce { flex: 1 0 100%; }
   .scorta-voce__testata { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 24px; font-size: var(--testo-12); color: var(--color-text-secondary); }
   button.scorta-voce__testata { width: 100%; min-height: 44px; padding: 0 4px; border: 0; background: transparent; font: inherit; font-size: var(--testo-12); text-align: left; cursor: pointer; }
   button.scorta-voce__testata:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
@@ -3490,7 +3482,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .scorta-voce__barra { position: relative; flex: 1 1 4rem; min-width: 2rem; max-width: 14rem; height: 4px; background: var(--color-border); overflow: hidden; }
   .scorta-voce__barra > span { position: absolute; inset: 0 auto 0 0; background: var(--color-primary); transition: width .2s ease-out, background-color .2s ease-out; }
   .scorta-voce--pronta .scorta-voce__barra > span { background: var(--color-success); }
-  /* la riga ripiegata (voce fatta): figure in una sola linea (al più sei e «+N»), la freccia subito dopo */
+  /* la riga ripiegata (voce fatta): figure in una sola linea (al più cinque e «+N»), la freccia subito dopo */
   .scorta-voce__riepilogo { display: inline-flex; flex: 0 1 auto; flex-wrap: nowrap; align-items: center; gap: 2px; min-width: 0; overflow: hidden; }
   .scorta-voce__altre { flex: none; padding-left: 2px; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--color-text-secondary); }
   .scorta-voce__freccia { display: inline-flex; flex: none; color: var(--color-text-muted); transition: transform .15s ease-out; }
@@ -3503,8 +3495,8 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
     border: 1px solid var(--color-border-input); border-radius: var(--radius-sm); background: var(--color-bg-tertiary); color: var(--color-text);
     font-size: var(--testo-12); line-height: 1.15; cursor: pointer; -webkit-tap-highlight-color: transparent;
     transition: background-color .15s ease-out, border-color .15s ease-out, color .15s ease-out, opacity .15s ease-out; }
-  /* l'area di tocco da 44 px, invisibile: 6 px sopra e sotto il chip (le file distano 12 px) */
-  .scorta-chip:not(.scorta-chip--lettura)::after { content: ''; position: absolute; inset: -7px -1px; }
+  /* l'area di tocco da 44 px, invisibile: 6 px sopra e sotto il chip (32 + 6 + 6; le file distano 12 px, le aree si toccano senza sovrapporsi) */
+  .scorta-chip:not(.scorta-chip--lettura)::after { content: ''; position: absolute; inset: -6px -1px; }
   .scorta-chip:not(.scorta-chip--lettura):hover { border-color: var(--color-text-secondary); }
   .scorta-chip:has(input:focus-visible) { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
   /* spuntato: non il rosso pieno del «fatto» (D15), ma contorno rosso, fondo scuro e testo attenuato; il segno di spunta sta sulla figura */
@@ -3520,13 +3512,19 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .scorta-chip--spuntato .scorta-chip__segno { background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); }
   .scorta-chip__segno > svg { width: 11px; height: 11px; stroke-width: 3.4; transform: scale(0); transition: transform .18s cubic-bezier(.2, 1.4, .4, 1); }
   .scorta-chip--spuntato .scorta-chip__segno > svg { transform: scale(1); }
+  /* a N/N (`--pronta`) i chip spuntati passano al verde di «Pronta», come barra e anello: contorno e cerchio della spunta (la spunta scura sul
+     verde: il bianco ci arriverebbe a poco più di 2:1) */
+  .scorta-voce--pronta .scorta-chip--spuntato { border-color: var(--color-success); }
+  .scorta-voce--pronta .scorta-chip--spuntato:hover { border-color: var(--color-success-testo); }
+  .scorta-voce--pronta .scorta-chip--spuntato .scorta-chip__segno { background: var(--color-success); border-color: var(--color-success); color: var(--color-bg); }
+  .scorta-chip__ritratto { border-radius: 2px; }
   /* sul telefono (elenco sotto i 366 px) tre colonne fisse; la colonna è stretta (~92 px) e un nome accanto alla figura si spezzerebbe a metà
-     parola («Temperan-za»): il chip si fa verticale, figura sopra e nome sotto su una riga intera (44 px visivi, che sono già il tocco;
-     l'area invisibile resta 4 px per lato e le file distano 8 px, senza sovrapporsi). Dopo le regole del chip, che sovrascrive */
+     parola («Temperan-za»): il chip si fa verticale, figura sopra e nome sotto su una riga intera. È alto 44 px visivi, che sono già il
+     tocco: niente area invisibile, e le file distano 8 px. Dopo le regole del chip, che sovrascrive */
   @container scorta-voce (max-width: 365px) {
     .scorta-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 8px; }
     .scorta-chip { flex-direction: column; justify-content: center; gap: 1px; min-height: 44px; padding: 2px 3px 1px; text-align: center; }
-    .scorta-chip:not(.scorta-chip--lettura)::after { inset: -5px -1px; }
+    .scorta-chip:not(.scorta-chip--lettura)::after { content: none; }
   }
   /* il richiamo dopo un tentativo di completare la voce troppo presto: le caselle mancanti si accendono in ambra per un attimo */
   .scorta-voce--richiamo .scorta-chip--manca { border-color: var(--color-warning-testo); box-shadow: 0 0 0 1px var(--color-warning-testo); }
@@ -3538,7 +3536,8 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .scorta-casella { flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; width: 66px; }
   .scorta-casella__motivo, .scorta-casella__pronta { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; column-gap: 3px; max-width: 100%;
     text-align: center; font-size: var(--testo-12); line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
-  /* sotto i 768 px la colonna del testo è stretta: la didascalia va su due righe («Mancano» / «6», segno sopra «Pronta») e restituisce 12 px al testo */
+  /* sotto i 768 px la casella sta nella prima fila della voce stretta con maniglia, immagine e comandi: la didascalia va su due righe («Mancano» /
+     «6», segno sopra «Pronta») e restituisce 12 px alla fila */
   @media (max-width: 767px) { .scorta-casella { width: 54px; } }
   .scorta-casella__motivo { color: var(--color-warning-testo); }
   .scorta-casella__pronta { color: var(--color-success-testo); }
@@ -3547,7 +3546,31 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
     background: conic-gradient(var(--colore-anello) calc(var(--p) * 1turn), color-mix(in srgb, var(--color-text-muted) 45%, transparent) 0);
     -webkit-mask: radial-gradient(circle, transparent 12.5px, #000 13px); mask: radial-gradient(circle, transparent 12.5px, #000 13px); }
   .scorta-anello--pronta { --colore-anello: var(--color-success); }
-  .scorta-anello > input[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+  /* la casella di completamento ferma ma col fuoco (`AzioneGiornata`): scorta incompleta, la sua richiesta in corso (`aria-busy`) o
+     un'operazione della giornata in corso; `disabled` resta per le ragioni durevoli */
+  .casella-voce[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+  .casella-voce[aria-busy="true"] { cursor: progress; }
+}
+
+/* ---- La voce stretta del Diario (telefono sotto i 768 px; Diario a mezza pagina, colonna delle voci fino a 460 px) ----
+   Prima fila: maniglia, casella (con la didascalia «Mancano n»/«Pronta») e immagine a sinistra, comandi e ricevute a destra; sotto, il testo
+   con i cartellini a tutta larghezza, poi l'elenco «In scorta». Prima il testo stava in una colonna di 130–140 px accanto alle figure (sei righe
+   per una Trama) e i comandi in una fila a sé. Vale per azioni e promemoria (`.azione > div` è la colonna del testo di entrambe). L'ordine
+   visivo sposta solo i comandi davanti al testo: nel documento (tastiera, lettore di schermo) restano dopo il testo, come in una scheda con
+   i comandi nell'angolo. Prima fila: maniglia, casella e immagine da 44 + 44 + 40 px, comandi 132 e tre spazi da 4 = 272 px, che stanno
+   anche a 360 px di schermo (la voce ne ha 275); con l'anello della scorta la casella è larga 54 (282 px, a 375 la voce ne ha 290). Più
+   stretta ancora, i comandi vanno a capo da soli in una fila loro. Fuori dai layer: deve vincere sulle utilità della riga (`gap-2`, `flex-1`) */
+@media (max-width: 767px) {
+  li.azione { column-gap: 4px; row-gap: 6px; }
+  li.azione > div { order: 2; flex-basis: 100%; }
+  li.azione > .comandi-voce__posto { order: 1; margin-left: auto; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+  li.azione > .scorta-voce { order: 3; }
+}
+@container voci-giorno (max-width: 460px) {
+  li.azione { column-gap: 4px; row-gap: 6px; }
+  li.azione > div { order: 2; flex-basis: 100%; }
+  li.azione > .comandi-voce__posto { order: 1; margin-left: auto; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+  li.azione > .scorta-voce { order: 3; }
 }
 
 /* ---- Segni agganciati con la riserva SVG (prompt §30–§31, 2026-11-18): Trama collegata, Non dovuta, scorta pronta ---- */

@@ -19,7 +19,7 @@
 // L6-06: la griglia di «Quale» e l'editor delle condizioni stanno in due finestre sopra la voce; nella voce restano una riga ciascuno.
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Segmenti } from '../shared/Segmenti';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { aggiornaVoceGiornata, applicaPropostaConversione, creaVoceGiornata, getElenchiAzione, getElenchiEffettiVoce } from '../../services/api';
@@ -84,6 +84,8 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   // come nella finestra (`Modal`): il fuoco sul campo apre la tastiera, e su tablet e telefono la tastiera copre metà del foglio;
   // il campo prende il fuoco solo da desktop (≥ 1024 px, la soglia della barra laterale)
   const largo = useMedia('(min-width: 1024px)');
+  // gli id dei campi di testo, per collegarli alla loro etichetta
+  const idCampo = useId();
   const telefono = useMedia('(max-width: 767px)');
   const voce = soggetto.tipo === 'voce' ? soggetto.voce : null;
   const proposta = soggetto.tipo === 'voce' ? soggetto.proposta ?? null : null;
@@ -202,15 +204,19 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     }
   };
 
+  // l'etichetta visibile è anche il nome accessibile del campo (collegata per id e ripetuta in `aria-label`, così nessuno strumento ripiega sul
+  // segnaposto, che è solo un esempio)
+  const etichettaTesto = azione ? 'Che cosa fare' : 'Che cosa succede';
+  const etichettaNote = azione ? 'Note' : 'Dettagli';
   const colonnaSinistra = (
     <div className="voce-colonna">
       <div className="flex flex-col gap-1">
         <Segmenti etichetta="Che cosa è" valore={campi.genere} opzioni={GENERI} onCambia={(g) => imposta({ genere: g })} />
         <span className="testo-12 text-text-muted">{azione ? 'Si spunta e può dare punti.' : 'Solo da leggere: compare in «Di giorno» o «Di sera» senza casella, e non ha tipo né effetti.'}</span>
       </div>
-      <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
+      <label className="flex flex-col gap-1 testo-13 text-text-secondary" htmlFor={`${idCampo}-testo`}>{etichettaTesto}
         {/* eslint-disable-next-line jsx-a11y/no-autofocus -- sullo schermo largo l'editor della voce si apre per scrivere il testo */}
-        <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus={largo} onChange={(e) => imposta({ testo: e.target.value })}
+        <textarea id={`${idCampo}-testo`} aria-label={etichettaTesto} className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus={largo} onChange={(e) => imposta({ testo: e.target.value })}
           placeholder={azione ? 'es. Comprare il Set per retrogaming' : 'es. Domani esami: ripassare la sera prima'} />
       </label>
       <Segmenti etichetta="Quando" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
@@ -241,8 +247,8 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
       {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} fatta={!!voce?.fatta} apertaDiPartenza={!voce || !!proposta} />}
       {azione && !elenchi && !erroreElenchi && <p className="m-0 testo-12 text-text-muted" role="status">Carico gli elenchi…</p>}
       {azione && erroreElenchi && <p className="m-0 testo-12 text-error-testo" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
-      <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Note' : 'Dettagli'}
-        <textarea className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
+      <label className="flex flex-col gap-1 testo-13 text-text-secondary" htmlFor={`${idCampo}-note`}>{etichettaNote}
+        <textarea id={`${idCampo}-note`} aria-label={etichettaNote} className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
       </label>
       {/* L13 (O9-3, «in tal caso viene meno la consegna»): quando la voce è dovuta, con l'editor unico delle condizioni; senza, si fa sempre.
           Con le condizioni false al giorno della voce, nella partita la voce è «Non dovuta»: non si spunta e non ferma la giornata */}
@@ -467,10 +473,15 @@ function FinestraRequisitiVoce({ requisiti, elenchi, onApplica, onChiudi }: { re
                       aria-label={`Persone di ${a.nome}: ${nomi.length === 0 ? 'qualunque' : nomi.join(', ')}. Scegli`} title={nomi.length === 0 ? `Qualunque Persona di ${a.nome}` : nomi.join(', ')}>
                       {specifiche.length === 0 ? <span className="scorta-tessera__testo">Qualunque</span> : (
                         <>
+                          {/* la prima Persona scelta con il suo ritratto, e quante altre: il nome completo di tutte è nel nome accessibile e nel titolo */}
                           <span className="scorta-tessera__ritratti">
-                            {specifiche.slice(0, 3).map((r) => <FiguraRequisito key={r.persona} r={r} persona={perId.get(r.persona!)} dimensione={22} />)}
+                            <FiguraRequisito r={specifiche[0]} persona={perId.get(specifiche[0].persona!)} dimensione={18} />
                           </span>
-                          <span className="scorta-tessera__testo">{specifiche.length === 1 ? nomi[0] : specifiche.length}</span>
+                          {/* il nome sopra e «+N» sotto: sulla tessera stretta il nome ha tutta la larghezza che resta */}
+                          <span className="scorta-tessera__nomi">
+                            <span className="scorta-tessera__testo">{nomi[0]}</span>
+                            {specifiche.length > 1 && <span className="scorta-tessera__altre">+{specifiche.length - 1}</span>}
+                          </span>
                         </>
                       )}
                       <IconChevronRight size={12} className="scorta-tessera__freccia" />

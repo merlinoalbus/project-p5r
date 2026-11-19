@@ -10,6 +10,7 @@ import { AzioneElenco, AzioneHome, AzioneIndietro, AzioneRiprova, FiguraStato, T
 import { IntestazioneScheda } from './IntestazioneScheda';
 import type { CausaErrore, StatoLettura } from '../../hooks/useCarica';
 import { ceUnaPaginaPrima } from '../../hooks/useIndietro';
+import { useTitoloErrore } from '../../hooks/useDocumentTitle';
 
 const FOTOGRAMMI = Array.from({ length: 8 }, (_, i) => `illustrazioni/caricamento-${i + 1}`);
 const ILLUSTRAZIONE_NEUTRA = 'illustrazioni/vuoto-persona-senza-testo';
@@ -89,6 +90,8 @@ export function PageState({ carica, isLoading: isLoadingPassato, error: errorePa
   // la causa passata dalla pagina, altrimenti quella della lettura fallita, solo se il messaggio mostrato è il suo
   const causa = causaPassata !== undefined ? causaPassata : fallita && fallita.errore === error ? fallita.causaErrore : null;
   const onRetry = onRetryPassato ?? (letture.length > 0 ? () => { for (const l of letture) void l.ricarica(); } : undefined);
+  // una scheda in errore è tutta la pagina: il titolo della scheda del browser dice l'errore («Non trovato — …»), non il nome generico
+  useTitoloErrore(!isLoading && error && scheda ? titoloPerCausa(causa) : null);
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">

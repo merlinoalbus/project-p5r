@@ -105,10 +105,12 @@ interface Props {
   altrove?: (r: RigaEffetto) => boolean;
   /** La voce è spuntata nella partita aperta. */
   fatta?: boolean;
+  /** La frase dell'elenco vuoto, al posto di «Nessun effetto: …» (una sola frase: Trama ed Esame dicono che cosa aggiungere). */
+  vuoto?: string;
 }
 
 /** L'elenco unico degli effetti, con «Aggiungi un effetto»: vedi l'intestazione del file. */
-export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fatta }: Props) {
+export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fatta, vuoto }: Props) {
   const righe = valore.effettiVoce ?? [];
   const collegato = indiceDelCollegamento(righe, valore.tipo, valore.riferimento);
   const visibili = righe.map((r, i) => ({ r, i })).filter(({ r }) => !altrove?.(r));
@@ -170,7 +172,7 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
       {motivoYen && <p role="alert" className="m-0 rounded border border-warning p-2 testo-13 text-warning">{motivoYen}</p>}
       {avvisoYen && <p role="note" className="m-0 rounded border border-warning p-2 testo-13 text-text-secondary">{avvisoYen}</p>}
       {motivoOggetti && <p role="alert" className="m-0 rounded border border-warning p-2 testo-13 text-warning text-pretty">{motivoOggetti}</p>}
-      {visibili.length === 0 && <p className="m-0 testo-13 text-text-muted">{righe.length === 0 ? 'Nessun effetto: la spunta registra solo che l’hai fatta.' : 'Nessun altro effetto.'}</p>}
+      {visibili.length === 0 && <p className="m-0 testo-13 text-text-muted">{righe.length === 0 ? vuoto ?? 'Nessun effetto: la spunta registra solo che l’hai fatta.' : 'Nessun altro effetto.'}</p>}
       {visibili.length > 0 && (
         <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Effetti della spunta">
           {visibili.map(({ r, i }) => {

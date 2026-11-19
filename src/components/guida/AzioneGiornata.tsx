@@ -8,7 +8,7 @@
 // metà (note, esiti, acquisti) non sopravvivono a una voce cambiata altrove.
 // ============================================================
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEventHandler, type ReactNode, type RefObject } from 'react';
 import { getConfidentiPartita, getVocePercorso, impostaAzionePercorso } from '../../services/api';
 import { giocaLaSceltaRomantica } from '../../../shared/puntiConfidenti';
 import { fraseRelazione } from '../../../shared/descriviEffettiSpunta';
@@ -70,14 +70,30 @@ interface PropsAzione {
   selezione?: SelezioneRiga;
 }
 
+/** Ciò che la spunta legge di una voce: quando cambia, la riga si rimonta (vedi l'intestazione). */
+const chiaveContesto = (a: AzionePercorsoDto, partitaId: number | null): string =>
+  JSON.stringify([partitaId, a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
+
+/** I gestori della selezione della riga, che ignorano i clic dentro l'elenco «In scorta»: un tocco mancato fra due chip o sul titolo non seleziona la voce. */
+const fuoriDallaScorta = (g: MouseEventHandler<HTMLLIElement> | undefined): MouseEventHandler<HTMLLIElement> | undefined =>
+  g && ((e) => { if (!(e.target instanceof Element && e.target.closest('.scorta-voce'))) g(e); });
+
 /** Una riga d'azione della giornata (della guida o aggiunta): spunta, immagine dell'entità, testo, tipo, collegamento, stato, note, gesti. */
 export function Azione(props: PropsAzione) {
   const { a, partitaId } = props;
-  const contesto = JSON.stringify([partitaId, a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
-  return <AzioneNelContesto key={contesto} {...props} />;
+  // la spunta o l'annullo cambiano `fatta` e quindi rimontano la riga: se il fuoco era nella riga torna sulla casella nuova (sopravvive al rimontaggio)
+  const fuocoCasellaRef = useRef(false);
+  return <AzioneNelContesto key={chiaveContesto(a, partitaId)} {...props} fuocoCasellaRef={fuocoCasellaRef} />;
 }
-function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione }: PropsAzione) {
+function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione, fuocoCasellaRef }: PropsAzione & { fuocoCasellaRef: RefObject<boolean> }) {
   const [occupato, setOccupato] = useState(false);
+  const rifCasella = useRef<HTMLInputElement>(null);
+  // la riga rimontata dalla spunta o dall'annullo che aveva il fuoco: la casella lo riprende (senza scorrere)
+  useLayoutEffect(() => {
+    if (!fuocoCasellaRef.current) return;
+    fuocoCasellaRef.current = false;
+    rifCasella.current?.focus({ preventScroll: true });
+  }, [fuocoCasellaRef]);
   // con la scelta romantica fatta nella scelta delle note (L13, O10-3), che arriva così fino al salvataggio
   const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; esiti?: SceltaEsitoSpunta[]; relazioneRomantica?: boolean } | null>(null);
   // L13: la scelta dell'esito (turno di un'attività con esiti, note di una Dote a valori possibili) prima di salvare la spunta
@@ -148,6 +164,10 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       if (!vivo.current) return;
       setChiediEsiti(null);
       setChiediAcquisti(null);
+      // la riga si rimonterà (è cambiato ciò che la spunta legge): se il fuoco è nella riga (la casella, o la scelta delle note, degli esiti o
+      // degli acquisti che sparisce con lei) la riga nuova lo rimette sulla casella; altrimenti il fuoco resta dov'è
+      const riga = rifCasella.current?.closest('li');
+      if (chiaveContesto(agg, partitaId) !== chiaveContesto(a, partitaId) && riga && riga.contains(document.activeElement)) fuocoCasellaRef.current = true;
       onCambiata(agg);
       // spuntando (o riaprendo) un'azione cambia cosa il giorno suggerisce: l'alone dorato si aggiorna da solo
       useSuggerimentiStore.getState().invalida();
@@ -187,28 +207,35 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const scortaMancano = scortaTotale - scortaFatti;
   // il richiamo all'elenco «In scorta»: cresce a ogni tentativo di completare la voce con caselle mancanti (`RequisitiVoce` porta il fuoco alla prima)
   const [richiamoScorta, setRichiamoScorta] = useState(0);
-  // con caselle «In scorta» mancanti la casella non è `disabled` ma `aria-disabled`: resta raggiungibile (la descrizione dice quante ne mancano) e
-  // un tocco, Spazio o Invio non spuntano ma portano alla prima casella mancante; le altre ragioni la spengono come prima
   const richiamaScorta = () => setRichiamoScorta((n) => n + 1);
+  // Due modi di fermare la casella. Le ragioni durevoli (operazione da completare, voce non dovuta, effetti da correggere) la spengono
+  // (`disabled`). Le attese (la sua richiesta in corso, `aria-busy`; un'operazione della giornata in corso) e le caselle «In scorta» mancanti
+  // invece no: `aria-disabled`, così il fuoco della tastiera resta sulla casella (un `disabled` lo farebbe cadere sul documento a ogni spunta e
+  // annullo) e il gesto si ignora; con la scorta incompleta un tocco, Spazio o Invio portano alla prima casella mancante (la descrizione dice
+  // quante ne mancano)
+  const spenta = !!pendente || nonDovuta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere');
+  const inAttesa = occupato || !!bloccata;
+  const ferma = !spenta && (inAttesa || scortaIncompleta);
+  const richiamo = scortaIncompleta && !inAttesa;
   const casella = (
-    <input type="checkbox" className={`w-5 h-5 shrink-0 ${conAnello ? '' : 'mt-2'}`} checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')}
-      aria-disabled={scortaIncompleta || undefined}
-      onClick={scortaIncompleta ? (e) => { e.preventDefault(); richiamaScorta(); } : undefined}
-      onKeyDown={scortaIncompleta ? (e) => { if (e.key === 'Enter') { e.preventDefault(); richiamaScorta(); } } : undefined}
-      onChange={(e) => { if (!scortaIncompleta) void cambia(e.target.checked); }}
+    <input ref={rifCasella} type="checkbox" className={`casella-voce w-5 h-5 shrink-0 ${conAnello ? '' : 'mt-2'}`} checked={a.fatta} disabled={spenta}
+      aria-disabled={ferma || undefined} aria-busy={occupato || undefined}
+      onClick={ferma ? (e) => { e.preventDefault(); if (richiamo) richiamaScorta(); } : undefined}
+      onKeyDown={richiamo ? (e) => { if (e.key === 'Enter') { e.preventDefault(); richiamaScorta(); } } : undefined}
+      onChange={(e) => { if (!ferma) void cambia(e.target.checked); }}
       aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={[nonDovuta ? `non-dovuta-${a.uid}` : '', scortaIncompleta ? idMotivoScorta(a.uid) : ''].filter(Boolean).join(' ') || undefined} />
   );
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
     <li id={`voce-${a.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''} ${classeRiga ?? ''} ${classeSelezioneRiga(selezione)}`} aria-current={evidenziata ? 'true' : undefined}
-      {...selezione?.gestori}>
+      {...(selezione && { ...selezione.gestori, onMouseDown: fuoriDallaScorta(selezione.gestori.onMouseDown), onClick: fuoriDallaScorta(selezione.gestori.onClick) })}>
       {maniglia}
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {/* L13 (O9-3): una voce non dovuta nella partita non si spunta (il server risponde 409): la casella è spenta e il motivo sta sotto il testo */}
       {/* con un elenco «In scorta» la casella ha attorno l'anello d'avanzamento (arco rosso che cresce con le caselle spuntate, verde e pieno quando si
           può spuntare) e sotto una didascalia: «Mancano n» (anche descrizione della casella) o, a N/N, «Pronta» con il suo segno */}
       {partitaId && (
-        <label className={`touch flex shrink-0 -my-1 ${conAnello ? 'scorta-casella' : 'items-start justify-center pr-1'} ${nonDovuta || scortaIncompleta ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+        <label className={`touch flex shrink-0 -my-1 ${conAnello ? 'scorta-casella' : 'items-start justify-center pr-1'} ${nonDovuta || scortaIncompleta ? 'cursor-not-allowed' : inAttesa ? 'cursor-progress' : 'cursor-pointer'}`}
           title={scortaIncompleta ? `In scorta: ${scortaFatti}/${scortaTotale}. Spunta le caselle che mancano.` : undefined}>
           {conAnello
             ? (
@@ -240,8 +267,6 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
           infiltrazioni={<InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />} />
         {/* le risposte migliori dell'avanzamento della voce Confidente, fra le sue note (progetto dei Confidenti, 2026-10-24) */}
         <RisposteVoce a={a} />
-        {/* l'elenco «da avere in scorta» (caselle manuali della partita): la casella di completamento resta spenta finché ne manca una */}
-        <RequisitiVoce a={a} partitaId={partitaId} onCambiata={onCambiata} richiamo={richiamoScorta} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
         {pendente && <p role="status" className="m-0 text-warning">Un’operazione su questa voce non è stata confermata: completala dall’elenco «Operazioni da completare» sopra le voci, poi potrai spuntare la voce.</p>}
         {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}
@@ -257,8 +282,9 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {chiediNote && <SceltaNote occupato={occupato} relazione={relazioneDaChiedere}
           onScegli={(n, relazione) => void cambia(true, n ?? undefined, n === null, undefined, undefined, undefined, [], false, relazione)} onAnnulla={() => setChiediNote(false)} />}
       </div>
-      {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; da 640 px in una colonna a destra
-          del testo, sul telefono in una fila a sé in fondo alla voce: `.comandi-voce__posto`) e le ricevute della spunta dietro un pulsantino (2026-10-25: «magari
+      {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; in una colonna a destra del testo, e
+          con la voce stretta — telefono, Diario a mezza pagina — a destra nella prima fila, accanto a maniglia, casella e immagine, col testo a
+          tutta larghezza sotto: `.comandi-voce__posto`) e le ricevute della spunta dietro un pulsantino (2026-10-25: «magari
           andrebbero visualizzati con un pulsantino e non restando la sotto sempre visibili»).
           2026-10-26: solo ciò che la spunta ha applicato ed è in vigore (`applicatoDallaSpunta`), non le ricevute annullate o tecniche; L13
           (decisione 19), a parte nella stessa finestra, gli effetti di stato che nella partita non valgono (`statiNonApplicati`) */}
@@ -268,6 +294,9 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
           <RicevuteVoce applicato={a.applicatoDallaSpunta} nonApplicati={a.statiNonApplicati} voce={a.azione} />
         </span>
       )}
+      {/* l'elenco «da avere in scorta» (caselle manuali della partita): una fila a tutta larghezza della voce, sotto casella, immagine, testo e
+          comandi (`.azione > .scorta-voce`); la casella di completamento resta ferma finché ne manca una */}
+      <RequisitiVoce a={a} partitaId={partitaId} onCambiata={onCambiata} richiamo={richiamoScorta} />
     </li>
   );
 }

@@ -15,10 +15,16 @@ interface TitoloPaginaState {
   imposta: (titolo: string) => void;
   /** Toglie il titolo se è ancora `titolo` (la pagina che si smonta non cancella quello della pagina nuova). */
   togli: (titolo: string) => void;
+  /** Il titolo dell'errore che occupa la pagina («Non trovato», «Sei offline»…, `useTitoloErrore`): finché c'è, il titolo della scheda del
+   *  browser è il suo e non quello generico della pagina («Persona»); le briciole restano quelle della pagina, come l'h1 dell'intestazione. */
+  errore: string | null;
+  impostaErrore: (errore: string | null) => void;
 }
 
 export const useTitoloPaginaStore = create<TitoloPaginaState>((set) => ({
   titolo: null,
   imposta: (titolo) => set({ titolo }),
   togli: (titolo) => set((s) => (s.titolo === titolo ? { titolo: null } : s)),
+  errore: null,
+  impostaErrore: (errore) => set({ errore }),
 }));
