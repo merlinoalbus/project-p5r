@@ -210,6 +210,10 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       } else if (rimonta && (ora === rifCasella.current || (daFinestra && !!ora?.closest('[role="dialog"]')))) {
         // la casella stessa, o un altro comando della finestra «Prima di spuntare», che si chiude con la riga
         fuocoCasellaRef.current = true;
+      } else if (!rimonta && ora && ora !== rifCasella.current && elementoAlGesto?.closest('[aria-busy], [role="dialog"]')?.contains(ora)) {
+        // un altro controllo della stessa scelta del gesto (da «♪♪» ad «Annulla», da un esito all'altro, un comando della finestra): la
+        // scelta sta per chiudersi senza che la riga si rimonti, quindi il fuoco va alla casella invece di cadere sul documento
+        rifCasella.current?.focus({ preventScroll: true });
       }
       setChiediNote(false);
       setChiediEsiti(null);
