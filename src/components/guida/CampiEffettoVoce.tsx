@@ -28,6 +28,7 @@ import { elencoNomi } from '../../../shared/riepilogoEffetti';
 import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
 import { useIdStabili } from '../../hooks/useIdStabili';
+import { opzioniOggettiDelCatalogo } from '../../utils/opzioniCatalogo';
 
 type Righe = RichiestaSalvaEffettiVoce['effetti'];
 
@@ -207,7 +208,7 @@ export function CampiUscitaOggetto({ effetto: e, oggetti, onCambia }: { effetto:
         }} />
       <div className="flex flex-wrap items-end gap-2">
         <Selettore className="min-w-[12rem] flex-1" etichetta={restituito ? 'Prestito restituito' : 'Oggetto venduto'} valore={e.oggetto}
-          opzioni={conCorrente(elenco.map((o) => ({ chiave: o.chiave, nome: o.nome, gruppo: o.categoria })), e.oggetto, 'Oggetto non più nel catalogo')}
+          opzioni={conCorrente(opzioniOggettiDelCatalogo(elenco), e.oggetto, 'Oggetto non più nel catalogo')}
           onCambia={(v) => onCambia({ ...e, oggetto: v })} />
         <CampoQuantita valore={e.quantita} onCambia={(quantita) => onCambia({ ...e, quantita })} />
         {!restituito && (
@@ -338,7 +339,7 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
     case 'oggetto':
       return (
         <div className="flex flex-wrap items-end gap-2">
-          <Selettore className="min-w-[12rem] flex-1" etichetta="Oggetto del catalogo" valore={e.oggetto} opzioni={conCorrente((effetti.oggetti ?? []).map((o) => ({ chiave: o.chiave, nome: o.nome, gruppo: o.categoria })), e.oggetto, 'Oggetto non più nel catalogo')} onCambia={(v) => onCambia({ ...e, oggetto: v })} />
+          <Selettore className="min-w-[12rem] flex-1" etichetta="Oggetto del catalogo" valore={e.oggetto} opzioni={conCorrente(opzioniOggettiDelCatalogo(effetti.oggetti ?? []), e.oggetto, 'Oggetto non più nel catalogo')} onCambia={(v) => onCambia({ ...e, oggetto: v })} />
           <CampoQuantita valore={e.quantita} onCambia={(quantita) => onCambia({ ...e, quantita })} />
         </div>
       );

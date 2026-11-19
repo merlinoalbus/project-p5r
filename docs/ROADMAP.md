@@ -73,7 +73,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
   Ancora aperti: i pin che restano sul luogo finché non si vede in gioco quale macchina indicano (Akihabara 272-275, Shinjuku
   1564-1566, edificio della Shujin 1759); la Stecca jump, il Set di freccette e i Boilie restano come sono finché non si verificano in gioco.
 - Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`). Un'offerta collegata prende nome,
-  categoria e «per chi» dall'oggetto; i legami fra fonti e oggetti si applicano subito, senza proposte.
+  categoria e «per chi» dall'oggetto; i legami fra fonti e oggetti si applicano subito, senza proposte. Le decorazioni della stanza al
+  Leblanc sono una categoria propria (gruppo «Decorazioni», provenienza dono di un Confidente o artiglio di Akihabara), scelte negli effetti
+  «oggetto ricevuto» delle voci e contate fra gli oggetti ottenuti della partita. Ancora aperto: l'elenco delle decorazioni nei dati, con i
+  loro legami alle voci e ai Confidenti.
 - Attività, lavori (esiti di Ore no Beko, Triple Seven e Rafflesia), libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri; serate della cantante nel Calendario. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria
   «Applica» sia alla spunta della voce sia con il + del contatore in Partita → Progressi.

@@ -1,6 +1,7 @@
 // Scritture del catalogo. Non riscrivono listini, testi delle voci o storico: gli altri moduli leggono la chiave.
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { chiaveCatalogo } from '../../shared/catalogo.js';
+import { chiaveCatalogo, eSottocategoriaDecorazione, SOTTOCATEGORIE_DECORAZIONE } from '../../shared/catalogo.js';
+import { httpErrors } from '../utils/httpError.js';
 import type { CatalogoOggettoDto } from '../../shared/types.js';
 import type { DatiCatalogoOggetto } from '../schemas/catalogoOggetti.js';
 import { dtoOggetto, identitaDellOggettoPerLOfferta, rigaOggetto } from './catalogoOggettiLetture.js';
@@ -17,7 +18,16 @@ function datiSql(dati: Partial<DatiCatalogoOggetto>): Record<string, string | nu
   return out;
 }
 
+/** Una decorazione dice la provenienza con una sottocategoria dell'elenco (`SOTTOCATEGORIE_DECORAZIONE`) o con nessuna; le altre categorie
+ *  hanno sottocategorie libere. Vale per la riga come sarà dopo la scrittura (categoria e sottocategoria possono cambiare una alla volta). */
+function verificaSottocategoria(categoria: string, sottocategoria: string | null): void {
+  if (categoria !== 'decorazione' || sottocategoria === null || eSottocategoriaDecorazione(sottocategoria)) return;
+  throw httpErrors.badRequest('sottocategoria-decorazione-non-valida',
+    `Una decorazione ha come sottocategoria «dono» (${SOTTOCATEGORIE_DECORAZIONE.dono}), «artiglio» (${SOTTOCATEGORIE_DECORAZIONE.artiglio}) o nessuna: «${sottocategoria}» non è fra queste.`);
+}
+
 export function creaOggetto(dati: DatiCatalogoOggetto): CatalogoOggettoDto {
+  verificaSottocategoria(dati.categoria, dati.sottocategoria);
   const base = chiaveCatalogo(dati.categoria, dati.nome);
   let chiave = base;
   for (let i = 2; prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
@@ -34,6 +44,7 @@ export function aggiornaOggetto(chiave: string, dati: Partial<DatiCatalogoOggett
   const valori = datiSql(dati);
   const colonne = Object.keys(valori).filter((c) => valori[c] !== r[c as keyof typeof r]);
   if (!colonne.length) return dtoOggetto(r);
+  verificaSottocategoria(dati.categoria ?? r.categoria, dati.sottocategoria !== undefined ? dati.sottocategoria : r.sottocategoria);
   getDb().transaction(() => {
     verificaCategoriaLettura(chiave, dati.categoria ?? r.categoria);
     prepared(`UPDATE catalogo_oggetto SET ${colonne.map((c) => `${c} = ?`).join(',')},origine = 'utente',updated_at = ? WHERE chiave = ?`)

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CATEGORIE_OGGETTO, CATEGORIA_OGGETTO, eCategoriaOggetto, type CategoriaOggetto } from '../../../shared/catalogo';
+import { CATEGORIE_OGGETTO, CATEGORIA_OGGETTO, eCategoriaOggetto, eSottocategoriaDecorazione, SOTTOCATEGORIE_DECORAZIONE, type CategoriaOggetto } from '../../../shared/catalogo';
 import type { CatalogoOggettoDto, DatiNuovoOggettoDto } from '../../types';
 import { aggiornaOggettoCatalogo, creaOggettoCatalogo } from '../../services/api/catalogoOggetti';
 import { Selettore } from '../shared/Selettore';
@@ -62,8 +62,17 @@ function ModuloOggettoReale({ oggetto, nomeIniziale = '', onChiudi, onSalvato }:
     {errore && <p role="alert" className="m-0 testo-13 text-error-testo">{errore}</p>}
     <SezioneCampi titolo="L’oggetto">
       <CampoTesto etichetta="Nome" obbligatorio largo valore={nome} massimo={300} onCambia={setNome} disabilitato={occupato} />
-      <Selettore etichettaSopra etichetta="Categoria" valore={categoria} disabilitato={occupato} opzioni={CATEGORIE_OGGETTO.map((k) => ({ chiave: k, nome: CATEGORIA_OGGETTO[k].nome }))} onCambia={(v) => { if (eCategoriaOggetto(v)) setCategoria(v); }} />
-      <CampoTesto etichetta="Sottocategoria" valore={sottocategoria} massimo={100} onCambia={setSottocategoria} disabilitato={occupato} />
+      <Selettore etichettaSopra etichetta="Categoria" valore={categoria} disabilitato={occupato} opzioni={CATEGORIE_OGGETTO.map((k) => ({ chiave: k, nome: CATEGORIA_OGGETTO[k].nome }))} onCambia={(v) => {
+        if (!eCategoriaOggetto(v)) return;
+        setCategoria(v);
+        // una decorazione ha solo le sottocategorie del suo elenco (il server rifiuta le altre): passando a decorazione un valore libero si toglie
+        if (v === 'decorazione' && sottocategoria.trim() && !eSottocategoriaDecorazione(sottocategoria.trim())) setSottocategoria('');
+      }} />
+      {/* la sottocategoria di una decorazione è la sua provenienza, da un elenco; per le altre categorie resta testo libero */}
+      {categoria === 'decorazione'
+        ? <Selettore etichettaSopra etichetta="Da dove viene" valore={sottocategoria} vuoto="Non indicato" ricerca="mai" disabilitato={occupato}
+          opzioni={Object.entries(SOTTOCATEGORIE_DECORAZIONE).map(([k, nome]) => ({ chiave: k, nome }))} onCambia={setSottocategoria} />
+        : <CampoTesto etichetta="Sottocategoria" valore={sottocategoria} massimo={100} onCambia={setSottocategoria} disabilitato={occupato} />}
       <CampoTesto etichetta="Nome originale" largo valore={originale} massimo={300} onCambia={setOriginale} disabilitato={occupato} />
       <CampoElenco etichetta="Altri nomi" voci={altri} lungo={false} max={300} onCambia={setAltri} disabilitato={occupato} />
     </SezioneCampi>
