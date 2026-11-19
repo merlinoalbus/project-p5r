@@ -13,7 +13,7 @@
 // che cosa è successo (col testo di prima, se c'è) e offre «Tieni il nuovo» / «Rimetti il precedente», oppure «Fatto».
 // ============================================================
 
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { impostaInfiltrazioniVoce, rivediVoceGiornata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
@@ -42,6 +42,15 @@ interface Props {
 export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
   const [aperta, setAperta] = useState(false);
   const [occupato, setOccupato] = useState(false);
+  // «Conferma» della proposta sparisce con la proposta confermata: se aveva il fuoco, il fuoco va alla matita che prende il suo posto
+  const rifConferma = useRef<HTMLButtonElement>(null);
+  const rifMatita = useRef<HTMLButtonElement>(null);
+  const fuocoAllaMatita = useRef(false);
+  useLayoutEffect(() => {
+    if (!fuocoAllaMatita.current || !rifMatita.current) return;
+    fuocoAllaMatita.current = false;
+    rifMatita.current.focus({ preventScroll: true });
+  });
   const opzioni = a.infiltrazioniDelPalazzo;
   if (!opzioni) return null;
   const insieme = a.infiltrazioni ?? [];
@@ -51,8 +60,13 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
   const proposta = insieme.length === 0 ? a.propostaInfiltrazioni ?? null : null;
   /** Salva l'insieme nuovo (le chiavi, in ordine) e passa al giorno la voce riletta. */
   const salva = async (chiavi: string[], messaggio: string) => {
+    if (occupato) return;
     setOccupato(true);
-    try { onCambiata(await impostaInfiltrazioniVoce(a.uid, chiavi, partitaId ?? undefined)); notifica('success', messaggio); }
+    try {
+      const agg = await impostaInfiltrazioniVoce(a.uid, chiavi, partitaId ?? undefined);
+      if (rifConferma.current && document.activeElement === rifConferma.current) fuocoAllaMatita.current = true;
+      onCambiata(agg); notifica('success', messaggio);
+    }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Infiltrazioni non salvate.'); }
     finally { setOccupato(false); }
   };
@@ -84,15 +98,17 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
         </ol>
       )}
       {/* L12 (passo 8): nel rilascio (sola lettura) l'insieme delle infiltrazioni si legge ma non si cambia e la proposta non si conferma */}
+      {/* mentre un cambio si salva i pulsanti della riga restano col fuoco: fermi (`aria-disabled`), il tocco si ignora (`disabled` farebbe
+          cadere il fuoco della tastiera sul documento) */}
       {!IN_RILASCIO && (insieme.length > 0
-        ? <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`Modifica le infiltrazioni: ${a.azione.slice(0, 60)}`} title="Modifica le infiltrazioni" disabled={occupato} onClick={() => setAperta(true)}>
+        ? <button ref={rifMatita} type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`Modifica le infiltrazioni: ${a.azione.slice(0, 60)}`} title="Modifica le infiltrazioni" aria-disabled={occupato || undefined} onClick={() => { if (!occupato) setAperta(true); }}>
             <IconaAzione chiave="modifica" dimensione={20} />
           </button>
-        : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Scegli le infiltrazioni" aria-haspopup="dialog" aria-label={`Scegli le infiltrazioni: ${a.azione.slice(0, 60)}`} disabled={occupato} onClick={() => setAperta(true)} />)}
+        : <PulsanteVisivo ref={rifMatita} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Scegli le infiltrazioni" aria-haspopup="dialog" aria-label={`Scegli le infiltrazioni: ${a.azione.slice(0, 60)}`} aria-disabled={occupato || undefined} onClick={() => { if (!occupato) setAperta(true); }} />)}
       {!IN_RILASCIO && proposta && (
         <span className="flex basis-full flex-wrap items-center gap-1.5 rounded-md bg-white/[0.04] px-2 py-1" role="status">
           <span>Proposta: {proposta.infiltrazioni.map((x) => x.nome).join(', ')} — {proposta.motivo} <span className="text-text-muted">({CERTEZZA[proposta.certezza]})</span></span>
-          <PulsanteVisivo compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Conferma" disabled={occupato} onClick={() => void salva(proposta.infiltrazioni.map((x) => x.chiave), 'Proposta confermata.')} />
+          <PulsanteVisivo ref={rifConferma} compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Conferma" aria-disabled={occupato || undefined} aria-busy={occupato || undefined} onClick={() => void salva(proposta.infiltrazioni.map((x) => x.chiave), 'Proposta confermata.')} />
         </span>
       )}
       {!IN_RILASCIO && aperta && (

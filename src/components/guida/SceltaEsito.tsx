@@ -65,7 +65,8 @@ function perGruppo(esiti: readonly EsitoDisponibileDto[]): Array<{ gruppo: strin
 /** L'elenco degli esiti come bersagli da toccare (≥ 44 px), con quello scelto in evidenza; i non possibili sono spenti col motivo. */
 function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = false }: { esiti: readonly EsitoDisponibileDto[]; scelto: string | null | undefined; occupato: boolean; onScegli: (chiave: string) => void; prezzoGiaNelSaldo?: boolean }) {
   // gli esiti non ancora possibili restano raggiungibili da tastiera (aria-disabled, non disabled): il motivo è scritto nel bottone e
-  // collegato con aria-describedby; il tocco non fa nulla (il server li rifiuta comunque)
+  // collegato con aria-describedby; il tocco non fa nulla (il server li rifiuta comunque). Così anche tutti mentre la scelta si salva
+  // (`occupato`): fermi ma col fuoco, che un `disabled` farebbe cadere sul documento
   const prefisso = useId();
   const doti = conDoti(esiti);
   return (
@@ -80,9 +81,9 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
               const dettaglio = dettaglioEsito(e, doti, prezzoGiaNelSaldo);
               const oggetti = fraseOggettiEsito(e.oggetti), prezzo = prezzoEsito(e, prezzoGiaNelSaldo), usa = fraseConsumaEsito(e.consuma);
               return (
-                <button key={e.chiave} type="button" className={`chip touch flex-col items-start text-left ${scelto === e.chiave ? 'chip--attivo' : ''} ${!e.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`} disabled={occupato}
-                  aria-disabled={!e.disponibile ? true : undefined} aria-describedby={!e.disponibile ? idMotivo : undefined}
-                  aria-pressed={scelto === e.chiave} onClick={() => { if (e.disponibile) onScegli(e.chiave); }}
+                <button key={e.chiave} type="button" className={`chip touch flex-col items-start text-left ${scelto === e.chiave ? 'chip--attivo' : ''} ${!e.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  aria-disabled={!e.disponibile || occupato ? true : undefined} aria-describedby={!e.disponibile ? idMotivo : undefined}
+                  aria-pressed={scelto === e.chiave} onClick={() => { if (e.disponibile && !occupato) onScegli(e.chiave); }}
                   title={!e.disponibile ? `Non ancora possibile: ${e.condizioniTesto ?? 'condizioni non soddisfatte'}` : e.condizioniTesto ?? undefined}
                   aria-label={`${e.nome}${doti ? `: ${testoNoteAParole(dotiTesto(e))}` : ''}${e.paga ? `; paga ${formattaYen(e.paga)}` : ''}${prezzo ? `; ${prezzo}` : ''}${e.trofeo ? `; segna il trofeo ${e.trofeo.nome}` : ''}${oggetti ? `; ricevi ${oggetti}` : ''}${usa ? `; ${usa}` : ''}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
                   <span>{e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}</span>
@@ -101,11 +102,11 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
 /**
  * 2026-10-27: l'interruttore «Bonus» (sì/no). Un bersaglio da 44 px (`touch`), con lo stato detto dal testo («sì»/«no») oltre che dalla pista e
  * dal colore; `role="switch"` con `aria-checked`. `descrizione`: il nome accessibile completo (lo strumento e la quantità), il testo visibile
- * resta «Bonus».
+ * resta «Bonus». `fermo` (la scelta si sta salvando): l'interruttore resta col fuoco (`aria-disabled`) e il tocco si ignora.
  */
-export function InterruttoreBonus({ acceso, disabled, descrizione, onCambia, className = '' }: { acceso: boolean; disabled?: boolean; descrizione: string; onCambia: (acceso: boolean) => void; className?: string }) {
+export function InterruttoreBonus({ acceso, fermo, descrizione, onCambia, className = '' }: { acceso: boolean; fermo?: boolean; descrizione: string; onCambia: (acceso: boolean) => void; className?: string }) {
   return (
-    <button type="button" role="switch" aria-checked={acceso} aria-label={`Bonus: ${descrizione}`} disabled={disabled} onClick={() => onCambia(!acceso)}
+    <button type="button" role="switch" aria-checked={acceso} aria-label={`Bonus: ${descrizione}`} aria-disabled={fermo || undefined} onClick={() => { if (!fermo) onCambia(!acceso); }}
       className={`chip touch gap-2 ${acceso ? 'chip--attivo' : ''} ${className}`}>
       <span aria-hidden="true" className={`interruttore-pista ${acceso ? 'interruttore-pista--acceso' : ''}`} />
       <span>Bonus</span>
@@ -135,12 +136,12 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla, p
   const conInterruttore = strumenti.some((s) => s.bonus);
   const prefisso = useId();
   return (
-    <span className="flex w-full flex-wrap items-center gap-1.5 testo-12" role="group" aria-label={`Esito del turno: ${nome}`}>
+    <span className="flex w-full flex-wrap items-center gap-1.5 testo-12" role="group" aria-label={`Esito del turno: ${nome}`} aria-busy={occupato || undefined}>
       <span className="w-full text-text-secondary">{strumenti.length && !altri.length ? 'Che cosa hai creato?' : 'Che esito hai ottenuto?'}</span>
       {promemoria.map((p) => <span key={p} className="w-full text-text-muted text-pretty">Dai libri letti: {p}</span>)}
       {strumenti.length > 0 && (
         <>
-          {conInterruttore && <InterruttoreBonus acceso={bonus} disabled={occupato} descrizione={`${nome}, vale per lo strumento che tocchi`} onCambia={setBonus} />}
+          {conInterruttore && <InterruttoreBonus acceso={bonus} fermo={occupato} descrizione={`${nome}, vale per lo strumento che tocchi`} onCambia={setBonus} />}
           <span className="flex w-full flex-wrap gap-1.5" role="group" aria-label="Strumenti">
             {strumenti.map(({ base, bonus: conBonus }) => {
               // uno strumento senza versione con il bonus registra sempre la sua creazione, con l'interruttore acceso o spento
@@ -148,11 +149,11 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla, p
               const idMotivo = `${prefisso}-motivo-${base.chiave}`;
               return (
                 // (revisione) il motivo di uno strumento non ancora possibile è scritto nel bottone, come in `ElencoEsiti`, non solo per i lettori di schermo
-                <button key={base.chiave} type="button" className={`chip touch flex-col items-start text-left ${!scelto.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`} disabled={occupato}
-                  aria-disabled={!scelto.disponibile ? true : undefined} aria-describedby={!scelto.disponibile ? idMotivo : undefined}
+                <button key={base.chiave} type="button" className={`chip touch flex-col items-start text-left ${!scelto.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  aria-disabled={!scelto.disponibile || occupato ? true : undefined} aria-describedby={!scelto.disponibile ? idMotivo : undefined}
                   title={!scelto.disponibile ? `Non ancora possibile: ${scelto.condizioniTesto ?? 'condizioni non soddisfatte'}` : undefined}
                   aria-label={`${nomeStrumento(base)}${bonus && conBonus ? ', con il bonus' : ''}${!scelto.disponibile ? '; non ancora possibile' : ''}`}
-                  onClick={() => { if (scelto.disponibile) onScegli(scelto.chiave); }}>
+                  onClick={() => { if (scelto.disponibile && !occupato) onScegli(scelto.chiave); }}>
                   <span>{nomeStrumento(base)}</span>
                   {!scelto.disponibile && <span id={idMotivo} className="testo-12 text-text-muted text-pretty">Non ancora: {scelto.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
                 </button>
@@ -164,8 +165,8 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla, p
       {altri.length > 0 && <ElencoEsiti esiti={altri} scelto={undefined} occupato={occupato} onScegli={(c) => onScegli(c)} />}
       {/* «Senza punti» solo se gli esiti danno Doti e non sono solo strumenti: per l'estrazione della lotteria la scelta è fra «Vinto» e «Non
           vinto»; per uno strumento il turno si registra con lo strumento creato */}
-      {altri.length > 0 && conDoti(altri) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Senza punti" disabled={occupato} onClick={() => onScegli(null)} />}
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
+      {altri.length > 0 && conDoti(altri) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Senza punti" aria-disabled={occupato || undefined} onClick={() => { if (!occupato) onScegli(null); }} />}
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" aria-disabled={occupato || undefined} onClick={() => { if (!occupato) onAnnulla(); }} />
     </span>
   );
 }
@@ -198,6 +199,9 @@ function SceltaLavoro({ s, v, occupato, onCambia }: { s: Extract<SceltaEsitoVoce
   const altre = s.doti.filter((d) => !v.mostrate.includes(d.dote));
   // anche il campo vuoto (o un testo che il browser rende vuoto) dice perché «Spunta» resta spento
   const yenScritti = yenValidi(v.yen) === null;
+  // mentre la spunta si salva: campo in sola lettura e pulsanti fermi, col fuoco (vedi `ElencoEsiti`)
+  const fermo = occupato || undefined;
+  const cambia = (x: ValoreLavoro) => { if (!occupato) onCambia(x); };
   return (
     <span className="flex w-full flex-col gap-2" role="group" aria-label={`Turno: ${s.attivitaNome}`}>
       <span className="text-text-secondary">{s.attivitaNome}: {chiedeYen(s) ? 'quanto hai ricevuto e quante note hai ottenuto?' : 'quante note hai ottenuto?'}</span>
@@ -205,8 +209,8 @@ function SceltaLavoro({ s, v, occupato, onCambia }: { s: Extract<SceltaEsitoVoce
       {chiedeYen(s) && s.paga && (
         <span className="flex flex-col gap-1">
           <label htmlFor={idYen} className="testo-13">Yen ricevuti</label>
-          <input id={idYen} className="form-input min-h-11 w-40 tabular-nums" type="number" inputMode="numeric" min={0} max={YEN_MASSIMI_LAVORO} step={1} value={v.yen} disabled={occupato}
-            aria-describedby={`${idYen}-aiuto`} aria-invalid={yenScritti ? true : undefined} onChange={(ev) => onCambia({ ...v, yen: ev.target.value })} />
+          <input id={idYen} className="form-input min-h-11 w-40 tabular-nums" type="number" inputMode="numeric" min={0} max={YEN_MASSIMI_LAVORO} step={1} value={v.yen} readOnly={occupato} aria-disabled={fermo}
+            aria-describedby={`${idYen}-aiuto`} aria-invalid={yenScritti ? true : undefined} onChange={(ev) => cambia({ ...v, yen: ev.target.value })} />
           <span id={`${idYen}-aiuto`} aria-live="polite" className={yenScritti ? 'text-error-testo' : 'text-text-muted text-pretty'}>
             {yenScritti ? `Un importo intero da 0 a ${formattaYen(YEN_MASSIMI_LAVORO)}.` : `Paga base ${formattaYen(s.paga.base)}${s.paga.massima ? `, fino a ${formattaYen(s.paga.massima)} con i bonus` : ''}: entrano tutti da soli nel saldo.`}
           </span>
@@ -215,25 +219,25 @@ function SceltaLavoro({ s, v, occupato, onCambia }: { s: Extract<SceltaEsitoVoce
       {v.mostrate.map((dote) => {
         const d = s.doti.find((x) => x.dote === dote)!;
         const scelta = v.note[dote];
-        const imposta = (note: 0 | 1 | 2 | 3) => onCambia({ ...v, note: { ...v.note, [dote]: note } });
+        const imposta = (note: 0 | 1 | 2 | 3) => cambia({ ...v, note: { ...v.note, [dote]: note } });
         return (
           <span key={dote} className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Note di ${d.doteNome}`}>
             <span className="w-full text-text-secondary">{d.doteNome}</span>
             {d.punti.map(({ note, punti }) => (
-              <button key={note} type="button" className={`chip touch ${scelta === note ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={scelta === note}
+              <button key={note} type="button" className={`chip touch ${scelta === note ? 'chip--attivo' : ''}`} aria-disabled={fermo} aria-pressed={scelta === note}
                 onClick={() => imposta(note)} aria-label={`${d.doteNome}: ${noteAParole(note)}, ${testoPunti(punti)}`}>{simboliNote(note)} · {testoPunti(punti)}</button>
             ))}
-            <button type="button" className={`chip touch ${scelta === 0 ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={scelta === 0} aria-label={`${d.doteNome}: nessuna nota`} onClick={() => imposta(0)}>Nessuna</button>
+            <button type="button" className={`chip touch ${scelta === 0 ? 'chip--attivo' : ''}`} aria-disabled={fermo} aria-pressed={scelta === 0} aria-label={`${d.doteNome}: nessuna nota`} onClick={() => imposta(0)}>Nessuna</button>
             {/* una Dote aggiunta a mano si toglie; quelle del lavoro restano («Nessuna» se il turno non le ha date) */}
-            {!s.proposte.includes(dote) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli ${d.doteNome}`} disabled={occupato}
-              onClick={() => { const note = { ...v.note }; delete note[dote]; onCambia({ ...v, note, mostrate: v.mostrate.filter((x) => x !== dote) }); }} />}
+            {!s.proposte.includes(dote) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli ${d.doteNome}`} aria-disabled={fermo}
+              onClick={() => { const note = { ...v.note }; delete note[dote]; cambia({ ...v, note, mostrate: v.mostrate.filter((x) => x !== dote) }); }} />}
           </span>
         );
       })}
       {altre.length > 0 && (
         <span className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Note anche in un’altra Dote">
           <span className="w-full text-text-muted">Note anche in un’altra Dote:</span>
-          {altre.map((d) => <button key={d.dote} type="button" className="chip touch" disabled={occupato} onClick={() => onCambia({ ...v, mostrate: [...v.mostrate, d.dote] })}>+ {d.doteNome}</button>)}
+          {altre.map((d) => <button key={d.dote} type="button" className="chip touch" aria-disabled={fermo} onClick={() => cambia({ ...v, mostrate: [...v.mostrate, d.dote] })}>+ {d.doteNome}</button>)}
         </span>
       )}
     </span>
@@ -252,8 +256,9 @@ function SceltaPiazzamento({ s, scelto, occupato, onScegli }: { s: Extract<Scelt
       {s.opzioni.map((o) => {
         const premio = premioTesto(o);
         return (
-          <button key={o.piazzamento} type="button" className={`chip touch flex-col items-start text-left ${scelto === o.piazzamento ? 'chip--attivo' : ''}`} disabled={occupato}
-            aria-pressed={scelto === o.piazzamento} onClick={() => onScegli(o.piazzamento)} aria-label={`${o.nome}${premio ? `: ${testoNoteAParole(premio)}` : ''}`}>
+          // fermi ma col fuoco mentre la spunta si salva (vedi `ElencoEsiti`)
+          <button key={o.piazzamento} type="button" className={`chip touch flex-col items-start text-left ${scelto === o.piazzamento ? 'chip--attivo' : ''}`} aria-disabled={occupato || undefined}
+            aria-pressed={scelto === o.piazzamento} onClick={() => { if (!occupato) onScegli(o.piazzamento); }} aria-label={`${o.nome}${premio ? `: ${testoNoteAParole(premio)}` : ''}`}>
             <span>{o.nome}</span>
             {premio && <span className="testo-12 text-text-secondary text-pretty">{premio}</span>}
           </button>
@@ -310,7 +315,11 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
     if (x.tipo === 'esame') return { effettoUid: s.effettoUid, tipo: 'esame', piazzamento: x.piazzamento };
     return { effettoUid: s.effettoUid, tipo: 'turno', esito: x.esito };
   });
+  // mentre la spunta si salva la scelta resta aperta e col fuoco: i controlli sono fermi (`aria-disabled`, il gruppo `aria-busy`) e ogni gesto
+  // si ignora; un `disabled` farebbe cadere il fuoco della tastiera sul documento. La chiude `AzioneGiornata` a spunta salvata
+  const fermo = occupato || undefined;
   const imposta = (uid: string, v: Valore) => {
+    if (occupato) return;
     // il valore toccato si accende anche con una scelta sola: mentre la spunta si salva si vede che cosa è stato inviato
     setValori((x) => ({ ...x, [uid]: v }));
     if (unica) onConferma(costruisci({ [uid]: v }));
@@ -333,12 +342,12 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
     : acquisti === scelte.length ? { gruppo: 'Acquisti da scegliere per la spunta', pulsante: 'Spunta con questi acquisti' }
       : { gruppo: 'Scelte da fare per la spunta', pulsante: 'Spunta con queste scelte' };
   const conferma = () => {
-    if (!complete) return;
+    if (!complete || occupato) return;
     onConferma(costruisci(valori));
   };
   return (
     // 2026-10-27: solo l'interruttore «Bonus»: interruttore, «Spunta» e «Annulla» su una riga (vanno a capo sul telefono se serve)
-    <span className={soloBonus ? 'flex w-full flex-wrap items-center gap-1.5 testo-12' : 'flex w-full flex-col gap-2 testo-12'} role="group" aria-label={parola.gruppo}>
+    <span className={soloBonus ? 'flex w-full flex-wrap items-center gap-1.5 testo-12' : 'flex w-full flex-col gap-2 testo-12'} role="group" aria-label={parola.gruppo} aria-busy={fermo}>
       {scelte.map((s) => {
         const v = valori[s.effettoUid];
         if (s.tipo === 'dote') return (
@@ -348,11 +357,11 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
             {s.possibili.map((n) => {
               const punti = s.punti.find((x) => x.note === n)?.punti;
               return (
-                <button key={n} type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === n ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === n}
+                <button key={n} type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === n ? 'chip--attivo' : ''}`} aria-disabled={fermo} aria-pressed={v?.tipo === 'dote' && v.note === n}
                   onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: n })} aria-label={`${noteAParole(n)}${punti !== undefined ? `, ${testoPunti(punti)}` : ''}`}>{simboliNote(n)}{punti !== undefined ? ` · ${testoPunti(punti)}` : ''}</button>
               );
             })}
-            <button type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === 0 ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === 0} onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: 0 })}>Nessuna</button>
+            <button type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === 0 ? 'chip--attivo' : ''}`} aria-disabled={fermo} aria-pressed={v?.tipo === 'dote' && v.note === 0} onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: 0 })}>Nessuna</button>
           </span>
         );
         // L13 (decisione 4): fra gli articoli in alternativa (Set A o Set B) quello comprato, o «Nessuno»
@@ -372,7 +381,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
         if (s.bonus) {
           const b = s.bonus;
           // (revisione) allineato al centro come «Spunta» e «Annulla» nella stessa riga (`items-center`); fra altre scelte, a sinistra
-          return <InterruttoreBonus key={s.effettoUid} className={soloBonus ? '' : 'self-start'} acceso={v?.tipo === 'turno' && v.esito === b.conBonus} disabled={occupato}
+          return <InterruttoreBonus key={s.effettoUid} className={soloBonus ? '' : 'self-start'} acceso={v?.tipo === 'turno' && v.esito === b.conBonus} fermo={occupato}
             descrizione={`${s.attivitaNome}, ${b.nome}${b.quantita > 1 ? ` ×${b.quantita}` : ''}`}
             onCambia={(acceso) => imposta(s.effettoUid, { tipo: 'turno', esito: acceso ? b.conBonus : b.base })} />;
         }
@@ -384,16 +393,16 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
             {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività, solo se ce ne sono (un promemoria, nessun importo) */}
             {s.promemoria?.map((p) => <span key={p} className="w-full text-text-muted text-pretty">Dai libri letti: {p}</span>)}
             <ElencoEsiti esiti={s.esiti} scelto={v?.tipo === 'turno' ? v.esito : undefined} occupato={occupato} onScegli={(c) => imposta(s.effettoUid, { tipo: 'turno', esito: c })} prezzoGiaNelSaldo={s.yenGiaNelSaldo === true} />
-            {conDoti(s.esiti) && <button type="button" className={`chip touch ${v?.tipo === 'turno' && v.esito === null ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'turno' && v.esito === null} onClick={() => imposta(s.effettoUid, { tipo: 'turno', esito: null })}>Senza punti</button>}
+            {conDoti(s.esiti) && <button type="button" className={`chip touch ${v?.tipo === 'turno' && v.esito === null ? 'chip--attivo' : ''}`} aria-disabled={fermo} aria-pressed={v?.tipo === 'turno' && v.esito === null} onClick={() => imposta(s.effettoUid, { tipo: 'turno', esito: null })}>Senza punti</button>}
           </span>
         );
       })}
       <span className="flex flex-wrap gap-1.5">
         {/* uno strumento da scegliere nell'editor non lascia spuntare: il pulsante non si mostra (non si accenderebbe mai) */}
-        {!unica && !scelte.some((s) => s.tipo === 'turno' && s.strumentoDaScegliere) && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={parola.pulsante} disabled={occupato || !complete} onClick={conferma} />}
+        {!unica && !scelte.some((s) => s.tipo === 'turno' && s.strumentoDaScegliere) && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={parola.pulsante} disabled={!complete} aria-disabled={fermo} onClick={conferma} />}
         {/* (revisione) al posto di «Spunta», che non si accenderebbe, il gesto che risolve: l'editor della voce (dove la voce si modifica) */}
-        {onModifica && scelte.some((s) => s.tipo === 'turno' && s.strumentoDaScegliere) && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica la voce" disabled={occupato} onClick={() => { onAnnulla(); onModifica(); }} />}
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
+        {onModifica && scelte.some((s) => s.tipo === 'turno' && s.strumentoDaScegliere) && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica la voce" aria-disabled={fermo} onClick={() => { if (!occupato) { onAnnulla(); onModifica(); } }} />}
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" aria-disabled={fermo} onClick={() => { if (!occupato) onAnnulla(); }} />
       </span>
     </span>
   );

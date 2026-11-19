@@ -221,21 +221,26 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, relazione }: { occup
   // la casella toccata vince sul valore della partita (che può arrivare dopo l'apertura della scelta)
   const [sceltaRelazione, setSceltaRelazione] = useState<boolean | null>(null);
   const relazioneScelta = relazione ? sceltaRelazione ?? relazione.valore : undefined;
-  const scegli = (note: 1 | 2 | 3 | null) => onScegli(note, relazioneScelta);
+  // mentre la spunta si salva i controlli restano col fuoco (`aria-disabled`, il gruppo `aria-busy`) e il gesto si ignora: `disabled` farebbe
+  // cadere il fuoco della tastiera sul documento (la scelta resta aperta fino al salvataggio, vedi `AzioneGiornata`)
+  const fermo = occupato || undefined;
+  const scegli = (note: 1 | 2 | 3 | null) => { if (!occupato) onScegli(note, relazioneScelta); };
   return (
-    <span className="flex flex-wrap items-center gap-1.5 testo-12" role="group" aria-label="Note ottenute con il Confidente">
+    <span className="flex flex-wrap items-center gap-1.5 testo-12" role="group" aria-label="Note ottenute con il Confidente" aria-busy={fermo}>
       {relazione && (
-        <label className="touch flex w-full items-center gap-2 cursor-pointer text-text">
-          <input type="checkbox" className="w-5 h-5 shrink-0" checked={relazioneScelta} disabled={occupato} onChange={(e) => setSceltaRelazione(e.target.checked)} />
+        <label className={`touch flex w-full items-center gap-2 text-text ${occupato ? 'cursor-progress' : 'cursor-pointer'}`}>
+          <input type="checkbox" className="w-5 h-5 shrink-0" checked={relazioneScelta} aria-disabled={fermo}
+            onClick={occupato ? (e) => e.preventDefault() : undefined} onChange={(e) => { if (!occupato) setSceltaRelazione(e.target.checked); }} />
           Ho scelto la relazione romantica
         </label>
       )}
       <span className="text-text-secondary">Quante note hai ottenuto?</span>
       {([1, 2, 3] as const).map((n) => (
-        <button key={n} type="button" className="chip touch" disabled={occupato} onClick={() => scegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
+        <button key={n} type="button" className="chip touch" aria-disabled={fermo} onClick={() => scegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
       ))}
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" disabled={occupato} onClick={() => scegli(null)} />
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" aria-disabled={fermo} onClick={() => scegli(null)} />
+      {/* anche «Annulla» aspetta: la spunta già partita non si ferma, e la scelta chiusa lascerebbe la richiesta senza il suo segno */}
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" aria-disabled={fermo} onClick={() => { if (!occupato) onAnnulla(); }} />
     </span>
   );
 }

@@ -125,6 +125,18 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     return () => { attivo = false; };
   }, [chiaveRomantica, partitaId]);
   const relazioneDaChiedere = chiaveRomantica !== null && relazionePartita?.chiave === chiaveRomantica ? { valore: relazionePartita.valore } : undefined;
+  // Il fuoco della tastiera nella voce. Le scelte della spunta (note, esiti, acquisti) restano col fuoco mentre la richiesta è in corso
+  // (`aria-disabled` e `aria-busy`, mai `disabled`, che lo farebbe cadere sul documento); quando una scelta sparisce col fuoco dentro, il fuoco
+  // passa alla casella di completamento, che resta (anche attraverso il rimontaggio della riga: `fuocoCasellaRef`).
+  // `conFinestra`: conta anche la finestra «Prima di spuntare» della voce (`PreparaAcquistiVoce`), che sta fuori dalla riga (in fondo a <body>)
+  const fuocoNellaVoce = (conFinestra = false): boolean => {
+    const f = document.activeElement, riga = rifCasella.current?.closest('li');
+    return !!f && !!riga && (riga.contains(f) || (conFinestra && !!f.closest('[role="dialog"]')));
+  };
+  /** Una scelta della riga sta per sparire: se aveva il fuoco, il fuoco va alla casella (senza scorrere). */
+  const fuocoAllaCasella = () => {
+    if (document.activeElement !== rifCasella.current && fuocoNellaVoce()) rifCasella.current?.focus({ preventScroll: true });
+  };
   /**
    * Spunta o toglie l'azione nella partita. Se spuntandola servono le note e non sono ancora arrivate (né si è scelto
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
@@ -135,15 +147,19 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     if (!partitaId || scrittura.current) return;
     if (pendente) { if (acquisti || pesche) throw new Error('Questa voce ha già un’operazione da completare: chiudila dall’elenco «Operazioni da completare».'); return; }
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { apriSceltaNote(); return; }
+    // la conferma della finestra «Prima di spuntare» (non la spunta automatica): il fuoco è nella finestra, fuori dalla riga
+    const daFinestra = (!!acquisti || !!pesche) && !automatica;
+    // dov'era il fuoco al gesto: se la richiesta lo facesse comunque cadere sul documento, alla fine torna sulla casella
+    const fuocoAlGesto = fuocoNellaVoce(daFinestra);
     // 2026-10-30: la visita ai Memento non chiede più quali Dedali hai aperto: le aperture si calcolano dai Palazzi conclusi
     // L13: l'esito ottenuto (o «senza punti») si sceglie prima di salvare: una scelta non fatta non lascia la spunta (decisione A1)
     if (fatta && !a.fatta && a.scelteEsito?.length && esiti === undefined) {
-      setChiediNote(false); setChiediEsiti({ noteRisposta, senzaPunti, relazioneRomantica }); return;
+      fuocoAllaCasella(); setChiediNote(false); setChiediEsiti({ noteRisposta, senzaPunti, relazioneRomantica }); return;
     }
     // 2026-10-28: consumazioni e visite di pesca si preparano da sole dalla voce e dallo stato della partita (`preparaOsservazioniVoce`): se
     // tutto è determinato la spunta registra senza finestra; la finestra compare solo con qualcosa di davvero aperto, e chiede solo quello
     if (fatta && !a.fatta && effettiDaOsservare(a).length && acquisti === undefined && pesche === undefined) {
-      setChiediNote(false); setChiediEsiti(null);
+      fuocoAllaCasella(); setChiediNote(false); setChiediEsiti(null);
       scrittura.current = true; setOccupato(true);
       let pronte: OsservazioniVoce | null;
       // una lettura fallita apre la finestra, che mostra l'errore e lascia rileggere
@@ -154,7 +170,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const r = richiesteOsservazioni(pronte);
       return cambia(true, noteRisposta, senzaPunti, r.acquisti, r.pesche, esiti, r.osservate, true, relazioneRomantica);
     }
-    setChiediNote(false);
+    // la scelta delle note resta aperta (e col fuoco) finché la spunta non è salvata: chiusa qui, il pulsante toccato sparirebbe col fuoco
     scrittura.current = true;
     setOccupato(true);
     try {
@@ -162,12 +178,16 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}), ...(relazione !== undefined ? { relazioneRomantica: relazione } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, undefined, undefined, esiti, relazione);
       segnalaMutazioneEffetti(partitaId);
       if (!vivo.current) return;
+      // le scelte della spunta spariscono: se il fuoco è nella voce (la casella, la scelta delle note, degli esiti o la finestra degli acquisti),
+      // o al gesto c'era ed è caduto sul documento, va sulla casella. Se la riga si rimonterà (è cambiato ciò che la spunta legge) lo fa la riga
+      // nuova (`fuocoCasellaRef`), altrimenti subito; se nel frattempo chi gioca l'ha portato altrove, resta dov'è
+      if (fuocoNellaVoce(daFinestra) || (fuocoAlGesto && (document.activeElement === null || document.activeElement === document.body))) {
+        if (chiaveContesto(agg, partitaId) !== chiaveContesto(a, partitaId)) fuocoCasellaRef.current = true;
+        else if (document.activeElement !== rifCasella.current) rifCasella.current?.focus({ preventScroll: true });
+      }
+      setChiediNote(false);
       setChiediEsiti(null);
       setChiediAcquisti(null);
-      // la riga si rimonterà (è cambiato ciò che la spunta legge): se il fuoco è nella riga (la casella, o la scelta delle note, degli esiti o
-      // degli acquisti che sparisce con lei) la riga nuova lo rimette sulla casella; altrimenti il fuoco resta dov'è
-      const riga = rifCasella.current?.closest('li');
-      if (chiaveContesto(agg, partitaId) !== chiaveContesto(a, partitaId) && riga && riga.contains(document.activeElement)) fuocoCasellaRef.current = true;
       onCambiata(agg);
       // spuntando (o riaprendo) un'azione cambia cosa il giorno suggerisce: l'alone dorato si aggiorna da solo
       useSuggerimentiStore.getState().invalida();
@@ -212,8 +232,10 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   // (`disabled`). Le attese (la sua richiesta in corso, `aria-busy`; un'operazione della giornata in corso) e le caselle «In scorta» mancanti
   // invece no: `aria-disabled`, così il fuoco della tastiera resta sulla casella (un `disabled` lo farebbe cadere sul documento a ogni spunta e
   // annullo) e il gesto si ignora; con la scorta incompleta un tocco, Spazio o Invio portano alla prima casella mancante (la descrizione dice
-  // quante ne mancano)
-  const spenta = !!pendente || nonDovuta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere');
+  // quante ne mancano). La spunta con acquisti o pesche della voce stessa, mentre è in volo, figura fra le operazioni da completare
+  // (`pendente`): finché è sua (`occupato`) è un'attesa, non una ragione durevole
+  const inSospeso = !!pendente && !occupato;
+  const spenta = inSospeso || nonDovuta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere');
   const inAttesa = occupato || !!bloccata;
   const ferma = !spenta && (inAttesa || scortaIncompleta);
   const richiamo = scortaIncompleta && !inAttesa;
@@ -268,19 +290,24 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* le risposte migliori dell'avanzamento della voce Confidente, fra le sue note (progetto dei Confidenti, 2026-10-24) */}
         <RisposteVoce a={a} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
-        {pendente && <p role="status" className="m-0 text-warning">Un’operazione su questa voce non è stata confermata: completala dall’elenco «Operazioni da completare» sopra le voci, poi potrai spuntare la voce.</p>}
+        {inSospeso && <p role="status" className="m-0 text-warning">Un’operazione su questa voce non è stata confermata: completala dall’elenco «Operazioni da completare» sopra le voci, poi potrai spuntare la voce.</p>}
         {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}
         {/* L1-08: la giornata sta in Oggi o nel Diario, che mostrano già le operazioni da completare della partita: non si ripetono qui */}
-        {partitaId !== null && !!a.daApplicare && <DaApplicare partitaId={partitaId} voceUid={a.uid} gestiNellaColonna onCambiato={async () => { onCambiata(await getVocePercorso(a.uid, partitaId)); }} />}
+        {partitaId !== null && !!a.daApplicare && <DaApplicare partitaId={partitaId} voceUid={a.uid} gestiNellaColonna onCambiato={async () => {
+          const agg = await getVocePercorso(a.uid, partitaId);
+          // decisi tutti i punti, il riquadro sparisce: se aveva il fuoco, il fuoco va alla casella della voce
+          if (!agg.daApplicare) fuocoAllaCasella();
+          onCambiata(agg);
+        }} />}
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}
         {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(richieste, pesche, osservate) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, richieste, pesche, chiediAcquisti.esiti, osservate, false, chiediAcquisti.relazioneRomantica)} />}
         {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
-        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s, [], false, chiediEsiti.relazioneRomantica)} onAnnulla={() => setChiediEsiti(null)} />}
+        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s, [], false, chiediEsiti.relazioneRomantica)} onAnnulla={() => { fuocoAllaCasella(); setChiediEsiti(null); }} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
         {chiediNote && <SceltaNote occupato={occupato} relazione={relazioneDaChiedere}
-          onScegli={(n, relazione) => void cambia(true, n ?? undefined, n === null, undefined, undefined, undefined, [], false, relazione)} onAnnulla={() => setChiediNote(false)} />}
+          onScegli={(n, relazione) => void cambia(true, n ?? undefined, n === null, undefined, undefined, undefined, [], false, relazione)} onAnnulla={() => { fuocoAllaCasella(); setChiediNote(false); }} />}
       </div>
       {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; in una colonna a destra del testo, e
           con la voce stretta — telefono, Diario a mezza pagina — a destra nella prima fila, accanto a maniglia, casella e immagine, col testo a

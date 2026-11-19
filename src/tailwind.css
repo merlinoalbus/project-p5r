@@ -3469,7 +3469,8 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   /* ---- la voce del Diario (`RequisitiVoce`, casella di completamento in `AzioneGiornata`) ----
      L'elenco è una fila a sé della voce, a tutta larghezza (`flex-basis: 100%` nella riga che va a capo), sotto casella, immagine, testo e
      comandi a ogni formato: la griglia prende tutte le colonne che la voce consente (8 a 1280, 6 a 1024, 3 a 375). Testata su una riga (titolo
-     e «n/N» mai spezzati, la barra prende il resto); sotto, la griglia di chip a colonne uguali (112 px minimi; sul telefono tre colonne). Il
+     e «n/N» mai spezzati, la barra prende il resto); sotto, la griglia di chip a colonne uguali (112 px minimi; fra 366 e 559 px di elenco
+     chip larghi quanto il loro nome, a file piene; sul telefono tre colonne). Il
      chip è 32 px visivi; il tocco arriva a 44 px con un'area invisibile 6 px sopra e 6 px sotto, e le file distano 12 px: le aree di due file
      si toccano senza sovrapporsi. */
   .scorta-voce { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 2px 0; }
@@ -3491,7 +3492,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .scorta-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px 6px; margin: 0; padding: 6px 0; list-style: none; min-width: 0; }
   .scorta-voce:has(> .scorta-chips) { container: scorta-voce / inline-size; }
   .scorta-chips > li { display: flex; min-width: 0; }
-  .scorta-chip { position: relative; display: flex; align-items: center; gap: 5px; width: 100%; min-width: 0; min-height: 32px; padding: 2px 5px 2px 4px;
+  /* 32 px anche con il nome su due righe (2 × 13,8 px nei 28 px fra 1 px di margine interno e il bordo): le aree di tocco di due file non si
+     sovrappongono mai */
+  .scorta-chip { position: relative; display: flex; align-items: center; gap: 5px; width: 100%; min-width: 0; min-height: 32px; padding: 1px 5px 1px 4px;
     border: 1px solid var(--color-border-input); border-radius: var(--radius-sm); background: var(--color-bg-tertiary); color: var(--color-text);
     font-size: var(--testo-12); line-height: 1.15; cursor: pointer; -webkit-tap-highlight-color: transparent;
     transition: background-color .15s ease-out, border-color .15s ease-out, color .15s ease-out, opacity .15s ease-out; }
@@ -3504,7 +3507,10 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .scorta-chip--spuntato:hover { border-color: var(--color-primary-testo); }
   .scorta-chip--occupato { opacity: .6; cursor: progress; }
   .scorta-chip--lettura { cursor: default; }
-  .scorta-chip__figura { position: relative; display: inline-flex; flex: none; }
+  /* la figura ha misura fissa (24 px): il ritratto della Persona che arriva dopo la figura dell'arcano, o l'immagine che si carica, non cambia
+     l'altezza del chip */
+  .scorta-chip__figura { position: relative; display: inline-flex; flex: none; align-items: center; justify-content: center; width: 24px; height: 24px; line-height: 0; }
+  .scorta-chip__figura > :first-child { flex: none; max-width: 24px; max-height: 24px; }
   .scorta-chip__nome { min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: break-word; hyphens: auto; font-weight: 600; }
   /* il cerchio della casella nell'angolo della figura: vuoto, o rosso pieno con la spunta bianca */
   .scorta-chip__segno { position: absolute; right: -4px; bottom: -3px; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px;
@@ -3512,12 +3518,20 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .scorta-chip--spuntato .scorta-chip__segno { background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); }
   .scorta-chip__segno > svg { width: 11px; height: 11px; stroke-width: 3.4; transform: scale(0); transition: transform .18s cubic-bezier(.2, 1.4, .4, 1); }
   .scorta-chip--spuntato .scorta-chip__segno > svg { transform: scale(1); }
-  /* a N/N (`--pronta`) i chip spuntati passano al verde di «Pronta», come barra e anello: contorno e cerchio della spunta (la spunta scura sul
-     verde: il bianco ci arriverebbe a poco più di 2:1) */
-  .scorta-voce--pronta .scorta-chip--spuntato { border-color: var(--color-success); }
+  /* a N/N (`--pronta`) i chip spuntati passano al verde di «Pronta», come barra e anello: contorno, cerchio della spunta (la spunta scura sul
+     verde: il bianco ci arriverebbe a poco più di 2:1) e fondo, neutro appena velato di verde (non più il velo rosso dello spuntato) */
+  .scorta-voce--pronta .scorta-chip--spuntato { border-color: var(--color-success); background: color-mix(in srgb, var(--color-success) 6%, var(--color-bg-secondary)); }
   .scorta-voce--pronta .scorta-chip--spuntato:hover { border-color: var(--color-success-testo); }
   .scorta-voce--pronta .scorta-chip--spuntato .scorta-chip__segno { background: var(--color-success); border-color: var(--color-success); color: var(--color-bg); }
   .scorta-chip__ritratto { border-radius: 2px; }
+  /* elenco stretto (da 366 a 559 px: la colonna delle voci di Partita › Oggi a 1280, il Diario a mezza pagina): a colonne uguali da 112 px ne
+     stavano tre, con i nomi brevi («Fede», «Sole») in caselle mezze vuote e una fila in più; più strette, «Temperanza» e «Consigliere» si
+     spezzavano a metà parola. Qui ogni chip è largo quanto figura e nome su una riga (mai tagliato) e le file si riempiono allargandoli: a 1280
+     undici requisiti stanno in tre file invece di quattro. Altezza, tocco e distanza fra le file restano quelli del chip */
+  @container scorta-voce (min-width: 366px) and (max-width: 559px) {
+    .scorta-chips { display: flex; flex-wrap: wrap; }
+    .scorta-chips > li { flex: 1 1 auto; }
+  }
   /* sul telefono (elenco sotto i 366 px) tre colonne fisse; la colonna è stretta (~92 px) e un nome accanto alla figura si spezzerebbe a metà
      parola («Temperan-za»): il chip si fa verticale, figura sopra e nome sotto su una riga intera. È alto 44 px visivi, che sono già il
      tocco: niente area invisibile, e le file distano 8 px. Dopo le regole del chip, che sovrascrive */
@@ -3550,6 +3564,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
      un'operazione della giornata in corso; `disabled` resta per le ragioni durevoli */
   .casella-voce[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
   .casella-voce[aria-busy="true"] { cursor: progress; }
+  /* allo stesso modo le scelte della spunta mentre si salva (note, esiti, acquisti, la finestra «Prima di spuntare») e i pulsanti di «Applica»:
+     fermi ma col fuoco (`aria-disabled`, il gruppo o il pulsante `aria-busy`), mai `disabled`, che farebbe cadere il fuoco sul documento */
+  [aria-busy="true"] :is(button, input)[aria-disabled="true"], :is(button, input)[aria-disabled="true"][aria-busy="true"] { cursor: progress; }
 }
 
 /* ---- La voce stretta del Diario (telefono sotto i 768 px; Diario a mezza pagina, colonna delle voci fino a 460 px) ----

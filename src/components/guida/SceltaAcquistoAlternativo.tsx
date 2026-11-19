@@ -42,11 +42,12 @@ export function SceltaAcquistoAlternativo({ s, scelto, occupato, onScegli }: Pro
           return (
             // `self-stretch`: `button.chip` ha `align-self:start` (src/tailwind.css, livello `components`, che le utilità superano); qui le due
             // schede affiancate (da 641 px) prendono l'altezza della riga, anche con contenuti di lunghezza diversa (rilievo della revisione UX)
-            <button key={o.effettoUid} type="button" disabled={occupato}
+            // mentre la spunta si salva le schede restano col fuoco: ferme (`aria-disabled`), il tocco si ignora (`disabled` farebbe cadere il fuoco)
+            <button key={o.effettoUid} type="button"
               className={`chip touch w-full self-stretch flex-col items-start justify-start gap-0.5 text-left ${attivo ? 'chip--attivo' : ''} ${!o.disponibile ? 'cursor-not-allowed' : ''}`}
-              aria-pressed={attivo} aria-disabled={!o.disponibile ? true : undefined} aria-describedby={!o.disponibile ? idMotivo : undefined}
+              aria-pressed={attivo} aria-disabled={!o.disponibile || occupato ? true : undefined} aria-describedby={!o.disponibile ? idMotivo : undefined}
               aria-label={`${o.articolo.nome}${o.quantita > 1 ? ` ×${o.quantita}` : ''}, ${prezzo}${contenuto ? `; contiene ${contenuto}` : ''}${!o.disponibile ? '; non si può comprare' : ''}`}
-              onClick={() => { if (o.disponibile) onScegli(o.effettoUid); }}>
+              onClick={() => { if (o.disponibile && !occupato) onScegli(o.effettoUid); }}>
               {/* spenta: si attenua ciò che non si può scegliere, mai il motivo, che è l'informazione della scheda e resta a pieno contrasto */}
               <span className={`flex w-full flex-wrap items-baseline justify-between gap-x-2 ${!o.disponibile ? 'opacity-60' : ''}`}>
                 <span className="font-semibold break-words text-pretty">{o.articolo.nome}{o.quantita > 1 ? ` ×${o.quantita}` : ''}</span>
@@ -59,7 +60,7 @@ export function SceltaAcquistoAlternativo({ s, scelto, occupato, onScegli }: Pro
         })}
       </span>
       <span className="flex">
-        <button type="button" className={`chip touch ${scelto === null ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={scelto === null} onClick={() => onScegli(null)}>Nessuno</button>
+        <button type="button" className={`chip touch ${scelto === null ? 'chip--attivo' : ''}`} aria-disabled={occupato || undefined} aria-pressed={scelto === null} onClick={() => { if (!occupato) onScegli(null); }}>Nessuno</button>
       </span>
     </span>
   );
