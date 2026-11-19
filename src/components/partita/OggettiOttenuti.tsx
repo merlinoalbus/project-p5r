@@ -22,6 +22,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import { conferma } from '../../stores/confermaStore';
 import { dataLeggibile } from '../../../shared/condizioniSpillo';
+import { nomeCategoriaOggetto } from '../../../shared/catalogo';
 import { PageState } from '../shared/PageState';
 import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -87,7 +88,7 @@ export function OggettiOttenuti({ partitaId }: { partitaId: number }) {
                   <li key={t.catalogoChiave} className="min-w-0">
                     <details className="min-w-0 rounded-md bg-white/[0.04] px-2.5">
                       <summary className="touch flex min-w-0 cursor-pointer items-center gap-2 testo-14">
-                        <span className="min-w-0 flex-1 break-words"><strong>{t.nome}</strong>{t.categoria ? <span className="testo-12 text-text-muted"> · {t.categoria}</span> : null}</span>
+                        <span className="min-w-0 flex-1 break-words"><strong>{t.nome}</strong>{t.categoria ? <span className="testo-12 text-text-muted"> · {nomeCategoriaOggetto(t.categoria)}</span> : null}</span>
                         <span className="shrink-0 text-right tabular-nums">
                           {avute > 0 ? `×${avute}` : null}
                           {uscite > 0 && <span className="block testo-12 text-text-muted">{uscita}{avute > 0 ? ` · ne restano ${restano}` : ''}</span>}

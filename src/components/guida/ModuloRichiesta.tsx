@@ -46,6 +46,7 @@ import { CampoQuantita } from './CampiEffettoVoce';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { CitazioniRichiestaDto, RichiestaDto, RichiesteDto } from '../../types';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { opzioniOggettiDelCatalogo } from '../../utils/opzioniCatalogo';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -341,7 +342,7 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
             ))}
           </ul>
           <Selettore etichetta="Aggiungi un oggetto" vuoto="Scegli un oggetto…" valore={nuovoOggetto} disabilitato={occupato}
-            opzioni={oggetti.filter((o) => !b.oggetti.some((x) => x.chiave === o.chiave)).map((o) => ({ chiave: o.chiave, nome: o.nome, gruppo: o.categoria }))}
+            opzioni={opzioniOggettiDelCatalogo(oggetti.filter((o) => !b.oggetti.some((x) => x.chiave === o.chiave)))}
             onCambia={(v) => { if (v) cambia({ oggetti: [...b.oggetti, { chiave: v, quantita: 1 }] }); setNuovoOggetto(''); }} />
         </div>
         <CampoTesto etichetta="Yen" tipo="numero" valore={b.yen} massimo={9} aiuto="Vuoto se la Richiesta non dà yen." onCambia={(v) => cambia({ yen: v })} disabilitato={occupato} />

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questi hook, fuori dal pannello, sono quelli di react-router-dom
 import { useNavigate, useParams } from '../components/scheda/routerScheda';
-import { CATEGORIA_OGGETTO } from '../../shared/catalogo';
+import { CATEGORIA_OGGETTO, eSottocategoriaDecorazione, fraseDellaDecorazione, SOTTOCATEGORIE_DECORAZIONE } from '../../shared/catalogo';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { eliminaOggettoCatalogo, getOggettoCatalogo } from '../services/api/catalogoOggetti';
@@ -121,7 +121,11 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
                 piace»): lo si dice con una frase calcolata dalla categoria, non con l'etichetta «Regalo» che i dati ripetevano né con l'avviso */}
             {!o.effetto && !o.descrizione && !o.lettura && !(typeof o.statistiche?.testo === 'string' && o.statistiche.testo) && (o.categoria === 'regalo'
               ? <p className="m-0 testo-13 text-text-secondary text-pretty">Si regala ai Confidenti: chi lo gradisce di più lo dice «A chi piace».</p>
-              : <p className="m-0 testo-13 text-text-muted">Nessun effetto o descrizione dichiarato.</p>)}
+              : o.categoria === 'decorazione'
+                ? <p className="m-0 testo-13 text-text-secondary text-pretty">{fraseDellaDecorazione(o.sottocategoria)}</p>
+                : <p className="m-0 testo-13 text-text-muted">Nessun effetto o descrizione dichiarato.</p>)}
+            {/* una decorazione con un testo proprio dice comunque da dove viene, se la sottocategoria lo indica */}
+            {o.categoria === 'decorazione' && (o.effetto || o.descrizione) && eSottocategoriaDecorazione(o.sottocategoria) && <p className="m-0 testo-13 text-text-secondary">{SOTTOCATEGORIE_DECORAZIONE[o.sottocategoria]}</p>}
             {o.statistiche && <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 testo-13">{Object.entries(o.statistiche).filter(([k, v]) => k !== 'effetti' && v !== null && (typeof v === 'number' || typeof v === 'string')).map(([k, v]) =>
               <div key={k} className="contents"><dt className="text-text-muted">{k === 'per' ? 'Per chi' : k === 'testo' ? 'Statistiche' : k === 'sessioni' ? 'Sessioni' : k}</dt><dd className="m-0 break-words">{String(v)}</dd></div>)}</dl>}
             {!!o.nomiAltri.length && <details><summary className="touch testo-13">Altri nomi</summary><ul className="m-0 pl-5 testo-13">{o.nomiAltri.map((n) => <li key={n}>{n}</li>)}</ul></details>}

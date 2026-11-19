@@ -16,8 +16,9 @@ export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
   },
   'POST /api/catalogo-oggetti': {
     sommario: 'Crea una nuova identità nel catalogo',
-    descrizione: 'Categoria e nome sono obbligatori; alias, nome originale, sottocategoria, effetto, descrizione e statistiche hanno i default della creazione. La chiave nasce da categoria/nome, con suffisso se già usata. Non crea offerte, acquisti o ottenimenti e non unisce omonimi.',
+    descrizione: 'Categoria e nome sono obbligatori; alias, nome originale, sottocategoria, effetto, descrizione e statistiche hanno i default della creazione. La chiave nasce da categoria/nome, con suffisso se già usata. La sottocategoria è testo libero, salvo per una decorazione (categoria `decorazione`), che ha `dono`, `artiglio` o nessuna: un altro valore risponde 400 `sottocategoria-decorazione-non-valida`. Non crea offerte, acquisti o ottenimenti e non unisce omonimi.',
     risposta: 'CatalogoOggettoDto creato (201)',
+    errori: [[400, 'sottocategoria-decorazione-non-valida']],
   },
   'GET /api/catalogo-oggetti/:categoria/:slug': {
     sommario: 'Pagina aggregata di un oggetto e delle sue fonti',
@@ -27,9 +28,9 @@ export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
   },
   'PUT /api/catalogo-oggetti/:categoria/:slug': {
     sommario: 'Corregge i campi inviati senza cambiare la chiave',
-    descrizione: 'Modifica parziale: i campi omessi non vengono azzerati dai default della creazione; un oggetto della guida corretto passa a origine «utente». Rinomina e categoria corrente non cambiano la chiave originale né riscrivono nomi/date dello storico; i lettori usano il riferimento stabile. Non corregge prezzi o condizioni delle singole offerte.',
+    descrizione: 'Modifica parziale: i campi omessi non vengono azzerati dai default della creazione; un oggetto della guida corretto passa a origine «utente». Rinomina e categoria corrente non cambiano la chiave originale né riscrivono nomi/date dello storico; i lettori usano il riferimento stabile. Non corregge prezzi o condizioni delle singole offerte. La sottocategoria di una decorazione (categoria `decorazione`, inviata o già salvata) è `dono`, `artiglio` o nessuna: un altro valore risponde 400 `sottocategoria-decorazione-non-valida` e non scrive.',
     risposta: 'CatalogoOggettoDto aggiornato',
-    errori: [[404, 'oggetto-non-trovato'], [409, 'categoria-lettura-collegata']],
+    errori: [[404, 'oggetto-non-trovato'], [409, 'categoria-lettura-collegata'], [400, 'sottocategoria-decorazione-non-valida']],
   },
   'DELETE /api/catalogo-oggetti/:categoria/:slug': {
     sommario: 'Elimina un’identità passando dal cestino',

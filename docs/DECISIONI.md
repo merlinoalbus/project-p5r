@@ -689,6 +689,15 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Gli orari di un punto vendita con sede sono quelli del suo luogo; un punto vendita ha orari propri solo come eccezione (oggi il negozio
   del Palazzo di Niijima, senza sede). Gli orari scritti sui negozi e non letti (Untouchable, Big Bang Burger, Mercante Sakai) sono in
   archivio.
+- **Decorazioni nel catalogo** (categoria `decorazione`, gruppo «Decorazioni»): gli oggetti da collezione della stanza al Leblanc, che si
+  mettono sulla mensola e non hanno effetti di gioco. Si ottengono in due modi, detti dalla sottocategoria: `dono` (regalata da un
+  Confidente in un'uscita) o `artiglio` (vinta all'artiglio della sala giochi di Akihabara); senza sottocategoria la provenienza non è
+  detta, e nessun altro valore è ammesso. Senza un testo proprio, l'elenco e la scheda dicono «Si mette sulla mensola della stanza al
+  Leblanc» con la provenienza: una frase calcolata dalla categoria, non ripetuta nei dati. Nella partita una decorazione arriva con la voce
+  del Diario che ha l'effetto «oggetto ricevuto» (la voce dell'uscita, o quella della vincita all'artiglio), spuntata, e compare fra gli
+  oggetti ottenuti. Il Confidente che la regala si lega con una ricompensa (`ricompensa_oggetto`, fonte «confidente») senza regola
+  (`condizioni_json` vuoto): la scheda del Confidente e quella dell'oggetto la mostrano, e la copia la dà solo la voce spuntata. Una regola
+  la darebbe da sola quando vale, e con la voce le copie sarebbero due: si usa solo per un dono che non ha una voce del Diario.
 - Un'offerta collegata a un oggetto del catalogo ne prende nome, categoria e «per chi»: le sue colonne restano vuote (nome vuoto,
   categoria «altro»), anche collegando un'offerta che aveva i suoi; valgono solo per un'offerta senza legame (con i valori di prima
   in archivio). Un'offerta che perde il legame (scollegata, o con l'oggetto eliminato) tiene il nome, la categoria e il «per chi» che

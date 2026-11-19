@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CATEGORIA_OGGETTO, GRUPPI_OGGETTO, type GruppoOggetto } from '../../../shared/catalogo';
+import { opzioniOggettiDelCatalogo } from '../../utils/opzioniCatalogo';
 import { ModuloOggetto } from './ModuloOggetto';
 import type { CatalogoOggettoDto } from '../../types';
 import { useCarica } from '../../hooks/useCarica';
@@ -32,9 +32,6 @@ export interface StatoSceltaCatalogo {
   onRicarica: () => void;
 }
 
-/** L'ordine dei gruppi nell'elenco: quello di `GRUPPI_OGGETTO`. */
-const ORDINE_GRUPPI = Object.keys(GRUPPI_OGGETTO) as GruppoOggetto[];
-
 /**
  * La variante già caricata riusa un'unica lettura per identità e componenti del costo di un'offerta. L3: le voci stanno a gruppi contigui
  * (Equipaggiamento, Consumabili…, poi per nome), così ogni intestazione compare una volta; con `onCrea` in fondo all'elenco c'è «Crea
@@ -45,13 +42,8 @@ export function SceltaNelCatalogo({ valore, onScegli, etichetta = 'Oggetto', dis
   onCreato?: (oggetto: CatalogoOggettoDto) => void;
   compatto?: boolean;
 }) {
-  const opzioni = useMemo(() => (oggetti ?? []).filter((o) => !escludi?.includes(o.chiave) && (!includi || includi.includes(o.chiave)))
-    .map((o) => ({ o, g: CATEGORIA_OGGETTO[o.categoria].gruppo }))
-    .sort((a, b) => ORDINE_GRUPPI.indexOf(a.g) - ORDINE_GRUPPI.indexOf(b.g) || a.o.nome.localeCompare(b.o.nome, 'it'))
-    .map(({ o, g }) => ({
-      chiave: o.chiave, nome: o.nome, gruppo: GRUPPI_OGGETTO[g], dettaglio: CATEGORIA_OGGETTO[o.categoria].nome,
-      testoRicerca: [...o.nomiAltri, o.nomeOriginale ?? ''].join(' '),
-    })), [oggetti, escludi, includi]);
+  const opzioni = useMemo(() => opzioniOggettiDelCatalogo((oggetti ?? []).filter((o) => !escludi?.includes(o.chiave) && (!includi || includi.includes(o.chiave)))
+    .map((o) => ({ chiave: o.chiave, nome: o.nome, categoria: o.categoria, testoRicerca: [...o.nomiAltri, o.nomeOriginale ?? ''].join(' ').trim() }))), [oggetti, escludi, includi]);
   const [nuovo, setNuovo] = useState<string | null>(null);
   return <div className="flex min-w-0 flex-col gap-2">
     {errore ? <p role="alert" className="m-0 testo-13">{errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" disabled={disabilitato} onClick={onRicarica} /></p> : null}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { CATEGORIA_OGGETTO, GRUPPI_OGGETTO, type GruppoOggetto } from '../../../shared/catalogo';
+import { CATEGORIA_OGGETTO, GRUPPI_OGGETTO, fraseDellaDecorazione, type GruppoOggetto } from '../../../shared/catalogo';
 import { filtroRicerca } from '../../utils/testo';
 import { descriviVoceEffetto, leggiVociEffetto } from '../../../shared/effettiCatalogo';
 import type { CatalogoOggettoDto } from '../../types';
@@ -45,15 +45,18 @@ function CellaEffetto({ o }: { o: CatalogoOggettoDto }) {
   const lettura = o.effetto ? '' : effettiDellaLettura(o);
   const statistiche = typeof o.statistiche?.testo === 'string' ? o.statistiche.testo : '';
   const regalo = !o.effetto && !statistiche && !lettura && o.categoria === 'regalo';
-  const tesoro = !o.effetto && !statistiche && !lettura && !regalo && DESCRIZIONE_DI_TESORO.test(o.descrizione ?? '');
+  // una decorazione senza un effetto proprio sta sulla mensola della stanza: la frase è calcolata dalla categoria, con la provenienza
+  const decorazione = !o.effetto && !statistiche && !lettura && o.categoria === 'decorazione';
+  const tesoro = !o.effetto && !statistiche && !lettura && !regalo && !decorazione && DESCRIZIONE_DI_TESORO.test(o.descrizione ?? '');
   return (
     <td className="tabella-oggetti__effetto break-words" title={o.effetto ? testoNoteAParole(noteInSimboli(o.effetto)) : lettura ? testoNoteAParole(lettura) : undefined}>
       {o.effetto && <TestoNote testo={o.effetto} daParole="conteggi" />}
       {statistiche && <span className="block testo-12 text-text-secondary">{statistiche}</span>}
       {lettura && <span className="block"><TestoNote testo={lettura} /></span>}
       {regalo && <span className="text-text-secondary">{EFFETTO_DEL_REGALO}</span>}
+      {decorazione && <span className="text-text-secondary">{fraseDellaDecorazione(o.sottocategoria)}</span>}
       {tesoro && <span className="text-text-secondary">{o.descrizione}</span>}
-      {!o.effetto && !statistiche && !lettura && !regalo && !tesoro && 'Non dichiarato'}
+      {!o.effetto && !statistiche && !lettura && !regalo && !decorazione && !tesoro && 'Non dichiarato'}
     </td>
   );
 }

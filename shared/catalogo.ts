@@ -88,15 +88,15 @@ export function fasceConPrezzoDiverso(prezzo: number | null, perFascia: unknown)
 
 export const CATEGORIE_OGGETTO = [
   'arma', 'arma-da-fuoco', 'protezione', 'accessorio', 'consumabile', 'materiale', 'chiave',
-  'regalo', 'cibo', 'libro', 'film', 'videogioco', 'carta-abilita', 'altro',
+  'regalo', 'cibo', 'libro', 'film', 'videogioco', 'carta-abilita', 'decorazione', 'altro',
 ] as const;
 export type CategoriaOggetto = (typeof CATEGORIE_OGGETTO)[number];
-export type GruppoOggetto = 'equipaggiamento' | 'consumabili' | 'materiali' | 'regali' | 'cibo' | 'libri' | 'film' | 'videogiochi' | 'carte-abilita' | 'altro';
+export type GruppoOggetto = 'equipaggiamento' | 'consumabili' | 'materiali' | 'regali' | 'cibo' | 'libri' | 'film' | 'videogiochi' | 'carte-abilita' | 'decorazioni' | 'altro';
 
 export const GRUPPI_OGGETTO: Readonly<Record<GruppoOggetto, string>> = {
   equipaggiamento: 'Equipaggiamento', consumabili: 'Consumabili', materiali: 'Chiave e materiali',
   regali: 'Regali', cibo: 'Cibo', libri: 'Libri', film: 'Film', videogiochi: 'Videogiochi',
-  'carte-abilita': 'Carte abilità', altro: 'Altro',
+  'carte-abilita': 'Carte abilità', decorazioni: 'Decorazioni', altro: 'Altro',
 };
 export const CATEGORIA_OGGETTO: Readonly<Record<CategoriaOggetto, { nome: string; gruppo: GruppoOggetto }>> = {
   arma: { nome: 'Arma', gruppo: 'equipaggiamento' },
@@ -108,11 +108,34 @@ export const CATEGORIA_OGGETTO: Readonly<Record<CategoriaOggetto, { nome: string
   regalo: { nome: 'Regalo', gruppo: 'regali' }, cibo: { nome: 'Cibo', gruppo: 'cibo' },
   libro: { nome: 'Libro', gruppo: 'libri' }, film: { nome: 'Film', gruppo: 'film' },
   videogioco: { nome: 'Videogioco', gruppo: 'videogiochi' },
-  'carta-abilita': { nome: 'Carta abilità', gruppo: 'carte-abilita' }, altro: { nome: 'Altro', gruppo: 'altro' },
+  'carta-abilita': { nome: 'Carta abilità', gruppo: 'carte-abilita' },
+  decorazione: { nome: 'Decorazione', gruppo: 'decorazioni' }, altro: { nome: 'Altro', gruppo: 'altro' },
 };
 
 export function eCategoriaOggetto(x: unknown): x is CategoriaOggetto {
   return typeof x === 'string' && (CATEGORIE_OGGETTO as readonly string[]).includes(x);
+}
+
+/** Il nome di una categoria come la scrivono i dati («Decorazione» per `decorazione`); una chiave sconosciuta resta com'è. */
+export function nomeCategoriaOggetto(categoria: string | null | undefined): string {
+  return categoria ? (eCategoriaOggetto(categoria) ? CATEGORIA_OGGETTO[categoria].nome : categoria) : '';
+}
+
+/** Le decorazioni della stanza al Leblanc (oggetti da collezione che si mettono sulla mensola) dicono da dove vengono con la sottocategoria,
+ *  l'unica categoria che le enumera: `dono` (regalata da un Confidente in un'uscita) o `artiglio` (vinta all'artiglio della sala giochi di
+ *  Akihabara); senza sottocategoria la provenienza non è detta. Le sottocategorie delle altre categorie restano testo libero. */
+export const SOTTOCATEGORIE_DECORAZIONE = { dono: 'Dono di un Confidente', artiglio: 'Vinta all’artiglio di Akihabara' } as const;
+export type SottocategoriaDecorazione = keyof typeof SOTTOCATEGORIE_DECORAZIONE;
+
+export function eSottocategoriaDecorazione(x: unknown): x is SottocategoriaDecorazione {
+  return typeof x === 'string' && Object.hasOwn(SOTTOCATEGORIE_DECORAZIONE, x);
+}
+
+/** Che cosa fa una decorazione senza un effetto proprio, con la provenienza se la sottocategoria la dice: una frase calcolata dalla
+ *  categoria (come quella dei regali), non un testo ripetuto nei dati. */
+export function fraseDellaDecorazione(sottocategoria: string | null): string {
+  const base = 'Si mette sulla mensola della stanza al Leblanc';
+  return eSottocategoriaDecorazione(sottocategoria) ? `${base} · ${SOTTOCATEGORIE_DECORAZIONE[sottocategoria]}` : base;
 }
 
 /** L4-07: un'offerta collegata a un oggetto del catalogo non ha nome, categoria né «per chi» propri (li dà l'oggetto): le colonne NOT NULL
