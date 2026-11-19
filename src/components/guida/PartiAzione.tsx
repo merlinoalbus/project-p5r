@@ -36,6 +36,12 @@ import { TestoNote } from '../shared/TestoNote';
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
   & Partial<Pick<AzionePercorsoDto, 'produceRiepilogo' | 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce' | 'yenAutomatici' | 'yenGiaNelSaldo' | 'effettiVoce' | 'ricevuteEffetti'>>;
 
+/** Il nome del Confidente senza l'arcano: i nomi salvati sono «Makoto Niijima - Papessa»; un testo senza « - » resta com'è. */
+const nomeSenzaArcano = (testo: string): string => {
+  const i = testo.lastIndexOf(' - ');
+  return i > 0 ? testo.slice(0, i).trim() : testo;
+};
+
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
   if (a.riferimento?.tipo === 'confidente') {
@@ -116,6 +122,9 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
   // apre la scheda. Ruoli diversi, un solo nome
   const postoMappa = a.mappa?.posto && !stessoNomeDiPosto(a.mappa.posto, link?.etichetta ?? a.riferimentoTesto) ? a.mappa.posto : null;
   const gruppi = a.fatta ? [] : gruppiDellaVoce(a);
+  // Una Trama collegata a un Confidente non è un incontro con rango: il collegamento è un chip neutro «con Makoto Niijima», senza l'arcano
+  // (il ritratto con il segno `trama-confidente` dice già chi è); il nome con l'arcano resta nel titolo. Le voci Confidente restano in rosso
+  const tramaConConfidente = a.tipo === 'trama' && confidente !== null;
   return (
     <>
     <span className="flex flex-wrap items-center gap-1.5">
@@ -124,14 +133,15 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {/* il tipo della voce solo se la riga non lo dice già (emblema e «Palazzo di Kamoshida», ritratto e nome del Confidente, un nome che
           contiene il tipo): 2026-10-25, «le etichette di testo devono essere visibili solo se hanno senso» (`tipoGiaDetto`) */}
       {!tipoGiaDetto(a, link?.etichetta ?? a.riferimentoTesto) && <span className="chip testo-12">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>}
-      {link ? <Link to={conRitornoDiario(link.href, partenza, uid)} className="chip chip--attivo no-underline testo-12"
+      {link ? <Link to={conRitornoDiario(link.href, partenza, uid)} className={`chip no-underline testo-12 ${tramaConConfidente ? '' : 'chip--attivo'}`}
+        title={tramaConConfidente ? link.etichetta : undefined}
         onClick={(e) => {
           if (apriAccanto && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); return; }
           if (confidente && partitaAttiva !== null && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); setCassetto(confidente); return; }
           // il Palazzo porta con sé la pagina di partenza e la voce (R10-28): nel pannello la scheda dice «Esci» e riporta alla voce
           if (apriSopra(e, conRitornoDiario(link.scheda ?? link.href, partenza, uid))) return;
           ricordaVoce(e);
-        }}>{link.etichetta}</Link>
+        }}>{tramaConConfidente ? `con ${nomeSenzaArcano(link.etichetta)}` : link.etichetta}</Link>
         : a.riferimentoTesto && <span className="chip testo-12">{a.riferimentoTesto}</span>}
       {cassetto && partitaAttiva !== null && (
         <Suspense fallback={null}>
@@ -211,21 +221,26 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, relazione }: { occup
   // la casella toccata vince sul valore della partita (che può arrivare dopo l'apertura della scelta)
   const [sceltaRelazione, setSceltaRelazione] = useState<boolean | null>(null);
   const relazioneScelta = relazione ? sceltaRelazione ?? relazione.valore : undefined;
-  const scegli = (note: 1 | 2 | 3 | null) => onScegli(note, relazioneScelta);
+  // mentre la spunta si salva i controlli restano col fuoco (`aria-disabled`, il gruppo `aria-busy`) e il gesto si ignora: `disabled` farebbe
+  // cadere il fuoco della tastiera sul documento (la scelta resta aperta fino al salvataggio, vedi `AzioneGiornata`)
+  const fermo = occupato || undefined;
+  const scegli = (note: 1 | 2 | 3 | null) => { if (!occupato) onScegli(note, relazioneScelta); };
   return (
-    <span className="flex flex-wrap items-center gap-1.5 testo-12" role="group" aria-label="Note ottenute con il Confidente">
+    <span className="flex flex-wrap items-center gap-1.5 testo-12" role="group" aria-label="Note ottenute con il Confidente" aria-busy={fermo}>
       {relazione && (
-        <label className="touch flex w-full items-center gap-2 cursor-pointer text-text">
-          <input type="checkbox" className="w-5 h-5 shrink-0" checked={relazioneScelta} disabled={occupato} onChange={(e) => setSceltaRelazione(e.target.checked)} />
+        <label className={`touch flex w-full items-center gap-2 text-text ${occupato ? 'cursor-progress' : 'cursor-pointer'}`}>
+          <input type="checkbox" className="w-5 h-5 shrink-0" checked={relazioneScelta} aria-disabled={fermo}
+            onClick={occupato ? (e) => e.preventDefault() : undefined} onChange={(e) => { if (!occupato) setSceltaRelazione(e.target.checked); }} />
           Ho scelto la relazione romantica
         </label>
       )}
       <span className="text-text-secondary">Quante note hai ottenuto?</span>
       {([1, 2, 3] as const).map((n) => (
-        <button key={n} type="button" className="chip touch" disabled={occupato} onClick={() => scegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
+        <button key={n} type="button" className="chip touch" aria-disabled={fermo} onClick={() => scegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
       ))}
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" disabled={occupato} onClick={() => scegli(null)} />
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" aria-disabled={fermo} onClick={() => scegli(null)} />
+      {/* anche «Annulla» aspetta: la spunta già partita non si ferma, e la scelta chiusa lascerebbe la richiesta senza il suo segno */}
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" aria-disabled={fermo} onClick={() => { if (!occupato) onAnnulla(); }} />
     </span>
   );
 }

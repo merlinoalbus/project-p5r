@@ -287,7 +287,7 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
   if (solo) {
     const richiesta = d?.richieste.find((x) => x.chiave === solo) ?? null;
     return (
-      <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+      <PageState carica={dati}>
         {d && (
           <div className="flex flex-col gap-2">
             {/* fuori dal pannello l'elemento è una pagina: si può tornare all'elenco (il nome della cosa, mai «Torna») */}
@@ -303,7 +303,7 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
   }
 
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {d && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Richieste dei Mementos" sottotitolo={<>{d.totale} Richieste: committente, date, dedalo, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare accettate e completate.'}</>} />

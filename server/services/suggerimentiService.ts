@@ -178,6 +178,9 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
       r.confidenti.add(rif.chiave);
       segna('confidenti', rif.chiave, a.azione, a.fascia);
       for (const p of personaggiDiConfidente(rif.chiave)) { r.personaggi.add(p); segna('personaggi', p, a.azione, a.fascia); }
+      // una Trama collegata al Confidente non si svolge nei suoi luoghi: il collegamento ritrova l'evento con il personaggio, non dice dove
+      // (la stessa regola di `mappaAzione`). Luoghi e spillo solo per le altre voci
+      if (a.tipo === 'trama') continue;
       for (const l of prepared('SELECT chiave FROM luogo WHERE nascosto = 0 AND confidenti_json LIKE ?').all(`%"${rif.chiave}"%`) as Array<{ chiave: string }>) aggiungiLuogo(r, l.chiave);
       const sp = prepared("SELECT id FROM spillo WHERE riferimento_tipo = 'confidente' AND riferimento_chiave = ? ORDER BY id LIMIT 1").get(rif.chiave) as { id: number } | undefined;
       if (sp) r.spilli.add(sp.id);

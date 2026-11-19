@@ -8,7 +8,7 @@
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useCarica } from './useCarica';
+import { useCarica, type CausaErrore } from './useCarica';
 import { getMappa, impostaAcquisto, impostaSpilloRaccolto, impostaStatoPunto } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -20,6 +20,8 @@ export interface MappaPartita {
   mappa: MappaDto | null;
   caricamento: boolean;
   errore: string | null;
+  /** Il genere dell'errore (`causaErrore` di `useCarica`), da dare a `PageState` con l'errore. */
+  causaErrore: CausaErrore;
   ricarica: () => Promise<void>;
   raccolto: (s: SpilloDto, valore: boolean) => Promise<void>;
   statoPunto: (s: SpilloDto, voce: string, stato: StatoPuntoMappa) => Promise<void>;
@@ -40,7 +42,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
   /** La mappa con lo stato della partita, nell'infiltrazione di contesto se c'è (altrimenti la chiamata di sempre). */
   const leggi = () => (contesto.current ? getMappa(chiave, partitaId ?? undefined, contesto.current) : getMappa(chiave, partitaId ?? undefined));
   // eslint-disable-next-line react-hooks/exhaustive-deps -- `leggi` usa `chiave`, `partitaId` e l'infiltrazione da un riferimento; `momento` fa solo rileggere
-  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => leggi(), [chiave, partitaId, momento]);
+  const { dati, caricamento, errore, causaErrore, ricarica, imposta } = useCarica(() => leggi(), [chiave, partitaId, momento]);
   // Gli spilli aggiornati in locale dopo un'azione valgono **sulla copia della mappa a cui si riferiscono**: arrivata una copia
   // nuova (una rilettura, anche quella di una versione nuova, o un caricamento completo per un cambio di momento o mappa) vale
   // quella del server.
@@ -140,5 +142,5 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     } catch (err) { errori(err); }
   };
 
-  return { mappa, caricamento, errore, ricarica: ricaricaTutto, raccolto, statoPunto, acquisto };
+  return { mappa, caricamento, errore, causaErrore, ricarica: ricaricaTutto, raccolto, statoPunto, acquisto };
 }

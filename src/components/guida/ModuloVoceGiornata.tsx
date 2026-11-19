@@ -19,7 +19,7 @@
 // L6-06: la griglia di «Quale» e l'editor delle condizioni stanno in due finestre sopra la voce; nella voce restano una riga ciascuno.
 // ============================================================
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Segmenti } from '../shared/Segmenti';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { aggiornaVoceGiornata, applicaPropostaConversione, creaVoceGiornata, getElenchiAzione, getElenchiEffettiVoce } from '../../services/api';
@@ -41,9 +41,10 @@ import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import { CondizioniEditor } from './CondizioniEditor';
 import { IconaAzione } from '../shared/IconaAzione';
-import { Selettore } from '../shared/Selettore';
-import { SelettoreIcone } from '../shared/SelettoreIcone';
 import { IconaArcano } from '../shared/IconaArcano';
+import { AnteprimaPersona } from '../shared/AnteprimaPersona';
+import { IconSpunta } from '../shared/iconeGuida';
+import { IconChevronRight } from '../shared/icons';
 import { MASSIMO_REQUISITI_VOCE } from '../../../shared/requisitiVoce';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 
@@ -83,6 +84,8 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   // come nella finestra (`Modal`): il fuoco sul campo apre la tastiera, e su tablet e telefono la tastiera copre metà del foglio;
   // il campo prende il fuoco solo da desktop (≥ 1024 px, la soglia della barra laterale)
   const largo = useMedia('(min-width: 1024px)');
+  // gli id dei campi di testo, per collegarli alla loro etichetta
+  const idCampo = useId();
   const telefono = useMedia('(max-width: 767px)');
   const voce = soggetto.tipo === 'voce' ? soggetto.voce : null;
   const proposta = soggetto.tipo === 'voce' ? soggetto.proposta ?? null : null;
@@ -201,15 +204,19 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     }
   };
 
+  // l'etichetta visibile è anche il nome accessibile del campo (collegata per id e ripetuta in `aria-label`, così nessuno strumento ripiega sul
+  // segnaposto, che è solo un esempio)
+  const etichettaTesto = azione ? 'Che cosa fare' : 'Che cosa succede';
+  const etichettaNote = azione ? 'Note' : 'Dettagli';
   const colonnaSinistra = (
     <div className="voce-colonna">
       <div className="flex flex-col gap-1">
         <Segmenti etichetta="Che cosa è" valore={campi.genere} opzioni={GENERI} onCambia={(g) => imposta({ genere: g })} />
         <span className="testo-12 text-text-muted">{azione ? 'Si spunta e può dare punti.' : 'Solo da leggere: compare in «Di giorno» o «Di sera» senza casella, e non ha tipo né effetti.'}</span>
       </div>
-      <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
+      <label className="flex flex-col gap-1 testo-13 text-text-secondary" htmlFor={`${idCampo}-testo`}>{etichettaTesto}
         {/* eslint-disable-next-line jsx-a11y/no-autofocus -- sullo schermo largo l'editor della voce si apre per scrivere il testo */}
-        <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus={largo} onChange={(e) => imposta({ testo: e.target.value })}
+        <textarea id={`${idCampo}-testo`} aria-label={etichettaTesto} className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus={largo} onChange={(e) => imposta({ testo: e.target.value })}
           placeholder={azione ? 'es. Comprare il Set per retrogaming' : 'es. Domani esami: ripassare la sera prima'} />
       </label>
       <Segmenti etichetta="Quando" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
@@ -228,15 +235,20 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   // e si modificano nella loro finestra: una riga ciascuno finché non si toccano, e il corpo della voce resta sotto gli 800 px a 1280
   const nomeFascia = campi.fascia === 'giorno' ? 'di giorno' : 'di sera';
   const riepilogoCondizioni = campi.condizioni.length === 0 ? 'Nessuna condizione: la voce si fa sempre.' : `${campi.condizioni.length} ${campi.condizioni.length === 1 ? 'condizione' : 'condizioni'}: la voce è dovuta solo se valgono.`;
-  const riepilogoScorta = campi.requisiti.length === 0 ? 'Nessuno' : `${campi.requisiti.length} ${campi.requisiti.length === 1 ? 'voce' : 'voci'}`;
+  // «Da avere in scorta» nella voce: le figure (il ritratto per una Persona specifica, la figura dell'arcano per «qualunque») e il conto
+  const personeScorta = useMemo(() => new Map((elenchiEffetti.dati?.persone ?? []).map((p) => [p.id, p])), [elenchiEffetti.dati]);
+  const nomiScorta = campi.requisiti.map((r) => {
+    const arcano = elenchiEffetti.dati?.arcani.find((a) => a.chiave === r.arcana)?.nome ?? r.arcana;
+    return r.persona === null ? `${arcano} (qualunque)` : `${personeScorta.get(r.persona)?.nomeIt ?? `Persona ${r.persona}`} (${arcano})`;
+  }).join(', ');
   const colonnaDestra = (
     <div className="voce-colonna">
       {azione && elenchi && <SceltaTipoQuale parte="quale" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} qualeAperta={qualeAperta} onQualeAperta={setQualeAperta} />}
       {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} fatta={!!voce?.fatta} apertaDiPartenza={!voce || !!proposta} />}
       {azione && !elenchi && !erroreElenchi && <p className="m-0 testo-12 text-text-muted" role="status">Carico gli elenchi…</p>}
       {azione && erroreElenchi && <p className="m-0 testo-12 text-error-testo" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
-      <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Note' : 'Dettagli'}
-        <textarea className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
+      <label className="flex flex-col gap-1 testo-13 text-text-secondary" htmlFor={`${idCampo}-note`}>{etichettaNote}
+        <textarea id={`${idCampo}-note`} aria-label={etichettaNote} className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
       </label>
       {/* L13 (O9-3, «in tal caso viene meno la consegna»): quando la voce è dovuta, con l'editor unico delle condizioni; senza, si fa sempre.
           Con le condizioni false al giorno della voce, nella partita la voce è «Non dovuta»: non si spunta e non ferma la giornata */}
@@ -259,11 +271,14 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
             <button type="button" className="ripiegabile__interruttore touch" aria-haspopup="dialog" disabled={occupato || !elenchi} title="Modifica l’elenco da avere in scorta" onClick={() => setScortaAperta(true)}>
               <span className="ripiegabile__freccia" aria-hidden="true"><IconaAzione chiave="modifica" dimensione={18} /></span>
               <span className="ripiegabile__nome">Da avere in scorta</span>
-              <span className="ripiegabile__riepilogo">{campi.requisiti.length === 0 ? riepilogoScorta : (
-                <span className="scorta-miniature" title={riepilogoScorta}>
-                  {campi.requisiti.slice(0, 12).map((r, i) => <IconaArcano key={i} arcana={r.arcana} dimensione={22} />)}
-                  {campi.requisiti.length > 12 && <span>+{campi.requisiti.length - 12}</span>}
-                  <span className="sr-only">{riepilogoScorta}</span>
+              <span className="ripiegabile__riepilogo">{campi.requisiti.length === 0 ? 'Nessuno' : (
+                <span className="scorta-miniature" title={nomiScorta}>
+                  <span className="scorta-miniature__conta">{contaScorta(campi.requisiti)}</span>
+                  <span className="scorta-miniature__figure">
+                    {campi.requisiti.slice(0, 12).map((r) => <FiguraRequisito key={`${r.arcana}#${r.persona ?? ''}`} r={r} persona={r.persona === null ? undefined : personeScorta.get(r.persona)} dimensione={22} />)}
+                    {campi.requisiti.length > 12 && <span className="scorta-miniature__altre" aria-hidden="true">+{campi.requisiti.length - 12}</span>}
+                  </span>
+                  <span className="sr-only">: {nomiScorta}</span>
                 </span>
               )}</span>
             </button>
@@ -333,22 +348,51 @@ function FinestraCondizioniVoce({ condizioni, onApplica, onChiudi }: { condizion
 
 /** Un requisito della bozza: l'arcano (chiave inglese) e, se specifico, l'id della Persona. */
 type RequisitoBozza = { arcana: string; persona: number | null };
-/** Una riga della finestra: il requisito con un numero proprio, che non cambia scegliendo la Persona (il campo non si rimonta). */
-type RigaScorta = RequisitoBozza & { k: number };
+/** Una Persona degli elenchi della voce (quelle che si possono chiedere in scorta). */
+type PersonaElenco = ElenchiVoce['effetti']['persone'][number];
+
+/** «9 arcani · 10 da avere»: gli arcani distinti e, quando sono meno dei requisiti (più Persone dello stesso arcano), quanti sono i requisiti;
+ *  se i due numeri coincidono basta il primo. */
+function contaScorta(r: readonly RequisitoBozza[]): string {
+  const arcani = new Set(r.map((x) => x.arcana)).size;
+  const parte = `${arcani} ${arcani === 1 ? 'arcano' : 'arcani'}`;
+  return r.length > arcani ? `${parte} · ${r.length} da avere` : parte;
+}
+
+/** La figura di un requisito: il ritratto della Persona se è specifica (due Persone dello stesso arcano si distinguono), altrimenti la figura dell'arcano. */
+function FiguraRequisito({ r, persona, dimensione }: { r: RequisitoBozza; persona: PersonaElenco | undefined; dimensione: number }) {
+  return (
+    <span className="scorta-figura" aria-hidden="true">
+      {persona ? <AnteprimaPersona nome={persona.nome} etichetta={persona.nomeIt} dimensione={dimensione} contieni /> : <IconaArcano arcana={r.arcana} dimensione={dimensione} />}
+    </span>
+  );
+}
 
 /**
- * «Da avere in scorta» in una finestra sopra la voce. In alto le tessere dei 22 arcani (tocco = dentro o fuori); sotto, una riga da 44 px per
- * ogni arcano scelto, con la Persona specifica facoltativa («Qualunque Persona» se non si sceglie), «+» per un'altra Persona dello stesso arcano e
- * «×» per togliere la riga. L'ordine è quello degli arcani (della tabella di fusione), poi della Persona: non si sposta a mano. Le regole del
- * server sono impedite già qui: per ogni arcano o c'è una riga sola con «qualunque Persona» o ci sono più righe con Persona diverse (mai un
- * doppione, mai l'arcano intero insieme a una sua Persona). «Applica» mette la bozza nella voce, che la salva con il suo «Salva».
+ * «Da avere in scorta» in una finestra sopra la voce, ancorata in alto e di altezza fissa (`FinestraModifica ancorata`): toccando, niente si
+ * sposta sotto il dito. Due viste nello stesso posto, mai una sotto l'altra (un solo corpo che scorre, quello della finestra):
+ *   - la griglia dei 24 arcani: un tocco su una tessera spenta la accende («qualunque Persona» di quell'arcano), un tocco sulla parte alta di una
+ *     tessera accesa la spegne; la fascia in basso della tessera accesa dice quali Persone («Qualunque», il ritratto e il nome di una, i ritratti
+ *     e il numero di più) e apre il pannello dell'arcano;
+ *   - il pannello dell'arcano, al posto della griglia: «Qualunque» per prima, poi le Persone dell'arcano con il ritratto, a scelta multipla.
+ *     Scegliere una Persona sostituisce «Qualunque»; togliere l'ultima riporta a «Qualunque» (l'arcano resta acceso: si spegne con «Togli» o dalla
+ *     griglia). «Arcani», o Esc, torna alla griglia.
+ * Le regole del server (`shared/requisitiVoce.ts`) sono impedite già qui: per ogni arcano o «qualunque» o Persone diverse, mai un doppione,
+ * al massimo `MASSIMO_REQUISITI_VOCE`. Niente si aggiunge da solo. «Applica» mette la bozza nella voce, che la salva con il suo «Salva».
  */
 function FinestraRequisitiVoce({ requisiti, elenchi, onApplica, onChiudi }: { requisiti: RequisitoBozza[]; elenchi: ElenchiVoce; onApplica: (r: RequisitoBozza[]) => void; onChiudi: () => void }) {
   const { arcani, persone } = elenchi.effetti;
-  const prossimoK = useRef(requisiti.length);
-  const [righe, setRighe] = useState<RigaScorta[]>(() => requisiti.map((r, k) => ({ ...r, k })));
+  const [bozza, setBozza] = useState<RequisitoBozza[]>(requisiti);
+  /** L'arcano di cui si scelgono le Persone (il pannello al posto della griglia); null = la griglia. */
+  const [aperto, setAperto] = useState<string | null>(null);
+  const corpo = useRef<HTMLDivElement>(null);
+  const indietro = useRef<HTMLButtonElement>(null);
+  const pannello = useRef<HTMLDivElement>(null);
+  /** L'arcano da cui si torna alla griglia: il fuoco va sulla sua tessera. */
+  const daCuiSiTorna = useRef<string | null>(null);
+  const perId = useMemo(() => new Map(persone.map((p) => [p.id, p])), [persone]);
   const personeDi = (chiave: string) => persone.filter((p) => p.arcanaChiave === chiave).sort((x, y) => x.livello - y.livello || x.nomeIt.localeCompare(y.nomeIt));
-  const pieno = righe.length >= MASSIMO_REQUISITI_VOCE;
+  const pieno = bozza.length >= MASSIMO_REQUISITI_VOCE;
   /** L'elenco com'è salvato: arcani nell'ordine della tabella di fusione, poi Persone per livello (l'arcano intero, che è solo, non ha Persona). */
   const normalizzate = (b: readonly RequisitoBozza[]): RequisitoBozza[] => {
     const posArcano = new Map(arcani.map((a, i) => [a.chiave, i]));
@@ -356,66 +400,158 @@ function FinestraRequisitiVoce({ requisiti, elenchi, onApplica, onChiudi }: { re
     return b.map(({ arcana, persona }) => ({ arcana, persona }))
       .sort((x, y) => (posArcano.get(x.arcana) ?? 999) - (posArcano.get(y.arcana) ?? 999) || (posPersona.get(x.persona ?? 0) ?? 0) - (posPersona.get(y.persona ?? 0) ?? 0));
   };
-  const scelti = arcani.filter((a) => righe.some((r) => r.arcana === a.chiave));
-  /** Le Persona di un arcano non ancora scelte (in nessuna riga). */
-  const libere = (chiave: string) => personeDi(chiave).filter((p) => !righe.some((r) => r.persona === p.id));
-  const nuovaRiga = (arcana: string, persona: number | null) => { const k = prossimoK.current++; setRighe((b) => [...b, { k, arcana, persona }]); };
-  /** Una tessera toccata: l'arcano entra (arcano intero) o esce con tutte le sue righe. */
-  const alterna = (chiave: string) => {
-    if (righe.some((r) => r.arcana === chiave)) setRighe((b) => b.filter((r) => r.arcana !== chiave));
-    else if (!pieno) nuovaRiga(chiave, null);
-  };
-  const cambiaPersona = (k: number, persona: number | null) => setRighe((b) => b.map((r) => (r.k === k ? { ...r, persona } : r)));
-  const togli = (k: number) => setRighe((b) => b.filter((r) => r.k !== k));
-  const conta = scelti.length === 0 ? 'Tocca gli arcani da avere in scorta'
-    : `${scelti.length} ${scelti.length === 1 ? 'scelto' : 'scelti'}${righe.length > scelti.length ? ` · ${righe.length} voci` : ''}${pieno ? ` (massimo ${MASSIMO_REQUISITI_VOCE})` : ''}`;
+  const ordinata = normalizzate(bozza);
+
+  /** Tessera dell'arcano: spenta si accende con «qualunque Persona»; accesa si spegne con tutte le sue Persone. */
+  const alternaArcano = (chiave: string) => setBozza((b) => (b.some((r) => r.arcana === chiave) ? b.filter((r) => r.arcana !== chiave)
+    : b.length >= MASSIMO_REQUISITI_VOCE ? b : [...b, { arcana: chiave, persona: null }]));
+  /** «Qualunque»: l'arcano intero, al posto delle Persone scelte. */
+  const qualunque = (chiave: string) => setBozza((b) => [...b.filter((r) => r.arcana !== chiave), { arcana: chiave, persona: null }]);
+  /** Una Persona: scelta prende il posto di «qualunque» (o si aggiunge alle altre); tolta l'ultima, l'arcano torna «qualunque». */
+  const alternaPersona = (chiave: string, id: number) => setBozza((b) => {
+    if (b.some((r) => r.persona === id)) {
+      const resto = b.filter((r) => r.persona !== id);
+      return resto.some((r) => r.arcana === chiave) ? resto : [...resto, { arcana: chiave, persona: null }];
+    }
+    if (b.some((r) => r.arcana === chiave && r.persona === null)) return b.map((r) => (r.arcana === chiave && r.persona === null ? { arcana: chiave, persona: id } : r));
+    return b.length >= MASSIMO_REQUISITI_VOCE ? b : [...b, { arcana: chiave, persona: id }];
+  });
+  const apri = (chiave: string) => setAperto(chiave);
+  const torna = () => { daCuiSiTorna.current = aperto; setAperto(null); };
+  const togliArcano = (chiave: string) => { setBozza((b) => b.filter((r) => r.arcana !== chiave)); torna(); };
+
+  // cambiando vista il corpo riparte dall'alto e il fuoco va dove si è: nel pannello su «Arcani», tornando sulla tessera da cui lo si era aperto
+  useEffect(() => {
+    corpo.current?.closest('.modal-body')?.scrollTo({ top: 0 });
+    if (aperto !== null) { indietro.current?.focus(); return; }
+    const da = daCuiSiTorna.current;
+    daCuiSiTorna.current = null;
+    if (!da || !corpo.current) return;
+    const tessera = corpo.current.querySelector<HTMLElement>(`[data-persone="${CSS.escape(da)}"]`) ?? corpo.current.querySelector<HTMLElement>(`[data-arcano="${CSS.escape(da)}"]`);
+    tessera?.focus();
+  }, [aperto]);
+  // Esc nel pannello torna alla griglia e non chiude la finestra: `Modal` ignora un Esc già usato (`preventDefault`), e l'ascolto sul pannello
+  // arriva prima del suo, che è sulla finestra del browser
+  useEffect(() => {
+    const el = pannello.current;
+    if (aperto === null || !el) return;
+    const esc = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      e.preventDefault();
+      daCuiSiTorna.current = aperto;
+      setAperto(null);
+    };
+    el.addEventListener('keydown', esc);
+    return () => el.removeEventListener('keydown', esc);
+  }, [aperto]);
+
+  const arcanoAperto = aperto === null ? null : arcani.find((a) => a.chiave === aperto) ?? { chiave: aperto, nome: aperto };
+  const conta = bozza.length === 0 ? 'Tocca un arcano: vale qualunque sua Persona. Per sceglierne una, tocca «Qualunque» sulla tessera.'
+    : `${contaScorta(bozza)}${pieno ? ` · massimo ${MASSIMO_REQUISITI_VOCE}` : ''}`;
   return (
-    <FinestraModifica titolo="Da avere in scorta" titoloSalva="Applica" onChiudi={onChiudi} sporca={JSON.stringify(normalizzate(righe)) !== JSON.stringify(normalizzate(requisiti))}
-      onSalva={() => { onApplica(normalizzate(righe)); onChiudi(); }}>
-      <div className="scorta-editor">
-        <SelettoreIcone multiplo griglia compatto etichetta="Arcani da avere in scorta" valore={scelti.map((a) => a.chiave)}
-          // l'interruttore comunica l'elenco nuovo: la tessera toccata è la sola che differisce dal precedente
-          onCambia={(nuovi) => { const toccata = nuovi.find((c) => !scelti.some((a) => a.chiave === c)) ?? scelti.find((a) => !nuovi.includes(a.chiave))?.chiave; if (toccata) alterna(toccata); }}
-          opzioni={arcani.map((a) => ({ chiave: a.chiave, nome: a.nome, icona: <IconaArcano arcana={a.chiave} dimensione={32} /> }))} />
-        <p className="scorta-editor__conta" role="status">{conta}</p>
-        {scelti.length > 0 && (
-          <ul className="scorta-righe">
-            {scelti.flatMap((a) => {
-              const dellArcano = righe.filter((r) => r.arcana === a.chiave);
-              const personeArcano = personeDi(a.chiave);
-              return dellArcano.map((r, i) => {
-                const opzioni = personeArcano.filter((p) => p.id === r.persona || !righe.some((x) => x.persona === p.id))
-                  .map((p) => ({ chiave: String(p.id), nome: p.nomeIt, dettaglio: `Liv. ${p.livello}` }));
-                // una Persona salvata che non è più nell'elenco resta visibile
-                if (r.persona !== null && !opzioni.some((o) => o.chiave === String(r.persona))) opzioni.unshift({ chiave: String(r.persona), nome: `Persona ${r.persona}`, dettaglio: '' });
-                const nomePersona = opzioni.find((o) => o.chiave === String(r.persona))?.nome;
-                const piuRighe = dellArcano.length > 1;
-                return (
-                  <li key={r.k} className={`scorta-riga ${i > 0 ? 'scorta-riga--seguente' : ''}`}>
-                    <span className="scorta-riga__arcano" aria-hidden={i > 0 ? true : undefined}>
-                      {i === 0 && <><IconaArcano arcana={a.chiave} dimensione={28} /><span>{a.nome}</span></>}
-                    </span>
-                    <div className="scorta-riga__persona">
-                      {/* con altre righe dello stesso arcano la Persona è obbligatoria: «qualunque» sarebbe l'arcano intero accanto a una sua Persona */}
-                      <Selettore compatto etichetta={`Persona di ${a.nome}`} valore={r.persona === null ? '' : String(r.persona)} {...(piuRighe ? {} : { vuoto: 'Qualunque Persona' })}
-                        opzioni={opzioni} onCambia={(c) => cambiaPersona(r.k, c === '' ? null : Number(c))} />
-                    </div>
-                    <span className="scorta-riga__azioni">
-                      {i === dellArcano.length - 1 && r.persona !== null && libere(a.chiave).length > 0 && (
-                        <button type="button" className="btn btn-ghost btn-sm" disabled={pieno} title={`Un’altra Persona di ${a.nome}`} aria-label={`Aggiungi un’altra Persona di ${a.nome}`}
-                          onClick={() => nuovaRiga(a.chiave, libere(a.chiave)[0]?.id ?? null)}><IconaAzione chiave="piu" dimensione={20} /></button>
+    <FinestraModifica ancorata titolo="Da avere in scorta" titoloSalva="Applica" onChiudi={onChiudi} sporca={JSON.stringify(ordinata) !== JSON.stringify(normalizzate(requisiti))}
+      onSalva={() => { onApplica(ordinata); onChiudi(); }}>
+      <div className="scorta-scelta" ref={corpo}>
+        <p className="scorta-scelta__conta" role="status">{conta}</p>
+        {arcanoAperto === null ? (
+          <ul className="scorta-griglia" aria-label="Arcani da avere in scorta">
+            {arcani.map((a) => {
+              const sue = ordinata.filter((r) => r.arcana === a.chiave);
+              const acceso = sue.length > 0;
+              const specifiche = sue.filter((r) => r.persona !== null);
+              const nomi = specifiche.map((r) => perId.get(r.persona!)?.nomeIt ?? `Persona ${r.persona}`);
+              return (
+                <li key={a.chiave} className={`scorta-tessera ${acceso ? 'scorta-tessera--accesa' : ''}`}>
+                  <button type="button" className="scorta-tessera__arcano" data-arcano={a.chiave} aria-pressed={acceso} disabled={!acceso && pieno} title={a.nome}
+                    onClick={() => alternaArcano(a.chiave)}>
+                    <IconaArcano arcana={a.chiave} dimensione={30} />
+                    <span className="scorta-tessera__nome">{a.nome}</span>
+                    {acceso && <span className="scorta-tessera__spunta" aria-hidden="true"><IconSpunta size={11} /></span>}
+                  </button>
+                  {acceso && (
+                    <button type="button" className="scorta-tessera__persone" data-persone={a.chiave} onClick={() => apri(a.chiave)}
+                      aria-label={`Persone di ${a.nome}: ${nomi.length === 0 ? 'qualunque' : nomi.join(', ')}. Scegli`} title={nomi.length === 0 ? `Qualunque Persona di ${a.nome}` : nomi.join(', ')}>
+                      {specifiche.length === 0 ? <span className="scorta-tessera__testo">Qualunque</span> : (
+                        <>
+                          {/* la prima Persona scelta con il suo ritratto, e quante altre: il nome completo di tutte è nel nome accessibile e nel titolo */}
+                          <span className="scorta-tessera__ritratti">
+                            <FiguraRequisito r={specifiche[0]} persona={perId.get(specifiche[0].persona!)} dimensione={18} />
+                          </span>
+                          {/* il nome sopra e «+N» sotto: sulla tessera stretta il nome ha tutta la larghezza che resta */}
+                          <span className="scorta-tessera__nomi">
+                            <span className="scorta-tessera__testo">{nomi[0]}</span>
+                            {specifiche.length > 1 && <span className="scorta-tessera__altre">+{specifiche.length - 1}</span>}
+                          </span>
+                        </>
                       )}
-                      <button type="button" className="btn btn-ghost btn-sm" title={piuRighe ? 'Togli questa Persona' : `Togli ${a.nome}`} aria-label={piuRighe && nomePersona ? `Togli ${nomePersona} (${a.nome})` : `Togli ${a.nome}`}
-                        onClick={() => togli(r.k)}><IconaAzione chiave="chiudi" dimensione={20} /></button>
-                    </span>
-                  </li>
-                );
-              });
+                      <IconChevronRight size={12} className="scorta-tessera__freccia" />
+                    </button>
+                  )}
+                </li>
+              );
             })}
           </ul>
+        ) : (
+          <div ref={pannello} className="scorta-pannello" role="group" aria-labelledby="scorta-pannello-titolo">
+            <div className="scorta-pannello__testata">
+              <button ref={indietro} type="button" className="scorta-pannello__comando touch" onClick={torna} aria-label="Torna a tutti gli arcani">
+                <IconaAzione chiave="indietro" dimensione={20} /><span>Arcani</span>
+              </button>
+              <span className="scorta-pannello__arcano">
+                <IconaArcano arcana={arcanoAperto.chiave} dimensione={32} />
+                <h3 id="scorta-pannello-titolo" className="scorta-pannello__titolo">{arcanoAperto.nome}</h3>
+              </span>
+              <button type="button" className="scorta-pannello__comando touch" onClick={() => togliArcano(arcanoAperto.chiave)} aria-label={`Togli ${arcanoAperto.nome} dall’elenco`}>
+                <IconaAzione chiave="elimina" dimensione={20} /><span>Togli</span>
+              </button>
+            </div>
+            <PersoneArcano chiave={arcanoAperto.chiave} nome={arcanoAperto.nome} sue={ordinata.filter((r) => r.arcana === arcanoAperto.chiave)} elenco={personeDi(arcanoAperto.chiave)}
+              perId={perId} pieno={pieno} onQualunque={() => qualunque(arcanoAperto.chiave)} onPersona={(id) => alternaPersona(arcanoAperto.chiave, id)} />
+          </div>
         )}
-        <p className="m-0 testo-12 text-text-muted text-pretty">Nel Diario ogni voce è una casella da spuntare a mano: un promemoria, non tocca la scorta.</p>
       </div>
     </FinestraModifica>
+  );
+}
+
+/** Le tessere del pannello di un arcano: «Qualunque» e poi le sue Persone con il ritratto (una salvata e non più negli elenchi resta, per toglierla). */
+function PersoneArcano({ chiave, nome, sue, elenco, perId, pieno, onQualunque, onPersona }: {
+  chiave: string; nome: string; sue: RequisitoBozza[]; elenco: PersonaElenco[]; perId: Map<number, PersonaElenco>; pieno: boolean;
+  onQualunque: () => void; onPersona: (id: number) => void;
+}) {
+  const intero = sue.some((r) => r.persona === null);
+  const scelte = new Set(sue.flatMap((r) => (r.persona === null ? [] : [r.persona])));
+  const sconosciute = [...scelte].filter((id) => !elenco.some((p) => p.id === id));
+  const spunta = <span className="scorta-persona__spunta" aria-hidden="true"><IconSpunta size={11} /></span>;
+  return (
+    <ul className="scorta-persone" aria-label={`Persone di ${nome}`}>
+      <li>
+        <button type="button" className="scorta-persona scorta-persona--qualunque touch" aria-pressed={intero} onClick={onQualunque}>
+          <span className="scorta-persona__figura" aria-hidden="true"><IconaArcano arcana={chiave} dimensione={44} /></span>
+          <span className="scorta-persona__nome">Qualunque</span>
+          <span className="scorta-persona__dettaglio">di {nome}</span>
+          {intero && spunta}
+        </button>
+      </li>
+      {[...elenco, ...sconosciute.map((id) => perId.get(id) ?? null)].map((p, i) => {
+        const id = p?.id ?? sconosciute[i - elenco.length];
+        const scelta = scelte.has(id);
+        // con «qualunque» scelto la Persona ne prende il posto: il conto non cresce, quindi si può anche a elenco pieno
+        const bloccata = !scelta && pieno && !intero;
+        return (
+          <li key={id}>
+            <button type="button" className="scorta-persona touch" aria-pressed={scelta} disabled={bloccata} onClick={() => onPersona(id)}
+              aria-label={p ? `${p.nomeIt}, livello ${p.livello}` : `Persona ${id}`} title={p ? `${p.nomeIt} · Liv. ${p.livello}` : `Persona ${id}`}>
+              <span className="scorta-persona__figura" aria-hidden="true">
+                {p ? <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={48} contieni /> : <IconaArcano arcana={chiave} dimensione={44} />}
+              </span>
+              <span className="scorta-persona__nome">{p ? p.nomeIt : `Persona ${id}`}</span>
+              {p && <span className="scorta-persona__dettaglio">Liv. {p.livello}</span>}
+              {scelta && spunta}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

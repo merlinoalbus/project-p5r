@@ -12,7 +12,8 @@
 //   - `RisultatiRicercaDiario`: al posto del giorno, a tutta larghezza; il numero dei risultati (annunciato), poi i risultati per mese e per
 //     giorno («martedì 12 aprile»), una riga per voce: fascia, testo con le parole evidenziate, collegamento, note ridotte se lunghe,
 //     «Spuntando: …» e, con la partita, «Fatta». Un tocco apre il giorno sulla voce; tornando, la riga della voce riprende il fuoco.
-//     Scorrono con la pagina: nessuna area scorrevole dentro.
+//     Scorrono con la pagina: nessuna area scorrevole dentro. Senza risultati: la figura e una frase sola (che cosa si è cercato e dove), con
+//     «Cancella ricerca» se la barra non l'ha già (senza tipo scelto) e «Cerca in tutti i tipi» se lo stesso testo trova voci di altri tipi.
 // La lettura dal server sta in `hooks/useRicercaDiario.ts`, gli aiuti (tipo dall'indirizzo, ritorno ai risultati) in `utils/ricercaDiario.ts`.
 // ============================================================
 
@@ -173,10 +174,12 @@ interface PropsRisultati {
   /** La voce da cui si torna («Torna ai risultati»): la sua riga riprende il fuoco e torna in vista. */
   voceDiRitorno: string | null;
   onTogliTipo: () => void;
+  /** «Cancella ricerca» della vista senza risultati: svuota testo e tipo e torna al giorno (lo stesso gesto della barra). */
+  onCancella: () => void;
 }
 
 /** La vista dei risultati, al posto del giorno: riepilogo annunciato, poi i risultati per mese e per giorno. */
-export function RisultatiRicercaDiario({ q, tipo, ricerca, conPartita, voceDiRitorno, onTogliTipo }: PropsRisultati) {
+export function RisultatiRicercaDiario({ q, tipo, ricerca, conPartita, voceDiRitorno, onTogliTipo, onCancella }: PropsRisultati) {
   const idTitolo = useId();
   const testo = q.trim();
   const parole = useMemo(() => paroleRicercaDiario(testoSufficiente(testo) ? testo : ''), [testo]);
@@ -197,7 +200,11 @@ export function RisultatiRicercaDiario({ q, tipo, ricerca, conPartita, voceDiRit
   let riepilogo: string;
   if (errore) riepilogo = 'La ricerca non è riuscita.';
   else if (!dati) riepilogo = 'Cerco…';
-  else {
+  // senza risultati una frase sola, che dice che cosa si è cercato e dove (niente «0 voci trovate» prima)
+  else if (dati.totale === 0) {
+    riepilogo = `Nessuna voce del Diario ${dati.q ? `contiene «${dati.q}» in «Che cosa fare» o nelle note` : 'è di questo tipo'}${dati.tipo && dati.q ? ` fra le voci «${nomeTipo(dati.tipo)}»` : ''}.`;
+    if (testo && !testoSufficiente(testo)) riepilogo += ` Per cercare nel testo scrivi almeno ${MINIMO_CARATTERI_RICERCA_DIARIO} lettere.`;
+  } else {
     const fatte = conPartita ? dati.risultati.filter((r) => r.fatta).length : 0;
     riepilogo = `${dati.totale === 1 ? '1 voce trovata' : `${dati.totale} voci trovate`}${dati.q ? ` con «${dati.q}»` : ''}${dati.tipo ? ` fra le voci «${nomeTipo(dati.tipo)}»` : ''}${fatte ? `, ${fatte} già ${fatte === 1 ? 'fatta' : 'fatte'} nella partita` : ''}.`;
     // con il tipo scelto e una lettera sola il testo non si cerca ancora: lo si dice, altrimenti sembrerebbe ignorato
@@ -205,21 +212,28 @@ export function RisultatiRicercaDiario({ q, tipo, ricerca, conPartita, voceDiRit
   }
   // senza risultati con un tipo scelto: quante voci troverebbe lo stesso testo con gli altri tipi
   const senzaTipo = dati && dati.totale === 0 && dati.tipo && dati.q ? Object.values(dati.perTipo).reduce((s, n) => s + (n ?? 0), 0) : 0;
+  // la ricerca è arrivata senza risultati (un errore ha la sua riga con «Riprova»)
+  const vuota = !errore && !!dati && dati.totale === 0;
 
   return (
     <section className="ricerca-diario__risultati" aria-labelledby={idTitolo} aria-busy={inCorso || undefined}>
       <h2 id={idTitolo} className="sr-only">Risultati della ricerca nel Diario</h2>
-      <p className="m-0 testo-14 text-text-secondary" role="status" aria-live="polite" aria-atomic="true">{riepilogo}</p>
-      {errore && <div><PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprova} /></div>}
-      {dati && dati.totale === 0 && (
-        <div className="card flex items-center gap-3 sm:gap-4">
-          <FiguraVuoto illustrazione="vuoto-ricerca" />
-          <div className="flex min-w-0 flex-col items-start gap-2">
-            <p className="m-0">Nessuna voce del Diario {dati.q ? <>contiene «{dati.q}» in «Che cosa fare» o nelle note</> : 'è di questo tipo'}{dati.tipo && dati.q ? <> fra le voci «{nomeTipo(dati.tipo)}»</> : null}.</p>
-            {senzaTipo > 0 && <PulsanteVisivo compatto icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo="Cerca in tutti i tipi" dettaglio={voci(senzaTipo)} onClick={onTogliTipo} />}
-          </div>
+      {/* Il riepilogo è la regione annunciata e resta lo stesso nodo in ogni stato (i due contenitori diventano `contents` quando c'è altro da
+          mostrare): senza risultati è la frase sola, accanto alla figura, con «Cancella ricerca» (e «Cerca in tutti i tipi» se servirebbe) sotto */}
+      <div className={vuota ? 'card flex items-center gap-3 sm:gap-4' : 'contents'}>
+        {vuota && <FiguraVuoto illustrazione="vuoto-ricerca" />}
+        <div className={vuota ? 'flex min-w-0 flex-col items-start gap-2' : 'contents'}>
+          <p className={`m-0 testo-14 ${vuota ? 'text-text' : 'text-text-secondary'}`} role="status" aria-live="polite" aria-atomic="true">{riepilogo}</p>
+          {vuota && (
+            <div className="flex flex-wrap gap-2">
+              {/* con un tipo scelto «Cancella ricerca» è già nella barra in cima: uno solo a schermo */}
+              {tipo === null && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="scarta" dimensione={20} />} titolo="Cancella ricerca" onClick={onCancella} />}
+              {senzaTipo > 0 && <PulsanteVisivo compatto icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo="Cerca in tutti i tipi" dettaglio={voci(senzaTipo)} onClick={onTogliTipo} />}
+            </div>
+          )}
         </div>
-      )}
+      </div>
+      {errore && <div><PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprova} /></div>}
       {gruppi.length > 0 && (
         <div className={`flex flex-col gap-4 ${inCorso ? 'ricerca-diario__in-corso' : ''}`}>
           {gruppi.map((m) => (

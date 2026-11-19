@@ -64,7 +64,8 @@ function CampoEsperienza({ valore, nome, disabilitato, onSalva }: { valore: numb
  * l'esperienza e il livello con −1/+1. Ogni risposta del server sostituisce l'intera squadra; un
  * cambio del livello di Joker fa ricaricare anche l'elenco delle partite nello store. */
 export function SquadraPartita({ partitaId }: { partitaId: number }) {
-  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getSquadra(partitaId), [partitaId]);
+  const squadra = useCarica(() => getSquadra(partitaId), [partitaId]);
+  const { dati, imposta } = squadra;
   const [movimento, setMovimento] = useState('');
   const [occupato, setOccupato] = useState<string | null>(null);
 
@@ -185,7 +186,7 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
   };
 
   return (
-    <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>
+    <PageState carica={squadra}>
       {dati && (
         // L10-01 (schizzi approvati, 2026-11-01): da 1024 px due colonne alte quanto la schermata, a sinistra denaro e oggetti, a destra la
         // squadra in righe dentro la sua area. La colonna sinistra scorre tutta insieme nella sua area con bordo: il denaro (testo e comandi)

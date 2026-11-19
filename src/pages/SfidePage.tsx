@@ -187,7 +187,7 @@ export function SfidePage() {
   useElementoDaIndirizzo(!!d, scheda);
   const schede = useSchede({ chiavi: SCHEDE.map(([k]) => k), attiva: scheda, onScegli: (k) => setParams(k === 'battaglie' ? {} : { scheda: k }, { replace: true }) });
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Battaglie Sfida, boss segreti e tratti" />

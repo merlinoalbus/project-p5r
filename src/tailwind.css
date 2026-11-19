@@ -2182,22 +2182,13 @@
   .menu-modifica__voci[hidden] { display: none; }
   .menu-modifica__voci > .btn, .menu-modifica__voci > * > .btn { width: 100%; justify-content: flex-start; }
   /* C9: i comandi di una voce del Diario (MenuVoce): Modifica, Elimina e «⋯», sempre in fila. Il loro posto nella riga (`.comandi-voce__posto`,
-     con sotto le ricevute della spunta): da 640 px una colonna a destra del testo; sul telefono, se ci sono i comandi, una fila a sé in fondo
-     alla voce, allineata a destra (la riga va già a capo, `flex-wrap`). Così sul telefono i tre pulsanti non tolgono al testo la loro
-     larghezza (la riga ha già maniglia, casella e immagine) e la voce cresce di una fila sola da 44 px, non di tre impilate (rilievo della
-     verifica: impilati, anche una voce di una riga arrivava a 132 px). Senza comandi (rilascio: solo le ricevute) il posto resta a destra */
+     con sotto le ricevute della spunta) è una colonna a destra del testo; con la voce stretta passa a destra nella prima fila, col testo a
+     tutta larghezza sotto (la «voce stretta», fuori dai layer in fondo al blocco «Da avere in scorta») */
   .comandi-voce { display: flex; flex-direction: row; align-items: center; flex-shrink: 0; }
   .comandi-voce__posto { display: flex; flex-direction: column; align-items: flex-end; align-self: flex-start; flex-shrink: 0; }
-  @media (max-width: 639px) {
-    .comandi-voce__posto:has(> .comandi-voce) { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; margin-top: -4px; }
-  }
-  /* L1-01 (schizzo approvato il 31/10): la stessa fila a sé quando è stretta la COLONNA delle voci, non lo schermo (Partita/Oggi e Home
-     mettono il Diario in mezza larghezza da 768 px, e il testo scendeva fino a 5 px). Soglia 460 px: la riga più carica ha 301 px fissi
-     (maniglia 44, casella 44, immagine 40, comandi 132, spazi), e al testo ne restano almeno 160 */
+  /* la colonna delle voci è un contenitore: la «voce stretta» vale anche quando è stretta la COLONNA, non lo schermo (L1-01: Partita/Oggi e
+     Home mettono il Diario in mezza larghezza da 768 px) */
   ul:has(> li.azione) { container: voci-giorno / inline-size; }
-  @container voci-giorno (max-width: 460px) {
-    .comandi-voce__posto:has(> .comandi-voce) { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; margin-top: -4px; }
-  }
   /* L1-02 (schizzo approvato il 31/10): da 768 px la griglia delle Doti ha l'altezza della pagina, e la stella a misura fissa usciva dalla
      card (sopra le schede e con la barra di pagina). La card è contenitore in larghezza; il riquadro della stella prende l'altezza che
      resta (fino al lato naturale: 540 px, o la larghezza meno il margine del 12% per lato) e la stella è il quadrato più grande che ci
@@ -2846,14 +2837,6 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .selettore-icone__icona { display:inline-flex; line-height:0; }
 .selettore-icone__nome { text-align:center; overflow-wrap:normal; word-break:normal; hyphens:auto; }
 @media (max-width: 767px) { .selettore-icone__tessera, .selettore-icone--compatto .selettore-icone__tessera { max-width:none; min-width:0; flex:0 1 calc(33.333% - 4px); } }
-/* Griglia fitta (i 22 arcani dell'elenco «da avere in scorta»): colonne uguali che si adattano alla larghezza, figura da 32 px sopra e nome
-   su una riga (puntini se lungo: il `title` lo dà per intero). Accesa: fondo pieno e triangolo bianco con la spunta sull'angolo, così
-   lo stato si legge anche senza il colore. Fuori dai layer come le altre regole del selettore, dopo quelle del telefono per batterle. */
-.selettore-icone--griglia { display:grid; grid-template-columns:repeat(auto-fill, minmax(72px, 1fr)); gap:4px; }
-.selettore-icone--griglia .selettore-icone__tessera, .selettore-icone--griglia.selettore-icone--compatto .selettore-icone__tessera { position:relative; flex:none; min-width:0; max-width:none; min-height:58px; padding:4px 2px 3px; gap:2px; transition:background-color .12s ease-out, border-color .12s ease-out; }
-.selettore-icone--griglia .selettore-icone__nome { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; hyphens:manual; }
-.selettore-icone__spunta { position:absolute; top:0; right:0; width:18px; height:18px; display:inline-flex; align-items:flex-start; justify-content:flex-end; background:#fff; color:var(--color-primary-fondo); clip-path:polygon(0 0, 100% 0, 100% 100%); box-sizing:border-box; padding:1px 1px 0 0; }
-.selettore-icone__spunta > svg { width:11px; height:11px; stroke-width:3; }
 /* Le categorie del listino lungo (`ListinoNegozio`): le stesse tessere, a scelta singola, dentro una `FilaScorrevole`. Dal tablet in su
    vanno a capo come le altre; sul telefono stanno su una riga sola che scorre, con la figura accanto al nome e alte 44 px, così i
    comandi sopra l'elenco restano entro il 30% della schermata. Il fuoco sta dentro la tessera: la fila taglia ciò che esce. */
@@ -3089,7 +3072,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* le file di scelta brevi (note ♪, rango atteso, sessioni) */
 .fila-scelta { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .fila-scelta__voce { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 10px; border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm, 4px); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-14); cursor: pointer; }
+  border-radius: var(--radius-sm); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-14); cursor: pointer; }
 .fila-scelta__voce:hover:not(:disabled) { border-color: var(--color-text-secondary); }
 .fila-scelta__voce:focus-visible { outline: 2px solid white; outline-offset: 2px; }
 .fila-scelta__voce--attiva { background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); color: var(--color-text-on-primary); font-weight: 700; }
@@ -3354,72 +3337,260 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 }
 
 /* ============================================================
+   «Scelta della scorta» — la finestra «Da avere in scorta» della voce (`FinestraRequisitiVoce`), la riga che la apre e la variante
+   ancorata di `FinestraModifica`
+   ============================================================
+   La finestra è ancorata in alto e alta sempre uguale: toccando le tessere niente si sposta sotto il dito. Dentro, una vista alla volta
+   (niente scroll annidati: scorre solo il corpo della finestra): la griglia dei 24 arcani, tessere di altezza fissa (la parte alta accende
+   e spegne; sull'accesa, la fascia in basso da 44 px dice quali Persone e apre il pannello), oppure il pannello dell'arcano con «Qualunque» e
+   le sue Persone con il ritratto. Il rosso pieno è lo «scelto» di tutta l'app. */
+@layer components {
+  /* la variante ancorata (`FinestraModifica ancorata`): in alto, alta quanto può fino a 720 px; sul telefono il foglio alto quanto lo schermo */
+  .modal-overlay:has(> .modal-content > .modal-body > .finestra-modifica--ancorata) { align-items: flex-start; }
+  .modal-content:has(> .modal-body > .finestra-modifica--ancorata) { height: min(720px, calc(100dvh - 32px)); max-height: none; }
+  .modal-content:has(> .modal-body > .finestra-modifica--ancorata) > .modal-body { flex: 1 1 auto; min-height: 0; }
+  @media (max-width: 767px) {
+    .modal-overlay:has(> .modal-content > .modal-body > .finestra-modifica--ancorata) { align-items: flex-end; }
+    .modal-content:has(> .modal-body > .finestra-modifica--ancorata) { height: calc(100dvh - 24px); }
+    .modal-content:has(> .modal-body > .finestra-modifica--ancorata) > .modal-body { padding: 12px 14px; }
+  }
+
+  .scorta-scelta { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  /* due righe sempre riservate: l'invito iniziale (due righe sul telefono) e il conto (una) occupano lo stesso spazio, la griglia non sale */
+  .scorta-scelta__conta { margin: 0; min-height: 2.6em; font-size: var(--testo-12); line-height: 1.3; color: var(--color-text-secondary); text-wrap: pretty; }
+
+  /* ---- la griglia: 24 tessere di altezza fissa, a colonne uguali ---- */
+  /* 9 colonne a 1280, 8 a 768 (tre righe), 4 a 375; la tessera è alta 100 px accesa o spenta: 54 per figura e nome, 44 per la fascia */
+  .scorta-griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+  .scorta-tessera { position: relative; display: grid; grid-template-rows: minmax(0, 1fr); height: 100px; min-width: 0;
+    border: 1px solid var(--color-border-input); background: var(--color-bg-tertiary); color: var(--color-text);
+    transition: background-color .12s ease-out, border-color .12s ease-out; }
+  .scorta-tessera:hover { border-color: var(--color-text-secondary); }
+  .scorta-tessera--accesa { grid-template-rows: minmax(0, 1fr) 44px; background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); color: var(--color-text-on-primary); }
+  .scorta-tessera--accesa:hover { border-color: var(--color-text-on-primary); }
+  .scorta-tessera__arcano, .scorta-tessera__persone { display: flex; align-items: center; min-width: 0; margin: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; }
+  .scorta-tessera__arcano { flex-direction: column; justify-content: center; gap: 3px; padding: 3px 1px; }
+  .scorta-tessera__arcano:disabled { opacity: .45; cursor: default; }
+  .scorta-tessera__nome { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--testo-12); line-height: 1.2; font-weight: 600; }
+  .scorta-tessera__spunta { position: absolute; top: 0; right: 0; width: 18px; height: 18px; display: inline-flex; align-items: flex-start; justify-content: flex-end; background: #fff;
+    color: var(--color-primary-fondo); clip-path: polygon(0 0, 100% 0, 100% 100%); padding: 1px 1px 0 0; pointer-events: none; }
+  .scorta-tessera__spunta > svg { width: 11px; height: 11px; stroke-width: 3; }
+  /* la fascia delle Persone: più scura del rosso della tessera, separata da una linea chiara; dice «Qualunque», il nome di una o il numero */
+  .scorta-tessera__persone { justify-content: center; gap: 2px; height: 44px; padding: 0 3px; border-top: 1px solid rgb(255 255 255 / .35); background: rgb(0 0 0 / .28); font-size: var(--testo-12); }
+  .scorta-tessera__persone:hover { background: rgb(0 0 0 / .42); }
+  .scorta-tessera__testo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .scorta-tessera__nomi { display: flex; flex: 0 1 auto; flex-direction: column; align-items: flex-start; min-width: 0; line-height: 1.15; }
+  .scorta-tessera__nomi > .scorta-tessera__testo { max-width: 100%; }
+  .scorta-tessera__altre { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .scorta-tessera__ritratti { display: inline-flex; flex: none; }
+  .scorta-tessera__ritratti .scorta-figura > span { border-color: #fff; }
+  .scorta-tessera__freccia { flex: none; opacity: .85; }
+  .scorta-tessera__arcano:focus-visible, .scorta-tessera__persone:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
+  .scorta-tessera--accesa .scorta-tessera__arcano:focus-visible, .scorta-tessera--accesa .scorta-tessera__persone:focus-visible { outline-color: #fff; }
+  .scorta-figura { display: inline-flex; flex: none; line-height: 0; }
+
+  /* ---- il pannello di un arcano, al posto della griglia ---- */
+  .scorta-pannello { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .scorta-pannello__testata { display: flex; align-items: center; gap: 8px; min-width: 0; padding-bottom: 8px; border-bottom: 1px solid var(--color-border); }
+  .scorta-pannello__arcano { display: flex; flex: 1 1 auto; align-items: center; justify-content: center; gap: 8px; min-width: 0; }
+  .scorta-pannello__titolo { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-display); font-weight: 400;
+    font-size: var(--testo-18); text-transform: uppercase; letter-spacing: .04em; }
+  .scorta-pannello__comando { display: inline-flex; flex: none; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 1px solid var(--color-border-input);
+    background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-13); cursor: pointer; }
+  .scorta-pannello__comando:hover { border-color: var(--color-text-secondary); }
+  .scorta-pannello__comando:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
+  /* 9 colonne a 1280: il Matto, l'arcano con più Persone (17 più «Qualunque»), sta in due righe senza scorrere */
+  .scorta-persone { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+  .scorta-persone > li { display: flex; min-width: 0; }
+  .scorta-persona { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; width: 100%; min-width: 0; height: 116px;
+    padding: 6px 4px 4px; border: 1px solid var(--color-border-input); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; cursor: pointer;
+    transition: background-color .12s ease-out, border-color .12s ease-out; -webkit-tap-highlight-color: transparent; }
+  .scorta-persona:hover { border-color: var(--color-text-secondary); }
+  .scorta-persona:disabled { opacity: .45; cursor: default; }
+  .scorta-persona:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
+  .scorta-persona[aria-pressed="true"] { background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); color: var(--color-text-on-primary); }
+  .scorta-persona--qualunque { border-style: dashed; }
+  .scorta-persona--qualunque[aria-pressed="true"] { border-style: solid; }
+  .scorta-persona__figura { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; flex: none; line-height: 0; }
+  /* il nome va a capo su due righe al più («Tsukiyomi Picaro»): la tessera è alta abbastanza per tutte e due */
+  .scorta-persona__nome { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; max-width: 100%; overflow: hidden; overflow-wrap: anywhere;
+    text-align: center; font-size: var(--testo-12); line-height: 1.25; font-weight: 600; }
+  .scorta-persona__dettaglio { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--testo-12); line-height: 1.2; opacity: .8; }
+  .scorta-persona__spunta { position: absolute; top: 0; right: 0; width: 18px; height: 18px; display: inline-flex; align-items: flex-start; justify-content: flex-end; background: #fff;
+    color: var(--color-primary-fondo); clip-path: polygon(0 0, 100% 0, 100% 100%); padding: 1px 1px 0 0; }
+  .scorta-persona__spunta > svg { width: 11px; height: 11px; stroke-width: 3; }
+  @media (max-width: 767px) {
+    .scorta-griglia { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+    .scorta-persone { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+  }
+  /* sotto i 1024 px le tessere sono più strette: la fascia dice solo «Qualunque», il nome o il numero, la freccia non ci sta */
+  @media (max-width: 1023px) { .scorta-tessera__freccia { display: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .scorta-tessera, .scorta-persona { transition: none; }
+  }
+
+  /* ---- la riga «Da avere in scorta» nella finestra della voce: le figure (ritratto per una Persona, arcano per «qualunque») e il conto ---- */
+  .scorta-miniature { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 4px 8px; min-width: 0; text-align: left; }
+  .scorta-miniature__figure { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px; min-width: 0; }
+  .scorta-miniature__altre { padding-left: 2px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-text-secondary); }
+  .scorta-miniature__conta { white-space: nowrap; font-weight: 600; color: var(--color-text); }
+
+  /* ---- «Quale» (`SceltaQuale`): il ritratto del Confidente con le iniziali sotto finché l'immagine non arriva, e la Trama con «Nessuno» ---- */
+  .quale-ritratto { position: relative; }
+  .quale-ritratto__iniziali { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: var(--testo-16);
+    color: var(--color-text-secondary); line-height: 1; }
+  .quale-ritratto__immagine { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; opacity: 0; transition: opacity .15s ease-out; }
+  .quale-ritratto__immagine--pronta { opacity: 1; }
+  .quale-ritratto--nessuno { display: inline-flex; align-items: center; justify-content: center; border-style: dashed; color: var(--color-text-secondary); }
+  .quale-facoltativo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+  .quale-facoltativo__scelte { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+  .quale-opzione { display: inline-flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%; min-height: 44px; padding: 4px 12px 4px 6px; border: 1px solid var(--color-border-input);
+    background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-13); cursor: pointer; text-align: left; }
+  .quale-opzione:hover { border-color: var(--color-text-secondary); }
+  .quale-opzione:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
+  .quale-opzione--attiva { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-tertiary)); font-weight: 700; box-shadow: inset 0 0 0 1px var(--color-primary); }
+  .quale-opzione__figura { display: inline-flex; flex: none; align-items: center; justify-content: center; min-width: 32px; line-height: 0; }
+  @media (prefers-reduced-motion: reduce) { .quale-ritratto__immagine { transition: none; } }
+}
+/* fuori dai layer, come `.quale-ritratto` che rimisura: il ritratto piccolo dentro la scelta «Personaggio coinvolto» */
+.quale-opzione__figura--ritratto .quale-ritratto { width: 32px; height: 42px; }
+
+/* ============================================================
    «Da avere in scorta» — editor (finestra) e voce del Diario
    ============================================================
    Editor: 22 tessere di arcani (`SelettoreIcone griglia`) e, sotto, una riga da 44 px per ogni arcano scelto (figura, nome, Persona
-   facoltativa, «+» e «×»). Voce: una fila di chip interruttore a capo, uno per requisito, con l'avanzamento n/N. Il rosso pieno è lo
-   «spuntato» di tutta l'app; il verde dice «pronta» (tutte le caselle spuntate: la voce si può completare). */
+   facoltativa, «+» e «×»). Voce: una griglia di chip interruttore compatti, uno per requisito, con l'avanzamento n/N. Il rosso pieno resta il
+   «fatto» di tutta l'app (D15): una casella spuntata è solo contornata di rosso; il verde dice «pronta» (tutte le caselle spuntate: la voce si
+   può completare), sulla casella di completamento. */
 @layer components {
-  .scorta-editor { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-  .scorta-editor__conta { margin: 0; font-size: var(--testo-12); color: var(--color-text-secondary); }
-  .scorta-righe { display: flex; flex-direction: column; gap: 3px; margin: 0; padding: 0; list-style: none; }
-  .scorta-riga { display: grid; grid-template-areas: "arcano persona azioni"; grid-template-columns: minmax(0, 10.5rem) minmax(0, 1fr) auto; align-items: center; gap: 4px 8px;
-    min-height: 44px; padding: 0 2px 0 8px; border-left: 3px solid var(--color-primary); background: var(--color-bg-tertiary); }
-  .scorta-riga--seguente { border-left-color: color-mix(in srgb, var(--color-primary) 40%, transparent); }
-  .scorta-riga__arcano { grid-area: arcano; display: flex; align-items: center; gap: 8px; min-width: 0; font-size: var(--testo-13); font-weight: 600; }
-  .scorta-riga__arcano > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .scorta-riga__persona { grid-area: persona; min-width: 0; }
-  .scorta-riga__persona .selettore--compatto { display: block; width: 100%; }
-  .scorta-riga__persona .selettore--compatto .selettore__scelta { width: 100%; }
-  .scorta-riga__azioni { grid-area: azioni; display: flex; align-items: center; gap: 0; }
-  .scorta-riga__azioni .btn { padding-inline: 6px; }
-  @media (max-width: 559px) {
-    .scorta-riga { grid-template-areas: "arcano azioni" "persona persona"; grid-template-columns: minmax(0, 1fr) auto; padding-bottom: 4px; }
-    .scorta-riga--seguente { grid-template-areas: "persona azioni"; grid-template-columns: minmax(0, 1fr) auto; }
-    .scorta-riga--seguente .scorta-riga__arcano { display: none; }
-  }
-  /* le figure degli arcani scelti, in miniatura, nella riga che apre la finestra */
-  .scorta-miniature { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+  /* (l'editor della finestra e la riga che la apre stanno nel blocco «Scelta della scorta», qui sopra) */
 
-  /* ---- la voce del Diario ---- */
-  .scorta-voce { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 2px 0; }
-  .scorta-voce__testata { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: var(--testo-12); color: var(--color-text-secondary); }
+  /* ---- la voce del Diario (`RequisitiVoce`, casella di completamento in `AzioneGiornata`) ----
+     L'elenco è una fila a sé della voce, a tutta larghezza (`flex-basis: 100%` nella riga che va a capo), sotto casella, immagine, testo e
+     comandi a ogni formato: la griglia prende tutte le colonne che la voce consente (8 a 1280, 6 a 1024, 3 a 375). Testata su una riga (titolo
+     e «n/N» mai spezzati, la barra prende il resto); sotto, la griglia di chip a colonne uguali (112 px minimi; fra 366 e 559 px di elenco
+     chip larghi quanto il loro nome, a file piene; sul telefono tre colonne). Il
+     chip è 32 px visivi; il tocco arriva a 44 px con un'area invisibile 6 px sopra e 6 px sotto, e le file distano 12 px: le aree di due file
+     si toccano senza sovrapporsi. */
+  .scorta-voce { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 2px 0; }
+  .azione > .scorta-voce { flex: 1 0 100%; }
+  .scorta-voce__testata { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 24px; font-size: var(--testo-12); color: var(--color-text-secondary); }
   button.scorta-voce__testata { width: 100%; min-height: 44px; padding: 0 4px; border: 0; background: transparent; font: inherit; font-size: var(--testo-12); text-align: left; cursor: pointer; }
   button.scorta-voce__testata:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
-  .scorta-voce__titolo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: var(--testo-13); color: var(--color-text); }
-  .scorta-voce__conta { font-variant-numeric: tabular-nums; font-weight: 700; font-size: var(--testo-13); color: var(--color-text); }
-  .scorta-voce--pronta .scorta-voce__conta { color: var(--color-success-testo); }
-  .scorta-voce__barra { position: relative; flex: 0 1 8rem; min-width: 3rem; height: 4px; background: var(--color-border); overflow: hidden; }
+  .scorta-voce__titolo { flex: none; white-space: nowrap; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: var(--testo-13); color: var(--color-text); }
+  .scorta-voce__conta { flex: none; white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 700; font-size: var(--testo-13); color: var(--color-text); }
+  .scorta-voce__barra { position: relative; flex: 1 1 4rem; min-width: 2rem; max-width: 14rem; height: 4px; background: var(--color-border); overflow: hidden; }
   .scorta-voce__barra > span { position: absolute; inset: 0 auto 0 0; background: var(--color-primary); transition: width .2s ease-out, background-color .2s ease-out; }
   .scorta-voce--pronta .scorta-voce__barra > span { background: var(--color-success); }
-  .scorta-voce__freccia { display: inline-flex; margin-left: auto; color: var(--color-text-muted); transition: transform .15s ease-out; }
+  /* la riga ripiegata (voce fatta): figure in una sola linea (al più cinque e «+N»), la freccia subito dopo */
+  .scorta-voce__riepilogo { display: inline-flex; flex: 0 1 auto; flex-wrap: nowrap; align-items: center; gap: 2px; min-width: 0; overflow: hidden; }
+  .scorta-voce__altre { flex: none; padding-left: 2px; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--color-text-secondary); }
+  .scorta-voce__freccia { display: inline-flex; flex: none; color: var(--color-text-muted); transition: transform .15s ease-out; }
   button.scorta-voce__testata[aria-expanded="false"] .scorta-voce__freccia { transform: rotate(-90deg); }
-  .scorta-voce__riepilogo { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px; min-width: 0; }
-  .scorta-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; min-width: 0; }
-  .scorta-chips > li { display: flex; min-width: 0; max-width: 100%; }
-  .scorta-chip { position: relative; display: inline-flex; align-items: center; gap: 7px; min-width: 0; max-width: 100%; min-height: 44px; padding: 4px 8px 4px 6px;
-    border: 1px solid var(--color-border-input); background: var(--color-bg-tertiary); color: var(--color-text); font-size: var(--testo-13); line-height: 1.15; cursor: pointer;
-    transition: background-color .15s ease-out, border-color .15s ease-out, opacity .15s ease-out; -webkit-tap-highlight-color: transparent; }
-  .scorta-chip:hover { border-color: var(--color-text-secondary); }
-  .scorta-chip:has(input:focus-visible) { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
-  .scorta-chip--spuntato { background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); color: var(--color-text-on-primary); }
-  .scorta-chip--spuntato:hover { background: var(--color-primary-fondo-hover); border-color: var(--color-primary-fondo-hover); }
-  .scorta-chip--occupato { opacity: .65; cursor: progress; }
-  .scorta-chip--lettura { cursor: default; }
-  .scorta-chip--lettura:hover { border-color: var(--color-border-input); }
-  .scorta-chip__nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-  .scorta-chip__persona { font-weight: 400; opacity: .8; }
-  .scorta-chip__segno { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 2px solid var(--color-border-input); border-radius: 50%; color: var(--color-primary-fondo);
-    transition: background-color .15s ease-out, border-color .15s ease-out; }
-  .scorta-chip--spuntato .scorta-chip__segno { background: #fff; border-color: #fff; }
-  .scorta-chip__segno > svg { width: 12px; height: 12px; stroke-width: 3.2; transform: scale(0); transition: transform .18s cubic-bezier(.2, 1.4, .4, 1); }
-  .scorta-chip--spuntato .scorta-chip__segno > svg { transform: scale(1); }
 
-  /* l'anello d'avanzamento attorno alla casella di completamento: l'arco rosso cresce con le caselle spuntate, a n/N si fa verde e pieno */
-  .scorta-anello { --p: 0; --colore-anello: var(--color-primary); position: relative; display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; margin-top: 3px; }
-  .scorta-anello::before { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: conic-gradient(var(--colore-anello) calc(var(--p) * 1turn), var(--color-border) 0);
-    -webkit-mask: radial-gradient(circle, transparent 11px, #000 12px); mask: radial-gradient(circle, transparent 11px, #000 12px); }
+  .scorta-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px 6px; margin: 0; padding: 6px 0; list-style: none; min-width: 0; }
+  .scorta-voce:has(> .scorta-chips) { container: scorta-voce / inline-size; }
+  .scorta-chips > li { display: flex; min-width: 0; }
+  /* 32 px anche con il nome su due righe (2 × 13,8 px nei 28 px fra 1 px di margine interno e il bordo): le aree di tocco di due file non si
+     sovrappongono mai */
+  .scorta-chip { position: relative; display: flex; align-items: center; gap: 5px; width: 100%; min-width: 0; min-height: 32px; padding: 1px 5px 1px 4px;
+    border: 1px solid var(--color-border-input); border-radius: var(--radius-sm); background: var(--color-bg-tertiary); color: var(--color-text);
+    font-size: var(--testo-12); line-height: 1.15; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: background-color .15s ease-out, border-color .15s ease-out, color .15s ease-out, opacity .15s ease-out; }
+  /* l'area di tocco da 44 px, invisibile: 6 px sopra e sotto il chip (32 + 6 + 6; le file distano 12 px, le aree si toccano senza sovrapporsi) */
+  .scorta-chip:not(.scorta-chip--lettura)::after { content: ''; position: absolute; inset: -6px -1px; }
+  .scorta-chip:not(.scorta-chip--lettura):hover { border-color: var(--color-text-secondary); }
+  .scorta-chip:has(input:focus-visible) { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
+  /* spuntato: non il rosso pieno del «fatto» (D15), ma contorno rosso, fondo scuro e testo attenuato; il segno di spunta sta sulla figura */
+  .scorta-chip--spuntato { background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-secondary)); border-color: var(--color-primary); color: var(--color-text-secondary); }
+  .scorta-chip--spuntato:hover { border-color: var(--color-primary-testo); }
+  .scorta-chip--occupato { opacity: .6; cursor: progress; }
+  .scorta-chip--lettura { cursor: default; }
+  /* la figura ha misura fissa (24 px): il ritratto della Persona che arriva dopo la figura dell'arcano, o l'immagine che si carica, non cambia
+     l'altezza del chip */
+  .scorta-chip__figura { position: relative; display: inline-flex; flex: none; align-items: center; justify-content: center; width: 24px; height: 24px; line-height: 0; }
+  .scorta-chip__figura > :first-child { flex: none; max-width: 24px; max-height: 24px; }
+  .scorta-chip__nome { min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: break-word; hyphens: auto; font-weight: 600; }
+  /* il cerchio della casella nell'angolo della figura: vuoto, o rosso pieno con la spunta bianca */
+  .scorta-chip__segno { position: absolute; right: -4px; bottom: -3px; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px;
+    border: 1.5px solid var(--color-text-muted); border-radius: 50%; background: var(--color-bg-tertiary); color: #fff; transition: background-color .15s ease-out, border-color .15s ease-out; }
+  .scorta-chip--spuntato .scorta-chip__segno { background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); }
+  .scorta-chip__segno > svg { width: 11px; height: 11px; stroke-width: 3.4; transform: scale(0); transition: transform .18s cubic-bezier(.2, 1.4, .4, 1); }
+  .scorta-chip--spuntato .scorta-chip__segno > svg { transform: scale(1); }
+  /* a N/N (`--pronta`) i chip spuntati passano al verde di «Pronta», come barra e anello: contorno, cerchio della spunta (la spunta scura sul
+     verde: il bianco ci arriverebbe a poco più di 2:1) e fondo, neutro appena velato di verde (non più il velo rosso dello spuntato) */
+  .scorta-voce--pronta .scorta-chip--spuntato { border-color: var(--color-success); background: color-mix(in srgb, var(--color-success) 6%, var(--color-bg-secondary)); }
+  .scorta-voce--pronta .scorta-chip--spuntato:hover { border-color: var(--color-success-testo); }
+  .scorta-voce--pronta .scorta-chip--spuntato .scorta-chip__segno { background: var(--color-success); border-color: var(--color-success); color: var(--color-bg); }
+  .scorta-chip__ritratto { border-radius: 2px; }
+  /* elenco stretto (da 366 a 559 px: la colonna delle voci di Partita › Oggi a 1280, il Diario a mezza pagina): a colonne uguali da 112 px ne
+     stavano tre, con i nomi brevi («Fede», «Sole») in caselle mezze vuote e una fila in più; più strette, «Temperanza» e «Consigliere» si
+     spezzavano a metà parola. Qui ogni chip è largo quanto figura e nome su una riga (mai tagliato) e le file si riempiono allargandoli: a 1280
+     undici requisiti stanno in tre file invece di quattro. Altezza, tocco e distanza fra le file restano quelli del chip */
+  @container scorta-voce (min-width: 366px) and (max-width: 559px) {
+    .scorta-chips { display: flex; flex-wrap: wrap; }
+    .scorta-chips > li { flex: 1 1 auto; }
+  }
+  /* sul telefono (elenco sotto i 366 px) tre colonne fisse; la colonna è stretta (~92 px) e un nome accanto alla figura si spezzerebbe a metà
+     parola («Temperan-za»): il chip si fa verticale, figura sopra e nome sotto su una riga intera. È alto 44 px visivi, che sono già il
+     tocco: niente area invisibile, e le file distano 8 px. Dopo le regole del chip, che sovrascrive */
+  @container scorta-voce (max-width: 365px) {
+    .scorta-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 8px; }
+    .scorta-chip { flex-direction: column; justify-content: center; gap: 1px; min-height: 44px; padding: 2px 3px 1px; text-align: center; }
+    .scorta-chip:not(.scorta-chip--lettura)::after { content: none; }
+  }
+  /* il richiamo dopo un tentativo di completare la voce troppo presto: le caselle mancanti si accendono in ambra per un attimo */
+  .scorta-voce--richiamo .scorta-chip--manca { border-color: var(--color-warning-testo); box-shadow: 0 0 0 1px var(--color-warning-testo); }
+  .scorta-voce--richiamo .scorta-chip--manca .scorta-chip__segno { border-color: var(--color-warning-testo); }
+
+  /* la casella di completamento con un elenco «In scorta»: l'anello d'avanzamento (3 px; l'arco rosso cresce con le caselle spuntate, a n/N si
+     fa verde e pieno) e sotto la didascalia, «Mancano n» o «Pronta» con il suo segno */
+  /* larghezza fissa: passando da «Mancano n» a «Pronta» la riga non si sposta; «Mancano 10» e oltre vanno su due righe */
+  .scorta-casella { flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; width: 66px; }
+  .scorta-casella__motivo, .scorta-casella__pronta { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; column-gap: 3px; max-width: 100%;
+    text-align: center; font-size: var(--testo-12); line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
+  /* sotto i 768 px la casella sta nella prima fila della voce stretta con maniglia, immagine e comandi: la didascalia va su due righe («Mancano» /
+     «6», segno sopra «Pronta») e restituisce 12 px alla fila */
+  @media (max-width: 767px) { .scorta-casella { width: 54px; } }
+  .scorta-casella__motivo { color: var(--color-warning-testo); }
+  .scorta-casella__pronta { color: var(--color-success-testo); }
+  .scorta-anello { --p: 0; --colore-anello: var(--color-primary); position: relative; display: inline-grid; place-items: center; flex: none; width: 32px; height: 32px; margin-top: 2px; }
+  .scorta-anello::before { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+    background: conic-gradient(var(--colore-anello) calc(var(--p) * 1turn), color-mix(in srgb, var(--color-text-muted) 45%, transparent) 0);
+    -webkit-mask: radial-gradient(circle, transparent 12.5px, #000 13px); mask: radial-gradient(circle, transparent 12.5px, #000 13px); }
   .scorta-anello--pronta { --colore-anello: var(--color-success); }
+  /* la casella di completamento ferma ma col fuoco (`AzioneGiornata`): scorta incompleta, la sua richiesta in corso (`aria-busy`) o
+     un'operazione della giornata in corso; `disabled` resta per le ragioni durevoli */
+  .casella-voce[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+  .casella-voce[aria-busy="true"] { cursor: progress; }
+  /* allo stesso modo le scelte della spunta mentre si salva (note, esiti, acquisti, la finestra «Prima di spuntare») e i pulsanti di «Applica»:
+     fermi ma col fuoco (`aria-disabled`, il gruppo o il pulsante `aria-busy`), mai `disabled`, che farebbe cadere il fuoco sul documento */
+  /* il segno dell'attesa si vede anche al tocco (il cursore no): i controlli fermi si attenuano come il chip «In scorta» che si salva
+     (`.scorta-chip--occupato`), senza cambiare misura; il fuoco resta visibile sopra l'attenuazione */
+  [aria-busy="true"] :is(button, input)[aria-disabled="true"], :is(button, input)[aria-disabled="true"][aria-busy="true"] { cursor: progress; opacity: .6;
+    transition: opacity .15s ease-out; }
+}
+
+/* ---- La voce stretta del Diario (telefono sotto i 768 px; Diario a mezza pagina, colonna delle voci fino a 460 px) ----
+   Prima fila: maniglia, casella (con la didascalia «Mancano n»/«Pronta») e immagine a sinistra, comandi e ricevute a destra; sotto, il testo
+   con i cartellini a tutta larghezza, poi l'elenco «In scorta». Prima il testo stava in una colonna di 130–140 px accanto alle figure (sei righe
+   per una Trama) e i comandi in una fila a sé. Vale per azioni e promemoria (`.azione > div` è la colonna del testo di entrambe). L'ordine
+   visivo sposta solo i comandi davanti al testo: nel documento (tastiera, lettore di schermo) restano dopo il testo, come in una scheda con
+   i comandi nell'angolo. Prima fila: maniglia, casella e immagine da 44 + 44 + 40 px, comandi 132 e tre spazi da 4 = 272 px, che stanno
+   anche a 360 px di schermo (la voce ne ha 275); con l'anello della scorta la casella è larga 54 (282 px, a 375 la voce ne ha 290). Più
+   stretta ancora, i comandi vanno a capo da soli in una fila loro. Fuori dai layer: deve vincere sulle utilità della riga (`gap-2`, `flex-1`) */
+@media (max-width: 767px) {
+  li.azione { column-gap: 4px; row-gap: 6px; }
+  li.azione > div { order: 2; flex-basis: 100%; }
+  li.azione > .comandi-voce__posto { order: 1; margin-left: auto; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+  li.azione > .scorta-voce { order: 3; }
+}
+@container voci-giorno (max-width: 460px) {
+  li.azione { column-gap: 4px; row-gap: 6px; }
+  li.azione > div { order: 2; flex-basis: 100%; }
+  li.azione > .comandi-voce__posto { order: 1; margin-left: auto; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+  li.azione > .scorta-voce { order: 3; }
 }
 
 /* ---- Segni agganciati con la riserva SVG (prompt §30–§31, 2026-11-18): Trama collegata, Non dovuta, scorta pronta ---- */
@@ -3430,13 +3601,20 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .immagine-azione__segno { position: absolute; right: -4px; bottom: -4px; display: inline-flex; width: 20px; height: 20px; pointer-events: none; }
   /* «Non dovuta»: il segno davanti alla frase, sulla riga di base del testo da 12 px */
   .segno-non-dovuta { display: inline-flex; vertical-align: text-bottom; margin-right: 6px; }
-  /* scorta pronta: il segno accanto a «n/N», che resta centrato sulla riga */
-  .scorta-voce__conta { display: inline-flex; align-items: center; gap: 6px; }
-  .scorta-voce__pronta { display: inline-flex; flex: none; }
+  /* scorta pronta: il segno sta nella didascalia «Pronta» sotto la casella di completamento (`.scorta-casella__pronta`, più sopra) */
 }
 
 /* ---- Figure di stato e di intestazione agganciate (prompt §33–§34, 2026-11-18): compaiono da sole quando il PNG è nel database ---- */
 @layer components {
   /* la figura di uno stato vuoto dentro una riga o un riquadro: altezza e rapporto 3:2 (1200×800) dichiarati, così il suo arrivo non sposta il testo */
   .figura-vuoto { height: min(96px, 14dvh); width: auto; aspect-ratio: 3 / 2; object-fit: contain; }
+  /* la figura di uno stato a tutta pagina o in un riquadro (`FiguraStato` in VistaErrore.tsx: EmptyState, errori, «Non trovato»): un riquadro di misura
+     fissa 3:2 (altezza e larghezza dichiarate) che c'è già prima che il manifest o il file arrivino, con la figura o l'icona di ripiego al centro */
+  .figura-stato { --alto-figura: 150px; flex: none; display: block; height: var(--alto-figura); width: calc(var(--alto-figura) * 1.5); max-width: 100%; object-fit: contain; }
+  .figura-stato--icona { display: flex; align-items: center; justify-content: center; }
+  .figura-stato--vuoto { --alto-figura: 200px; }
+  .figura-stato--errore { --alto-figura: 150px; }
+  .figura-stato--riquadro { --alto-figura: 96px; }
+  .figura-stato--pagina { --alto-figura: min(80px, 9dvh); }
+  @media (min-width: 640px) { .figura-stato--pagina { --alto-figura: min(120px, 16dvh); } }
 }

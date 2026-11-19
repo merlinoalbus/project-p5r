@@ -114,7 +114,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
       {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
       {contenute.length > 0 && <p className="m-0 testo-13 text-text-secondary">Questa mappa non ha una pianta sua: raccoglie le mappe qui sotto.</p>}
     </IntestazioneScheda>
-    <PageState isLoading={albero.inPrimoCaricamento} error={albero.errore} onRetry={albero.ricarica}>
+    <PageState carica={albero}>
       {contenute.length > 0
         ? <GriglieDelLuogo contenute={contenute} nome={nome} />
         : <p className="m-0 testo-13 text-text-muted" role="status">{mappa.tipo === 'dedalo' ? 'I Memento non hanno planimetrie: i piani si generano a ogni discesa, e i dedali stanno nella loro scheda.' : 'Qui non c’è ancora nessuna planimetria. Puoi aggiungerne una dall’editor.'}</p>}
@@ -248,7 +248,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const spilloIniziale = Number(params.get('spillo')) || null; const puntoIniziale = useMemo(() => centroAccessoMondo(params), [params]);
-  const { mappa, caricamento, errore, ricarica, raccolto, statoPunto, acquisto } = useMappaPartita(chiave, partitaId);
+  const { mappa, caricamento, errore, causaErrore, ricarica, raccolto, statoPunto, acquisto } = useMappaPartita(chiave, partitaId);
   const albero = useCarica(getAlberoMappe, [chiave]);
   const presentata = mappa ? presentaMappa(mappa, params.get('contesto')) : null;
   useDocumentTitle(presentata ? `${presentata.nome} — Mappe` : 'Mappa');
@@ -258,7 +258,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
   const sezione = params.get('area');
   if (mappa?.radiceDi?.tipo === 'dungeon' && sezione) return <Navigate to={`${schedaAccessoMondo('dungeon', mappa.radiceDi.chiave)}?area=${encodeURIComponent(sezione)}`} replace />;
   return (
-    <PageState isLoading={caricamento && !mappa} error={errore} onRetry={ricarica} scheda={{ titolo: 'Mappa', ripiego: '/guida/mappe' }}>
+    <PageState isLoading={caricamento && !mappa} error={errore} causa={causaErrore} onRetry={ricarica} scheda={{ titolo: 'Mappa', ripiego: '/guida/mappe' }}>
       {mappa && <div className="flex flex-col gap-4">
 
         {!haPlanimetria(mappa) ? <LuogoSenzaPlanimetria mappa={mappa} nome={presentata!.nome} albero={albero} partitaId={partitaId} />

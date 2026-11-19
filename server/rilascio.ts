@@ -7,28 +7,34 @@
 //   1. assicuraPartiteIniziali() — senza partite.db lo crea copiando partite-vuoto.db dal volume dell'edizione;
 //   2. initDb({ soloLettura })   — apre gioco.db SENZA WAL, mai creato né rinominato, e attacca partite.db come `utente`;
 //   3. verificaSolaLettura()     — una scrittura di prova su gioco.db deve fallire con SQLITE_READONLY (terzo livello di difesa);
-//   4. verificaVersioni()        — i due file alla versione che questo codice legge (un'edizione di un'altra versione dell'app non si serve);
+//   4. portaAllaVersioneAttuale({ file: ['partite'] }) — un partite.db alla versione IMMEDIATAMENTE PRECEDENTE (l'avanzamento di chi
+//      gioca, che sopravvive al cambio di edizione) riceve le sole strutture nuove, col testo letto dal `partite-vuoto.db` dell'edizione e
+//      con la copia di sicurezza in BACKUP_DIR prima di scrivere (`server/db/passaggioVersione.ts`); gioco.db no: è l'edizione stessa,
+//      in sola lettura, e deve già essere alla versione del codice;
+//   5. verificaVersioni()        — i due file alla versione che questo codice legge (un'edizione di un'altra versione dell'app non si serve);
 //      verificaSchemaUtente()    — versioni e impronta della struttura delle partite contro il manifesto dell'edizione;
-//   5. createApp({ modalita: 'rilascio' }) — monta solo le rotte del giocatore e controlla che l'elenco corrisponda alle rotte vere;
-//   6. listen + copie dell'avanzamento (all'avvio e ogni 6 ore, in un volume a parte).
-// Qualunque fallimento dei passi 1-5 è FATALE: un'istanza pubblica con i contenuti scrivibili o con le partite di una struttura
+//   6. createApp({ modalita: 'rilascio' }) — monta solo le rotte del giocatore e controlla che l'elenco corrisponda alle rotte vere;
+//   7. listen + copie dell'avanzamento (all'avvio e ogni 6 ore, in un volume a parte).
+// Qualunque fallimento dei passi 1-6 è FATALE: un'istanza pubblica con i contenuti scrivibili o con le partite di una struttura
 // sconosciuta non deve rispondere.
 //
 // Quello che qui NON c'è, di proposito: le regole sui dati all'avvio, il pacchetto di gioco (i contenuti nascono dall'edizione, e
-// `partite.db` dal suo `partite-vuoto.db`), il riscaldamento delle miniature (l'edizione le porta tutte), l'assegnazione degli uid
-// degli spilli.
+// `partite.db` dal suo `partite-vuoto.db`, che dà anche i testi del passaggio), il riscaldamento delle miniature (l'edizione le porta
+// tutte), l'assegnazione degli uid degli spilli.
 //
 // Arresto: come la preparazione, su SIGINT/SIGTERM si chiude il server HTTP e la connessione (senza `PRAGMA optimize`: gioco.db è
 // in sola lettura).
 // ============================================================
 
+import path from 'node:path';
 import { config } from './config.js';
 import { logger } from './utils/logger.js';
 import { closeDb, initDb } from './db/dbService.js';
+import { portaAllaVersioneAttuale } from './db/passaggioVersione.js';
 import { verificaVersioni } from './db/versioneSchema.js';
 import { createApp } from './bootstrap.js';
 import { verificaRuntimeNode } from './utils/nodeRuntime.js';
-import { assicuraPartiteIniziali, identificativoEdizione, leggiManifesto, verificaSchemaUtente } from './rilascio/edizione.js';
+import { FILE_PARTITE_VUOTO, assicuraPartiteIniziali, identificativoEdizione, leggiManifesto, verificaSchemaUtente } from './rilascio/edizione.js';
 import { verificaSolaLettura } from './rilascio/solaLettura.js';
 import { avviaCopieUtente } from './rilascio/backupUtente.js';
 
@@ -44,6 +50,8 @@ try {
   assicuraPartiteIniziali();
   const db = initDb(undefined, { soloLettura: true });
   verificaSolaLettura(db);
+  // solo le partite: le strutture nuove si leggono dal modello dell'edizione (l'immagine di rilascio non ha il pacchetto)
+  portaAllaVersioneAttuale(db, { file: ['partite'], origini: { partite: path.join(config.edizioneDir, FILE_PARTITE_VUOTO) } });
   verificaVersioni(db);
   verificaSchemaUtente(db, leggiManifesto());
   edizione = identificativoEdizione();

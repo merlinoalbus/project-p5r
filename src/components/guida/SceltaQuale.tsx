@@ -10,6 +10,8 @@
 // larghezza. Nella voce resta una riga: la tessera scelta con «Cambia» e «Nessun collegamento», o «Scegli» se non c'è ancora una scelta.
 // Toccare una tessera sceglie e chiude la finestra; la finestra si apre da sé quando si sceglie un tipo che si collega (vedi
 // `SceltaTipoQuale`), così prima si sceglie il tipo e poi l'elemento dell'elenco filtrato, con lo stesso numero di tocchi di prima.
+// Un collegamento facoltativo (`facoltativo`, la Trama) ha titolo e sottotitolo propri e «Nessuno» sempre in vista: nella riga, accanto al
+// personaggio scelto, e come prima tessera della finestra; la finestra non si apre da sola.
 // ============================================================
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
@@ -17,6 +19,8 @@ import { Modal } from '../shared/Modal';
 import { useMedia } from '../../hooks/useMedia';
 import { AssetImg } from '../shared/AssetImg';
 import { chiaviPresenti, urlImmagineVersionata } from '../shared/immaginiCache';
+import { useAsset } from '../../stores/assetStore';
+import { attributiMiniatura } from '../../../shared/miniature';
 import { IconaCategoria } from './IconaCategoria';
 import { EmblemaDungeon } from './EmblemaDungeon';
 import { slug } from '../../../shared/slug';
@@ -34,7 +38,15 @@ const CATEGORIA: Record<Exclude<TipoRiferimentoAzione, 'confidente' | 'dungeon'>
   richiesta: 'richiesta', libro: 'libro', film: 'dvd', attivita: 'attivita', negozio: 'acquisto', dote: 'dote',
 };
 
-/** Ritratto del Confidente non interattivo (dentro un pulsante non può stare il riquadro che si ingrandisce): immagine caricata, poi grafica predefinita, poi iniziali. */
+/** La larghezza del ritratto nelle tessere (`.quale-ritratto`): le immagini si chiedono in miniatura a questa misura. */
+const LARGHEZZA_RITRATTO = 44;
+
+/**
+ * Ritratto del Confidente non interattivo (dentro un pulsante non può stare il riquadro che si ingrandisce): immagine caricata, poi il ritratto
+ * fedele, poi quello stilizzato, in miniatura. Le iniziali stanno sotto finché un'immagine non è arrivata davvero, e restano se nessuna arriva:
+ * il riquadro non è mai vuoto. Prima i ritratti si chiedevano a piena misura (PNG da 1–1,5 MB ciascuno, 23 nella griglia) e senza nulla
+ * sotto: gli ultimi della griglia restavano riquadri vuoti finché non finivano di scaricarsi.
+ */
 function RitrattoConfidente({ chiave, nome }: { chiave: string; nome: string }) {
   const [caricata, setCaricata] = useState(false);
   useEffect(() => {
@@ -42,13 +54,26 @@ function RitrattoConfidente({ chiave, nome }: { chiave: string; nome: string }) 
     void chiaviPresenti('confidente').then((set) => { if (!annullato) setCaricata(set.has(chiave)); });
     return () => { annullato = true; };
   }, [chiave]);
+  const fedele = useAsset(`confidenti/${slug(chiave)}-fedele`);
+  const stilizzato = useAsset(`confidenti/${slug(chiave)}`);
+  const candidati = [caricata ? urlImmagineVersionata('confidente', chiave) : null, fedele, stilizzato].filter((u): u is string => !!u);
+  // gli URL che non si sono caricati (prima in miniatura, poi a piena misura): si passa al candidato seguente
+  const [falliti, setFalliti] = useState<ReadonlySet<string>>(() => new Set());
+  const [pronta, setPronta] = useState<string | null>(null);
+  const tentativi = candidati.flatMap((u) => {
+    const m = attributiMiniatura(u, LARGHEZZA_RITRATTO);
+    return m.srcSet ? [{ chiave: `${u}#mini`, attr: m }, { chiave: u, attr: { src: u } as typeof m }] : [{ chiave: u, attr: { src: u } as typeof m }];
+  });
+  const tentativo = tentativi.find((t) => !falliti.has(t.chiave)) ?? null;
   const iniziali = nome.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
-  const riserva = <AssetImg nome={`confidenti/${slug(chiave)}`} alt="" decorativa className="h-full w-full object-cover object-top" fallback={<span className="font-black text-text-muted">{iniziali}</span>} />;
   return (
     <span className="quale-ritratto" aria-hidden="true">
-      {caricata
-        ? <img src={urlImmagineVersionata('confidente', chiave)} alt="" draggable={false} className="h-full w-full object-cover object-top" />
-        : <AssetImg nome={`confidenti/${slug(chiave)}-fedele`} alt="" decorativa className="h-full w-full object-cover object-top" fallback={riserva} />}
+      {pronta !== tentativo?.chiave && <span className="quale-ritratto__iniziali">{iniziali}</span>}
+      {tentativo && (
+        <img key={tentativo.chiave} src={tentativo.attr.src} srcSet={tentativo.attr.srcSet} sizes={tentativo.attr.sizes} alt="" draggable={false} decoding="async"
+          className={`quale-ritratto__immagine ${pronta === tentativo.chiave ? 'quale-ritratto__immagine--pronta' : ''}`}
+          onLoad={() => setPronta(tentativo.chiave)} onError={() => setFalliti((f) => new Set(f).add(tentativo.chiave))} />
+      )}
     </span>
   );
 }
@@ -73,10 +98,15 @@ interface Props {
   /** La finestra della griglia è aperta: la tiene chi usa il componente, perché si apre anche dalla scelta del tipo. */
   finestraAperta: boolean;
   onFinestra: (aperta: boolean) => void;
+  /**
+   * Un collegamento facoltativo (la Trama: il personaggio coinvolto in un evento di storia, che non porta incontro né rango): titolo e
+   * sottotitolo propri al posto di «Quale — …», e «Nessuno» sempre in vista come scelta, nella riga e come prima tessera della finestra.
+   */
+  facoltativo?: { titolo: string; sottotitolo: string };
 }
 
 /** La riga di «Quale» nella voce e la finestra con la griglia di tessere e la ricerca; al posto di una tendina senza immagini. */
-export function SceltaQuale({ tipo, elenchi, valore, soloTurni = false, onCambia, finestraAperta, onFinestra }: Props) {
+export function SceltaQuale({ tipo, elenchi, valore, soloTurni = false, onCambia, finestraAperta, onFinestra, facoltativo }: Props) {
   // come nella finestra della voce: il campo di ricerca prende il fuoco solo da desktop (su tablet e telefono aprirebbe la tastiera)
   const largo = useMedia('(min-width: 1024px)');
   const [testo, setTesto] = useState('');
@@ -94,8 +124,55 @@ export function SceltaQuale({ tipo, elenchi, valore, soloTurni = false, onCambia
   const sceltaFatta = tutte.find((v) => v.chiave === valore) ?? null;
   /** Chiude la finestra della griglia e dimentica la ricerca: alla prossima apertura l'elenco riparte intero. */
   const chiudi = () => { setTesto(''); onFinestra(false); };
-  /** Una tessera: sceglie (o, se è già la scelta, toglie il collegamento) e chiude la finestra. */
-  const scegli = (chiave: string) => { onCambia(chiave === valore ? '' : chiave); chiudi(); };
+  /** Una tessera: sceglie e chiude la finestra. Toccando la scelta: senza «Nessuno» fra le tessere toglie il collegamento, con «Nessuno» la conferma. */
+  const scegli = (chiave: string) => { onCambia(!facoltativo && chiave === valore ? '' : chiave); chiudi(); };
+  const titoloFinestra = facoltativo ? facoltativo.titolo : `Quale — ${nome.toLowerCase()}`;
+  const finestra = (
+    <Modal titolo={titoloFinestra} aperta={finestraAperta} larga onChiudi={chiudi} azioni={(
+      <div className="flex w-full flex-wrap items-center justify-end gap-2">
+        {valore && !facoltativo && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nessun collegamento" onClick={() => { onCambia(''); chiudi(); }} />}
+        <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={chiudi} />
+      </div>
+    )}>
+      <div className="flex flex-col gap-2 min-w-0">
+        {ricerca && (
+          // eslint-disable-next-line jsx-a11y/no-autofocus -- sullo schermo largo la finestra si apre per cercare; su tablet e telefono no (tastiera)
+          <input type="search" className="form-input" value={testo} autoFocus={largo} onChange={(e) => setTesto(e.target.value)} placeholder={`Cerca: ${nome.toLowerCase()}…`} aria-label={`Cerca: ${nome.toLowerCase()}`} />
+        )}
+        <GrigliaQuale tipo={tipo} nome={nome} valore={valore} mostrate={filtrate.mostrate} facoltativo={!!facoltativo} onScegli={scegli} />
+        {filtrate.totale === 0 && <span className="testo-12 text-text-muted" role="status">Nessun risultato.</span>}
+        {filtrate.totale > TETTO && <span className="testo-12 text-text-muted" role="status">Mostrati {Math.min(TETTO, filtrate.totale)} di {filtrate.totale}: scrivi per restringere.</span>}
+      </div>
+    </Modal>
+  );
+  if (facoltativo) {
+    // la Trama: «Nessuno» e il personaggio scelto sono le due scelte in vista (un gruppo radio); «Scegli» / «Cambia» apre la griglia
+    return (
+      <div className="flex flex-col gap-2 min-w-0" role="group" aria-labelledby="quale-facoltativo-titolo">
+        <div className="flex flex-col gap-0.5">
+          <span id="quale-facoltativo-titolo" className="testo-13 text-text-secondary">{facoltativo.titolo}</span>
+          <span className="testo-12 text-text-muted text-pretty">{facoltativo.sottotitolo}</span>
+        </div>
+        <div className="quale-facoltativo">
+          <div role="radiogroup" aria-label={facoltativo.titolo} className="quale-facoltativo__scelte">
+            <button type="button" role="radio" aria-checked={!sceltaFatta} className={`quale-opzione touch ${!sceltaFatta ? 'quale-opzione--attiva' : ''}`} onClick={() => onCambia('')}>
+              <span className="quale-opzione__figura" aria-hidden="true"><IconaAzione chiave="chiudi" dimensione={20} /></span>
+              <span>Nessuno</span>
+            </button>
+            {sceltaFatta && (
+              <button type="button" role="radio" aria-checked className="quale-opzione quale-opzione--attiva touch" title={sceltaFatta.dettaglio ? `${sceltaFatta.nome} · ${sceltaFatta.dettaglio}` : sceltaFatta.nome}>
+                <span className="quale-opzione__figura quale-opzione__figura--ritratto" aria-hidden="true">{figura(tipo, sceltaFatta)}</span>
+                <span className="min-w-0 break-words">{sceltaFatta.nome}</span>
+              </button>
+            )}
+          </div>
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave={sceltaFatta ? 'modifica' : 'seleziona'} dimensione={20} />} titolo={sceltaFatta ? 'Cambia' : 'Scegli'}
+            aria-label={sceltaFatta ? `Cambia il personaggio coinvolto: ora ${sceltaFatta.nome}` : 'Scegli il personaggio coinvolto'} aria-haspopup="dialog" onClick={() => onFinestra(true)} />
+        </div>
+        {finestra}
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-2 min-w-0">
       <span className="testo-13 text-text-secondary">Quale — {nome.toLowerCase()}</span>
@@ -112,34 +189,34 @@ export function SceltaQuale({ tipo, elenchi, valore, soloTurni = false, onCambia
       ) : (
         <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Scegli" aria-label={`Scegli: ${nome.toLowerCase()}`} aria-haspopup="dialog" onClick={() => onFinestra(true)} />
       )}
-      <Modal titolo={`Quale — ${nome.toLowerCase()}`} aperta={finestraAperta} larga onChiudi={chiudi} azioni={(
-        <div className="flex w-full flex-wrap items-center justify-end gap-2">
-          {valore && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nessun collegamento" onClick={() => { onCambia(''); chiudi(); }} />}
-          <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={chiudi} />
-        </div>
-      )}>
-        <div className="flex flex-col gap-2 min-w-0">
-          {ricerca && (
-            // eslint-disable-next-line jsx-a11y/no-autofocus -- sullo schermo largo la finestra si apre per cercare; su tablet e telefono no (tastiera)
-            <input type="search" className="form-input" value={testo} autoFocus={largo} onChange={(e) => setTesto(e.target.value)} placeholder={`Cerca: ${nome.toLowerCase()}…`} aria-label={`Cerca: ${nome.toLowerCase()}`} />
-          )}
-          <div role="radiogroup" aria-label={`Quale: ${nome.toLowerCase()}`} className="quale-griglia">
-            {filtrate.mostrate.map((v) => {
-              const attiva = v.chiave === valore;
-              return (
-                <button key={v.chiave} type="button" role="radio" aria-checked={attiva} className={`quale-tessera touch ${attiva ? 'quale-tessera--attiva' : ''}`}
-                  title={v.dettaglio ? `${v.nome} · ${v.dettaglio}` : v.nome} onClick={() => scegli(v.chiave)}>
-                  <span className="quale-tessera__figura" aria-hidden="true">{figura(tipo, v)}</span>
-                  <span>{v.nome}</span>
-                  {v.dettaglio && <span className="quale-tessera__dettaglio">{v.dettaglio}</span>}
-                </button>
-              );
-            })}
-          </div>
-          {filtrate.totale === 0 && <span className="testo-12 text-text-muted" role="status">Nessun risultato.</span>}
-          {filtrate.totale > TETTO && <span className="testo-12 text-text-muted" role="status">Mostrati {Math.min(TETTO, filtrate.totale)} di {filtrate.totale}: scrivi per restringere.</span>}
-        </div>
-      </Modal>
+      {finestra}
+    </div>
+  );
+}
+
+/** Le tessere della finestra: con un collegamento facoltativo «Nessuno» è la prima, e toccare la scelta la conferma invece di toglierla. */
+function GrigliaQuale({ tipo, nome, valore, mostrate, facoltativo, onScegli }: {
+  tipo: TipoRiferimentoAzione; nome: string; valore: string; mostrate: VoceElencoAzione[]; facoltativo: boolean; onScegli: (chiave: string) => void;
+}) {
+  return (
+    <div role="radiogroup" aria-label={facoltativo ? 'Personaggio coinvolto' : `Quale: ${nome.toLowerCase()}`} className="quale-griglia">
+      {facoltativo && (
+        <button type="button" role="radio" aria-checked={!valore} className={`quale-tessera touch ${!valore ? 'quale-tessera--attiva' : ''}`} onClick={() => onScegli('')}>
+          <span className="quale-tessera__figura" aria-hidden="true"><span className="quale-ritratto quale-ritratto--nessuno"><IconaAzione chiave="chiudi" dimensione={24} /></span></span>
+          <span>Nessuno</span>
+        </button>
+      )}
+      {mostrate.map((v) => {
+        const attiva = v.chiave === valore;
+        return (
+          <button key={v.chiave} type="button" role="radio" aria-checked={attiva} className={`quale-tessera touch ${attiva ? 'quale-tessera--attiva' : ''}`}
+            title={v.dettaglio ? `${v.nome} · ${v.dettaglio}` : v.nome} onClick={() => onScegli(v.chiave)}>
+            <span className="quale-tessera__figura" aria-hidden="true">{figura(tipo, v)}</span>
+            <span>{v.nome}</span>
+            {v.dettaglio && <span className="quale-tessera__dettaglio">{v.dettaglio}</span>}
+          </button>
+        );
+      })}
     </div>
   );
 }

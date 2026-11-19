@@ -82,7 +82,9 @@ export function IntestazionePagina({ titolo, sottotitolo, azioni, illustrazione,
         </div>
         {azioni && <div className={azioniInRiga ? `flex items-center min-w-0 ${azioniAccanto ? 'max-md:flex-none md:basis-0 md:flex-1' : 'basis-full md:basis-0 md:flex-1'} md:justify-end` : 'flex items-center gap-2 flex-wrap'}>{azioni}</div>}
       </div>
-      {illustrazione && !nelPannello && <AssetImg nome={illustrazione} alt="" decorativa subito className="intestazione__illustrazione" fallback={null} />}
+      {/* la miniatura da 160 px (il riquadro è al più 120 px): WebP di pochi KB invece del PNG da 210–360 KB; `subito` resta, sta sopra la piega e
+          con la miniatura caricarla senza attesa non costa */}
+      {illustrazione && !nelPannello && <AssetImg nome={illustrazione} alt="" decorativa subito dimensione={160} className="intestazione__illustrazione" fallback={null} />}
       </div>
     </header>
   );

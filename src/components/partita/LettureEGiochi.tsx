@@ -182,9 +182,6 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
     videogiochi: (giochi.dati?.videogiochi ?? []).map(daGioco).map((v) => conToppa(v, giochi.dati)),
   };
 
-  const caricamento = (libri.caricamento && !libri.dati) || (film.caricamento && !film.dati) || (giochi.caricamento && !giochi.dati);
-  const errore = libri.errore ?? film.errore ?? giochi.errore;
-
   /** Imposta il progresso della voce con l'API del suo gruppo, mette la risposta nella toppa e
    * ricorda le Doti da segnare; la riga resta occupata finché la richiesta non finisce. */
   const cambia = async (gruppo: Gruppo, v: Voce, avanzamento: number) => {
@@ -215,7 +212,7 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const totali = { fatti: tutte.filter((v) => v.fatto).length, tutti: tutte.length };
 
   return (
-    <PageState isLoading={caricamento} error={errore} onRetry={() => { void libri.ricarica(); void film.ricarica(); void giochi.ricarica(); }}>
+    <PageState carica={[libri, film, giochi]}>
       <div className="flex flex-col gap-3 lg:h-full lg:min-h-0">
         <p className="m-0 testo-12 text-text-secondary">
           Segna qui le sessioni senza uscire dalla partita: {totali.fatti} completati su {totali.tutti}. Le schede complete, con luoghi ed effetti, restano nella Guida.

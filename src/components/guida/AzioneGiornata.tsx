@@ -8,7 +8,7 @@
 // metà (note, esiti, acquisti) non sopravvivono a una voce cambiata altrove.
 // ============================================================
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEventHandler, type ReactNode, type RefObject } from 'react';
 import { getConfidentiPartita, getVocePercorso, impostaAzionePercorso } from '../../services/api';
 import { giocaLaSceltaRomantica } from '../../../shared/puntiConfidenti';
 import { fraseRelazione } from '../../../shared/descriviEffettiSpunta';
@@ -26,7 +26,7 @@ import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
 import { DaRivedereVoce, InfiltrazioniVoce } from './InfiltrazioniVoce';
 import { RisposteVoce } from './RisposteVoce';
 import { RequisitiVoce } from './RequisitiVoce';
-import { idContatoreScorta } from '../../utils/requisitiVoce';
+import { idMotivoScorta } from '../../utils/requisitiVoce';
 import { RicevuteVoce } from './RicevuteVoce';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
@@ -70,14 +70,40 @@ interface PropsAzione {
   selezione?: SelezioneRiga;
 }
 
+/** Ciò che la spunta legge di una voce: quando cambia, la riga si rimonta (vedi l'intestazione). */
+const chiaveContesto = (a: AzionePercorsoDto, partitaId: number | null): string =>
+  JSON.stringify([partitaId, a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
+
+/** I gestori della selezione della riga, che ignorano i clic dentro l'elenco «In scorta»: un tocco mancato fra due chip o sul titolo non seleziona la voce. */
+const fuoriDallaScorta = (g: MouseEventHandler<HTMLLIElement> | undefined): MouseEventHandler<HTMLLIElement> | undefined =>
+  g && ((e) => { if (!(e.target instanceof Element && e.target.closest('.scorta-voce'))) g(e); });
+
 /** Una riga d'azione della giornata (della guida o aggiunta): spunta, immagine dell'entità, testo, tipo, collegamento, stato, note, gesti. */
 export function Azione(props: PropsAzione) {
   const { a, partitaId } = props;
-  const contesto = JSON.stringify([partitaId, a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
-  return <AzioneNelContesto key={contesto} {...props} />;
+  // la spunta o l'annullo cambiano `fatta` e quindi rimontano la riga: se il fuoco era nella riga torna nella riga nuova (sopravvive al
+  // rimontaggio). `true`: sulla casella; un testo: sul controllo della riga che si chiama così (quello su cui chi gioca era passato durante la
+  // richiesta), o sulla casella se nella riga nuova non c'è più
+  const fuocoCasellaRef = useRef<boolean | string>(false);
+  return <AzioneNelContesto key={chiaveContesto(a, partitaId)} {...props} fuocoCasellaRef={fuocoCasellaRef} />;
 }
-function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione }: PropsAzione) {
+/** Il nome con cui ritrovare un controllo della riga dopo il rimontaggio: il nome accessibile scritto o, senza, il testo. */
+const nomeControllo = (el: Element): string => (el.getAttribute('aria-label') ?? el.textContent ?? '').trim();
+function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione, fuocoCasellaRef }: PropsAzione & { fuocoCasellaRef: RefObject<boolean | string> }) {
   const [occupato, setOccupato] = useState(false);
+  const rifCasella = useRef<HTMLInputElement>(null);
+  // la riga rimontata dalla spunta o dall'annullo che aveva il fuoco: lo riprende la casella, o il controllo dove chi gioca l'aveva portato
+  // (senza scorrere)
+  useLayoutEffect(() => {
+    const dove = fuocoCasellaRef.current;
+    if (!dove) return;
+    fuocoCasellaRef.current = false;
+    const riga = rifCasella.current?.closest('li');
+    const stesso = typeof dove === 'string' && riga
+      ? [...riga.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')].find((el) => nomeControllo(el) === dove)
+      : undefined;
+    (stesso ?? rifCasella.current)?.focus({ preventScroll: true });
+  }, [fuocoCasellaRef]);
   // con la scelta romantica fatta nella scelta delle note (L13, O10-3), che arriva così fino al salvataggio
   const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; esiti?: SceltaEsitoSpunta[]; relazioneRomantica?: boolean } | null>(null);
   // L13: la scelta dell'esito (turno di un'attività con esiti, note di una Dote a valori possibili) prima di salvare la spunta
@@ -109,6 +135,24 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     return () => { attivo = false; };
   }, [chiaveRomantica, partitaId]);
   const relazioneDaChiedere = chiaveRomantica !== null && relazionePartita?.chiave === chiaveRomantica ? { valore: relazionePartita.valore } : undefined;
+  // Il fuoco della tastiera nella voce. Le scelte della spunta (note, esiti, acquisti) restano col fuoco mentre la richiesta è in corso
+  // (`aria-disabled` e `aria-busy`, mai `disabled`, che lo farebbe cadere sul documento); quando una scelta sparisce col fuoco dentro, il fuoco
+  // passa alla casella di completamento, che resta (anche attraverso il rimontaggio della riga: `fuocoCasellaRef`).
+  // `conFinestra`: conta anche la finestra «Prima di spuntare» della voce (`PreparaAcquistiVoce`), che sta fuori dalla riga (in fondo a <body>)
+  const fuocoNellaVoce = (conFinestra = false): boolean => {
+    const f = document.activeElement, riga = rifCasella.current?.closest('li');
+    return !!f && !!riga && (riga.contains(f) || (conFinestra && !!f.closest('[role="dialog"]')));
+  };
+  /** Una parte della riga sta per sparire (`dentro`, o la scelta che ha appena ricevuto il gesto): se aveva il fuoco, il fuoco va alla casella
+   *  (senza scorrere). Un altro elemento della riga col fuoco (il «⋯», «Modifica») resta com'è. */
+  const fuocoAllaCasella = (dentro?: Element | null) => {
+    const f = document.activeElement;
+    if (!f || f === rifCasella.current || !fuocoNellaVoce()) return;
+    if (dentro !== undefined && !dentro?.contains(f)) return;
+    rifCasella.current?.focus({ preventScroll: true });
+  };
+  // il riquadro dei punti da applicare: quando sparisce (decisi tutti) e aveva il fuoco, il fuoco va alla casella
+  const rifPunti = useRef<HTMLDivElement>(null);
   /**
    * Spunta o toglie l'azione nella partita. Se spuntandola servono le note e non sono ancora arrivate (né si è scelto
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
@@ -119,15 +163,20 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     if (!partitaId || scrittura.current) return;
     if (pendente) { if (acquisti || pesche) throw new Error('Questa voce ha già un’operazione da completare: chiudila dall’elenco «Operazioni da completare».'); return; }
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { apriSceltaNote(); return; }
+    // la conferma della finestra «Prima di spuntare» (non la spunta automatica): il fuoco è nella finestra, fuori dalla riga
+    const daFinestra = (!!acquisti || !!pesche) && !automatica;
+    // l'elemento che aveva il fuoco al gesto, se era nella voce: alla fine il fuoco torna sulla casella solo se è ancora lì, o se è caduto sul
+    // documento o con un elemento tolto; se chi gioca l'ha portato altrove (anche nella stessa riga, «⋯» o «Modifica») resta dov'è
+    const elementoAlGesto = fuocoNellaVoce(daFinestra) ? document.activeElement : null;
     // 2026-10-30: la visita ai Memento non chiede più quali Dedali hai aperto: le aperture si calcolano dai Palazzi conclusi
     // L13: l'esito ottenuto (o «senza punti») si sceglie prima di salvare: una scelta non fatta non lascia la spunta (decisione A1)
     if (fatta && !a.fatta && a.scelteEsito?.length && esiti === undefined) {
-      setChiediNote(false); setChiediEsiti({ noteRisposta, senzaPunti, relazioneRomantica }); return;
+      fuocoAllaCasella(); setChiediNote(false); setChiediEsiti({ noteRisposta, senzaPunti, relazioneRomantica }); return;
     }
     // 2026-10-28: consumazioni e visite di pesca si preparano da sole dalla voce e dallo stato della partita (`preparaOsservazioniVoce`): se
     // tutto è determinato la spunta registra senza finestra; la finestra compare solo con qualcosa di davvero aperto, e chiede solo quello
     if (fatta && !a.fatta && effettiDaOsservare(a).length && acquisti === undefined && pesche === undefined) {
-      setChiediNote(false); setChiediEsiti(null);
+      fuocoAllaCasella(); setChiediNote(false); setChiediEsiti(null);
       scrittura.current = true; setOccupato(true);
       let pronte: OsservazioniVoce | null;
       // una lettura fallita apre la finestra, che mostra l'errore e lascia rileggere
@@ -138,7 +187,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const r = richiesteOsservazioni(pronte);
       return cambia(true, noteRisposta, senzaPunti, r.acquisti, r.pesche, esiti, r.osservate, true, relazioneRomantica);
     }
-    setChiediNote(false);
+    // la scelta delle note resta aperta (e col fuoco) finché la spunta non è salvata: chiusa qui, il pulsante toccato sparirebbe col fuoco
     scrittura.current = true;
     setOccupato(true);
     try {
@@ -146,6 +195,27 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}), ...(relazione !== undefined ? { relazioneRomantica: relazione } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, undefined, undefined, esiti, relazione);
       segnalaMutazioneEffetti(partitaId);
       if (!vivo.current) return;
+      // le scelte della spunta spariscono: se il fuoco è ancora sull'elemento del gesto (la casella, la scelta delle note, degli esiti, la
+      // finestra degli acquisti) o è caduto sul documento, va sulla casella. Se chi gioca l'ha portato su un altro controllo della riga (un
+      // cartellino, una casella «In scorta») resta lì: se la riga si rimonterà (è cambiato ciò che la spunta legge), la riga nuova lo rimette
+      // sullo stesso controllo (`fuocoCasellaRef`); fuori dalla voce non si tocca
+      const ora = document.activeElement;
+      const sulGesto = !!elementoAlGesto && (ora === elementoAlGesto || !ora || ora === document.body || !ora.isConnected);
+      const rimonta = chiaveContesto(agg, partitaId) !== chiaveContesto(a, partitaId);
+      if (sulGesto) {
+        if (rimonta) fuocoCasellaRef.current = true;
+        else if (ora !== rifCasella.current) rifCasella.current?.focus({ preventScroll: true });
+      } else if (rimonta && ora && ora !== rifCasella.current && rifCasella.current?.closest('li')?.contains(ora)) {
+        fuocoCasellaRef.current = nomeControllo(ora) || true;
+      } else if (rimonta && (ora === rifCasella.current || (daFinestra && !!ora?.closest('[role="dialog"]')))) {
+        // la casella stessa, o un altro comando della finestra «Prima di spuntare», che si chiude con la riga
+        fuocoCasellaRef.current = true;
+      } else if (!rimonta && ora && ora !== rifCasella.current && elementoAlGesto?.closest('[aria-busy], [role="dialog"]')?.contains(ora)) {
+        // un altro controllo della stessa scelta del gesto (da «♪♪» ad «Annulla», da un esito all'altro, un comando della finestra): la
+        // scelta sta per chiudersi senza che la riga si rimonti, quindi il fuoco va alla casella invece di cadere sul documento
+        rifCasella.current?.focus({ preventScroll: true });
+      }
+      setChiediNote(false);
       setChiediEsiti(null);
       setChiediAcquisti(null);
       onCambiata(agg);
@@ -184,24 +254,50 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const scortaFatti = a.requisiti?.filter((r) => r.fatto === true).length ?? 0;
   const scortaTotale = a.requisiti?.length ?? 0;
   const conAnello = scortaTotale > 0 && !a.fatta;
+  const scortaMancano = scortaTotale - scortaFatti;
+  // il richiamo all'elenco «In scorta»: cresce a ogni tentativo di completare la voce con caselle mancanti (`RequisitiVoce` porta il fuoco alla prima)
+  const [richiamoScorta, setRichiamoScorta] = useState(0);
+  const richiamaScorta = () => setRichiamoScorta((n) => n + 1);
+  // Due modi di fermare la casella. Le ragioni durevoli (operazione da completare, voce non dovuta, effetti da correggere) la spengono
+  // (`disabled`). Le attese (la sua richiesta in corso, `aria-busy`; un'operazione della giornata in corso) e le caselle «In scorta» mancanti
+  // invece no: `aria-disabled`, così il fuoco della tastiera resta sulla casella (un `disabled` lo farebbe cadere sul documento a ogni spunta e
+  // annullo) e il gesto si ignora; con la scorta incompleta un tocco, Spazio o Invio portano alla prima casella mancante (la descrizione dice
+  // quante ne mancano). La spunta con acquisti o pesche della voce stessa, mentre è in volo, figura fra le operazioni da completare
+  // (`pendente`): finché è sua (`occupato`) è un'attesa, non una ragione durevole
+  const inSospeso = !!pendente && !occupato;
+  const spenta = inSospeso || nonDovuta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere');
+  const inAttesa = occupato || !!bloccata;
+  const ferma = !spenta && (inAttesa || scortaIncompleta);
+  const richiamo = scortaIncompleta && !inAttesa;
   const casella = (
-    <input type="checkbox" className={`w-5 h-5 shrink-0 ${conAnello ? '' : 'mt-2'}`} checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || scortaIncompleta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)}
-      aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={[nonDovuta ? `non-dovuta-${a.uid}` : '', scortaIncompleta ? idContatoreScorta(a.uid) : ''].filter(Boolean).join(' ') || undefined} />
+    <input ref={rifCasella} type="checkbox" className={`casella-voce w-5 h-5 shrink-0 ${conAnello ? '' : 'mt-2'}`} checked={a.fatta} disabled={spenta}
+      aria-disabled={ferma || undefined} aria-busy={occupato || undefined}
+      onClick={ferma ? (e) => { e.preventDefault(); if (richiamo) richiamaScorta(); } : undefined}
+      onKeyDown={richiamo ? (e) => { if (e.key === 'Enter') { e.preventDefault(); richiamaScorta(); } } : undefined}
+      onChange={(e) => { if (!ferma) void cambia(e.target.checked); }}
+      aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={[nonDovuta ? `non-dovuta-${a.uid}` : '', scortaIncompleta ? idMotivoScorta(a.uid) : ''].filter(Boolean).join(' ') || undefined} />
   );
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
     <li id={`voce-${a.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''} ${classeRiga ?? ''} ${classeSelezioneRiga(selezione)}`} aria-current={evidenziata ? 'true' : undefined}
-      {...selezione?.gestori}>
+      {...(selezione && { ...selezione.gestori, onMouseDown: fuoriDallaScorta(selezione.gestori.onMouseDown), onClick: fuoriDallaScorta(selezione.gestori.onClick) })}>
       {maniglia}
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {/* L13 (O9-3): una voce non dovuta nella partita non si spunta (il server risponde 409): la casella è spenta e il motivo sta sotto il testo */}
-      {/* con un elenco «In scorta» la casella ha attorno l'anello d'avanzamento (arco rosso che cresce con le caselle spuntate, verde e pieno quando si può spuntare);
-          da spenta dice perché nel `title` e nella descrizione (il contatore n/N dell'elenco) */}
+      {/* con un elenco «In scorta» la casella ha attorno l'anello d'avanzamento (arco rosso che cresce con le caselle spuntate, verde e pieno quando si
+          può spuntare) e sotto una didascalia: «Mancano n» (anche descrizione della casella) o, a N/N, «Pronta» con il suo segno */}
       {partitaId && (
-        <label className={`touch flex items-start justify-center shrink-0 -my-1 pr-1 ${nonDovuta || scortaIncompleta ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+        <label className={`touch flex shrink-0 -my-1 ${conAnello ? 'scorta-casella' : 'items-start justify-center pr-1'} ${nonDovuta || scortaIncompleta ? 'cursor-not-allowed' : inAttesa ? 'cursor-progress' : 'cursor-pointer'}`}
           title={scortaIncompleta ? `In scorta: ${scortaFatti}/${scortaTotale}. Spunta le caselle che mancano.` : undefined}>
           {conAnello
-            ? <span className={`scorta-anello ${scortaIncompleta ? '' : 'scorta-anello--pronta'}`} style={{ '--p': scortaFatti / scortaTotale } as CSSProperties}>{casella}</span>
+            ? (
+              <>
+                <span className={`scorta-anello ${scortaIncompleta ? '' : 'scorta-anello--pronta'}`} style={{ '--p': scortaFatti / scortaTotale } as CSSProperties}>{casella}</span>
+                {scortaIncompleta
+                  ? <span id={idMotivoScorta(a.uid)} className="scorta-casella__motivo">Mancano {scortaMancano}<span className="sr-only"> su {scortaTotale} Persone da spuntare in scorta</span></span>
+                  : <span className="scorta-casella__pronta"><IconaSegno chiave="scorta-pronta" dimensione={14} />Pronta</span>}
+              </>
+            )
             : casella}
         </label>
       )}
@@ -223,25 +319,29 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
           infiltrazioni={<InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />} />
         {/* le risposte migliori dell'avanzamento della voce Confidente, fra le sue note (progetto dei Confidenti, 2026-10-24) */}
         <RisposteVoce a={a} />
-        {/* l'elenco «da avere in scorta» (caselle manuali della partita): la casella di completamento resta spenta finché ne manca una */}
-        <RequisitiVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
-        {pendente && <p role="status" className="m-0 text-warning">Un’operazione su questa voce non è stata confermata: completala dall’elenco «Operazioni da completare» sopra le voci, poi potrai spuntare la voce.</p>}
+        {inSospeso && <p role="status" className="m-0 text-warning">Un’operazione su questa voce non è stata confermata: completala dall’elenco «Operazioni da completare» sopra le voci, poi potrai spuntare la voce.</p>}
         {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}
         {/* L1-08: la giornata sta in Oggi o nel Diario, che mostrano già le operazioni da completare della partita: non si ripetono qui */}
-        {partitaId !== null && !!a.daApplicare && <DaApplicare partitaId={partitaId} voceUid={a.uid} gestiNellaColonna onCambiato={async () => { onCambiata(await getVocePercorso(a.uid, partitaId)); }} />}
+        {partitaId !== null && !!a.daApplicare && <div ref={rifPunti} className="contents"><DaApplicare partitaId={partitaId} voceUid={a.uid} gestiNellaColonna onCambiato={async () => {
+          const agg = await getVocePercorso(a.uid, partitaId);
+          // decisi tutti i punti, il riquadro sparisce: se aveva il fuoco, il fuoco va alla casella della voce
+          if (!agg.daApplicare) fuocoAllaCasella(rifPunti.current);
+          onCambiata(agg);
+        }} /></div>}
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}
         {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(richieste, pesche, osservate) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, richieste, pesche, chiediAcquisti.esiti, osservate, false, chiediAcquisti.relazioneRomantica)} />}
         {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
-        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s, [], false, chiediEsiti.relazioneRomantica)} onAnnulla={() => setChiediEsiti(null)} />}
+        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s, [], false, chiediEsiti.relazioneRomantica)} onAnnulla={() => { fuocoAllaCasella(); setChiediEsiti(null); }} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
         {chiediNote && <SceltaNote occupato={occupato} relazione={relazioneDaChiedere}
-          onScegli={(n, relazione) => void cambia(true, n ?? undefined, n === null, undefined, undefined, undefined, [], false, relazione)} onAnnulla={() => setChiediNote(false)} />}
+          onScegli={(n, relazione) => void cambia(true, n ?? undefined, n === null, undefined, undefined, undefined, [], false, relazione)} onAnnulla={() => { fuocoAllaCasella(); setChiediNote(false); }} />}
       </div>
-      {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; da 640 px in una colonna a destra
-          del testo, sul telefono in una fila a sé in fondo alla voce: `.comandi-voce__posto`) e le ricevute della spunta dietro un pulsantino (2026-10-25: «magari
+      {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; in una colonna a destra del testo, e
+          con la voce stretta — telefono, Diario a mezza pagina — a destra nella prima fila, accanto a maniglia, casella e immagine, col testo a
+          tutta larghezza sotto: `.comandi-voce__posto`) e le ricevute della spunta dietro un pulsantino (2026-10-25: «magari
           andrebbero visualizzati con un pulsantino e non restando la sotto sempre visibili»).
           2026-10-26: solo ciò che la spunta ha applicato ed è in vigore (`applicatoDallaSpunta`), non le ricevute annullate o tecniche; L13
           (decisione 19), a parte nella stessa finestra, gli effetti di stato che nella partita non valgono (`statiNonApplicati`) */}
@@ -251,6 +351,9 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
           <RicevuteVoce applicato={a.applicatoDallaSpunta} nonApplicati={a.statiNonApplicati} voce={a.azione} />
         </span>
       )}
+      {/* l'elenco «da avere in scorta» (caselle manuali della partita): una fila a tutta larghezza della voce, sotto casella, immagine, testo e
+          comandi (`.azione > .scorta-voce`); la casella di completamento resta ferma finché ne manca una */}
+      <RequisitiVoce a={a} partitaId={partitaId} onCambiata={onCambiata} richiamo={richiamoScorta} />
     </li>
   );
 }

@@ -124,7 +124,7 @@ export function CovoPage() {
   useElementoDaIndirizzo(!!covo);
 
   return (
-    <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {covo && c && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Covo dei Ladri"

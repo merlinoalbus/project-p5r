@@ -131,7 +131,7 @@ export function CalendarioPage() {
   };
 
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {d && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Calendario di gioco" sottotitolo={<>Giorno per giorno dal 9 aprile: meteo previsto, eventi della storia, scadenze dei Palazzi, esami, sblocchi e feste. {partitaId ? (d.dataGioco ? `Oggi nella partita è ${dataGiocoTesto(d.dataGioco)}.` : 'Apri un giorno e imposta la data di gioco della partita.') : 'Attiva una partita per seguire la data di gioco.'}</>} />

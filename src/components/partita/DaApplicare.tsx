@@ -157,6 +157,13 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
       fuoco.current = { fase: 'decisa', elenco: aperte.map((p) => p.uid).join(',') };
       // l'eventuale avanzamento della partita (chiusa l'ultima decisione aperta di una fascia/giornata già spuntata) lo applica già il registro dei gesti
       if (vivo.current) {
+        // «Confermi?» si chiude: il pulsante che l'aveva aperta può essere già sparito con la proposta decisa (l'elenco si rilegge da solo dopo
+        // il gesto), e la finestra ridarebbe il fuoco al contenuto della pagina. Il fuoco passa prima dove lo mette il ripiego qui sopra (la
+        // finestra che contiene l'elenco, o l'elenco stesso), che lo riconosce come fuoco perso e appena può lo porta al primo pulsante rimasto;
+        // se il pulsante che aveva aperto «Confermi?» c'è ancora, la finestra glielo ridà
+        const attivo = document.activeElement, s = sezione.current;
+        const dove = s ? s.closest<HTMLElement>('.modal-content') ?? s : null;
+        if (dove && attivo instanceof HTMLElement && attivo.closest('[role="dialog"]') && !dove.contains(attivo)) dove.focus({ preventScroll: true });
         setRicevuta(r.proposte.length === 1 ? 'Fatto.' : `Fatto: ${r.proposte.length} voci decise.`);
         setAnteprima(null); setIncerto(false);
       }
@@ -223,18 +230,22 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
             const inverso = p.delta < 0;
             // la Dote con note e punti («Applica Perizia ♪♪♪ · 5 punti»): un «+5» nudo si leggeva come note
             const etichetta = `${inverso ? 'Annulla' : 'Applica'} ${p.tipo === 'dote' ? testoDote(p) : `${nome(p)}${p.tipo === 'effetto-voce' ? '' : ` ${p.delta > 0 ? '+' : ''}${p.delta}`}`}`;
+            // mentre un gesto è in corso (`occupato`: l'anteprima o la decisione) i pulsanti restano col fuoco, fermi (`aria-disabled`) e il tocco
+            // si ignora: `disabled` farebbe cadere il fuoco della tastiera sul documento. Restano spenti per le ragioni che valgono prima del gesto
+            const fermo = occupato || undefined;
             return <>
               {!!altri.length && <ul className="m-0 pl-4 text-warning">{altri.map((i) => <li key={i}>{i}</li>)}</ul>}
-              <div className="flex flex-wrap gap-1.5">
-                {p.tipo === 'effetto-voce' ? <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={e?.tipo === 'acquisto' && e.variante ? `Applica ${nomeDote(e.variante)}` : delPassato(p) ? 'Applica alla partita' : 'Completa l’effetto'} disabled={occupato || !p.applicabile || !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] })} onClick={() => {
+              <div className="flex flex-wrap gap-1.5" aria-busy={fermo}>
+                {p.tipo === 'effetto-voce' ? <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={e?.tipo === 'acquisto' && e.variante ? `Applica ${nomeDote(e.variante)}` : delPassato(p) ? 'Applica alla partita' : 'Completa l’effetto'} disabled={!p.applicabile || (!occupato && !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] }))} aria-disabled={fermo} onClick={() => {
+                  if (occupato) return;
                   if (e?.tipo === 'acquisto' || e?.tipo === 'pesca') setConsumo(p);
                   else chiedi({ tipo: 'applica-effetto', proposta: riferimento(p) });
                 }} /> : <>
-                  <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={inverso ? 'annulla-ultimo' : 'raggiunto'} dimensione={20} />} titolo={<TestoNote testo={etichetta} />} disabled={occupato || !(p.applicabile || (soloVerifica && !p.orfana))} onClick={() => void applica(p)} />
-                  {!inverso && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="L’ho già segnato a mano" disabled={occupato} onClick={() => chiedi({ tipo: 'gia-conteggiata', proposta: riferimento(p), quantita: Math.abs(p.delta) })} />}
+                  <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={inverso ? 'annulla-ultimo' : 'raggiunto'} dimensione={20} />} titolo={<TestoNote testo={etichetta} />} disabled={!(p.applicabile || (soloVerifica && !p.orfana))} aria-disabled={fermo} onClick={() => { if (!occupato) applica(p); }} />
+                  {!inverso && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="L’ho già segnato a mano" aria-disabled={fermo} onClick={() => { if (!occupato) chiedi({ tipo: 'gia-conteggiata', proposta: riferimento(p), quantita: Math.abs(p.delta) }); }} />}
                 </>}
                 {/* L13 (revisione R3): per l'elenco del passato il rifiuto ha un nome vero in ogni caso (già segnato a mano, o mai fatto in partita) */}
-                {p.tipo === 'effetto-voce' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={delPassato(p) ? 'scarta' : 'raggiunto'} dimensione={20} />} titolo={delPassato(p) ? 'Non applicare' : 'L’ho già segnato a mano'} disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })} />}
+                {p.tipo === 'effetto-voce' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={delPassato(p) ? 'scarta' : 'raggiunto'} dimensione={20} />} titolo={delPassato(p) ? 'Non applicare' : 'L’ho già segnato a mano'} aria-disabled={fermo} onClick={() => { if (!occupato) chiedi({ tipo: 'scarta', proposte: [riferimento(p)] }); }} />}
               </div>
             </>;
           })()}
@@ -265,7 +276,7 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
     </Modal>
     <Modal aperta={anteprima !== null} titolo="Confermi?" onChiudi={() => { if (!occupato && !incerto) setAnteprima(null); }} azioni={<>
       <button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={() => setAnteprima(null)}>Annulla</button>
-      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={incerto ? 'riprova' : 'raggiunto'} dimensione={22} />} titolo={incerto ? 'Riprova' : 'Conferma'} disabled={occupato} onClick={() => void conferma()} />
+      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={incerto ? 'riprova' : 'raggiunto'} dimensione={22} />} titolo={incerto ? 'Riprova' : 'Conferma'} aria-disabled={occupato || undefined} aria-busy={occupato || undefined} onClick={() => { if (!occupato) void conferma(); }} />
     </>}>
       {anteprima && <div className="flex flex-col gap-2 testo-13">
         <strong>{anteprima.richiesta.decisione.tipo === 'scarta' && anteprima.proposte.length > 0 && anteprima.proposte.every(delPassato) ? 'Non applicare: esce dall’elenco, la partita non cambia' : dicituraDecisione[anteprima.richiesta.decisione.tipo]}</strong>

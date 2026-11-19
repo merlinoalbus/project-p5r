@@ -226,7 +226,7 @@ export function AttivitaPage({ soloChiave }: { soloChiave?: string } = {}) {
     // i videogiochi hanno la loro pagina nell'elenco, ma l'elemento citato si cerca fra tutti
     const elemento = [...(d?.attivita ?? []), ...(d?.lavori ?? [])].find((x) => x.chiave === solo) ?? null;
     return (
-      <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+      <PageState carica={dati}>
         {d && (
           <div className="flex flex-col gap-2">
             {/* fuori dal pannello l'elemento è una pagina: si può tornare all'elenco (il nome della cosa, mai «Torna») */}
@@ -240,7 +240,7 @@ export function AttivitaPage({ soloChiave }: { soloChiave?: string } = {}) {
     );
   }
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori e studio con le note (♪) delle Doti che alzano, dove e quando farli. I videogiochi hanno la <Link to="/guida/videogiochi" className="text-primary-testo">loro pagina</Link>, con i round e quello che sbloccano.</>} />

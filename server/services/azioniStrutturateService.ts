@@ -108,7 +108,9 @@ function mappaAzioneSenzaPosto(a: AzioneClassificata): { chiave: string; spilloI
       OR (riferimento_tipo = 'luogo' AND riferimento_chiave IN (SELECT sede_chiave FROM negozio WHERE chiave = ? AND sede_chiave IS NOT NULL)) ORDER BY id LIMIT 1`).get(r.chiave, r.chiave) as { id: number; mappa_chiave: string } | undefined;
     return s ? { chiave: s.mappa_chiave, spilloId: s.id } : null;
   }
-  if (r?.tipo === 'confidente') {
+  // una Trama collegata a un Confidente non è un incontro: il collegamento serve solo a ritrovare l'evento con quel personaggio, e il luogo
+  // del Confidente (il suo primo spillo) non è il luogo dell'evento. Nessun luogo dedotto
+  if (r?.tipo === 'confidente' && a.tipo !== 'trama') {
     const s = prepared(`SELECT s.id, s.mappa_chiave FROM spillo s WHERE (s.riferimento_tipo = 'confidente' AND s.riferimento_chiave = ?)
       OR (s.riferimento_tipo = 'luogo' AND s.riferimento_chiave IN (SELECT chiave FROM luogo WHERE nascosto = 0 AND confidenti_json LIKE ?)) ORDER BY s.id LIMIT 1`).get(r.chiave, `%"${r.chiave}"%`) as { id: number; mappa_chiave: string } | undefined;
     return s ? { chiave: s.mappa_chiave, spilloId: s.id } : null;

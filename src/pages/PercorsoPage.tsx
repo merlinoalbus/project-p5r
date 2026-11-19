@@ -168,7 +168,7 @@ export function PercorsoPage() {
    *  giorni e conta un passo in più (più quelli del pannello aperto) per tornare indietro fino ai risultati. */
   const vai = (d: string | null) => { if (d) navigate(`/guida/percorso/${d}`, { state: ritornoRicerca ? { ritornoRicerca: { ...ritornoRicerca, passi: ritornoRicerca.passi >= 1 ? ritornoRicerca.passi + profonditaDaStato(posizione.state) + 1 : 0 } } : undefined }); };
   return (
-    <PageState isLoading={(indice.caricamento && !indice.dati) || (giorno.caricamento && !g)} error={indice.errore ?? giorno.errore} onRetry={() => { void indice.ricarica(); void giorno.ricarica(); }}>
+    <PageState carica={[indice, giorno]}>
       {indice.dati && g && (
         // R10-27: nella Guida › Giorno per giorno la scheda di un oggetto citato da una voce si apre in un pannello sopra il diario
         <ProviderPannelloScheda>
@@ -178,7 +178,7 @@ export function PercorsoPage() {
           {/* la barra sta nello stesso punto con e senza ricerca: scrivendo, il campo non perde il fuoco quando il giorno lascia il posto ai risultati */}
           <BarraRicercaDiario testo={testoRicerca} onTesto={setTestoRicerca} tipo={tipoRicerca} onTipo={(t) => scriviRicerca(testoRicerca, t)} attiva={ricercaAttiva} onCancella={cancellaRicerca} perTipo={ricerca.dati?.perTipo} idCampo={idCampoRicerca} />
           {ricercaAttiva ? (
-            <RisultatiRicercaDiario q={qIndirizzo} tipo={tipoRicerca} ricerca={ricerca} conPartita={partitaId !== null} voceDiRitorno={typeof voceDiRitorno === 'string' ? voceDiRitorno : null} onTogliTipo={() => scriviRicerca(testoRicerca, null)} />
+            <RisultatiRicercaDiario q={qIndirizzo} tipo={tipoRicerca} ricerca={ricerca} conPartita={partitaId !== null} voceDiRitorno={typeof voceDiRitorno === 'string' ? voceDiRitorno : null} onTogliTipo={() => scriviRicerca(testoRicerca, null)} onCancella={cancellaRicerca} />
           ) : (<>
           {ritornoRicerca && <BarraRitornoRisultati ritorno={ritornoRicerca} onTorna={() => tornaAiRisultati(ritornoRicerca)} />}
           <div className="flex flex-wrap items-center gap-1.5">

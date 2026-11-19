@@ -82,6 +82,8 @@ function nomeDi(rif: NonNullable<CampiStrutturati['riferimento']>, elenchi: Elen
 }
 /** Il nome dell'elemento collegato, dagli elenchi. */
 const nomeCollegato = (valore: CampiStrutturati, elenchi: ElenchiVoce): string | null => (valore.riferimento ? nomeDi(valore.riferimento, elenchi) : null);
+/** Titolo e sottotitolo del collegamento facoltativo della Trama. */
+const TESTI_FACOLTATIVO = { titolo: 'Personaggio coinvolto (facoltativo)', sottotitolo: 'Solo per ritrovare l’evento con quel personaggio: non cambia il rango.' };
 const nomeGenere = (tipo: string): string => TIPI_RIFERIMENTO_AZIONE.find((g) => g.chiave === tipo)?.nome.toLowerCase() ?? tipo;
 
 /**
@@ -151,7 +153,9 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi, parte = 'tutto', qu
       )}
       {tq && (
         <SceltaQuale tipo={tq} elenchi={elenchi.azione} valore={rif && rif.tipo === tq ? rif.chiave : ''} soloTurni={valore.tipo === 'lavoro'}
-          onCambia={(chiave) => void applica(valore.tipo, chiave ? { tipo: tq, chiave } : null)} finestraAperta={finestraQuale} onFinestra={apriQuale} />
+          onCambia={(chiave) => void applica(valore.tipo, chiave ? { tipo: tq, chiave } : null)} finestraAperta={finestraQuale} onFinestra={apriQuale}
+          // la Trama: il personaggio di un evento di storia, facoltativo e senza rango (`COLLEGAMENTO_FACOLTATIVO`); non la scelta obbligatoria di una voce Confidente
+          facoltativo={COLLEGAMENTO_FACOLTATIVO.has(valore.tipo) ? TESTI_FACOLTATIVO : undefined} />
       )}
     </div>
   );
@@ -178,6 +182,13 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apert
   } else {
     const negozio = valore.tipo === 'acquisto' && rif?.tipo === 'negozio' ? rif.chiave : null;
     let contesto: ReactNode = null;
+    // Trama ed Esame senza il loro effetto: che cosa aggiungere. Con l'elenco vuoto la frase prende il posto di «Nessun effetto: …» (una frase
+    // sola: due istruzioni di fila non informano di più); con altri effetti sta sopra l'elenco
+    const daAggiungere = (valore.tipo === 'esame' && !righe.some((r) => r.effetto.tipo === 'domanda')) || (valore.tipo === 'trama' && !righe.some((r) => r.effetto.tipo === 'storia'))
+      ? (valore.tipo === 'esame'
+        ? 'La domanda del giorno si aggiunge qui sotto con «Aggiungi un effetto» → «Domanda risposta»: la spunta la segna come risposta.'
+        : 'L’evento di storia si aggiunge qui sotto con «Aggiungi un effetto» → «Evento di storia»: la spunta lo segna avvenuto.')
+      : null;
     if (valore.tipo === 'confidente') {
       const rango = valore.rangoAtteso;
       contesto = nome && rif ? (
@@ -191,10 +202,8 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apert
       ) : frase('Scegli il Confidente in «Quale»: alla spunta si registra l’incontro e si scelgono le note.');
     } else if (valore.tipo === 'palazzo') {
       contesto = frase('Le infiltrazioni si scelgono sulla voce, come prima.');
-    } else if ((valore.tipo === 'esame' && !righe.some((r) => r.effetto.tipo === 'domanda')) || (valore.tipo === 'trama' && !righe.some((r) => r.effetto.tipo === 'storia'))) {
-      contesto = frase(valore.tipo === 'esame'
-        ? 'La domanda del giorno si aggiunge qui sotto con «Aggiungi un effetto» → «Domanda risposta»: la spunta la segna come risposta.'
-        : 'L’evento di storia si aggiunge qui sotto con «Aggiungi un effetto» → «Evento di storia»: la spunta lo segna avvenuto.');
+    } else if (daAggiungere) {
+      if (righe.length > 0) contesto = frase(daAggiungere);
     } else if (tq && !COLLEGAMENTO_FACOLTATIVO.has(valore.tipo) && (!rif || rif.tipo !== tq)) {
       contesto = frase(valore.tipo === 'acquisto'
         ? 'Scegli il negozio in «Quale»: qui compariranno gli articoli da segnare comprati.'
@@ -207,7 +216,8 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apert
         {contesto}
         {negozio && <AcquistiNegozioVoce valore={valore} onCambia={onCambia} elenchi={elenchi} nomi={nomi} negozio={negozio} nomeNegozio={nome} />}
         {negozio && <h4 className="m-0 testo-13 font-semibold">Altri effetti</h4>}
-        <ElencoEffettiVoce valore={valore} onCambia={onCambia} elenchi={elenchi} nomi={nomi} fatta={fatta} altrove={negozio ? (r) => eArticoloDelNegozio(r, negozio) : undefined} />
+        <ElencoEffettiVoce valore={valore} onCambia={onCambia} elenchi={elenchi} nomi={nomi} fatta={fatta} altrove={negozio ? (r) => eArticoloDelNegozio(r, negozio) : undefined}
+          vuoto={daAggiungere && righe.length === 0 ? daAggiungere : undefined} />
       </>
     );
   }

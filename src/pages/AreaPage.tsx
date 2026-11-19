@@ -71,7 +71,7 @@ export function AreaPage() {
   const indirizzoContenitore = contenitore === 'tokyo' ? '/guida/citta' : `/guida/citta/${encodeURIComponent(contenitore)}`;
   if (dati.errore && !a) return <AreaNonTrovata errore={dati.errore} indietro={indirizzoContenitore} onRiprova={() => void dati.ricarica()} />;
   return (
-    <PageState isLoading={dati.caricamento && !a} error={null} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati} error={null}>
       {a && <Contenuto area={a} indirizzoContenitore={indirizzoContenitore} ricarica={dati.ricarica} />}
     </PageState>
   );

@@ -12,7 +12,6 @@
 
 import type { ReactNode } from 'react';
 import { IconaCategoria } from '../guida/IconaCategoria';
-import { IconSpunta } from './iconeGuida';
 
 export interface OpzioneIcone {
   chiave: string;
@@ -31,9 +30,6 @@ interface Base {
   disabilitato?: boolean;
   /** Tessere più strette (icona 28 px) per i pannelli dei filtri. */
   compatto?: boolean;
-  /** Tessere fitte di larghezza uguale (nome su una riga, con i puntini se lungo) e, se accese, segno di spunta sull'angolo: per scelte
-   *  con molte voci che hanno una figura (i 22 arcani), dove il nome per esteso conta meno della figura. */
-  griglia?: boolean;
   className?: string;
 }
 interface Singolo extends Base { multiplo?: false; valore: string; onCambia: (chiave: string) => void }
@@ -45,7 +41,7 @@ interface Multiplo extends Base { multiplo: true; valore: string[]; onCambia: (c
  * se data, altrimenti l'illustrazione di categoria; `conteggio` si aggiunge accanto al nome.
  */
 export function SelettoreIcone(props: Singolo | Multiplo) {
-  const { etichetta, opzioni, disabilitato, compatto, griglia, className } = props;
+  const { etichetta, opzioni, disabilitato, compatto, className } = props;
   const scelte = new Set(props.multiplo ? props.valore : [props.valore]);
   /** A scelta multipla accende o spegne la voce nell'elenco; a scelta singola la comunica come nuova scelta. */
   const scegli = (chiave: string) => {
@@ -53,7 +49,7 @@ export function SelettoreIcone(props: Singolo | Multiplo) {
     else props.onCambia(chiave);
   };
   return (
-    <div role={props.multiplo ? 'group' : 'radiogroup'} aria-label={etichetta} className={`selettore-icone ${compatto ? 'selettore-icone--compatto' : ''} ${griglia ? 'selettore-icone--griglia' : ''} ${className ?? ''}`}>
+    <div role={props.multiplo ? 'group' : 'radiogroup'} aria-label={etichetta} className={`selettore-icone ${compatto ? 'selettore-icone--compatto' : ''} ${className ?? ''}`}>
       {opzioni.map((o) => {
         const attiva = scelte.has(o.chiave);
         return (
@@ -62,7 +58,6 @@ export function SelettoreIcone(props: Singolo | Multiplo) {
             disabled={disabilitato} onClick={() => scegli(o.chiave)} title={o.nome}>
             <span className="selettore-icone__icona" aria-hidden="true">{o.icona ?? <IconaCategoria categoria={o.categoria ?? o.chiave} dimensione={compatto ? 28 : 36} />}</span>
             <span className="selettore-icone__nome">{o.conteggio !== undefined ? `${o.nome} ${o.conteggio}` : o.nome}</span>
-            {griglia && attiva && <span className="selettore-icone__spunta" aria-hidden="true"><IconSpunta size={11} /></span>}
           </button>
         );
       })}

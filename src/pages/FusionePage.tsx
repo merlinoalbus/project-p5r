@@ -49,7 +49,8 @@ export function FusionePage() {
   const partiteCaricate = usePartitaStore((s) => s.caricata);
   const aggiornaLocale = usePartitaStore((s) => s.aggiornaLocale);
   const [params, setParams] = useSearchParams();
-  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getRegoleFusione(), [], { cacheUrl: URL_REGOLE_FUSIONE });
+  const regoleLette = useCarica(() => getRegoleFusione(), [], { cacheUrl: URL_REGOLE_FUSIONE });
+  const { dati, ricarica } = regoleLette;
   const persone = useCarica(() => getPersone(), [], { cacheUrl: urlPersone() });
   // della partita attiva le letture usano solo l'id
   const idAttiva = attiva?.id;
@@ -128,7 +129,7 @@ export function FusionePage() {
         </FilaScorrevole>
       </div>
 
-      <PageState isLoading={inPrimoCaricamento || persone.inPrimoCaricamento} error={errore ?? persone.errore} onRetry={() => { void ricarica(); void persone.ricarica(); }}>
+      <PageState carica={[regoleLette, persone]}>
         {persone.dati && vista === 'calcolatore' && (
           <Calcolatore persone={persone.dati} partitaId={attiva?.id ?? null} inScorta={inScorta} inizialeA={idParam('a')} inizialeB={idParam('b')} scorta={scorta.dati ?? undefined} onScortaCambiata={() => void scorta.ricarica()} />
         )}

@@ -50,7 +50,7 @@ export function CompendioPersonale({ partitaId }: Props) {
   };
 
   return (
-    <PageState isLoading={tutte.inPrimoCaricamento || registrate.inPrimoCaricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
+    <PageState carica={[tutte, registrate]}>
       {/* L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda riempie l'altezza, i comandi restano fermi in una riga e l'elenco scorre
           nella sua area con bordo, su due colonne di righe da 44 px; sotto i 1024 px una colonna che scorre con la pagina, come prima (lo
           stacco `md:gap-1.5` è quello che la colonna della pagina dava ai due blocchi quando erano suoi figli diretti) */}

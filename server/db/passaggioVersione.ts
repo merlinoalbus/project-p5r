@@ -6,8 +6,9 @@
 // questo, l'avvio porta ciascun file dalla versione IMMEDIATAMENTE PRECEDENTE a quella attuale (`PASSAGGI`):
 //   - ADDITIVO: crea gli oggetti che mancano (tabelle e indici). Non modifica, non toglie e non converte niente di ciò che c'è;
 //   - IDENTICO ai file distribuiti: il testo di creazione di ogni oggetto si legge da `pacchetto/gioco.db` e da
-//     `pacchetto/partite-vuoto.db` (`sqlite_master.sql`), mai riscritto qui, e dopo la creazione si confronta con l'originale:
-//     l'impronta della struttura (`improntaSchema`) deve restare quella dei file distribuiti;
+//     `pacchetto/partite-vuoto.db` (`sqlite_master.sql`; nel rilascio, che non ha il pacchetto, dal `partite-vuoto.db` dell'edizione),
+//     mai riscritto qui, e dopo la creazione si confronta con l'originale: l'impronta della struttura (`improntaSchema`) deve restare
+//     quella dei file distribuiti;
 //   - IDEMPOTENTE: un file già alla versione attesa non si tocca (nessuna scrittura, nessun log);
 //   - CAUTO: una versione diversa dalla precedente non si tocca e la verifica che segue (`verificaVersioni`) ferma l'avvio come sempre;
 //     un oggetto che esiste già in un file ancora alla versione precedente è un errore (mai sovrascritto);
@@ -19,9 +20,11 @@
 //     partite e togliere le strutture aggiunte (o rimettere i file di prima).
 //
 // Non è un sistema di migrazioni: ogni cambio di struttura porta il proprio passaggio additivo nello stesso cambiamento che alza
-// `VERSIONE_GIOCO` o `VERSIONE_PARTITE`, e toglie quello della versione prima (si passa solo dalla precedente). Solo l'avvio della
-// preparazione lo chiama (`server/index.ts`): «Importa», anteprima, ripristino, edizione di rilascio e script aprono un file esterno
-// e lo rifiutano se non è alla versione attesa. I dati non si convertono mai.
+// `VERSIONE_GIOCO` o `VERSIONE_PARTITE`, e toglie quello della versione prima (si passa solo dalla precedente). Lo chiamano solo i
+// due avvii: la preparazione (`server/index.ts`) per i due file, il rilascio (`server/rilascio.ts`) per le sole partite, con i testi
+// letti dall'edizione (il suo `gioco.db` è l'edizione stessa, in sola lettura, e deve già essere alla versione del codice).
+// «Importa», anteprima, ripristino, «Prepara edizione» e script aprono un file esterno e lo rifiutano se non è alla versione attesa:
+// un backup di prima del passaggio non si importa né si ripristina. I dati non si convertono mai.
 // ============================================================
 
 import fs from 'node:fs';
@@ -82,6 +85,11 @@ const PASSAGGI: readonly Passaggio[] = [
   },
 ];
 
+/** La versione da cui il passaggio in vigore porta un file alla versione attuale (null se per quel file non ce n'è). */
+export function versioneDaCuiSiPassa(file: FileVersionato): number | null {
+  return PASSAGGI.find((p) => p.file === file)?.da ?? null;
+}
+
 /** Che cosa ha fatto il passaggio di un file. */
 export interface EsitoPassaggio {
   file: FileVersionato;
@@ -92,10 +100,21 @@ export interface EsitoPassaggio {
   copia: string | null;
 }
 
-/** Le opzioni di `portaAllaVersioneAttuale` (i valori di serie sono quelli dell'istanza). */
+/** Le opzioni di `portaAllaVersioneAttuale` (i valori di serie sono quelli dell'istanza di preparazione). */
 export interface OpzioniPassaggio {
   /** Dove si scrivono le copie di sicurezza (`config.backupDir`). */
   cartellaCopie?: string;
+  /**
+   * Quali file si possono portare (di serie tutti e due). L'istanza di rilascio passa solo `['partite']`: il suo `gioco.db` è l'edizione,
+   * in sola lettura, e deve già essere alla versione del codice.
+   */
+  file?: readonly FileVersionato[];
+  /**
+   * Da quale file distribuito si leggono i testi di creazione, per file (di serie `pacchetto/gioco.db` e `pacchetto/partite-vuoto.db`).
+   * L'immagine di rilascio non ha il pacchetto: legge le strutture delle partite dal `partite-vuoto.db` dell'edizione, lo stesso file da
+   * cui il manifesto ha preso l'impronta, così dopo il passaggio `verificaSchemaUtente` ritrova la stessa impronta.
+   */
+  origini?: Partial<Record<FileVersionato, string>>;
 }
 
 /** Un testo fra apici SQL (il percorso di `VACUUM INTO`). */
@@ -108,8 +127,7 @@ const timbroCopia = (): string => new Date().toISOString().replace(/[:.]/g, '-')
  * I testi di creazione degli oggetti del passaggio, letti dal file distribuito in sola lettura. Lancia se il file manca, non è alla
  * versione di arrivo o non contiene uno degli oggetti: il pacchetto e le costanti vanno aggiornati insieme.
  */
-function leggiDefinizioni(passaggio: Passaggio): OggettoSchema[] {
-  const percorso = passaggio.origine();
+function leggiDefinizioni(passaggio: Passaggio, percorso: string): OggettoSchema[] {
   if (!fs.existsSync(percorso)) {
     throw new ErrorePassaggioVersione(`Il file distribuito (${path.basename(percorso)}) da cui si leggono le strutture nuove manca (${percorso}): senza non si può portare ${nomeFile(passaggio)} alla versione ${passaggio.a}.`);
   }
@@ -164,11 +182,11 @@ function copiaDiSicurezza(db: Database.Database, passaggio: Passaggio, cartella:
 }
 
 /** Il passaggio di un file, già riconosciuto alla versione di partenza: controlli, copia di sicurezza, creazione in una transazione. */
-function eseguiPassaggio(db: Database.Database, passaggio: Passaggio, cartellaCopie: string): EsitoPassaggio {
+function eseguiPassaggio(db: Database.Database, passaggio: Passaggio, cartellaCopie: string, origine: string): EsitoPassaggio {
   if (passaggio.da !== passaggio.a - 1) {
     throw new ErrorePassaggioVersione(`Il passaggio di ${nomeFile(passaggio)} (da ${passaggio.da} a ${passaggio.a}) non parte dalla versione immediatamente precedente: passaggioVersione.ts non è stato aggiornato insieme alla versione.`);
   }
-  const definizioni = leggiDefinizioni(passaggio);
+  const definizioni = leggiDefinizioni(passaggio, origine);
   const esiste = db.prepare(`SELECT 1 FROM ${passaggio.schema}.sqlite_master WHERE name = ?`);
   for (const o of definizioni) {
     if (esiste.get(o.name)) {
@@ -197,17 +215,18 @@ function eseguiPassaggio(db: Database.Database, passaggio: Passaggio, cartellaCo
 
 /**
  * Porta alla versione attuale i file della connessione (`main` = gioco.db, `utente` = partite.db) che sono alla versione
- * immediatamente precedente; gli altri non si toccano (la verifica delle versioni che segue ferma l'avvio se non sono quella attesa).
- * Per ogni passaggio fatto scrive un log a livello info; se non c'è niente da fare non scrive niente, né sul file né nel log.
- * Restituisce i passaggi fatti. Lancia `ErrorePassaggioVersione` al primo che non riesce.
+ * immediatamente precedente, fra quelli ammessi (`opzioni.file`); gli altri non si toccano (la verifica delle versioni che segue ferma
+ * l'avvio se non sono quella attesa). Per ogni passaggio fatto scrive un log a livello info; se non c'è niente da fare non scrive niente,
+ * né sul file né nel log. Restituisce i passaggi fatti. Lancia `ErrorePassaggioVersione` al primo che non riesce.
  */
 export function portaAllaVersioneAttuale(db: Database.Database, opzioni: OpzioniPassaggio = {}): EsitoPassaggio[] {
   const cartellaCopie = opzioni.cartellaCopie ?? config.backupDir;
   const fatti: EsitoPassaggio[] = [];
   for (const passaggio of PASSAGGI) {
+    if (opzioni.file && !opzioni.file.includes(passaggio.file)) continue;
     const letta = db.pragma(`${passaggio.schema}.user_version`, { simple: true }) as number;
     if (letta !== passaggio.da) continue;
-    const esito = eseguiPassaggio(db, passaggio, cartellaCopie);
+    const esito = eseguiPassaggio(db, passaggio, cartellaCopie, opzioni.origini?.[passaggio.file] ?? passaggio.origine());
     logger.info(
       { file: nomeFile(passaggio), da: esito.da, a: esito.a, oggettiCreati: esito.oggettiCreati, copia: esito.copia },
       `${nomeFile(passaggio)} portato dalla versione ${esito.da} alla ${esito.a}: strutture nuove aggiunte, dati intatti`,

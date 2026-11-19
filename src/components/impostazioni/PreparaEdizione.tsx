@@ -140,7 +140,6 @@ function Rapporto({ e }: { e: EsitoEdizioneDto }) {
       {c.precedente && (
         <div className="flex flex-col gap-1">
           <h3 className="m-0 testo-14">Compatibilità con l’edizione {c.precedente.numero}</h3>
-          {c.strutturaPartiteCambiata && <p className="m-0 text-warning">La struttura delle partite è cambiata: l’istanza di rilascio non ha una strada automatica per convertirla.</p>}
           {c.chiaviRimosse.length === 0 ? (
             <p className="m-0 text-success">Nessuna chiave citata dalle partite è sparita ({numero(c.chiaviAggiunte)} nuove).</p>
           ) : (

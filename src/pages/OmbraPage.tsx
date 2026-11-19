@@ -74,7 +74,7 @@ export function OmbraPage() {
   const o = dati.dati;
   useDocumentTitle(o ? o.nome : 'Ombra');
   return (
-    <PageState isLoading={dati.caricamento && !o} error={dati.errore} onRetry={() => void dati.ricarica()} scheda={{ titolo: 'Ombra', ripiego: '/guida/battaglia' }}>
+    <PageState carica={dati} scheda={{ titolo: 'Ombra', ripiego: '/guida/battaglia' }}>
       {o && (
         <div className="flex flex-col gap-3">
           {/* L11 · R11-15/4: un solo punto di modifica dell'Ombra (nome, personalità, livello, negoziabilità, note, affinità proprie) */}

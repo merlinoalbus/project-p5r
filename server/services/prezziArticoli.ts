@@ -75,7 +75,7 @@ function primoPassaggioARango(partitaId: number, confidente: string, rango: numb
     .filter((p) => DATA_DI_GIOCO.test(p.data));
   if (!passaggi.length) return null;
   const voci = prepared(`SELECT g.data, g.fascia, MIN(g.ordine) AS ordine FROM main.voce_giornata g JOIN utente.spunta_voce_partita s ON s.voce_uid = g.uid AND s.partita_id = ?
-    WHERE g.riferimento_tipo = 'confidente' AND g.riferimento_chiave = ? AND g.rango_atteso >= ? GROUP BY g.data, g.fascia`).all(partitaId, confidente, rango) as Array<{ data: string; fascia: string; ordine: number }>;
+    WHERE g.riferimento_tipo = 'confidente' AND g.riferimento_chiave = ? AND g.rango_atteso >= ? AND g.tipo <> 'trama' GROUP BY g.data, g.fascia`).all(partitaId, confidente, rango) as Array<{ data: string; fascia: string; ordine: number }>;
   const ordineNellaFascia = new Map(voci.map((v) => [`${v.data}|${v.fascia}`, v.ordine]));
   return passaggi
     .map((p): MomentoVoce => [ordineGioco(p.data), p.fascia === 'sera' ? 1 : 0, ordineNellaFascia.get(`${p.data}|${p.fascia}`) ?? Number.NEGATIVE_INFINITY])

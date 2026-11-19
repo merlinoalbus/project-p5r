@@ -109,7 +109,7 @@ function SchedaOmbre() {
       && trova(o.nome, ...o.nomiAltri, o.persona?.nome, o.persona?.nomeIt, ...o.luoghi.map(luogoBreve)));
   }, [ombre, q, dungeon, elemento, personalita]);
   return (
-    <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       <div className="flex flex-col gap-2">
         <p className="m-0 testo-13 text-text-secondary">Ricerca rapida delle Ombre di Palazzi e Dedali: scrivi il nome dell'Ombra o della Persona, oppure filtra per dove si incontra, debolezza e personalità. Le debolezze sono quelle della Persona nel compendio.</p>
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Ombra, Persona, Palazzo o dedalo…" />
@@ -397,7 +397,7 @@ export function BattagliaPage() {
   const d = dati.dati;
   const schede = useSchede({ chiavi: SCHEDE.map(([k]) => k), attiva: scheda, onScegli: (k) => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true }) });
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per infiltrazione o dedalo, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali." />

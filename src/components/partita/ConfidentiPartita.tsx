@@ -95,7 +95,8 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   const [params, setParams] = useSearchParams();
   // le correzioni a dialoghi, abilità e regali fatte nella scheda del Confidente si rileggono ogni volta che si apre questa scheda
   useState(() => { svuotaDettagliConfidenti(); return null; });
-  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getConfidentiPartita(partitaId), [partitaId]);
+  const confidenti = useCarica(() => getConfidentiPartita(partitaId), [partitaId]);
+  const { dati, ricarica, imposta } = confidenti;
   const [occupato, setOccupato] = useState<string | null>(null);
   const sugg = useSuggerimenti();
   const [modifica, setModifica] = useState<ConfidentePartitaDto | null>(null);
@@ -413,7 +414,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
           Da solo si apre subito e, finché i Confidenti arrivano, dice che sta caricando (o l'errore, con Riprova) */}
       {/* la ✕ chiude sempre; Esc solo se il cassetto è la finestra più in alto (lo decide `Modal`) */}
       <Modal titolo="Gestione del Confidente" aperta={soloCassetto ? true : cassettoAperto} onChiudi={chiudiFoglio} cassetto fascia={trovato ? fasciaInvito : null}>
-        {trovato ? contenutoCassetto(trovato) : soloCassetto && <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>
+        {trovato ? contenutoCassetto(trovato) : soloCassetto && <PageState carica={confidenti}>
           <p className="m-0 testo-13 text-text-muted">Questo Confidente non è nella partita attiva.</p>
         </PageState>}
       </Modal>
@@ -450,5 +451,5 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   );
   // da solo, niente stato di pagina: caricamento ed errore stanno dentro il cassetto
   // lo spinner di pagina solo al primo caricamento: una rilettura (esami, ritorno dalla Scheda completa) non smonta elenco e cassetto
-  return soloCassetto ? contenuto : <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>{contenuto}</PageState>;
+  return soloCassetto ? contenuto : <PageState carica={confidenti}>{contenuto}</PageState>;
 }

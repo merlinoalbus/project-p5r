@@ -49,6 +49,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { copiaSchema, getDb, nowIso, resolveDbPath } from '../db/dbService.js';
 import { FILE_MODELLO_PARTITE, percorsoModelloPartite } from '../db/partiteVuote.js';
 import { VERSIONE_PARTITE } from '../db/versioneSchema.js';
+import { versioneDaCuiSiPassa } from '../db/passaggioVersione.js';
 import { ALGORITMO_IMPRONTA_SCHEMA, improntaSchema } from '../db/improntaSchema.js';
 import { traduciNomiSpilli } from './mappe/nomiSpilli.js';
 import { riallineaSpilliLuoghi } from './mappe/riallineaSpilliLuoghi.js';
@@ -237,11 +238,17 @@ function raccogliChiavi(db: Database.Database): Record<string, string[]> {
 function confrontaConPrecedente(precedente: EdizioneTrovata | null, chiavi: Record<string, string[]>, improntaPartite: string, avvisi: string[]): Pick<CompatibilitaEdizioneDto, 'precedente' | 'strutturaPartiteCambiata' | 'chiaviRimosse' | 'chiaviAggiunte'> {
   if (!precedente) return { precedente: null, strutturaPartiteCambiata: false, chiaviRimosse: [], chiaviAggiunte: 0 };
   const intestazione = { numero: precedente.numero, cartella: precedente.cartella, creataIl: precedente.creataIl };
-  let manifestoPrima: { formato?: number; improntaSchemaPartite?: string; algoritmoImpronta?: string } | null = null;
+  let manifestoPrima: { formato?: number; improntaSchemaPartite?: string; algoritmoImpronta?: string; versioneSchemaPartite?: number } | null = null;
   let chiaviPrima: { formato?: number; insiemi?: Record<string, string[]> } | null = null;
   try { manifestoPrima = JSON.parse(fs.readFileSync(path.join(precedente.percorso, 'manifesto.json'), 'utf8')); } catch { /* sotto: avviso */ }
   try { chiaviPrima = JSON.parse(fs.readFileSync(path.join(precedente.percorso, 'chiavi.json'), 'utf8')); } catch { /* sotto: avviso */ }
   const strutturaPartiteCambiata = !!manifestoPrima && manifestoPrima.algoritmoImpronta === ALGORITMO_IMPRONTA_SCHEMA && manifestoPrima.improntaSchemaPartite !== improntaPartite;
+  if (strutturaPartiteCambiata) {
+    // dalla versione immediatamente precedente l'istanza di rilascio passa da sola (`passaggioVersione.ts`, solo strutture nuove); da ogni altra no
+    avvisi.push(manifestoPrima?.versioneSchemaPartite !== undefined && manifestoPrima.versioneSchemaPartite === versioneDaCuiSiPassa('partite')
+      ? `La struttura delle partite è cambiata dalla versione ${manifestoPrima.versioneSchemaPartite} dell'edizione precedente: all'avvio l'istanza di rilascio aggiunge da sola le strutture nuove al file delle partite, con una copia di sicurezza prima.`
+      : 'La struttura delle partite è diversa da quella dell\'edizione precedente e non viene dalla versione immediatamente precedente: l\'istanza di rilascio non ha una strada automatica per convertirla (serve una conversione una tantum su copia, dopo il tuo sì).');
+  }
   if (!manifestoPrima || manifestoPrima.algoritmoImpronta !== ALGORITMO_IMPRONTA_SCHEMA) avvisi.push(`L'edizione precedente (${precedente.cartella}) usa un altro algoritmo per l'impronta dello schema delle partite: il confronto della struttura non è possibile.`);
   if (!chiaviPrima?.insiemi || chiaviPrima.formato !== FORMATO_EDIZIONE) {
     avvisi.push(`L'edizione precedente (${precedente.cartella}) non ha un elenco di chiavi leggibile: il confronto delle chiavi citate dalle partite non è possibile.`);
@@ -456,7 +463,6 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     avanza('compatibilita');
     const confronto = confrontaConPrecedente(precedente, chiavi, vuoto.impronta, avvisi);
     const compatibilita: CompatibilitaEdizioneDto = { ...confronto, orfaniPreparazione };
-    if (compatibilita.strutturaPartiteCambiata) avvisi.push('La struttura delle partite è diversa da quella dell\'edizione precedente: l\'istanza di rilascio non ha una strada automatica per convertirla (serve una conversione una tantum su copia, dopo il tuo sì).');
     if (compatibilita.chiaviRimosse.length > 0) avvisi.push(`Rispetto all'edizione ${precedente?.numero}: chiavi citate dalle partite sparite in ${compatibilita.chiaviRimosse.length} insiemi (${compatibilita.chiaviRimosse.map((c) => `${c.insieme}: ${c.rimosse}`).join('; ')}).`);
 
     finale.pragma('journal_mode = DELETE');

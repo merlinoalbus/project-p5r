@@ -65,7 +65,7 @@ export function CittaPage() {
   const covo = useCovoNellaPartita(attiva?.id, attiva);
   const q = dati.dati;
   return (
-    <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState carica={dati}>
       {q && (
         <div className="flex flex-col gap-4">
           {/* L2: la mappa e le schede portano allo stesso posto, la pagina del quartiere (prima la mappa apriva la planimetria

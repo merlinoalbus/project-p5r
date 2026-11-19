@@ -36,6 +36,8 @@ Dove documento e codice dissentono, vale il codice.
   `VERSIONE_GIOCO` e `VERSIONE_PARTITE` di `server/db/versioneSchema.ts`, altrimenti l'avvio si ferma) → censimento delle partite
   (avviso nel log) → `regoleAllAvvio` → effetti di stato mai applicati (proposte nell'elenco da approvare) → `listen` → copia di `partite.db` in `data/backups` (subito e ogni 6 ore). I dati non
   si convertono mai; l'unica eccezione è quel passaggio additivo dalla versione precedente, un solo punto (vedi `docs/DECISIONI.md`).
+  Il rilascio (`server/rilascio.ts`) ha un avvio suo (`docs/ARCHITETTURA.md` §7 bis): applica lo stesso passaggio al solo `partite.db`,
+  con i testi del `partite-vuoto.db` dell'edizione, prima di `verificaVersioni` e del controllo del manifesto.
 - Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/`.
 - Risposte API: successo `{ data }`, errore `{ error: { code, message, details? }, requestId }`; 404 JSON su `/api/*`.
 - Frontend: pagine in `src/pages/`, componenti in `src/components/<area>/`, stato in `src/stores/` (zustand), chiamate in

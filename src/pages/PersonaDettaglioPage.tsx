@@ -114,7 +114,8 @@ export function PersonaDettaglioPage() {
 function SchedaPersona() {
   const { id } = useParams();
   const personaId = Number(id);
-  const { dati: p, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId], { cacheUrl: urlPersona(personaId) });
+  const personaLetta = useCarica(() => getPersona(personaId), [personaId], { cacheUrl: urlPersona(personaId) });
+  const { dati: p, ricarica } = personaLetta;
   useDocumentTitle(p ? p.nomeIt : 'Persona');
   const attiva = usePartitaStore((s) => s.attiva);
   const { segni, ricarica: ricaricaSegni } = useSegniPersonaPartita();
@@ -151,7 +152,7 @@ function SchedaPersona() {
   };
 
   return (
-    <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()} scheda={{ titolo: 'Persona', ripiego: '/compendio' }}>
+    <PageState carica={personaLetta} scheda={{ titolo: 'Persona', ripiego: '/compendio' }}>
       {p && (
         <div className="flex flex-col gap-4">
           {/* Lotto B: l'intestazione comune delle schede, prima dell'immagine (sul telefono il nome stava sotto l'arte, al 71% della

@@ -198,7 +198,7 @@ export function IndiceLuoghi() {
         così l'intestazione resta entro il 30% dell'altezza a ogni formato */}
     <IntestazionePagina compatta titolo="Luoghi della guida" illustrazione="illustrazioni/intestazione-luoghi"
       azioni={g && <div className="flex w-full min-w-[220px] md:w-72"><CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca un luogo" /></div>} />
-    <PageState isLoading={gerarchia.inPrimoCaricamento} error={gerarchia.errore} onRetry={gerarchia.ricarica}>
+    <PageState carica={gerarchia}>
       {/* la miniatura di una carta (O9-5) cambiata dalla sua finestra fa rileggere la gerarchia */}
       {g && <RicaricaLuoghi.Provider value={gerarchia.ricarica}>
         <FilaScorrevole {...schedeLuoghi.lista} aria-label="Sezioni dei luoghi" title={testoConteggiPin(g.totali.pin)}>

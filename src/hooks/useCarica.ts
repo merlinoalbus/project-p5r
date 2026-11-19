@@ -18,6 +18,9 @@ export interface OpzioniCarica {
   cacheUrl?: string | null;
 }
 
+/** Quello che `PageState` legge di una lettura (`carica={x}`): lo stato del primo caricamento, l'errore con la sua causa e la rilettura. */
+export type StatoLettura = Pick<Stato<unknown>, 'inPrimoCaricamento' | 'errore' | 'causaErrore' | 'ricarica'>;
+
 interface Stato<T> {
   dati: T | null;
   caricamento: boolean;
@@ -30,7 +33,8 @@ interface Stato<T> {
   /** Errore di una **rilettura** fallita mentre i dati già mostrati restano: la pagina non sparisce, il messaggio è anche
    *  notificato (resta finché non lo si chiude). Si azzera alla rilettura riuscita. */
   erroreRilettura: string | null;
-  /** Il genere dell'errore corrente (`errore` o `erroreRilettura`): serve a titolare l'errore («Sei offline» solo se offline) e a decidere se mostrare l'ultima lettura buona. */
+  /** Il genere dell'errore corrente (`errore` o `erroreRilettura`): `PageState` lo legge da sé (`carica={x}`) per il titolo, la figura e le azioni
+   *  («Sei offline», «Non trovato»…); con `causaTransitoria` si decide se mostrare l'ultima lettura buona. */
   causaErrore: CausaErrore;
   /** Rilegge i dati; la promessa si risolve quando la rilettura è arrivata (riuscita o fallita), non prima. */
   ricarica: () => Promise<void>;
@@ -53,33 +57,20 @@ interface Esito<T> {
 }
 
 /** Il genere di un errore di caricamento: il motivo di un `ErroreRete` (`offline`: il dispositivo è senza rete; `rete`: il server non si raggiunge;
- *  `timeout`: non risponde in tempo), `server` (5xx), `null` per ogni altro caso (un 4xx, un errore di codice). */
-export type CausaErrore = MotivoErroreRete | 'server' | null;
+ *  `timeout`: non risponde in tempo), `server` (5xx), `non-trovato` (404: quello che si cerca non c'è, riprovare non serve), `null` per ogni
+ *  altro caso (un altro 4xx, un errore di codice). */
+export type CausaErrore = MotivoErroreRete | 'server' | 'non-trovato' | null;
+
+/** Vero per i guasti che passano da soli (rete, server): solo questi si rileggono al ritorno della rete e lasciano a schermo l'ultima lettura buona. */
+export function causaTransitoria(causa: CausaErrore): causa is MotivoErroreRete | 'server' {
+  return causa !== null && causa !== 'non-trovato';
+}
 
 function causaDi(err: unknown): CausaErrore {
   if (err instanceof ErroreRete) return err.motivo;
-  return isApiError(err) && err.status >= 500 ? 'server' : null;
-}
-
-// La causa degli ultimi errori di lettura per messaggio: `PageState` riceve solo il messaggio (`error={x.errore}`, decine di pagine) e da qui
-// ricava il titolo e l'illustrazione giusti («Sei offline», «Server non raggiungibile») senza che ogni pagina debba passare `causa`. Poche voci:
-// i messaggi di rete sono tre frasi fisse, quelli del server sono quelli recenti.
-const causePerMessaggio = new Map<string, Exclude<CausaErrore, null>>();
-const MASSIMO_CAUSE_RICORDATE = 30;
-
-function ricordaCausa(messaggio: string, causa: CausaErrore): void {
-  causePerMessaggio.delete(messaggio);
-  if (causa === null) return;
-  causePerMessaggio.set(messaggio, causa);
-  if (causePerMessaggio.size > MASSIMO_CAUSE_RICORDATE) {
-    const piuVecchia = causePerMessaggio.keys().next();
-    if (!piuVecchia.done) causePerMessaggio.delete(piuVecchia.value);
-  }
-}
-
-/** La causa con cui una lettura è fallita con questo messaggio (`null` se non è di rete né 5xx o se non è un errore di `useCarica`). */
-export function causaDelMessaggio(messaggio: string | null): CausaErrore {
-  return messaggio ? causePerMessaggio.get(messaggio) ?? null : null;
+  if (!isApiError(err)) return null;
+  if (err.status >= 500) return 'server';
+  return err.status === 404 ? 'non-trovato' : null;
 }
 
 // Le letture montate la cui ultima lettura è fallita per la rete o per il server, con la loro `ricarica`: quando la connessione torna
@@ -192,7 +183,7 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
       scrivi(e);
       // registro delle letture ferme per la rete: ci entra chi ha fallito per rete o server, ne esce chi è riuscito (e allora la
       // connessione c'è: le altre ferme si rileggono, così basta un «Riprova» qualsiasi)
-      if (e.causa && (e.errore !== null || e.erroreRilettura !== null)) {
+      if (causaTransitoria(e.causa ?? null) && (e.errore !== null || e.erroreRilettura !== null)) {
         fallitePerRete.set(istanza, () => ricaricaRef.current());
       } else {
         fallitePerRete.delete(istanza);
@@ -213,19 +204,20 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
       .catch((err: unknown) => {
         const messaggio = err instanceof Error ? err.message : 'Errore di caricamento';
         const causa = causaDi(err);
-        ricordaCausa(messaggio, causa);
+        // il toast di una rilettura fallita per la rete o il server si toglie da solo quando la connessione torna; gli altri restano
+        const daRete = causaTransitoria(causa) ? { daRete: true } : undefined;
         const prima = esitoRef.current;
         // rilettura fallita con dati già mostrati per le stesse dipendenze: restano al loro posto, l'errore si dichiara a parte
         // (anche se i dati mostrati sono quelli della cache: la pagina non sparisce per una rilettura silenziosa andata male)
         if ((!prima || prima.chiave !== chiave) && dallaCache !== undefined) {
-          if (attivo) notifica('error', messaggio, undefined, causa ? { daRete: true } : undefined);
+          if (attivo) notifica('error', messaggio, undefined, daRete);
           concludi({ chiave, tick, dati: dallaCache, errore: null, erroreRilettura: messaggio, causa });
           return;
         }
         if (prima && prima.chiave === chiave && prima.dati !== null && prima.dati !== undefined) {
           // lo stesso messaggio che il client HTTP ha già notificato (se non era una lettura silenziosa) non si duplica: la coda
           // scarta le notifiche identiche ancora a schermo
-          if (attivo) notifica('error', messaggio, undefined, causa ? { daRete: true } : undefined);
+          if (attivo) notifica('error', messaggio, undefined, daRete);
           concludi({ chiave, tick, dati: prima.dati, errore: null, erroreRilettura: messaggio, causa });
           return;
         }

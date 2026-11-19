@@ -21,34 +21,61 @@ import { AssetImg } from './AssetImg';
 import { IconAlert, IconHome } from './icons';
 import { CollegamentoVisivo, PulsanteVisivo, type TonoPulsante } from './PulsanteVisivo';
 import { IconaAzione } from './IconaAzione';
-import { useAssetMulti } from '../../stores/assetStore';
+import { useAssetMulti, useAssetStore } from '../../stores/assetStore';
+import { usePreferenzeStore } from '../../stores/preferenzeStore';
 import type { CausaErrore } from '../../hooks/useCarica';
 
 /** Il titolo più usato: l'errore che non ha un nome più preciso. */
 export const TITOLO_ERRORE = 'Qualcosa è andato storto';
 
+/** Il titolo di una lettura a cui il server risponde 404: quello che si cerca non c'è (riprovare non serve). */
+export const TITOLO_NON_TROVATO = 'Non trovato';
+
 /** L'illustrazione d'errore generica (con `autonoma`, `ErrorBoundary`, la dà il manifest): è anche il ripiego delle due specifiche. */
 const ILLUSTRAZIONE_ERRORE = 'illustrazioni/errore-senza-testo';
+/** L'illustrazione neutra degli stati vuoti: il ripiego di «Non trovato», che non è un guasto. */
+const ILLUSTRAZIONE_NEUTRA = 'illustrazioni/vuoto-persona-senza-testo';
 
-/** L'illustrazione che dice la causa: `errore-offline` se il dispositivo è senza rete, `errore-server` se la rete cade, il server non risponde in tempo
- *  o risponde 5xx; per ogni altra causa (e per ogni errore di codice) la generica. Se il file specifico non c'è nel manifest (o dà 404) ripiega
- *  sulla generica, e se nemmeno quella c'è sull'icona: `AssetImg` segna mancante un file che non si carica e non lo richiede più. */
-function illustrazioneErrore(causa: CausaErrore | undefined): string {
-  if (causa === 'offline') return 'illustrazioni/errore-offline';
-  if (causa === 'rete' || causa === 'timeout' || causa === 'server') return 'illustrazioni/errore-server';
-  return ILLUSTRAZIONE_ERRORE;
+/** Le illustrazioni che dicono la causa, dalla preferita al ripiego: `errore-offline` se il dispositivo è senza rete, `errore-server` se la rete cade,
+ *  il server non risponde in tempo o risponde 5xx, `vuoto-ricerca` per un 404 (poi la neutra degli stati vuoti); per ogni altra causa (e per ogni
+ *  errore di codice) la generica, che è anche il ripiego delle due di guasto. Se nessuna c'è resta l'icona. */
+function illustrazioniErrore(causa: CausaErrore | undefined): readonly string[] {
+  if (causa === 'offline') return ['illustrazioni/errore-offline', ILLUSTRAZIONE_ERRORE];
+  if (causa === 'rete' || causa === 'timeout' || causa === 'server') return ['illustrazioni/errore-server', ILLUSTRAZIONE_ERRORE];
+  if (causa === 'non-trovato') return ['illustrazioni/vuoto-ricerca', ILLUSTRAZIONE_NEUTRA];
+  return [ILLUSTRAZIONE_ERRORE];
 }
 
-/** La figura dell'errore con il suo ripiego (specifica → generica → icona). Un componente a sé: la variante `autonoma` di `ErrorBoundary` non usa nessuno store. */
-function FiguraErrore({ causa, className }: { causa: CausaErrore | undefined; className: string }) {
-  const specifica = illustrazioneErrore(causa);
-  const [urlSpecifica] = useAssetMulti([specifica]);
-  return <AssetImg nome={urlSpecifica ? specifica : ILLUSTRAZIONE_ERRORE} alt="" decorativa className={className} fallback={<IconAlert size={32} className="text-error-testo" />} />;
+/** La misura del riquadro di una figura di stato (`.figura-stato--<misura>` in `tailwind.css`): altezza fissa e rapporto 3:2 delle illustrazioni 1200×800. */
+export type MisuraFiguraStato = 'vuoto' | 'pagina' | 'errore' | 'riquadro';
+
+/** La larghezza in pixel CSS del riquadro di ogni misura, data ad `AssetImg` per chiedere la miniatura (il server la serve WebP, `shared/miniature.ts`). */
+const LARGHEZZA_FIGURA: Record<MisuraFiguraStato, number> = { vuoto: 320, pagina: 160, errore: 320, riquadro: 160 };
+
+/**
+ * La figura di uno stato (vuoto, errore, «Non trovato»): la prima di `nomi` che il manifest conosce, altrimenti il `ripiego` (un'icona).
+ * Con la grafica predefinita attiva il riquadro ha SEMPRE la stessa misura dichiarata (altezza fissa, rapporto 3:2): vuoto finché il manifest
+ * non è arrivato, poi la figura o l'icona al centro. Così il titolo sotto non scende quando il file arriva, e la figura si sceglie una volta sola,
+ * a manifest caricato (prima la dedicata poteva cedere il posto alla neutra e poi tornare). Senza grafica predefinita resta l'icona, o niente.
+ * Un file che dà 404 si segna mancante (`AssetImg`) e cede il posto alla figura seguente o all'icona, nello stesso riquadro.
+ */
+export function FiguraStato({ nomi, misura, ripiego }: { nomi: ReadonlyArray<string | null | undefined>; misura: MisuraFiguraStato; ripiego?: ReactNode }) {
+  const attiva = usePreferenzeStore((s) => s.graficaPredefinita);
+  const caricato = useAssetStore((s) => s.caricato);
+  const url = useAssetMulti(nomi);
+  const classe = `figura-stato figura-stato--${misura}`;
+  if (!attiva) return ripiego ? <>{ripiego}</> : null;
+  if (!caricato) return <span className={classe} aria-hidden="true" />;
+  const indice = url.findIndex((u) => u !== null);
+  const conRiquadro = ripiego ? <span className={`${classe} figura-stato--icona`} aria-hidden="true">{ripiego}</span> : null;
+  if (indice < 0) return conRiquadro;
+  return <AssetImg nome={nomi[indice]} alt="" decorativa className={classe} dimensione={LARGHEZZA_FIGURA[misura]} fallback={conRiquadro} />;
 }
 
 interface Props {
   titolo: string;
-  /** Il genere dell'errore (`causaErrore` di `useCarica`): sceglie l'illustrazione (offline, server, generica). */
+  /** Il genere dell'errore (`causaErrore` di `useCarica`): sceglie l'illustrazione (offline, server, «Non trovato», generica); con `non-trovato` il
+   *  titolo è nel colore del testo e la vista non si annuncia come allarme. */
   causa?: CausaErrore;
   /** Che cosa è successo e che cosa resta (i dati salvati), in parole dell'utente. */
   spiegazione?: ReactNode;
@@ -68,20 +95,22 @@ interface Props {
 export function VistaErrore({ titolo, causa, spiegazione, dettaglio, azioni, livello = 2, compatta = false, autonoma }: Props) {
   const Titolo = livello === 1 ? 'h1' : 'h2';
   const fisso = autonoma !== undefined;
-  const altezzaFigura = compatta ? 'max-h-[96px]' : 'max-h-[150px]';
+  // un 404 non è un guasto: niente annuncio d'allarme e il titolo nel colore del testo
+  const nonTrovato = causa === 'non-trovato';
   return (
     <div
       className={`flex flex-col items-center justify-center gap-3 text-center ${fisso ? 'min-h-dvh p-6 font-sans bg-[color:var(--color-bg,#0b0b0e)] text-[color:var(--color-text,#ececf1)]' : compatta ? 'py-8 px-4' : 'flex-1 min-h-[40vh] p-6'}`}
-      role="alert"
+      role={nonTrovato ? 'status' : 'alert'}
     >
       {fisso ? (
         autonoma.illustrazione
-          ? <img src={autonoma.illustrazione} alt="" className={`${altezzaFigura} w-auto object-contain`} draggable={false} />
+          ? <img src={autonoma.illustrazione} alt="" className={`${compatta ? 'max-h-[96px]' : 'max-h-[150px]'} w-auto object-contain`} draggable={false} />
           : <IconAlert size={32} className="text-[color:var(--color-error-testo,#fb7c7c)]" />
       ) : (
-        <FiguraErrore causa={causa} className={`${altezzaFigura} w-auto object-contain`} />
+        <FiguraStato nomi={illustrazioniErrore(causa)} misura={compatta ? 'riquadro' : 'errore'}
+          ripiego={<IconAlert size={32} className={nonTrovato ? 'text-text-muted' : 'text-error-testo'} />} />
       )}
-      <Titolo className={`m-0 font-decor uppercase tracking-wide leading-none ${compatta ? 'testo-24' : 'testo-28'} ${fisso ? 'text-[color:var(--color-error-testo,#fb7c7c)]' : 'text-error-testo'}`}>
+      <Titolo className={`m-0 font-decor uppercase tracking-wide leading-none ${compatta ? 'testo-24' : 'testo-28'} ${fisso ? 'text-[color:var(--color-error-testo,#fb7c7c)]' : nonTrovato ? 'text-text' : 'text-error-testo'}`}>
         {titolo}
       </Titolo>
       {spiegazione && <p className={`m-0 max-w-[460px] ${fisso ? 'text-[color:var(--color-text-secondary,#a3a3b3)]' : 'text-text-secondary'}`}>{spiegazione}</p>}
@@ -104,6 +133,11 @@ export function AzioneRiprova({ onClick, tono = 'primario', inCorso = false }: {
 /** «Torna indietro»: alla pagina di prima. */
 export function AzioneIndietro({ onClick }: { onClick: () => void }) {
   return <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo="Torna indietro" onClick={onClick} />;
+}
+
+/** «Torna all'elenco»: all'elenco a cui appartiene la scheda che non c'è (la rotta di ripiego della scheda). */
+export function AzioneElenco({ to }: { to: string }) {
+  return <CollegamentoVisivo to={to} tono="primario" compatto icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo="Torna all'elenco" />;
 }
 
 /** «Torna alla home» con l'icona della Home della navigazione; niente se si è già sulla Home o fuori dal router. */
