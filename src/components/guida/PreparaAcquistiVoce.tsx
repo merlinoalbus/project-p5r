@@ -69,11 +69,11 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   };
   return <Modal aperta titolo="Prima di spuntare" onChiudi={() => { if (!occupato && !incerto) onChiudi(); }} azioni={<>
     <button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={onChiudi}>Annulla</button>
-    {/* mentre la spunta si salva il pulsante resta col fuoco (`aria-disabled`, `aria-busy`; il gesto lo ignora `spunta`): `disabled` lo farebbe
-        cadere sul documento, e intanto la spunta in volo figura fra le operazioni da completare (`pendente`) e la giornata può avanzare
-        (l'anteprima si rilegge). Le ragioni per non spuntare valgono prima del gesto */}
-    <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo="Spunta la voce" disabled={!occupato && (incerto || !!pendente || nonPronta || !pronto)}
-      aria-disabled={occupato || undefined} aria-busy={occupato || undefined} onClick={() => void spunta()} />
+    {/* il pulsante non si spegne mai con `disabled`, che farebbe cadere il fuoco sul documento: mentre la spunta si salva (e la spunta in volo
+        figura fra le operazioni da completare, la giornata può avanzare e l'anteprima rileggersi) e dopo un rifiuto o un esito incerto resta
+        col fuoco, fermo (`aria-disabled`; `aria-busy` durante la richiesta); il gesto lo ignora `spunta` */}
+    <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo="Spunta la voce"
+      aria-disabled={occupato || incerto || !!pendente || nonPronta || !pronto || undefined} aria-busy={occupato || undefined} onClick={() => void spunta()} />
   </>}>
     <div className="flex min-w-0 flex-col gap-3 testo-13">
       <strong className="text-pretty">{a.azione}</strong>

@@ -46,11 +46,31 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
   const rifConferma = useRef<HTMLButtonElement>(null);
   const rifMatita = useRef<HTMLButtonElement>(null);
   const fuocoAllaMatita = useRef(false);
+  // Nella finestra le righe hanno la chiave «infiltrazione:posizione»: spostata o tolta una riga, il pulsante premuto non c'è più. Il fuoco segue
+  // la riga spostata sullo stesso comando, o dopo «Togli» va al «Togli» della riga che ne prende il posto (o della precedente), poi alla scelta
+  // «Aggiungi», poi alla finestra stessa: mai sul documento. Se nel frattempo chi gioca l'ha portato altrove, resta dov'è
+  const rifElenco = useRef<HTMLOListElement>(null);
+  const rifAggiungi = useRef<HTMLSpanElement>(null);
+  const fuocoDopo = useRef<{ indice: number; comando: 'su' | 'giu' | 'togli'; gesto: Element | null } | null>(null);
+  // si rifanno quando la voce riletta porta un insieme nuovo (`onCambiata`): è lì che spariscono «Conferma» e le righe col fuoco
   useLayoutEffect(() => {
     if (!fuocoAllaMatita.current || !rifMatita.current) return;
     fuocoAllaMatita.current = false;
     rifMatita.current.focus({ preventScroll: true });
-  });
+  }, [a.infiltrazioni]);
+  useLayoutEffect(() => {
+    const d = fuocoDopo.current;
+    fuocoDopo.current = null;
+    if (!d) return;
+    const attivo = document.activeElement;
+    if (attivo && attivo !== document.body && attivo.isConnected && attivo !== d.gesto) return;
+    const righe = rifElenco.current ? [...rifElenco.current.children] : [];
+    const riga = righe[Math.min(d.indice, righe.length - 1)];
+    const meta = (riga?.querySelector<HTMLElement>(`[data-comando="${d.comando}"]`))
+      ?? rifAggiungi.current?.querySelector<HTMLElement>('[role="combobox"]')
+      ?? rifElenco.current?.closest<HTMLElement>('.modal-content');
+    meta?.focus({ preventScroll: true });
+  }, [a.infiltrazioni]);
   const opzioni = a.infiltrazioniDelPalazzo;
   if (!opzioni) return null;
   const insieme = a.infiltrazioni ?? [];
@@ -58,20 +78,26 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
   const etichetta = collegamentoAzione(a)?.etichetta ?? null;
   const collegamento = etichetta ? `il collegamento «${etichetta}»` : null;
   const proposta = insieme.length === 0 ? a.propostaInfiltrazioni ?? null : null;
-  /** Salva l'insieme nuovo (le chiavi, in ordine) e passa al giorno la voce riletta. */
-  const salva = async (chiavi: string[], messaggio: string) => {
+  /** Salva l'insieme nuovo (le chiavi, in ordine) e passa al giorno la voce riletta; `dopo`: dove va il fuoco se la riga del gesto sparisce. */
+  const salva = async (chiavi: string[], messaggio: string, dopo?: { indice: number; comando: 'su' | 'giu' | 'togli' }) => {
     if (occupato) return;
+    const gesto = document.activeElement;
     setOccupato(true);
     try {
       const agg = await impostaInfiltrazioniVoce(a.uid, chiavi, partitaId ?? undefined);
       if (rifConferma.current && document.activeElement === rifConferma.current) fuocoAllaMatita.current = true;
+      if (dopo) fuocoDopo.current = { ...dopo, gesto };
       onCambiata(agg); notifica('success', messaggio);
     }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Infiltrazioni non salvate.'); }
     finally { setOccupato(false); }
   };
   const chiavi = insieme.map((x) => x.chiave);
-  const sposta = (i: number, verso: -1 | 1) => { const n = [...chiavi]; [n[i], n[i + verso]] = [n[i + verso], n[i]]; void salva(n, 'Ordine delle infiltrazioni salvato.'); };
+  const sposta = (i: number, verso: -1 | 1) => {
+    if (occupato || i + verso < 0 || i + verso >= chiavi.length) return;
+    const n = [...chiavi]; [n[i], n[i + verso]] = [n[i + verso], n[i]];
+    void salva(n, 'Ordine delle infiltrazioni salvato.', { indice: i + verso, comando: verso < 0 ? 'su' : 'giu' });
+  };
   // una ripetuta non va di seguito: chi sposta o toglie la rifarebbe consecutiva, il server la rifiuta (400) e lo dice
   const ultima = chiavi[chiavi.length - 1];
   const daAggiungere = opzioni.filter((o) => o.chiave !== ultima);
@@ -125,22 +151,29 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
               : a.atterraggio
                 ? `Nessuna: ${collegamento} apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo.${proposta ? ' Confermata la proposta, aprirà la prima non completata fra quelle scelte.' : ''}`
                 : `Nessuna: ${collegamento} apre ${a.propostaInfiltrazioni?.infiltrazioni.length ? `«${a.propostaInfiltrazioni.infiltrazioni[0].nome}», la prima della proposta` : 'la prima infiltrazione non completata del Palazzo'}.`}</p>}
-            <ol className="m-0 flex list-none flex-col gap-1.5 p-0">
+            {/* mentre un cambio si salva i comandi restano col fuoco: fermi (`aria-disabled`, l'elenco `aria-busy`), il gesto si ignora; anche
+                ai bordi («Sposta su» della prima, «Sposta giù» dell'ultima) restano raggiungibili e fermi, così il fuoco che segue una riga
+                spostata in cima o in fondo non cade sul documento */}
+            <ol ref={rifElenco} className="m-0 flex list-none flex-col gap-1.5 p-0" aria-busy={occupato || undefined}>
               {insieme.map((x, i) => (
                 <li key={`${x.chiave}:${i}`} className="card flex flex-wrap items-center gap-1 p-1.5">
                   <span className="min-w-0 flex-1 font-semibold">{i + 1}. {x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</span>
                   <span className="flex flex-wrap items-center gap-1">
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su ${x.nome}`} disabled={occupato || i === 0} onClick={() => sposta(i, -1)} />
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù ${x.nome}`} disabled={occupato || i === insieme.length - 1} onClick={() => sposta(i, 1)} />
-                    <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli" className="whitespace-nowrap" aria-label={`Togli ${x.nome}`} disabled={occupato} onClick={() => void salva(chiavi.filter((_, j) => j !== i), `${x.nome}: tolta dalla voce.`)} />
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su ${x.nome}`} data-comando="su" aria-disabled={occupato || i === 0 || undefined} onClick={() => sposta(i, -1)} />
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù ${x.nome}`} data-comando="giu" aria-disabled={occupato || i === insieme.length - 1 || undefined} onClick={() => sposta(i, 1)} />
+                    <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli" className="whitespace-nowrap" aria-label={`Togli ${x.nome}`} data-comando="togli" aria-disabled={occupato || undefined}
+                      onClick={() => { if (!occupato) void salva(chiavi.filter((_, j) => j !== i), `${x.nome}: tolta dalla voce.`, { indice: i, comando: 'togli' }); }} />
                   </span>
                 </li>
               ))}
             </ol>
+            {/* la scelta resta attiva (e col fuoco) mentre un cambio si salva: la scelta fatta in quel momento si ignora */}
             {daAggiungere.length > 0 && (
-              <Selettore etichetta="Aggiungi infiltrazione" valore="" vuoto="— scegli —"
-                opzioni={daAggiungere.map((o) => ({ chiave: o.chiave, nome: `${o.ordine + 1}. ${o.nome}`, dettaglio: chiavi.includes(o.chiave) ? 'di nuovo' : undefined }))}
-                onCambia={(k) => { if (k) void salva([...chiavi, k], 'Infiltrazione aggiunta alla voce.'); }} disabilitato={occupato} />
+              <span ref={rifAggiungi} className="contents" aria-busy={occupato || undefined}>
+                <Selettore etichetta="Aggiungi infiltrazione" valore="" vuoto="— scegli —"
+                  opzioni={daAggiungere.map((o) => ({ chiave: o.chiave, nome: `${o.ordine + 1}. ${o.nome}`, dettaglio: chiavi.includes(o.chiave) ? 'di nuovo' : undefined }))}
+                  onCambia={(k) => { if (k && !occupato) void salva([...chiavi, k], 'Infiltrazione aggiunta alla voce.'); }} />
+              </span>
             )}
           </div>
         </Modal>

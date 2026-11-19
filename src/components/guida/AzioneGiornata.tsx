@@ -81,18 +81,28 @@ const fuoriDallaScorta = (g: MouseEventHandler<HTMLLIElement> | undefined): Mous
 /** Una riga d'azione della giornata (della guida o aggiunta): spunta, immagine dell'entità, testo, tipo, collegamento, stato, note, gesti. */
 export function Azione(props: PropsAzione) {
   const { a, partitaId } = props;
-  // la spunta o l'annullo cambiano `fatta` e quindi rimontano la riga: se il fuoco era nella riga torna sulla casella nuova (sopravvive al rimontaggio)
-  const fuocoCasellaRef = useRef(false);
+  // la spunta o l'annullo cambiano `fatta` e quindi rimontano la riga: se il fuoco era nella riga torna nella riga nuova (sopravvive al
+  // rimontaggio). `true`: sulla casella; un testo: sul controllo della riga che si chiama così (quello su cui chi gioca era passato durante la
+  // richiesta), o sulla casella se nella riga nuova non c'è più
+  const fuocoCasellaRef = useRef<boolean | string>(false);
   return <AzioneNelContesto key={chiaveContesto(a, partitaId)} {...props} fuocoCasellaRef={fuocoCasellaRef} />;
 }
-function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione, fuocoCasellaRef }: PropsAzione & { fuocoCasellaRef: RefObject<boolean> }) {
+/** Il nome con cui ritrovare un controllo della riga dopo il rimontaggio: il nome accessibile scritto o, senza, il testo. */
+const nomeControllo = (el: Element): string => (el.getAttribute('aria-label') ?? el.textContent ?? '').trim();
+function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione, fuocoCasellaRef }: PropsAzione & { fuocoCasellaRef: RefObject<boolean | string> }) {
   const [occupato, setOccupato] = useState(false);
   const rifCasella = useRef<HTMLInputElement>(null);
-  // la riga rimontata dalla spunta o dall'annullo che aveva il fuoco: la casella lo riprende (senza scorrere)
+  // la riga rimontata dalla spunta o dall'annullo che aveva il fuoco: lo riprende la casella, o il controllo dove chi gioca l'aveva portato
+  // (senza scorrere)
   useLayoutEffect(() => {
-    if (!fuocoCasellaRef.current) return;
+    const dove = fuocoCasellaRef.current;
+    if (!dove) return;
     fuocoCasellaRef.current = false;
-    rifCasella.current?.focus({ preventScroll: true });
+    const riga = rifCasella.current?.closest('li');
+    const stesso = typeof dove === 'string' && riga
+      ? [...riga.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')].find((el) => nomeControllo(el) === dove)
+      : undefined;
+    (stesso ?? rifCasella.current)?.focus({ preventScroll: true });
   }, [fuocoCasellaRef]);
   // con la scelta romantica fatta nella scelta delle note (L13, O10-3), che arriva così fino al salvataggio
   const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; esiti?: SceltaEsitoSpunta[]; relazioneRomantica?: boolean } | null>(null);
@@ -133,10 +143,16 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     const f = document.activeElement, riga = rifCasella.current?.closest('li');
     return !!f && !!riga && (riga.contains(f) || (conFinestra && !!f.closest('[role="dialog"]')));
   };
-  /** Una scelta della riga sta per sparire: se aveva il fuoco, il fuoco va alla casella (senza scorrere). */
-  const fuocoAllaCasella = () => {
-    if (document.activeElement !== rifCasella.current && fuocoNellaVoce()) rifCasella.current?.focus({ preventScroll: true });
+  /** Una parte della riga sta per sparire (`dentro`, o la scelta che ha appena ricevuto il gesto): se aveva il fuoco, il fuoco va alla casella
+   *  (senza scorrere). Un altro elemento della riga col fuoco (il «⋯», «Modifica») resta com'è. */
+  const fuocoAllaCasella = (dentro?: Element | null) => {
+    const f = document.activeElement;
+    if (!f || f === rifCasella.current || !fuocoNellaVoce()) return;
+    if (dentro !== undefined && !dentro?.contains(f)) return;
+    rifCasella.current?.focus({ preventScroll: true });
   };
+  // il riquadro dei punti da applicare: quando sparisce (decisi tutti) e aveva il fuoco, il fuoco va alla casella
+  const rifPunti = useRef<HTMLDivElement>(null);
   /**
    * Spunta o toglie l'azione nella partita. Se spuntandola servono le note e non sono ancora arrivate (né si è scelto
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
@@ -149,8 +165,9 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { apriSceltaNote(); return; }
     // la conferma della finestra «Prima di spuntare» (non la spunta automatica): il fuoco è nella finestra, fuori dalla riga
     const daFinestra = (!!acquisti || !!pesche) && !automatica;
-    // dov'era il fuoco al gesto: se la richiesta lo facesse comunque cadere sul documento, alla fine torna sulla casella
-    const fuocoAlGesto = fuocoNellaVoce(daFinestra);
+    // l'elemento che aveva il fuoco al gesto, se era nella voce: alla fine il fuoco torna sulla casella solo se è ancora lì, o se è caduto sul
+    // documento o con un elemento tolto; se chi gioca l'ha portato altrove (anche nella stessa riga, «⋯» o «Modifica») resta dov'è
+    const elementoAlGesto = fuocoNellaVoce(daFinestra) ? document.activeElement : null;
     // 2026-10-30: la visita ai Memento non chiede più quali Dedali hai aperto: le aperture si calcolano dai Palazzi conclusi
     // L13: l'esito ottenuto (o «senza punti») si sceglie prima di salvare: una scelta non fatta non lascia la spunta (decisione A1)
     if (fatta && !a.fatta && a.scelteEsito?.length && esiti === undefined) {
@@ -178,12 +195,21 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}), ...(relazione !== undefined ? { relazioneRomantica: relazione } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, undefined, undefined, esiti, relazione);
       segnalaMutazioneEffetti(partitaId);
       if (!vivo.current) return;
-      // le scelte della spunta spariscono: se il fuoco è nella voce (la casella, la scelta delle note, degli esiti o la finestra degli acquisti),
-      // o al gesto c'era ed è caduto sul documento, va sulla casella. Se la riga si rimonterà (è cambiato ciò che la spunta legge) lo fa la riga
-      // nuova (`fuocoCasellaRef`), altrimenti subito; se nel frattempo chi gioca l'ha portato altrove, resta dov'è
-      if (fuocoNellaVoce(daFinestra) || (fuocoAlGesto && (document.activeElement === null || document.activeElement === document.body))) {
-        if (chiaveContesto(agg, partitaId) !== chiaveContesto(a, partitaId)) fuocoCasellaRef.current = true;
-        else if (document.activeElement !== rifCasella.current) rifCasella.current?.focus({ preventScroll: true });
+      // le scelte della spunta spariscono: se il fuoco è ancora sull'elemento del gesto (la casella, la scelta delle note, degli esiti, la
+      // finestra degli acquisti) o è caduto sul documento, va sulla casella. Se chi gioca l'ha portato su un altro controllo della riga (un
+      // cartellino, una casella «In scorta») resta lì: se la riga si rimonterà (è cambiato ciò che la spunta legge), la riga nuova lo rimette
+      // sullo stesso controllo (`fuocoCasellaRef`); fuori dalla voce non si tocca
+      const ora = document.activeElement;
+      const sulGesto = !!elementoAlGesto && (ora === elementoAlGesto || !ora || ora === document.body || !ora.isConnected);
+      const rimonta = chiaveContesto(agg, partitaId) !== chiaveContesto(a, partitaId);
+      if (sulGesto) {
+        if (rimonta) fuocoCasellaRef.current = true;
+        else if (ora !== rifCasella.current) rifCasella.current?.focus({ preventScroll: true });
+      } else if (rimonta && ora && ora !== rifCasella.current && rifCasella.current?.closest('li')?.contains(ora)) {
+        fuocoCasellaRef.current = nomeControllo(ora) || true;
+      } else if (rimonta && (ora === rifCasella.current || (daFinestra && !!ora?.closest('[role="dialog"]')))) {
+        // la casella stessa, o un altro comando della finestra «Prima di spuntare», che si chiude con la riga
+        fuocoCasellaRef.current = true;
       }
       setChiediNote(false);
       setChiediEsiti(null);
@@ -293,12 +319,12 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {inSospeso && <p role="status" className="m-0 text-warning">Un’operazione su questa voce non è stata confermata: completala dall’elenco «Operazioni da completare» sopra le voci, poi potrai spuntare la voce.</p>}
         {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}
         {/* L1-08: la giornata sta in Oggi o nel Diario, che mostrano già le operazioni da completare della partita: non si ripetono qui */}
-        {partitaId !== null && !!a.daApplicare && <DaApplicare partitaId={partitaId} voceUid={a.uid} gestiNellaColonna onCambiato={async () => {
+        {partitaId !== null && !!a.daApplicare && <div ref={rifPunti} className="contents"><DaApplicare partitaId={partitaId} voceUid={a.uid} gestiNellaColonna onCambiato={async () => {
           const agg = await getVocePercorso(a.uid, partitaId);
           // decisi tutti i punti, il riquadro sparisce: se aveva il fuoco, il fuoco va alla casella della voce
-          if (!agg.daApplicare) fuocoAllaCasella();
+          if (!agg.daApplicare) fuocoAllaCasella(rifPunti.current);
           onCambiata(agg);
-        }} />}
+        }} /></div>}
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}

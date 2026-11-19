@@ -158,10 +158,12 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
       // l'eventuale avanzamento della partita (chiusa l'ultima decisione aperta di una fascia/giornata già spuntata) lo applica già il registro dei gesti
       if (vivo.current) {
         // «Confermi?» si chiude: il pulsante che l'aveva aperta può essere già sparito con la proposta decisa (l'elenco si rilegge da solo dopo
-        // il gesto), e la finestra ridarebbe il fuoco al contenuto della pagina. Il fuoco passa prima all'elenco, che resta (con la ricevuta);
-        // se il pulsante c'è ancora, la finestra glielo ridà
-        const attivo = document.activeElement;
-        if (sezione.current && attivo instanceof HTMLElement && attivo.closest('[role="dialog"]') && !sezione.current.contains(attivo)) sezione.current.focus({ preventScroll: true });
+        // il gesto), e la finestra ridarebbe il fuoco al contenuto della pagina. Il fuoco passa prima dove lo mette il ripiego qui sopra (la
+        // finestra che contiene l'elenco, o l'elenco stesso), che lo riconosce come fuoco perso e appena può lo porta al primo pulsante rimasto;
+        // se il pulsante che aveva aperto «Confermi?» c'è ancora, la finestra glielo ridà
+        const attivo = document.activeElement, s = sezione.current;
+        const dove = s ? s.closest<HTMLElement>('.modal-content') ?? s : null;
+        if (dove && attivo instanceof HTMLElement && attivo.closest('[role="dialog"]') && !dove.contains(attivo)) dove.focus({ preventScroll: true });
         setRicevuta(r.proposte.length === 1 ? 'Fatto.' : `Fatto: ${r.proposte.length} voci decise.`);
         setAnteprima(null); setIncerto(false);
       }
