@@ -375,6 +375,9 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Nella scheda Doti l'interruttore «Anima da cineasta» parte acceso se la partita ha letto il libro e si può spegnere; senza il libro letto è
   spento e disattivato, con il suggerimento «Serve il libro …» (il nome del libro dai dati), e lo scalino in più non vale (utente, 01/11:
   «Spento senza libro»). L'interruttore «Libro» resta a mano **(01/11)**.
+- **Note dette con «Anima da cineasta» (20/11)**: con il libro letto, la spunta di un film o di un DVD dice le note che il gioco mostra, uno
+  scalino sopra quelle della scheda (al più tre): un DVD da ♪♪ dice «Coraggio ♪♪♪ · 5 punti», come il «+3» delle giornate della guida
+  (utente: «nel gioco ci sono 3 note»). I punti non cambiano; vale per le ricevute, i promemoria e le proposte «Applica» delle spunte nuove.
 - **«Applica» è un gesto unico (31/10)**: l'anteprima non scrive nulla e mostra i movimenti del server; «Annulla» non lascia tracce;
   «Conferma» registra in una sola transazione la dichiarazione «non conteggiata» e l'applicazione.
 - Alla spunta di un incontro si chiede solo «Quante note hai ottenuto?» (le note dell'ultima risposta dopo il passaggio di rango): le

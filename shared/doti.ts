@@ -50,3 +50,12 @@ export function puntiDaNote(note: 1 | 2 | 3, libro = false, fortuna = false, cin
   const base = PUNTI_SCALINO[scalino - 1];
   return fortuna ? moltiplicaFortuna(base) : base;
 }
+
+/**
+ * Le note che il gioco mostra per `note` note della guida: con «Anima da cineasta» (`cinema`) film e DVD salgono di uno scalino anche nelle
+ * note (un DVD da ♪♪ si vede ♪♪♪ e vale 5 punti, come dicono le giornate della guida: «Coraggio +3»), al più tre; altrimenti le stesse.
+ * Segnalazione dell'utente del 20/11: «nel gioco ci sono 3 note», e l'app diceva «Coraggio ♪♪ · 5 punti». I punti restano di `puntiDaNote`.
+ */
+export function noteDelloScalino(note: 1 | 2 | 3, cinema = false): 1 | 2 | 3 {
+  return cinema ? (Math.min(3, note + 1) as 1 | 2 | 3) : note;
+}

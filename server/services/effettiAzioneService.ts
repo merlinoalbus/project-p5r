@@ -18,7 +18,7 @@ import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartit
 import { applicaEventoDiario } from './puntiCronologici.js';
 import { annullaPiazzamentoDallaSpunta, piazzamentoCorrente, premiDellEsame, premioDelPiazzamento, segnaPiazzamentoDallaSpunta } from './piazzamentoEsamiService.js';
 import { CHIAVI_PIAZZAMENTO_ESAME, giocaLaSceltaRomantica, nomePiazzamentoEsame, RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
-import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
+import { noteDote, origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
 import { avanzamentoLettura, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
 import { z } from 'zod';
@@ -124,7 +124,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       const note = scelta?.tipo === 'dote' ? scelta.note : e.note;
       // le Doti si segnano a mano (`aggiornaDote`): qui si dice che cosa il gioco dà, in punti (`puntiDote`), e lo si ricorda
       const punti = note === 0 ? 0 : puntiDote(partitaId, e.dote, note, origine);
-      doti.push({ chiave: e.dote, nome: nomeDote(e.dote), delta: punti, note, cinema, ...(scelta?.tipo === 'dote' ? { scelta: true } : {}) });
+      // le note dette sono quelle che il gioco mostra: con «Anima da cineasta» quelle di un film o di un DVD salgono di uno scalino
+      doti.push({ chiave: e.dote, nome: nomeDote(e.dote), delta: punti, note: note === 0 ? 0 : noteDote(partitaId, note, origine), cinema, ...(scelta?.tipo === 'dote' ? { scelta: true } : {}) });
     } else if (e.tipo === 'lettura') {
       const stato = avanzamentoLettura(partitaId, e.categoria, e.chiave);
       // al cinema (nessun totale) «completato» è una visione: le visioni sono quante le spunte che le contano, questa compresa
@@ -141,7 +142,7 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       const esame = premiDellEsame(e.esame);
       if (!esame) throw httpErrors.badRequest('effetto-inesistente', 'L’esame della voce non esiste più nella guida: correggi gli effetti della voce.');
       const segnato = segnaPiazzamentoDallaSpunta(partitaId, e.esame, scelta.piazzamento);
-      const dotiPremio = premioDelPiazzamento(esame.premi, scelta.piazzamento).doti.map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDote(partitaId, d.dote, d.note, origine), note: d.note }));
+      const dotiPremio = premioDelPiazzamento(esame.premi, scelta.piazzamento).doti.map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDote(partitaId, d.dote, d.note, origine), note: noteDote(partitaId, d.note, origine) }));
       esami.push({ esame: e.esame, nome: esame.nome, piazzamento: scelta.piazzamento, prima: segnato.prima, doti: dotiPremio, ...(segnato.trofeo ? { trofeo: segnato.trofeo } : {}) });
     } else {
       // L13: il turno di un'attività che dichiara esiti dà le Doti dell'esito scelto (o ricavato dal giorno, o dichiarato dalla voce nel modo
