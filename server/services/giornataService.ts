@@ -37,7 +37,8 @@ import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizia
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { nomeEffettoConYen, riepilogoEffettiVoce, type CruciverbaRiepilogoEffetti, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti, type QuesitoRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
-import { rangoDellEventoGiocato } from '../../shared/puntiConfidenti.js';
+import { RANGO_MASSIMO_CONFIDENTE, rangoDellEventoGiocato } from '../../shared/puntiConfidenti.js';
+import { eRangoIntermedio, rangoPrimaDellEvento } from '../../shared/eventiIntermedi.js';
 import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
@@ -498,8 +499,10 @@ function haInvitoDelConfidente(voceUid: string, riferimento: RiferimentoAzioneDt
  * dell'utente. Senza riga di dialogo, nessun campo. Con la partita, anche `rangoPartita` e `dialogoPartita` (il prossimo evento vero).
  */
 function campoDialogo(v: VoceBase, conf: Map<string, ConfidentePartitaDto> | null): { dialogo?: DialogoVoceDto; rangoPartita?: number; dialogoPartita?: DialogoVoceDto } {
-  // senza rango atteso la voce non prevede una salita di rango: nessun dialogo da proporre (scelta dell'utente, 2026-10-24)
-  if (v.tipo !== 'confidente' || v.riferimento?.tipo !== 'confidente' || v.rangoAtteso === null) return {};
+  if (v.tipo !== 'confidente' || v.riferimento?.tipo !== 'confidente') return {};
+  // senza rango atteso la voce non prevede una salita di rango: nessun dialogo da proporre (scelta dell'utente, 2026-10-24), salvo la voce
+  // che rappresenta un evento intermedio del suo Confidente (7.5, effetto «eventoConfidente»): mostra il dialogo dell'evento
+  if (v.rangoAtteso === null) return campoDialogoDellEvento(v.uid, v.riferimento.chiave, conf);
   const chiave = v.riferimento.chiave;
   const dialogo = dialogoDelRango(chiave, v.rangoAtteso);
   // 2026-10-24 (progetto dei Confidenti approvato dall'utente): con una partita, anche il rango del Confidente nella partita e, se il
@@ -509,6 +512,23 @@ function campoDialogo(v: VoceBase, conf: Map<string, ConfidentePartitaDto> | nul
   // giocato è quello della voce, non il successivo. Lo stesso criterio della casella della relazione alla spunta (`rangoDellEventoGiocato`)
   const evento = c ? rangoDellEventoGiocato(v.rangoAtteso, c.rango) : v.rangoAtteso;
   const dialogoPartita = c && evento !== null && evento !== v.rangoAtteso ? dialogoDelRango(chiave, evento) : null;
+  return { ...(dialogo ? { dialogo } : {}), ...(c ? { rangoPartita: c.rango } : {}), ...(dialogoPartita ? { dialogoPartita } : {}) };
+}
+
+/** Il dialogo della voce che rappresenta un evento intermedio (7.5) del suo Confidente, dall'effetto «eventoConfidente» della voce (il dato
+ *  unico dell'evento). Con la partita: al rango dell'evento (7) è l'evento della voce, da giocare o appena giocato; altrove, il prossimo passo
+ *  vero della partita (il suo evento intermedio non fatto, altrimenti il rango successivo) va in `dialogoPartita`, come per un rango atteso. */
+function campoDialogoDellEvento(uid: string, chiave: string, conf: Map<string, ConfidentePartitaDto> | null): { dialogo?: DialogoVoceDto; rangoPartita?: number; dialogoPartita?: DialogoVoceDto } {
+  const righe = prepared("SELECT dati_json FROM voce_effetto WHERE voce_uid = ? AND tipo = 'eventoConfidente' ORDER BY ordine").all(uid) as Array<{ dati_json: string }>;
+  const evento = righe.map((r) => { try { return JSON.parse(r.dati_json) as { confidente?: unknown; rango?: unknown }; } catch { return null; } })
+    .find((e) => e !== null && e.confidente === chiave && typeof e.rango === 'number' && eRangoIntermedio(e.rango));
+  if (!evento || typeof evento.rango !== 'number') return {};
+  const dialogo = dialogoDelRango(chiave, evento.rango);
+  const c = conf?.get(chiave);
+  const prossimo = c && c.rango !== rangoPrimaDellEvento(evento.rango) && c.rango < RANGO_MASSIMO_CONFIDENTE
+    ? (c.eventoIntermedio && !c.eventoIntermedio.fatto ? c.eventoIntermedio.rango : c.rango + 1)
+    : null;
+  const dialogoPartita = prossimo !== null && prossimo !== evento.rango ? dialogoDelRango(chiave, prossimo) : null;
   return { ...(dialogo ? { dialogo } : {}), ...(c ? { rangoPartita: c.rango } : {}), ...(dialogoPartita ? { dialogoPartita } : {}) };
 }
 

@@ -16,6 +16,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { resaPuntiScelta } from '../../../shared/note';
+import { eRangoIntermedio, rangoPrimaDellEvento, testoPassoConfidente, titoloPassoConfidente } from '../../../shared/eventiIntermedi';
 
 /** Le scelte di un evento: la (o le) migliori in evidenza, il valore in note (la resa unica `resaPuntiScelta`, col ramo amore dove la guida lo dà). */
 function ScelteEvento({ d }: { d: DialogoVoceDto }) {
@@ -37,31 +38,35 @@ function ScelteEvento({ d }: { d: DialogoVoceDto }) {
   );
 }
 
-/** Il blocco delle risposte migliori della voce: solo con un rango atteso (senza, la voce non prevede una salita di rango). */
+/** Il blocco delle risposte migliori della voce: con un rango atteso, o per la voce che rappresenta un evento intermedio (7.5: il server dà
+ *  il dialogo solo in questi due casi; senza, la voce non prevede un passo del Confidente). */
 export function RisposteVoce({ a }: { a: AzionePercorsoDto }) {
   const [altroAperto, setAltroAperto] = useState(false);
   const d = a.dialogo;
-  if (a.rangoAtteso === null || !d) return null;
+  if (!d) return null;
   const secondario = a.dialogoPartita;
+  const evento = eRangoIntermedio(d.rango);
+  // fuori passo: la partita non è al rango da cui si gioca questo evento (7 per il 7.5; per un rango N, N - 1)
+  const fuoriPasso = a.rangoPartita !== undefined && (evento ? a.rangoPartita !== rangoPrimaDellEvento(d.rango) : a.rangoPartita + 1 !== d.rango);
   return (
-    <div className="risposte-voce" role="group" aria-label={`Risposte migliori, evento del rango ${d.rango}`}>
-      <span className="risposte-voce__titolo">Avanzamento al rango {d.rango} · risposte migliori</span>
+    <div className="risposte-voce" role="group" aria-label={evento ? `Risposte migliori, ${testoPassoConfidente(d.rango)}` : `Risposte migliori, evento del rango ${d.rango}`}>
+      <span className="risposte-voce__titolo">{evento ? `${titoloPassoConfidente(d.rango)} · risposte migliori` : <>Avanzamento al rango {d.rango} · risposte migliori</>}</span>
       {d.note && <span className="testo-12 text-text-muted">{d.note}</span>}
       <ScelteEvento d={d} />
-      {a.rangoPartita !== undefined && a.rangoPartita + 1 !== d.rango && (
+      {fuoriPasso && a.rangoPartita !== undefined && (
         <span className="testo-12 text-text-secondary">
           Nella tua partita è al rango {a.rangoPartita}
           {secondario && (
             <>
               {' · '}
-              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo={<>{altroAperto ? 'Nascondi' : 'Mostra'} le risposte del rango {secondario.rango}</>} aria-expanded={altroAperto} onClick={() => setAltroAperto((v) => !v)} />
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo={<>{altroAperto ? 'Nascondi' : 'Mostra'} le risposte {eRangoIntermedio(secondario.rango) ? `dell’${testoPassoConfidente(secondario.rango)}` : `del rango ${secondario.rango}`}</>} aria-expanded={altroAperto} onClick={() => setAltroAperto((v) => !v)} />
             </>
           )}
         </span>
       )}
       {secondario && altroAperto && (
         <div className="flex flex-col gap-1">
-          <span className="risposte-voce__titolo">Rango {secondario.rango} · il tuo prossimo evento</span>
+          <span className="risposte-voce__titolo">{titoloPassoConfidente(secondario.rango)} · il tuo prossimo evento</span>
           <ScelteEvento d={secondario} />
         </div>
       )}

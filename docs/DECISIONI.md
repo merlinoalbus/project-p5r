@@ -403,7 +403,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - **Eventi intermedi dei Confidenti (20/11)**: un evento fra due ranghi (Takemi 7.5, Kawakami 8.5, Mishima 6.5…, i dialoghi della guida
   con rango non intero) è un passo del Confidente, non un rango: il rango resta intero ovunque. Per partita si segna solo se l'evento è
   fatto, un solo stato con due modi di segnarlo: dal pannello Partita → Confidenti («Evento 7.5 fatto», con annullo) o dalla spunta della
-  voce del Diario che lo rappresenta (effetto «Evento intermedio di un Confidente», annullato togliendo la spunta). Una riga del pannello
+  voce del Diario che lo rappresenta (effetto «Evento intermedio di un Confidente», annullato togliendo la spunta). Nella finestra della
+  voce la fila «Rango atteso» offre anche gli eventi del Confidente scelto (per Takemi «7.5» fra 7 e 8): sceglierlo lascia il rango atteso
+  vuoto e scrive l'effetto (il dato è l'effetto, la fila lo riflette); la voce mostra le risposte migliori dell'evento, nell'anteprima e
+  nel Diario, e la spunta segna l'evento senza cambiare il rango. Una riga del pannello
   non si duplica con la spunta e la spunta tolta non la tocca; una riga del Diario si toglie solo togliendo la spunta. Si segna dal rango
   da cui si fa (il 7.5 dal rango 7). Al rango 7 il pannello mostra rango 7 → evento 7.5 (risposte e requisiti del 7.5) → rango 8; fatto
   il 7.5 passa alle risposte del rango 8. La condizione «Confidente» con un rango x.5 vale dal rango x con l'evento fatto, o dal rango x+1:

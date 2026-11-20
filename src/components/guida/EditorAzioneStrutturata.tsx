@@ -37,6 +37,7 @@ import { TestoNote } from '../shared/TestoNote';
 import { NOME_FAMIGLIA_EFFETTO, cambiaCollegamento, collegamentoSuggerito, contestoDa, eAltroGenere, effettoCompilatoCheSiPerde, fraseEffetto, indiceDelCollegamento, nomiEffettiDa, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
 import { conferma } from '../../stores/confermaStore';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
+import { eRangoIntermedio, etichettaEventoIntermedio, rangoPrimaDellEvento } from '../../../shared/eventiIntermedi';
 import { useIdStabili } from '../../hooks/useIdStabili';
 
 interface Props {
@@ -58,13 +59,15 @@ function AnteprimaRisposte({ chiave, rango }: { chiave: string; rango: number })
   const { dati, caricamento, errore } = useDettaglioConfidente(chiave);
   const [chiusi, setChiusi] = useState<Record<number, boolean>>({});
   const dialoghi = (dati?.dialoghi ?? []).filter((d) => d.rango === rango);
+  // l'evento intermedio (7.5) si dice per nome; il rango intero come sempre
+  const passo = eRangoIntermedio(rango) ? `dell’evento ${etichettaEventoIntermedio(rango)}` : `del rango ${rango}`;
   return (
-    <div className="risposte-voce" role="group" aria-label={`Anteprima delle risposte migliori del rango ${rango}`}>
-      <span className="risposte-voce__titolo">Anteprima · risposte migliori del rango {rango}</span>
+    <div className="risposte-voce" role="group" aria-label={`Anteprima delle risposte migliori ${passo}`}>
+      <span className="risposte-voce__titolo">Anteprima · risposte migliori {passo}</span>
       <span className="testo-12 text-text-muted">Compariranno fra le note della voce; spuntandola, la scelta delle note parte da qui.</span>
       {caricamento && <span className="testo-12 text-text-muted" role="status">Carico le risposte…</span>}
       {errore && <span className="testo-12 text-error-testo" role="alert">Risposte non disponibili: {errore}</span>}
-      {dati && dialoghi.length === 0 && <span className="testo-12 text-text-muted">Nessun dialogo documentato per il rango {rango}.</span>}
+      {dati && dialoghi.length === 0 && <span className="testo-12 text-text-muted">{eRangoIntermedio(rango) ? `Nessun dialogo documentato per l’evento ${etichettaEventoIntermedio(rango)}.` : `Nessun dialogo documentato per il rango ${rango}.`}</span>}
       {dialoghi.length > 0 && (
         <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
           {dialoghi.map((d) => <DialogoRango key={d.id} d={d} aperto={!chiusi[d.id]} onToggle={() => setChiusi((c) => ({ ...c, [d.id]: !c[d.id] }))} />)}
@@ -191,13 +194,35 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apert
       : null;
     if (valore.tipo === 'confidente') {
       const rango = valore.rangoAtteso;
+      // L'evento intermedio (7.5) che la voce rappresenta: il dato è l'effetto «eventoConfidente» del suo Confidente (un solo punto di
+      // modifica); la fila «Rango atteso» lo riflette e lo scrive. Il rango atteso resta intero (o nessuno): il 7.5 non cambia il rango.
+      const eventi = rif ? (elenchi.effetti.eventiIntermedi ?? []).filter((x) => x.confidente === rif.chiave) : [];
+      const rigaEvento = rif && rango === null ? righe.find((r) => r.effetto.tipo === 'eventoConfidente' && r.effetto.confidente === rif.chiave) : undefined;
+      const rangoEvento = rigaEvento && rigaEvento.effetto.tipo === 'eventoConfidente' ? rigaEvento.effetto.rango : null;
+      // la fila: Nessuno, 1…9 e MAX come sempre, con gli eventi intermedi del Confidente al loro posto fra i due interi
+      const opzioni = eventi.length === 0 ? RANGHI : RANGHI.flatMap((o) => [o, ...eventi.filter((x) => o.chiave !== '' && rangoPrimaDellEvento(x.rango) === Number(o.chiave))
+        .map((x) => ({ chiave: String(x.rango), nome: `Evento ${x.etichetta}`, contenuto: <span className="font-display testo-16 leading-none">{x.etichetta}</span> }))]);
+      const scegli = (v: string) => {
+        const n = v ? Number(v) : null;
+        if (!rif) return;
+        if (n !== null && eRangoIntermedio(n)) {
+          // la voce rappresenta l'evento: nessun rango atteso, e un solo effetto «evento intermedio» di quel Confidente (quello che c'era, aggiornato)
+          const altre = righe.filter((r) => !(r.effetto.tipo === 'eventoConfidente' && r.effetto.confidente === rif.chiave));
+          onCambia({ ...valore, rangoAtteso: null, effettiVoce: [...altre, { uid: rigaEvento?.uid ?? null, effetto: { tipo: 'eventoConfidente', confidente: rif.chiave, rango: n } }] });
+        } else if (rangoEvento !== null) {
+          // dall'evento a un rango (o a nessuno): l'effetto dell'evento se ne va con la scelta
+          onCambia({ ...valore, rangoAtteso: n, effettiVoce: righe.filter((r) => r !== rigaEvento) });
+        } else onCambia({ ...valore, rangoAtteso: n });
+      };
       contesto = nome && rif ? (
         <>
           {frase(`Incontro con ${nome} (la Dote dell’incontro, se c’è) e le note della risposta che scegli alla spunta.`)}
           <span className="testo-13 text-text-secondary">Rango atteso</span>
-          <FilaScelta etichetta="Rango atteso" valore={rango === null ? '' : String(rango)} opzioni={RANGHI} onCambia={(v) => onCambia({ ...valore, rangoAtteso: v ? Number(v) : null })} />
+          <FilaScelta etichetta="Rango atteso" valore={rangoEvento !== null ? String(rangoEvento) : rango === null ? '' : String(rango)} opzioni={opzioni} onCambia={scegli} />
           {rango !== null && frase(rango === RANGO_MASSIMO_CONFIDENTE ? `Con il rango atteso MAX la spunta porta ${nome} al rango massimo.` : `Con il rango atteso ${rango} la spunta porta ${nome} al rango ${rango}.`)}
           {rango !== null && <AnteprimaRisposte chiave={rif.chiave} rango={rango} />}
+          {rangoEvento !== null && frase(`Con l’evento ${etichettaEventoIntermedio(rangoEvento)} la spunta segna l’evento ${etichettaEventoIntermedio(rangoEvento)} di ${nome}: il rango resta ${rangoPrimaDellEvento(rangoEvento)}.`)}
+          {rangoEvento !== null && <AnteprimaRisposte chiave={rif.chiave} rango={rangoEvento} />}
         </>
       ) : frase('Scegli il Confidente in «Quale»: alla spunta si registra l’incontro e si scelgono le note.');
     } else if (valore.tipo === 'palazzo') {
