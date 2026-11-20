@@ -697,7 +697,14 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   del Diario che ha l'effetto «oggetto ricevuto» (la voce dell'uscita, o quella della vincita all'artiglio), spuntata, e compare fra gli
   oggetti ottenuti. Il Confidente che la regala si lega con una ricompensa (`ricompensa_oggetto`, fonte «confidente») senza regola
   (`condizioni_json` vuoto): la scheda del Confidente e quella dell'oggetto la mostrano, e la copia la dà solo la voce spuntata. Una regola
-  la darebbe da sola quando vale, e con la voce le copie sarebbero due: si usa solo per un dono che non ha una voce del Diario.
+  la darebbe da sola quando vale, e con la voce le copie sarebbero due: si usa solo per un dono che non ha una voce del Diario. Le
+  decorazioni regalate in uscite che la guida non data (Barca cigno, Cuscino shumai, Palloncini, Stendardo della notte, Bambola lumaca di
+  mare, Bambole Featherman) restano solo nel catalogo: nessuna voce con un giorno inventato; l'uscita si segna con «Aggiungi» quando la si
+  fa. **(20/11)**
+- **Teschio di Cristallo e Distintivo dell'angelo**: tre accessori distinti come nella guida: Teschio di Cristallo (tutte le statistiche
+  +5 e Grazia angelica) e Teschio di Cristallo R (+6), dalla Sedia elettrica, e Distintivo dell'angelo (solo Grazia angelica), dallo
+  scambio con Sakai; il collegamento di prima (lo scambio sul Teschio R, le due schede chiamate «Distintivo dell'angelo») resta come nota
+  storica. **(20/11)**
 - Un'offerta collegata a un oggetto del catalogo ne prende nome, categoria e «per chi»: le sue colonne restano vuote (nome vuoto,
   categoria «altro»), anche collegando un'offerta che aveva i suoi; valgono solo per un'offerta senza legame (con i valori di prima
   in archivio). Un'offerta che perde il legame (scollegata, o con l'oggetto eliminato) tiene il nome, la categoria e il «per chi» che
