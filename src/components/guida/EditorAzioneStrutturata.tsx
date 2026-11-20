@@ -53,6 +53,18 @@ const RANGHI = [{ chiave: '', nome: 'Nessuno' }, ...Array.from({ length: RANGO_M
   return { chiave: String(n), nome: massimo ? 'Rango MAX' : `Rango ${n}`, contenuto: <AssetImg nome={massimo ? 'ui/rango-max' : `ui/rango-${n}`} alt="" decorativa className="h-7 w-7 object-contain" fallback={<span className="font-display testo-16 leading-none">{massimo ? 'MAX' : n}</span>} /> };
 })];
 
+/** La cifra di un evento intermedio (7.5) con la grafica dei ranghi: la targa vuota del rango (`ui/rango-senza-testo`, la stessa delle cifre
+ *  `ui/rango-N`) con l'etichetta sopra, bianca, corsiva e in grassetto come le cifre; senza l'immagine, l'etichetta su fondo nero. */
+function CifraEvento({ etichetta }: { etichetta: string }) {
+  return (
+    <span className="relative inline-flex h-7 w-9 items-center justify-center" aria-hidden="true">
+      <AssetImg nome="ui/rango-senza-testo" alt="" decorativa className="absolute inset-0 h-full w-full object-contain"
+        fallback={<span className="absolute inset-0 rounded-sm bg-black" />} />
+      <span className="relative font-display testo-12 font-black italic leading-none tracking-tight text-white">{etichetta}</span>
+    </span>
+  );
+}
+
 /** Anteprima, mentre si scrive la voce, delle risposte migliori dell'evento del rango atteso: le stesse compariranno fra le note della
  *  voce (progetto dei Confidenti approvato dall'utente, 2026-10-24). Sola lettura, dal dettaglio del Confidente (in cache). */
 function AnteprimaRisposte({ chiave, rango }: { chiave: string; rango: number }) {
@@ -201,7 +213,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apert
       const rangoEvento = rigaEvento && rigaEvento.effetto.tipo === 'eventoConfidente' ? rigaEvento.effetto.rango : null;
       // la fila: Nessuno, 1…9 e MAX come sempre, con gli eventi intermedi del Confidente al loro posto fra i due interi
       const opzioni = eventi.length === 0 ? RANGHI : RANGHI.flatMap((o) => [o, ...eventi.filter((x) => o.chiave !== '' && rangoPrimaDellEvento(x.rango) === Number(o.chiave))
-        .map((x) => ({ chiave: String(x.rango), nome: `Evento ${x.etichetta}`, contenuto: <span className="font-display testo-16 leading-none">{x.etichetta}</span> }))]);
+        .map((x) => ({ chiave: String(x.rango), nome: `Evento ${x.etichetta}`, contenuto: <CifraEvento etichetta={x.etichetta} /> }))]);
       const scegli = (v: string) => {
         const n = v ? Number(v) : null;
         if (!rif) return;
