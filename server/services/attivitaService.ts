@@ -19,7 +19,7 @@ import { registraEvento } from './storicoService.js';
 import type { AttivitaDto, AttivitaTutteDto, CatalogoOggettoDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomeDote } from './partiteService.js';
-import { haAnimaDaCineasta, puntiDote } from './puntiDoti.js';
+import { haAnimaDaCineasta, noteDote, puntiDote } from './puntiDoti.js';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { libriCheSbloccano } from '../../shared/dipendenzeCondizioni.js';
 import { effettiVisibiliDelLibro } from '../../shared/effettiLibro.js';
@@ -444,8 +444,9 @@ function applicaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const origine = origineLettura(partitaId, tipo);
   for (const n of doti) {
     const punti = puntiDote(partitaId, n.dote, n.note, origine);
+    // le note che il gioco mostra (con «Anima da cineasta» un DVD da ♪♪ si vede ♪♪♪): servono solo a dirle accanto ai punti
     prepared('INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(partitaId, tipo, chiave, numero, n.dote, punti, n.note, adesso);
+      .run(partitaId, tipo, chiave, numero, n.dote, punti, noteDote(partitaId, n.note, origine), adesso);
   }
 }
 
@@ -540,7 +541,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
       // videogiochi sono quelli di ogni sessione, e la frase lo dice («Dote a ogni sessione»)
       const origine = origineLettura(partitaId, tipo);
       const quando = regola === 'ogni-sessione' ? ` ${quandoDaLeDoti(tipo, dove)}` : '';
-      const dote = doti.length ? ` · Dote${quando}: ${doti.map((d) => testoDoteInPunti({ nome: nomeDote(d.dote), note: d.note, delta: puntiDote(partitaId, d.dote, d.note, origine) })).join(', ')}` : '';
+      const dote = doti.length ? ` · Dote${quando}: ${doti.map((d) => testoDoteInPunti({ nome: nomeDote(d.dote), note: noteDote(partitaId, d.note, origine), delta: puntiDote(partitaId, d.dote, d.note, origine) })).join(', ')}` : '';
       const titolo = nomeCorrente;
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
       const doveEvento = tipo === 'libro' ? provenienzaDelLibro(chiave) : tipo === 'film' ? (dove === 'cinema' ? 'Cinema' : 'DVD') : nomeSedeAttivita((riga as RigaAttivita).sede_chiave);

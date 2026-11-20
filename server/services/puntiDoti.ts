@@ -11,7 +11,7 @@
 // in un posto solo; chi converte passa soltanto le note e che cosa le dà.
 // ============================================================
 
-import { puntiDaNote } from '../../shared/doti.js';
+import { noteDelloScalino, puntiDaNote } from '../../shared/doti.js';
 import { prepared } from '../db/dbService.js';
 import type { ModificatoriDotiDto } from '../../shared/types.js';
 import { fortunaSu } from './fortunaService.js';
@@ -38,6 +38,12 @@ export function modificatoriDotiDellaPartita(partitaId: number): ModificatoriDot
  *  della scheda Doti): la lettura della partita decide. */
 export function puntiDote(partitaId: number, dote: string, note: 1 | 2 | 3, origine: OrigineNote = {}): number {
   return puntiDaNote(note, origine.libro === true, fortunaSu(partitaId, dote), origine.cinema === true && haAnimaDaCineasta(partitaId));
+}
+
+/** Le note che il gioco mostra nella partita adesso per `note` note della guida: con «Anima da cineasta» letto, film e DVD uno scalino in più
+ *  (`noteDelloScalino`), con la stessa condizione di `puntiDote`. Si registrano e si dicono queste, accanto ai punti di `puntiDote`. */
+export function noteDote(partitaId: number, note: 1 | 2 | 3, origine: OrigineNote = {}): 1 | 2 | 3 {
+  return noteDelloScalino(note, origine.cinema === true && haAnimaDaCineasta(partitaId));
 }
 
 /**
