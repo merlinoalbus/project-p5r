@@ -37,6 +37,8 @@ export function effettoNuovo(t: Tipo): EffettoVoce {
     // 2026-10-28 («i punti rango andavano gestiti come note»): un effetto nuovo dà note, come una risposta nei dialoghi
     case 'puntiConfidente': return { tipo: 'puntiConfidente', confidente: '', note: 1 };
     case 'uscitaOggetto': return { tipo: 'uscitaOggetto', oggetto: '', quantita: 1, modo: 'restituito' };
+    // l'evento intermedio di un Confidente: Confidente ed evento (7.5) da scegliere
+    case 'eventoConfidente': return { tipo: 'eventoConfidente', confidente: '', rango: 0 };
     // L13 (ondata 7, O7-2): i risultati di un esame, con l'esame da scegliere
     case 'esame': return { tipo: 'esame', esame: '' };
   }
@@ -51,7 +53,7 @@ export const MENU_EFFETTI: ReadonlyArray<{ tipo: Tipo; categoria: string }> = [
   { tipo: 'uscitaOggetto', categoria: 'oggetto-uscito' },
   { tipo: 'sblocco', categoria: 'richiesta' }, { tipo: 'richiesta', categoria: 'richiesta' }, { tipo: 'trofeo', categoria: 'trofeo' },
   { tipo: 'storia', categoria: 'trama' }, { tipo: 'domanda', categoria: 'esame' }, { tipo: 'esame', categoria: 'esame' }, { tipo: 'cruciverba', categoria: 'esame' },
-  { tipo: 'invito', categoria: 'confidente' }, { tipo: 'puntiConfidente', categoria: 'punti-confidente' },
+  { tipo: 'invito', categoria: 'confidente' }, { tipo: 'puntiConfidente', categoria: 'punti-confidente' }, { tipo: 'eventoConfidente', categoria: 'confidente' },
   { tipo: 'persona', categoria: 'velluto' }, { tipo: 'personaTolta', categoria: 'persona-tolta' }, { tipo: 'fortuna', categoria: 'dote' },
   { tipo: 'acquisto', categoria: 'acquisto' }, { tipo: 'pesca', categoria: 'attivita' },
 ];

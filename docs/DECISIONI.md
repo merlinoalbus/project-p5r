@@ -101,17 +101,17 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   quale file e che cosa fare. L'unica eccezione è `server/db/passaggioVersione.ts`, chiamato solo dai due avvii: un file alla versione
   IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove, con il testo di creazione identico a quello dei file distribuiti
   (`pacchetto/`; nel rilascio, che non ha il pacchetto, il `partite-vuoto.db` dell'edizione). Additivo (non modifica, non toglie, non
-  converte: ciò che crea nasce vuoto), idempotente, in una transazione con la nuova versione. **Eccezione scritta dell'utente (20/11)**:
-  il passaggio delle partite 75→76 ricostruisce `consumo_oggetto_partita`, il registro unico delle uscite, perché il suo CHECK accetti
-  anche il modo «usato»; prima controlla testo vecchio, colonne, indici, trigger, chiavi esterne e integrità, poi fa la copia di
-  sicurezza e in una transazione ricrea la tabella con il testo del modello, ricopia le righe colonna per colonna con il contatore della
-  chiave, e confronta numero di righe e impronta prima e dopo; se qualcosa non torna annulla e l'avvio si ferma. È la sola ricostruzione
-  ammessa; ogni altra resta vietata. La preparazione lo applica ai due file, il
+  converte: ciò che crea nasce vuoto), idempotente, in una transazione con la nuova versione. Il passaggio in vigore è quello delle partite
+  76→77, che crea solo `evento_intermedio_partita`. **Eccezione scritta dell'utente (20/11)**: una tabella si ricostruisce solo per una
+  decisione scritta come quella del registro unico delle uscite (`consumo_oggetto_partita` con il modo «usato»): prima si controllano testo
+  vecchio, colonne, indici, trigger, chiavi esterne e integrità, poi la copia di sicurezza e in una transazione la tabella rifatta con il
+  testo del modello, le righe ricopiate colonna per colonna con il contatore della chiave, numero di righe e impronta confrontati prima e
+  dopo; se qualcosa non torna si annulla e l'avvio si ferma. Ogni altra ricostruzione resta vietata. La preparazione lo applica ai due file, il
   rilascio solo a `partite.db` (il suo `gioco.db` è l'edizione, in sola lettura, già alla versione del codice). Prima di toccare le partite
   se ne fa una copia di sicurezza nella cartella delle copie (`prima-del-passaggio-partite-<versione>-<momento>.db`, fuori dalla rotazione,
   da togliere a mano); se non riesce, o una struttura esiste già, l'avvio si ferma senza scrivere. Dopo il passaggio un'immagine della
   versione precedente non riparte sui file passati. «Importa», l'anteprima, il ripristino, «Prepara edizione» e gli script accettano solo
-  la versione attuale: **i backup di prima del passaggio (dati di gioco 390, partite 75) non si importano né si ripristinano più**. Ogni
+  la versione attuale: **i backup di prima del passaggio (dati di gioco 390, partite 76) non si importano né si ripristinano più**. Ogni
   cambio di struttura porta il suo passaggio nello stesso cambiamento che alza la costante, e toglie quello della versione prima.
   L'avanzamento (`partite.db`) si copia da solo all'avvio e ogni 6 ore in `data/backups` (le ultime 40); `gioco.db` si salva dal
   backup dell'istanza. Un'istanza nuova nasce dal pacchetto: `pacchetto/gioco.db` per i dati di gioco (senza immagini) e
@@ -400,6 +400,17 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   scheda, la registrazione nel compendio e l'Allarme delle fusioni.
 - Gli editor della pagina Confidente (informazioni, requisiti, ranghi, disponibilità) sono finestre uguali con un solo Salva a piè di
   finestra; i requisiti salvano insieme tutti i ranghi cambiati, e il motivo di una modifica alle informazioni è facoltativo.
+- **Eventi intermedi dei Confidenti (20/11)**: un evento fra due ranghi (Takemi 7.5, Kawakami 8.5, Mishima 6.5…, i dialoghi della guida
+  con rango non intero) è un passo del Confidente, non un rango: il rango resta intero ovunque. Per partita si segna solo se l'evento è
+  fatto, un solo stato con due modi di segnarlo: dal pannello Partita → Confidenti («Evento 7.5 fatto», con annullo) o dalla spunta della
+  voce del Diario che lo rappresenta (effetto «Evento intermedio di un Confidente», annullato togliendo la spunta). Una riga del pannello
+  non si duplica con la spunta e la spunta tolta non la tocca; una riga del Diario si toglie solo togliendo la spunta. Si segna dal rango
+  da cui si fa (il 7.5 dal rango 7). Al rango 7 il pannello mostra rango 7 → evento 7.5 (risposte e requisiti del 7.5) → rango 8; fatto
+  il 7.5 passa alle risposte del rango 8. La condizione «Confidente» con un rango x.5 vale dal rango x con l'evento fatto, o dal rango x+1:
+  così la Richiesta dei Mementos si sblocca perché l'evento risulta fatto. I requisiti di un evento stanno al suo rango (7.5) e non si
+  mostrano più quando è fatto; non bloccano la salita al rango intero, che resta governata dai requisiti del rango intero. La pioggia di un
+  requisito del 7.5 vale per il 7.5 finché non è fatto, poi vale quella del rango 8; senza requisiti di pioggia sul 7.5 vale quella del
+  rango 8, come prima. Un evento non ha copia della guida: nell'editor dei requisiti è «Modificato» se ne ha.
 - Relazione romantica: dato della partita per Confidente, con il giorno d'inizio; si segna dalla scheda o scegliendo alla spunta del
   passaggio al rango 9; vale per gli incontri dopo il rango 9 e per i doni «se fidanzata».
 - **2026-10-25 — Fortuna e pesca**: la Fortuna è uno stato momentaneo della partita, acceso dall'interazione con Chihaya o
@@ -472,7 +483,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   requisiti, mai le caselle. Gli elenchi li compone l'utente nell'editor della voce, nell'istanza di produzione; il pacchetto è rifatto da
   lì e li porta così (48 requisiti su 8 voci, dal 23 aprile al 28 giugno: sei della Stanza di Velluto, una di Palazzo e una di
   Confidente; il 23 aprile con quattro Persona specifiche, le altre con arcani interi). L'edizione di rilascio va rifatta per portare
-  i dati di gioco alla versione 391; le partite del rilascio passano da sole dalla 74 alla 75.
+  i dati di gioco alla versione 391; le partite del rilascio passano da sole dalla versione immediatamente precedente (§3).
 - Nella finestra della voce «Quale» e «Si fa solo se» sono una riga ciascuno; la griglia di «Quale» e l'editor delle condizioni si aprono
   in una finestra loro, larga quanto quella della voce, così il corpo della voce sta sotto gli 800 px a 1280 qualunque sia l'elenco o il
   numero delle condizioni. Scegliere un tipo che si collega apre da sé la griglia; toccare una tessera sceglie e la chiude. «Applica» mette le condizioni

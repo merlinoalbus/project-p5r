@@ -6,8 +6,8 @@
 // questo, l'avvio porta ciascun file dalla versione IMMEDIATAMENTE PRECEDENTE a quella attuale (`PASSAGGI`). Un passaggio fa due cose:
 //   - CREA gli oggetti che mancano (tabelle e indici nuovi, `crea`): additivo, ciò che crea nasce vuoto;
 //   - RICOSTRUISCE una tabella che ha cambiato struttura (`ricostruisce`): è l'ECCEZIONE SCRITTA alla regola «niente migrazioni», decisa
-//     dall'utente perché un registro resti uno solo (partite 75→76: `consumo_oggetto_partita` accetta il modo «usato» delle uscite dalle
-//     voci). La tabella rinasce con il testo nuovo, con tutte le sue righe copiate colonna per colonna e senza conversioni (le colonne
+//     dall'utente perché un registro resti uno solo (l'ha usata il passaggio delle partite 75→76: `consumo_oggetto_partita` con il modo
+//     «usato»; quello in vigore non ricostruisce niente). La tabella rinasce con il testo nuovo, con tutte le sue righe copiate colonna per colonna e senza conversioni (le colonne
 //     devono essere le stesse, con gli stessi tipi), con i suoi indici e trigger e con il contatore della chiave automatica com'era. Prima e
 //     dopo si contano le righe e se ne calcola un'impronta (SHA-256 di ogni riga resa da `quote()`, in ordine stabile): devono coincidere.
 //     Poi `foreign_key_check` e `integrity_check` dello schema. Una tabella ricostruita esige la copia di sicurezza.
@@ -29,7 +29,7 @@
 //     partite (o rimettere i file di prima).
 //
 // Non è un sistema di migrazioni: ogni cambio di struttura porta il proprio passaggio nello stesso cambiamento che alza
-// `VERSIONE_GIOCO` o `VERSIONE_PARTITE`, e toglie quello della versione prima (si passa solo dalla precedente). In vigore: partite 75→76;
+// `VERSIONE_GIOCO` o `VERSIONE_PARTITE`, e toglie quello della versione prima (si passa solo dalla precedente). In vigore: partite 76→77 (solo creazione);
 // i dati di gioco restano alla 391 e non hanno passaggio (un `gioco.db` a un'altra versione ferma l'avvio). Lo chiamano solo i due avvii:
 // la preparazione (`server/index.ts`) per i due file, il rilascio (`server/rilascio.ts`) per le sole partite, con i testi letti
 // dall'edizione (il suo `gioco.db` è l'edizione stessa, in sola lettura, e deve già essere alla versione del codice).
@@ -73,18 +73,19 @@ interface Passaggio {
 }
 
 /**
- * I passaggi in vigore: quelli di questa versione, da 75→76 (partite: `consumo_oggetto_partita` con il modo «usato»). Chi alza una costante
- * di `versioneSchema.ts` riscrive qui l'elenco con gli oggetti di quel cambiamento.
+ * I passaggi in vigore: quelli di questa versione, da 76→77 (partite: la tabella nuova `evento_intermedio_partita`, gli eventi intermedi dei
+ * Confidenti fatti nella partita; solo creazione). Chi alza una costante di `versioneSchema.ts` riscrive qui l'elenco con gli oggetti di quel
+ * cambiamento.
  */
 const PASSAGGI: readonly Passaggio[] = [
   {
     file: 'partite',
     schema: 'utente',
-    da: 75,
+    da: 76,
     a: VERSIONE_PARTITE,
     origine: percorsoModelloPartite,
-    crea: [],
-    ricostruisce: ['consumo_oggetto_partita'],
+    crea: ['evento_intermedio_partita'],
+    ricostruisce: [],
     conCopia: true,
   },
 ];

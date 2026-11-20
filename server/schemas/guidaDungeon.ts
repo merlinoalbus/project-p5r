@@ -17,6 +17,7 @@ import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { CARATTERI } from '../../shared/caratteriVoce.js';
 import { idParam } from './comuni.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
+import { eRangoDiPasso } from '../../shared/eventiIntermedi.js';
 
 /** Una data del calendario di gioco, «MM-GG». */
 const dataGioco = z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
@@ -174,6 +175,7 @@ export const bodyRichiesta = z.object({
 export const bodyNuovaRichiesta = bodyRichiesta.extend({ nome: z.string().trim().min(1).max(R.nome), bersaglio });
 
 /** Un requisito di un Confidente: confidente, rango e indice nel rango (2026-10-11, correzione dei requisiti sulle Richieste). */
-export const paramsRequisitoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), indice: z.coerce.number().int().min(0).max(99) });
+// il rango è un intero da 1 al massimo o un evento intermedio (7.5): che sia uno del Confidente lo verifica il servizio (400)
+export const paramsRequisitoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().refine(eRangoDiPasso, `Il rango è un intero da 1 a ${RANGO_MASSIMO_CONFIDENTE}, o un evento intermedio (7.5).`), indice: z.coerce.number().int().min(0).max(99) });
 /** La Richiesta che il requisito cita al posto di quella di prima. */
 export const bodyRequisitoRichiesta = z.object({ richiesta: z.string().min(1).max(200) });

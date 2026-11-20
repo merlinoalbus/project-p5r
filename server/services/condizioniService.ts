@@ -33,6 +33,7 @@ import { promemoriaLibriPerAttivita } from './modificatoriLibri.js';
 import { httpErrors } from '../utils/httpError.js';
 import { confidentiRomanzabili } from './relazioneRomanticaService.js';
 import { setDlcConPersone } from './setDlcService.js';
+import { tuttiGliEventiIntermedi } from './eventiIntermediService.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataDellEvento, dataValida, dedaloDellEvento, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { ElenchiRegoleDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, RispostaValutaGruppiDto } from '../../shared/types.js';
 
@@ -93,6 +94,8 @@ export function elenchiRegole(): ElenchiRegoleDto {
     })(),
     // i set di contenuti scaricabili (chiave = id come testo), per la condizione «Contenuto scaricabile posseduto»
     setDlc: setDlcConPersone().map((s) => ({ chiave: String(s.id), nome: s.nome })),
+    // gli eventi intermedi dei Confidenti (7.5…), dai dialoghi della guida: la condizione «Confidente» li offre accanto ai ranghi interi
+    eventiIntermedi: [...tuttiGliEventiIntermedi()].flatMap(([confidente, ranghi]) => ranghi.map((rango) => ({ confidente, rango }))),
     inviti: (() => {
       const n = nomiCondizioniMemo();
       return tuttiGliInviti().map((i) => ({ chiave: i.chiave, nome: n.inviti?.[i.chiave] ?? i.chiave, gruppo: n.confidenti?.[i.confidente_chiave] ?? i.confidente_chiave, confidente: i.confidente_chiave }));

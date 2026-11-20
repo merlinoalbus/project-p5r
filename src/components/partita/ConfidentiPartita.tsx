@@ -19,7 +19,7 @@
 
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { aggiornaConfidente, annullaUltimoConfidente, getConfidentiPartita, confermaRequisitoConfidente, impostaPiazzamentoEsame, isApiError } from '../../services/api';
+import { aggiornaConfidente, annullaUltimoConfidente, getConfidentiPartita, confermaRequisitoConfidente, impostaEventoIntermedio, impostaPiazzamentoEsame, isApiError } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState, FiguraVuoto } from '../shared/PageState';
@@ -195,6 +195,19 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
     }
   };
 
+  /** «Evento 7.5 fatto» (o il suo annullo) dal pannello: sostituisce il Confidente aggiornato in elenco, come le altre azioni. */
+  const segnaEvento = async (c: ConfidentePartitaDto, rango: number, fatto: boolean) => {
+    setOccupato(c.chiave);
+    try {
+      const agg = await impostaEventoIntermedio(partitaId, c.chiave, rango, fatto);
+      imposta((correnti) => correnti.map((x) => (x.chiave === agg.chiave ? agg : x)));
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+    } finally {
+      setOccupato(null);
+    }
+  };
+
   /** Salva le note del Confidente in modifica e chiude la finestra se il salvataggio riesce. */
   const salvaNote = async () => {
     if (!modifica) return;
@@ -229,6 +242,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       bonus: (valore) => setBonusForzato((b) => ({ ...b, [c.chiave]: valore })),
       // L13 (O10-3): la sola relazione romantica (PUT con il solo campo: niente incontri né punti, `impostaRelazioneRomantica`)
       relazione: (valore) => void salva(c.chiave, { relazioneRomantica: valore }),
+      eventoIntermedio: (fatto) => { if (c.eventoIntermedio) void segnaEvento(c, c.eventoIntermedio.rango, fatto); },
     };
   };
 

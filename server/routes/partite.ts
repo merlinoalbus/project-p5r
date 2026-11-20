@@ -15,7 +15,8 @@ import {
   bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita,
   paramsCestinoPersonale, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto,
   paramsPartitaConsumo, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
-  bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
+  bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData, paramsEventoIntermedio } from '../schemas/partite.js';
+import { segnaEventoIntermedio, togliEventoIntermedio } from '../services/eventiIntermediService.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano, type DatiPianoSalvato } from '../services/pianiSalvatiService.js';
@@ -215,6 +216,19 @@ router.put('/:id/inviti/:confidente/:data', validate({ params: paramsInvito }), 
 });
 router.delete('/:id/inviti/:confidente/:data', validate({ params: paramsInvito }), (req, res) => {
   res.json(annullaInvito(Number(req.params.id), `${String(req.params.confidente)}/${String(req.params.data)}`));
+});
+
+/** L'evento intermedio di un Confidente (7.5): «Evento 7.5 fatto» (PUT) e il suo annullo (DELETE: solo se segnato dal pannello, 409 se l'ha segnato
+ *  una voce del Diario). Il rango del Confidente non cambia. Restituiscono il Confidente aggiornato. */
+router.put('/:id/confidenti/:chiave/eventi-intermedi/:rango', validate({ params: paramsEventoIntermedio }), (req, res) => {
+  const p = req.params;
+  segnaEventoIntermedio(Number(p.id), String(p.chiave), Number(p.rango));
+  res.json(confidente(Number(p.id), String(p.chiave)));
+});
+router.delete('/:id/confidenti/:chiave/eventi-intermedi/:rango', validate({ params: paramsEventoIntermedio }), (req, res) => {
+  const p = req.params;
+  togliEventoIntermedio(Number(p.id), String(p.chiave), Number(p.rango));
+  res.json(confidente(Number(p.id), String(p.chiave)));
 });
 
 /** Conferma di un requisito `evento` (semafori, Fase 12.3; gli altri tipi li dice la partita, R6-01b); restituisce il Confidente aggiornato. */

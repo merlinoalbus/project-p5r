@@ -28,6 +28,7 @@ import {
 } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, impostaRequisitiRanghi, impostaRequisitiRango, requisitiDelConfidente, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
+import { eRangoDiPasso } from '../../shared/eventiIntermedi.js';
 import { setDlcConPersone } from '../services/setDlcService.js';
 import { aggiornaSbloccoQuartiere, dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { dettaglioLuogo } from '../services/luoghiService.js';
@@ -480,12 +481,15 @@ router.put('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveG
 router.get('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(requisitiDelConfidente(String(req.params.chiave)));
 });
-const paramsRangoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE) });
+// un rango intero da 1 al massimo, o un evento intermedio (7.5): che il Confidente l'abbia lo verifica il servizio (400 `evento-intermedio-inesistente`)
+const rangoDiPasso = z.number().refine(eRangoDiPasso, 'Il rango è un intero da 1 a 10, o un evento intermedio (7.5).');
+const paramsRangoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().refine(eRangoDiPasso, 'Il rango è un intero da 1 a 10, o un evento intermedio (7.5).') });
 /** L7-02: i ranghi indicati, tutti in una transazione (il salvataggio unico dell'editor); la nota è il testo proprio del requisito. */
 const bodyRequisitiRanghi = z.object({ ranghi: z.array(z.object({
-  rango: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE),
+  rango: rangoDiPasso,
   requisiti: z.array(z.object({ condizione: condizioneSpillo, nota: z.string().max(500).nullable().optional() }).strict()).max(10),
-}).strict()).min(1).max(RANGO_MASSIMO_CONFIDENTE) }).strict();
+  // i ranghi interi e gli eventi intermedi (al più uno fra due ranghi)
+}).strict()).min(1).max(2 * RANGO_MASSIMO_CONFIDENTE) }).strict();
 router.put('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida, body: bodyRequisitiRanghi }), (req, res) => {
   res.json(impostaRequisitiRanghi(String(req.params.chiave), req.body.ranghi));
 });

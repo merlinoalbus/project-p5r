@@ -19,6 +19,8 @@ import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/co
 import { giorniDiGiocoFra } from '../../shared/date.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { eRomanzabile, relazioneAlRango, relazioneRomantica } from './relazioneRomanticaService.js';
+import { eventoIntermedioFatto } from './eventiIntermediService.js';
+import { rangoIntermedioDopo } from '../../shared/eventiIntermedi.js';
 
 export const CHIAVE_SEED_DISPONIBILITA = (confidente: string) => `disponibilita-struttura-seed-v1:${confidente}`;
 export interface RigaStruttura { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; motivo_senza_luogo: string; fonte: string | null }
@@ -69,10 +71,13 @@ function contestoDellaPartita(partitaId: number, confidente: string, stato?: Sta
   const meteo = p.data_gioco ? meteoOra(partitaId, p.data_gioco, fascia) : null;
   const rango = (prepared('SELECT rango FROM confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, confidente) as { rango: number } | undefined)?.rango ?? 0;
   const festivo = p.data_gioco ? eGiornoFestivo(p.data_gioco) : false;
+  // l'evento intermedio fra il rango e il successivo (7.5), fatto o no nella partita: dice quale pioggia vale (`passoDellaPioggia`)
+  const eventoFatto = eventoIntermedioFatto(partitaId, confidente, rangoIntermedioDopo(rango));
   return {
     data: p.data_gioco, fascia: p.data_gioco ? fascia : null, festivo, piove: meteo ? meteo.meteo === 'pioggia' : null, rango,
     giorniDallUltimoRango: giorniDalGiorno(giornoDellUltimoRango(partitaId, confidente, rango), p.data_gioco),
-    nonConLaPioggia: nonConLaPioggia(confidente, rango, stato),
+    eventoIntermedioFatto: eventoFatto,
+    nonConLaPioggia: nonConLaPioggia(confidente, rango, stato, eventoFatto),
     // L13 (O10-2): la relazione romantica della partita, dal punto unico (falsa per un Confidente non romanzabile), per l'incontro successivo
     relazioneRomantica: relazioneAlRango(relazioneRomantica(partitaId, confidente), rango + 1),
   };
@@ -93,7 +98,7 @@ export function disponibilitaConfidente(confidente: string, partitaId?: number, 
   if (partitaId !== undefined) {
     verificaPartita(partitaId); // prima dello stato: solo le partite del proprietario della richiesta
     const contesto = contestoDellaPartita(partitaId, confidente, statoDellaPartita?.(partitaId));
-    dto.oggi = verdettoDelConfidente(confidente, contesto) ?? valutaDisponibilita(struttura, contesto);
+    dto.oggi = verdettoDelConfidente(confidente, contesto) ?? valutaDisponibilita(struttura, conPassoDellaPioggia(confidente, contesto));
   }
   return dto;
 }
@@ -169,12 +174,23 @@ function ranghiSenzaPioggiaDi(confidente: string): number[] {
 }
 
 /**
- * Se l'incontro del rango successivo a `rango` (0 = il primo) non si fa con la pioggia, secondo i requisiti di rango: vero con un obbligo; con un
+ * Il passo i cui requisiti dicono la pioggia del prossimo incontro: l'evento intermedio fra `rango` e il successivo (7.5) quando la partita non
+ * l'ha ancora fatto (`eventoIntermedioFatto` falso) e i suoi requisiti parlano della pioggia; altrimenti il rango successivo, come sempre (senza
+ * evento intermedio, con l'evento fatto, o quando non si sa).
+ */
+export function passoDellaPioggia(confidente: string, rango: number | null | undefined, eventoIntermedioFatto?: boolean | null): number {
+  const r = rango ?? 0;
+  const intermedio = rangoIntermedioDopo(r);
+  return eventoIntermedioFatto === false && pioggiaDeiRanghi().get(confidente)?.has(intermedio) ? intermedio : r + 1;
+}
+
+/**
+ * Se l'incontro del rango successivo a `rango` (0 = il primo; o l'evento intermedio da fare, `passoDellaPioggia`) non si fa con la pioggia, secondo i requisiti di rango: vero con un obbligo; con un
  * «almeno una» vero solo se, col valutatore unico sullo stato della partita (`stato`), gli altri rami sono tutti falsi, falso se uno è vero.
  * Senza lo stato, o con un ramo che non si sa (grigio), un «almeno una» non lo sappiamo: null, nessun controllo.
  */
-export function nonConLaPioggia(confidente: string, rango: number | null | undefined, stato?: StatoDelRamo): boolean | null {
-  const p = pioggiaDeiRanghi().get(confidente)?.get((rango ?? 0) + 1);
+export function nonConLaPioggia(confidente: string, rango: number | null | undefined, stato?: StatoDelRamo, eventoIntermedioFatto?: boolean | null): boolean | null {
+  const p = pioggiaDeiRanghi().get(confidente)?.get(passoDellaPioggia(confidente, rango, eventoIntermedioFatto));
   if (!p) return false;
   if (p.obbligo) return true;
   if (!stato) return null;
@@ -194,6 +210,13 @@ export function nonConLaPioggia(confidente: string, rango: number | null | undef
 export function verdettoDelConfidente(confidente: string, contesto: ContestoDisponibilita, stato?: StatoDelRamo): EsitoDisponibilita | null {
   const s = tutteLeStrutture().get(confidente);
   if (!s) return null;
-  return valutaDisponibilita(s, contesto.nonConLaPioggia === undefined ? { ...contesto, nonConLaPioggia: nonConLaPioggia(confidente, contesto.rango, stato) } : contesto);
+  return valutaDisponibilita(s, conPassoDellaPioggia(confidente, contesto.nonConLaPioggia === undefined
+    ? { ...contesto, nonConLaPioggia: nonConLaPioggia(confidente, contesto.rango, stato, contesto.eventoIntermedioFatto) } : contesto));
+}
+
+/** Il contesto con il passo della pioggia, solo quando è l'evento intermedio (per il motivo «L'evento 7.5 non si fa con la pioggia»). */
+function conPassoDellaPioggia(confidente: string, contesto: ContestoDisponibilita): ContestoDisponibilita {
+  const passo = passoDellaPioggia(confidente, contesto.rango, contesto.eventoIntermedioFatto);
+  return Number.isInteger(passo) ? contesto : { ...contesto, passoPioggia: passo };
 }
 

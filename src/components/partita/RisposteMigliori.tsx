@@ -7,7 +7,8 @@
 // è quello che si affronta per arrivare al rango N (anche le Doti d'incontro, `dotiIncontro`, e i semafori dei requisiti, `semafori[0]`,
 // sono indicizzati sul rango di arrivo). Qui si applica lo stesso criterio: aperti per primi i dialoghi del rango attuale + 1 (o, subito
 // dopo una salita, quelli del rango appena raggiunto: l'evento appena giocato, le cui note si registrano adesso). Gli altri
-// ranghi restano consultabili sotto «Tutte le risposte», ripiegati. Il componente delle scelte è `DialogoRango` (massimo dei punti
+// ranghi restano consultabili sotto «Tutte le risposte», ripiegati. Con un evento intermedio da fare (7.5) il rango dell'evento è il suo: i
+// dialoghi etichettati «7.5» (`d.rango === 7.5`), poi, fatto l'evento, quelli del rango successivo. Il componente delle scelte è `DialogoRango` (massimo dei punti
 // evidenziato), lo stesso della scheda. Il dettaglio si legge solo per il Confidente scelto e si ricorda (`useDettaglioConfidente`);
 // il caricamento e l'errore stanno dentro la sezione: il resto del pannello resta usabile.
 // ============================================================
@@ -19,6 +20,7 @@ import { Spinner } from '../shared/PageState';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
+import { eRangoIntermedio, etichettaEventoIntermedio, testoPassoConfidente } from '../../../shared/eventiIntermedi';
 
 interface Props {
   chiave: string;
@@ -47,7 +49,7 @@ export function RisposteMigliori({ chiave, nome, rangoEvento, appenaGiocato = fa
     <section className="risposte-migliori" aria-label={`Risposte migliori di ${nome}`}>
       <div className="flex items-baseline gap-2 flex-wrap">
         <h4 className="m-0 font-display uppercase testo-16 tracking-wide">Risposte migliori</h4>
-        {!oltre && <span className="testo-12 text-text-muted">{appenaGiocato ? `evento del rango ${arrivo} appena giocato: registra le note ottenute` : `evento del rango ${arrivo}`}</span>}
+        {!oltre && <span className="testo-12 text-text-muted">{appenaGiocato ? `evento del rango ${arrivo} appena giocato: registra le note ottenute` : eRangoIntermedio(arrivo) ? `evento ${etichettaEventoIntermedio(arrivo)}` : `evento del rango ${arrivo}`}</span>}
       </div>
       {caricamento && <div className="flex items-center gap-2 testo-13 text-text-muted" role="status"><Spinner size={18} /> Carico le risposte…</div>}
       {errore && (
@@ -59,7 +61,7 @@ export function RisposteMigliori({ chiave, nome, rangoEvento, appenaGiocato = fa
       {dati && (
         <>
           {oltre && <p className="m-0 testo-13 text-text-muted">Rango massimo: nessun altro dialogo da affrontare.</p>}
-          {!oltre && prossimi.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessun dialogo documentato per il rango {arrivo}.</p>}
+          {!oltre && prossimi.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessun dialogo documentato per {eRangoIntermedio(arrivo) ? 'l’' : 'il '}{testoPassoConfidente(arrivo)}.</p>}
           {prossimi.length > 0 && (
             <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
               {prossimi.map((d) => <DialogoRango key={d.id} d={d} aperto={aperto(d.id, true)} onToggle={() => alterna(d.id, true)} />)}

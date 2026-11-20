@@ -14,6 +14,9 @@
 // dell'evento appena giocato: le note che dà si registrano subito e valgono già verso il rango successivo.
 // L13 (O10-3): fra «il resto» l'interruttore «Relazione romantica» della partita (solo un Confidente romanzabile, dal rango della scelta
 // romantica o con la relazione già segnata); la leggono disponibilità, semafori e Diario.
+// L'evento intermedio (7 → 7.5 → 8, `c.eventoIntermedio`): da fare, «Verso il rango N+1» è preceduto dai requisiti dell'evento e dal pulsante
+// «Evento 7.5 fatto», e le risposte migliori sono quelle del 7.5; fatto, il pulsante resta acceso e le risposte passano al rango N+1. Il rango
+// resta intero e il blocco riguarda sempre il rango intero successivo.
 // Questo componente è solo presentazione: le azioni restano in `ConfidentiPartita`, che le passa in `azioni`.
 // ============================================================
 
@@ -34,6 +37,7 @@ import { formattaPunti } from '../../utils/punti';
 import { noteAParole, simboliNote } from '../../../shared/note';
 import { MOLTIPLICATORE_ARCANO, MOLTIPLICATORE_INVITO, RANGO_DELLA_SCELTA_ROMANTICA, RANGO_MASSIMO_CONFIDENTE, testoMoltiplicatore } from '../../../shared/puntiConfidenti';
 import type { ConfidentePartitaDto } from '../../types';
+import { eRangoIntermedio } from '../../../shared/eventiIntermedi';
 
 /** Le azioni che il dettaglio può chiedere; la logica (e le notifiche) sta in `ConfidentiPartita`. */
 export interface AzioniConfidente {
@@ -54,6 +58,8 @@ export interface AzioniConfidente {
   bonus: (valore: boolean) => void;
   /** L13 (O10-3): segna o toglie la relazione romantica nella partita (solo un Confidente romanzabile). */
   relazione: (valore: boolean) => void;
+  /** «Evento 7.5 fatto»: segna o toglie l'evento intermedio fra il rango attuale e il successivo (il rango non cambia). */
+  eventoIntermedio: (fatto: boolean) => void;
 }
 
 interface Props {
@@ -86,7 +92,12 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
   const aPunti = aPuntiDi(c);
   const pronto = sogliaRaggiunta(c) && !c.bloccato;
   const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === RANGO_MASSIMO_CONFIDENTE ? 1 : 0;
-  const semaforo = c.rango < RANGO_MASSIMO_CONFIDENTE ? c.semafori[0] : undefined;
+  // i requisiti del prossimo rango intero (il primo semaforo che non è di un evento intermedio: senza eventi intermedi è il primo, come sempre)
+  const semaforo = c.rango < RANGO_MASSIMO_CONFIDENTE ? c.semafori.find((s) => !eRangoIntermedio(s.rango)) : undefined;
+  // l'evento intermedio fra il rango e il successivo (7 → 7.5 → 8): da fare, i suoi requisiti vengono prima di quelli del rango
+  const evento = c.rango < RANGO_MASSIMO_CONFIDENTE ? c.eventoIntermedio ?? null : null;
+  const eventoDaFare = !!evento && !evento.fatto;
+  const semaforoEvento = evento && !evento.fatto ? c.semafori.find((s) => s.rango === evento.rango) : undefined;
   // il blocco e i semafori dicono lo stesso rango: i motivi stanno già nei semafori, non si ripetono in elenco
   const motiviNeiSemafori = !!c.bloccato && semaforo?.rango === c.bloccato.rango;
   const valoreRegalo = formattaPunti(anteprima({ regalo: true }));
@@ -168,6 +179,21 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
       <div className="dettaglio-confidente__colonne">
         {/* che cosa serve per salire: requisiti del prossimo rango e moltiplicatori dei punti */}
         <div className="dettaglio-confidente__testa">
+          {/* l'evento intermedio (7.5) fra il rango e il successivo: da fare, prima i suoi requisiti e il pulsante; fatto, il pulsante acceso (si toglie
+              da qui se segnato dal pannello, togliendo la spunta della voce se l'ha segnato il Diario) */}
+          {evento && (
+            <div className="flex flex-col gap-1.5">
+              {eventoDaFare && <h4 className="titolo-sezione-confidente">Prima del rango {prossimo}: evento {evento.etichetta}</h4>}
+              {semaforoEvento && (
+                <SemaforiRango semafori={semaforoEvento} compatto occupato={occ} onConferma={(rango, r, confermato) => azioni.conferma(rango, r.indice, confermato)} onCorreggi={(rango) => azioni.correggi(rango)} />
+              )}
+              <PulsanteVisivo className="self-start" attivo={evento.fatto} compatto icona={<IconaAzione chiave={evento.fatto ? 'raggiunto' : 'aperti'} dimensione={20} />}
+                titolo={`Evento ${evento.etichetta} fatto`} dettaglio={evento.origine === 'diario' ? 'dalla spunta del Diario' : undefined}
+                disabled={occ || evento.origine === 'diario'} onClick={() => azioni.eventoIntermedio(!evento.fatto)}
+                title={evento.origine === 'diario' ? 'L’ha segnato la spunta di una voce del Diario: per toglierlo togli quella spunta' : undefined}
+                aria-label={`${c.nome}: evento ${evento.etichetta} fatto`} />
+            </div>
+          )}
           {c.rango < RANGO_MASSIMO_CONFIDENTE && (semaforo || aPunti || (c.bloccato && !motiviNeiSemafori)) && <h4 className="titolo-sezione-confidente">Verso il rango {prossimo}</h4>}
           {c.bloccato && !motiviNeiSemafori && <ul className="m-0 pl-4 testo-12 text-text-secondary">{c.bloccato.motivi.map((m) => <li key={m}>{m}</li>)}</ul>}
           {semaforo && (
@@ -194,7 +220,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
 
         {/* le risposte migliori dell'evento: il prossimo, o quello appena giocato dopo una salita */}
         <div className="dettaglio-confidente__risposte">
-          <RisposteMigliori chiave={c.chiave} nome={c.nome} rangoEvento={appenaSalito ? c.rango : prossimo} appenaGiocato={appenaSalito} />
+          <RisposteMigliori chiave={c.chiave} nome={c.nome} rangoEvento={appenaSalito ? c.rango : evento && !evento.fatto ? evento.rango : prossimo} appenaGiocato={appenaSalito} />
         </div>
 
         {/* la registrazione: note della risposta (pulsanti della loro misura), regalo, uscita, annulla */}

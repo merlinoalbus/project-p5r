@@ -103,6 +103,12 @@ export const impostaTrofeo = (id: number, trofeo: string, ottenuto: boolean): Pr
 /** Conferma (o revoca) a mano un requisito non verificabile di un rango del Confidente. */
 export const confermaRequisitoConfidente = (id: number, chiave: string, rango: number, indice: number, confermato: boolean): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${chiave}/requisiti`, { rango, indice, confermato });
+/** «Evento 7.5 fatto» (`fatto` vero) o il suo annullo dal pannello del Confidente (409 `evento-intermedio-dal-diario` se l'ha segnato una voce):
+ *  restituisce il Confidente aggiornato. Il rango del Confidente non cambia. */
+export const impostaEventoIntermedio = (id: number, chiave: string, rango: number, fatto: boolean): Promise<ConfidentePartitaDto> => {
+  const percorso = `/partite/${id}/confidenti/${encodeURIComponent(chiave)}/eventi-intermedi/${rango}`;
+  return fatto ? apiPut(percorso) : apiDelete(percorso);
+};
 /** Spunta (o riapre) una voce della giornata nella partita, per identità: applica i suoi effetti (con le note ottenute, se è un
  *  incontro con un Confidente) e dice se la partita è passata al giorno dopo. L13 (O10-3): `relazioneRomantica` è la scelta romantica alla spunta
  *  del passaggio al rango 9 di un Confidente romanzabile (assente = la relazione non cambia; solo spuntando). */

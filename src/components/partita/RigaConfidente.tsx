@@ -5,7 +5,8 @@
 // Progetto approvato dall'utente (2026-10-24, tavola 2 del canvas): il disegno fissa posizioni e spazi, la grafica resta quella dei
 // poster (filigrana dell'arcano, cifra del rango in immagine `ui/rango-N` dentro l'anello d'avanzamento, scala di grigi per i bloccati).
 // Tutta la scheda è il pulsante che apre il cassetto (`.riga-confidente__scelta::after`). Lo stato sintetico è uno solo, nell'ordine:
-// MAX → Bloccato → Pronto per il rango N (soglia raggiunta) → punti e quanto manca → Da avviare → Solo trama → Senza punti.
+// MAX → Bloccato → Pronto per il rango N (soglia raggiunta) → punti e quanto manca → Da avviare → evento intermedio da fare (7.5) → Solo trama
+// → Senza punti.
 // ============================================================
 
 import { ImmagineEntita } from '../shared/ImmagineEntita';
@@ -50,6 +51,8 @@ function StatoSintetico({ c }: { c: ConfidentePartitaDto }) {
     );
   }
   if (c.rango === 0) return <span className="riga-confidente__stato text-text-muted">Da avviare: incontralo in gioco</span>;
+  // l'evento intermedio da fare (7.5) prima del rango successivo, dove il rango non sale a punti: è il passo che informa
+  if (c.eventoIntermedio && !c.eventoIntermedio.fatto) return <span className="riga-confidente__stato text-text-muted">Prossimo: evento {c.eventoIntermedio.etichetta}</span>;
   if (c.puntiNecessari === null) return <span className="riga-confidente__stato text-text-muted">Solo trama</span>;
   return <span className="riga-confidente__stato text-text-muted">Il rango {c.rango + 1} non dipende dai punti</span>;
 }

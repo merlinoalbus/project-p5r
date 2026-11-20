@@ -90,7 +90,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
       JOIN main.voce_giornata v ON v.uid = s.voce_uid
       JOIN main.voce_effetto_transizione t ON t.voce_uid = s.voce_uid AND t.stato = 'convertita'
       JOIN main.voce_effetto e ON e.voce_uid = s.voce_uid
-      WHERE e.tipo IN ('storia','domanda','cruciverba','richiesta','articolo','invito','persona','oggetto','trofeo','sblocco','personaTolta','puntiConfidente','uscitaOggetto')
+      WHERE e.tipo IN ('storia','domanda','cruciverba','richiesta','articolo','invito','persona','oggetto','trofeo','sblocco','personaTolta','puntiConfidente','uscitaOggetto','eventoConfidente')
       ORDER BY s.partita_id, v.data, s.voce_uid, e.ordine`).all() as RigaCandidato[];
     const perPartita = new Map<number, CensimentoPartita>();
     const conta = (p: number): CensimentoPartita => {
@@ -219,6 +219,7 @@ function motivoDelPassato(p: number, e: EffettoDiStatoVoce): string {
             : e.tipo === 'personaTolta' ? 'la Persona risulta ancora nella scorta'
               : e.tipo === 'puntiConfidente' ? 'i punti al Confidente non risultano aggiunti'
                 : e.tipo === 'uscitaOggetto' ? `l’oggetto non risulta ${e.modo}`
+                  : e.tipo === 'eventoConfidente' ? 'l’evento intermedio del Confidente non risulta fatto'
             : e.tipo === 'invito' ? 'l’invito non risulta avvenuto'
               : e.tipo === 'richiesta' ? 'la Richiesta non risulta completata'
                 : e.tipo === 'domanda' ? 'la domanda non risulta risposta'

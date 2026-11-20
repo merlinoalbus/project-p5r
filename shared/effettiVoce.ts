@@ -4,6 +4,7 @@ import { ATTIVITA_PESCA, REGOLA_PESCA, type EffettoPescaVoce } from './pesca.js'
 import { fasceConPrezzoDiverso, type PrezzoPerFascia } from './catalogo.js';
 import { simboliNote, testoPunti } from './note.js';
 import { MOLTIPLICATORE_INVITO, puntiBase, testoMoltiplicatore } from './puntiConfidenti.js';
+import { chiaveEventoIntermedio, eRangoIntermedio, etichettaEventoIntermedio } from './eventiIntermedi.js';
 
 export type CategoriaLetturaVoce = 'libro' | 'film' | 'videogioco';
 export interface DoteNoteVoce { dote: DoteChiave; note: 1 | 2 | 3 }
@@ -113,9 +114,13 @@ export type EffettoDiStatoVoce =
    *  prestito (il libro della Biblioteca, il DVD a noleggio) torna, e la regola «restituzione» del rifornimento lo rende di nuovo disponibile;
    *  «venduto»: con `prezzo` (facoltativo, il ricavo di tutte le copie) gli yen entrano da soli nel saldo (decisione 18); «usato»: l'oggetto
    *  esce e basta (il Laptop rotto che si ripara, i frullati bevuti, ciò che si cede in uno scambio): nessuno yen, nessun prezzo, non torna in vendita. */
-  | { tipo: 'uscitaOggetto'; oggetto: string; quantita: number; modo: ModoUscitaOggetto; prezzo?: number };
+  | { tipo: 'uscitaOggetto'; oggetto: string; quantita: number; modo: ModoUscitaOggetto; prezzo?: number }
+  /** L'evento intermedio di un Confidente fatto (`confidente` = chiave, `rango` = 7.5, 8.5, 6.5: un dialogo della guida con quel rango, vedi
+   *  `shared/eventiIntermedi.ts`): la spunta lo segna nella partita (`utente.evento_intermedio_partita`, lo stesso stato di «Evento 7.5 fatto»
+   *  del pannello del Confidente), togliendo la spunta se ne va, solo se l'aveva scritto questa voce. Il rango del Confidente non cambia. */
+  | { tipo: 'eventoConfidente'; confidente: string; rango: number };
 export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'persona' || e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito' || e.tipo === 'oggetto' || e.tipo === 'trofeo' || e.tipo === 'sblocco'
-  || e.tipo === 'personaTolta' || e.tipo === 'puntiConfidente' || e.tipo === 'uscitaOggetto';
+  || e.tipo === 'personaTolta' || e.tipo === 'puntiConfidente' || e.tipo === 'uscitaOggetto' || e.tipo === 'eventoConfidente';
 /**
  * Gli effetti di stato che non sono uno stato sì/no ma una riga che somma, della voce e dell'effetto (l'oggetto ricevuto, i punti a un Confidente,
  * l'oggetto restituito, venduto o usato): ogni voce spuntata porta la sua, nessuna «c'era già», e togliendo la spunta se ne va solo quella.
@@ -146,6 +151,8 @@ export const puntiBaseNote = (note: NotePuntiConfidente): number => puntiBase({ 
 export const testoNotePuntiConfidente = (note: NotePuntiConfidente, punti?: number): string => `${simboliNote(note)} · ${testoPunti(punti ?? puntiBaseNote(note))}`;
 /** La chiave con cui un effetto «sblocco» si registra e la condizione lo cerca: «richiesta:chiave», «attivita:chiave». */
 export const chiaveSblocco = (bersaglio: BersaglioSblocco, chiave: string): string => `${bersaglio}:${chiave}`;
+/** La chiave con cui un effetto «eventoConfidente» si registra (voce, stato della voce): «takemi:7.5», la stessa della partita. */
+export const chiaveEventoConfidente = (e: { confidente: string; rango: number }): string => chiaveEventoIntermedio(e.confidente, e.rango);
 /** La lettura della buona sorte di Chihaya: spuntando la voce si accende la Fortuna sulla Dote scelta, per il resto del giorno (R10-10/2). */
 export interface EffettoFortunaVoce { tipo: 'fortuna'; dote: DoteChiave }
 export interface EffettoVoceDto { uid: string; ordine: number; effetto: EffettoVoce; origine: 'seed' | 'regola' | 'utente' }
@@ -231,7 +238,7 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
 }
 function normalizzaEffettoBase(o: Record<string, unknown>): EffettoVoce | null {
   const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], esame: ['tipo','esame'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'],
-    personaTolta: ['tipo','persona'], puntiConfidente: ['tipo','confidente','note','punti'], uscitaOggetto: ['tipo','oggetto','quantita','modo','prezzo'] };
+    personaTolta: ['tipo','persona'], puntiConfidente: ['tipo','confidente','note','punti'], uscitaOggetto: ['tipo','oggetto','quantita','modo','prezzo'], eventoConfidente: ['tipo','confidente','rango'] };
   const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());
   const quantita = (v: unknown): number | null => Number.isSafeInteger(v) && (v as number) >= 1 && (v as number) <= QUANTITA_MASSIMA_EFFETTO ? v as number : null;
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
@@ -283,6 +290,8 @@ function normalizzaEffettoBase(o: Record<string, unknown>): EffettoVoce | null {
     return { tipo: 'uscitaOggetto', oggetto: o.oggetto.trim(), quantita: q, modo: 'venduto', prezzo: o.prezzo as number };
   }
   if (o.tipo === 'sblocco') return (o.bersaglio === 'richiesta' || o.bersaglio === 'attivita') && chiaveOk(o.chiave) ? { tipo: 'sblocco', bersaglio: o.bersaglio, chiave: o.chiave.trim() } : null;
+  // il rango è quello di un evento intermedio (7.5): che il Confidente l'abbia nei suoi dialoghi lo verifica il server
+  if (o.tipo === 'eventoConfidente') return chiaveOk(o.confidente, 79) && typeof o.rango === 'number' && eRangoIntermedio(o.rango) ? { tipo: 'eventoConfidente', confidente: o.confidente.trim(), rango: o.rango } : null;
   if (o.tipo === 'richiesta') return typeof o.richiesta === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,79}$/i.test(o.richiesta.trim()) ? { tipo: 'richiesta', richiesta: o.richiesta.trim() } : null;
   if (o.tipo === 'pesca') {
     const ids = (v: unknown): v is string[] => Array.isArray(v) && v.every(x => typeof x === 'string' && /^[0-9a-f]{32}$/.test(x)) && new Set(v).size === v.length;
@@ -589,6 +598,10 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, 
       if (e.modo === 'usato') return `Usato: ${o}${copie(e.quantita)}`;
       // il ricavo nella frase solo prima della spunta: dopo, gli yen davvero entrati hanno la loro riga (il movimento) e non si ripetono
       return `Venduto: ${o}${copie(e.quantita)}${e.prezzo && !opz.applicato ? ` · ${yen(e.prezzo)}` : ''}`;
+    }
+    case 'eventoConfidente': {
+      const c = n.confidente?.(e.confidente);
+      return c ? `${c}: evento ${etichettaEventoIntermedio(e.rango)} fatto` : `Evento ${etichettaEventoIntermedio(e.rango)} di un Confidente fatto`;
     }
   }
 }

@@ -17,6 +17,8 @@ export const TIPI_EVENTO = [
   'confidente-punti',
   // L13 (O10-2): la relazione romantica con un Confidente iniziata o tolta nella partita
   'confidente-relazione',
+  // l'evento intermedio di un Confidente fatto (7.5), dal pannello o dalla spunta di una voce del Diario
+  'confidente-evento',
   'regalo',
   'compendio-registrata',
   'persona-aggiunta',
@@ -61,6 +63,7 @@ export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; grupp
   'confidente-rango': { nome: 'Rango di un Confidente', gruppo: 'confidenti' },
   'confidente-punti': { nome: 'Punti di un Confidente', gruppo: 'confidenti' },
   'confidente-relazione': { nome: 'Relazione romantica con un Confidente', gruppo: 'confidenti' },
+  'confidente-evento': { nome: 'Evento intermedio di un Confidente', gruppo: 'confidenti' },
   regalo: { nome: 'Regalo a un Confidente', gruppo: 'confidenti' },
   'compendio-registrata': { nome: 'Persona registrata nel compendio', gruppo: 'persona' },
   'persona-aggiunta': { nome: 'Persona aggiunta alla scorta', gruppo: 'persona' },

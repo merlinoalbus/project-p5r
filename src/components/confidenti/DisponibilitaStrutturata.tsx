@@ -29,6 +29,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
+import { eRangoIntermedio, etichettaEventoIntermedio } from '../../../shared/eventiIntermedi';
 import { useIdStabili } from '../../hooks/useIdStabili';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -60,7 +61,14 @@ function testoEccezione(e: EccezioneDisponibilita): string {
 /** La pioggia in parole, dai requisiti di rango (la sua sola fonte): null se nessun incontro dipende dalla pioggia. */
 function testoPioggia(ranghi: number[]): string | null {
   if (ranghi.length === 0) return null;
-  return RANGHI.every((r) => ranghi.includes(r)) ? 'Con la pioggia non è disponibile' : `Con la pioggia non si incontra per ${ranghi.length === 1 ? 'il rango' : 'i ranghi'} ${elenco(ranghi.map(String))}`;
+  // gli eventi intermedi (7.5) si dicono a parte: «per il rango 6 e l'evento 7.5»
+  const interi = ranghi.filter((r) => !eRangoIntermedio(r)), eventi = ranghi.filter(eRangoIntermedio);
+  if (eventi.length === 0) return RANGHI.every((r) => ranghi.includes(r)) ? 'Con la pioggia non è disponibile' : `Con la pioggia non si incontra per ${ranghi.length === 1 ? 'il rango' : 'i ranghi'} ${elenco(ranghi.map(String))}`;
+  const parti = [
+    ...(interi.length ? [`${interi.length === 1 ? 'il rango' : 'i ranghi'} ${elenco(interi.map(String))}`] : []),
+    `${eventi.length === 1 ? 'l’evento' : 'gli eventi'} ${elenco(eventi.map(etichettaEventoIntermedio))}`,
+  ];
+  return `Con la pioggia non si incontra per ${parti.join(' e ')}`;
 }
 
 /** Le eccezioni e la pioggia, nell'ordine in cui la scheda le elenca. */

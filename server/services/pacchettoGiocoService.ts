@@ -165,6 +165,9 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'consumo_oggetto_partita', colonna: 'voce_uid', entita: 'voce dell’uscita di un oggetto', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid', colonnaOpzionale: true },
   { tabella: 'consumo_oggetto_partita', colonna: 'effetto_uid', entita: 'effetto dell’uscita di un oggetto', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid', colonnaOpzionale: true },
   { tabella: 'sblocco_partita', colonna: 'voce_uid', entita: 'voce dello sblocco', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  // gli eventi intermedi dei Confidenti fatti (7.5): un Confidente che sparisce lascia la riga orfana; la voce solo per quelli dal Diario
+  { tabella: 'evento_intermedio_partita', colonna: 'confidente_chiave', entita: 'Confidente dell’evento intermedio', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
+  { tabella: 'evento_intermedio_partita', colonna: 'voce_uid', entita: 'voce dell’evento intermedio', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'invito_partita', colonna: 'voce_uid', entita: 'voce dell’invito', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid', colonnaOpzionale: true },
   { tabella: 'evento_partita', colonna: 'voce_uid', entita: 'voce dell’evento dello storico', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid', colonnaOpzionale: true },
   { tabella: 'yen_automatico', colonna: 'voce_uid', entita: 'voce del movimento di yen', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },

@@ -174,6 +174,8 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   oggetto_ottenuto_partita: ['oggetto ricevuto nelle partite', 'oggetti ricevuti nelle partite'], sblocco_partita: ['sblocco ricevuto nelle partite', 'sblocchi ricevuti nelle partite'],
   // il primo richiamo gratuito di una Persona DLC già speso
   primo_richiamo_speso: ['primo richiamo DLC speso nelle partite', 'primi richiami DLC spesi nelle partite'],
+  // l'evento intermedio di un Confidente fatto (7.5), dal pannello o dalla spunta di una voce
+  evento_intermedio_partita: ['evento intermedio di un Confidente fatto nelle partite', 'eventi intermedi dei Confidenti fatti nelle partite'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */

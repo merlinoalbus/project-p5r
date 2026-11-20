@@ -21,12 +21,15 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { descriviRequisitoSpillo, type Condizione } from '../../shared/condizioniSpillo.js';
 import type { RequisitiConfidenteDto } from '../../shared/types.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
+import { richiediEventoIntermedio, tuttiGliEventiIntermedi } from './eventiIntermediService.js';
 
 interface RigaRequisito { tipo: string; dati_json: string; testo: string }
 interface RigaRequisitoRango extends RigaRequisito { rango: number; indice: number }
 
 /** Il requisito di tipo «richiesta» (404 se non c'è, 400 se è di un altro tipo: gli altri non si correggono da qui). */
 function requisitoDiRichiesta(confidente: string, rango: number, indice: number): RigaRequisito {
+  // un rango non intero solo per un evento intermedio del Confidente (400)
+  richiediEventoIntermedio(confidente, rango);
   const r = prepared('SELECT tipo, dati_json, testo FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').get(confidente, rango, indice) as RigaRequisito | undefined;
   if (!r) throw httpErrors.notFound('requisito-non-trovato', 'Requisito non trovato.');
   if (r.tipo !== 'richiesta') throw httpErrors.badRequest('requisito-non-di-richiesta', 'Da qui si corregge solo un requisito che cita una Richiesta.');
@@ -83,7 +86,10 @@ export function requisitiDelConfidente(confidente: string): RequisitiConfidenteD
   const attuali = righe('confidente_requisito', confidente);
   const guida = righe('confidente_requisito_guida', confidente);
   const ranghi: RequisitiConfidenteDto['ranghi'] = [];
-  for (let rango = 1; rango <= RANGO_MASSIMO_CONFIDENTE; rango++) {
+  // i ranghi interi da 1 al massimo e, ognuno dopo il suo intero, gli eventi intermedi del Confidente (7 → 7.5 → 8)
+  const intermedi = tuttiGliEventiIntermedi().get(confidente) ?? [];
+  const passi = [...Array.from({ length: RANGO_MASSIMO_CONFIDENTE }, (_, i) => i + 1), ...intermedi].sort((a, b) => a - b);
+  for (const rango of passi) {
     const qui = attuali.filter((r) => r.rango === rango);
     const requisiti = qui.flatMap((r) => {
       const c = condizioneDelRequisito(r as RigaRequisito & { tipo: Condizione['tipo'] });
@@ -91,6 +97,8 @@ export function requisitiDelConfidente(confidente: string): RequisitiConfidenteD
       const descrizione = descriviRequisitoSpillo(c, nomi);
       return [{ indice: r.indice, condizione: c, descrizione, nota: notaDelRequisito(r, descrizione) }];
     });
+    // un evento intermedio non ha copia della guida (la tabella della guida ha ranghi interi): il confronto è con nessun requisito, quindi è
+    // «Modificato» solo se ne ha
     ranghi.push({ rango, requisiti, modificato: firma(qui) !== firma(guida.filter((r) => r.rango === rango)) });
   }
   return { confidente, ranghi };
@@ -127,6 +135,8 @@ export function impostaRequisitiRango(confidente: string, rango: number, requisi
 export function impostaRequisitiRanghi(confidente: string, ranghi: ReadonlyArray<{ rango: number; requisiti: readonly RequisitoDaSalvare[] }>): RequisitiConfidenteDto {
   verificaConfidente(confidente);
   if (new Set(ranghi.map((r) => r.rango)).size !== ranghi.length) throw httpErrors.badRequest('rango-doppio', 'Lo stesso rango compare due volte.');
+  // un rango non intero vale solo per un evento intermedio del Confidente (400 `evento-intermedio-inesistente`)
+  for (const r of ranghi) richiediEventoIntermedio(confidente, r.rango);
   getDb().transaction(() => { for (const r of ranghi) scriviRango(confidente, r.rango, r.requisiti); })();
   // la disponibilità legge dai requisiti la pioggia e il «dal» del rango 1 (R9-04/4) e li tiene in memoria
   invalidaCacheDiGioco();

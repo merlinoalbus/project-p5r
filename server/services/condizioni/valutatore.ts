@@ -31,6 +31,8 @@ import type { StatoDisponibilita } from '../disponibilitaService.js';
 import type { StatoPartitaSemafori } from '../semaforiService.js';
 import { EVENTI_PESCA } from '../../../shared/pesca.js';
 import { confidentiRomanzabili } from '../relazioneRomanticaService.js';
+import { eEventoIntermedio, eventiFattiDelloStato } from '../eventiIntermediService.js';
+import { chiaveEventoIntermedio, eRangoIntermedio, etichettaEventoIntermedio, rangoDopoLEvento, rangoPrimaDellEvento } from '../../../shared/eventiIntermedi.js';
 
 /** Lo stato che il valutatore legge: quello dei semafori, con quel che serve alle condizioni del catalogo e dei pin quando c'è (chi valuta
  *  solo requisiti di rango può passare lo stato dei semafori: quel che manca vale «niente», mai un errore). */
@@ -282,7 +284,17 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     }
     case 'confidente': {
       const attuale = st.ranghiConfidenti.get(r.confidente) ?? 0;
-      return esito('confidente', attuale >= r.rango ? 'verde' : 'rosso', `${t('confidente', r.confidente)}: rango ${attuale} di ${r.rango}`);
+      if (!eRangoIntermedio(r.rango)) return esito('confidente', attuale >= r.rango ? 'verde' : 'rosso', `${t('confidente', r.confidente)}: rango ${attuale} di ${r.rango}`);
+      // un evento intermedio (7.5): vero dal rango dopo (8), o dal rango prima (7) con l'evento segnato nella partita (pannello o voce del Diario)
+      const nome = t('confidente', r.confidente);
+      const etichetta = etichettaEventoIntermedio(r.rango);
+      if (!eEventoIntermedio(r.confidente, r.rango)) return esito('confidente', 'grigio', `${nome} non ha un evento ${etichetta} nei dialoghi della guida: correggi la condizione`);
+      if (attuale >= rangoDopoLEvento(r.rango)) return esito('confidente', 'verde', `${nome}: rango ${attuale}, oltre l’evento ${etichetta}`);
+      const fatto = eventiFattiDelloStato(st).has(chiaveEventoIntermedio(r.confidente, r.rango));
+      if (fatto && attuale >= rangoPrimaDellEvento(r.rango)) return esito('confidente', 'verde', `${nome}: evento ${etichetta} fatto`);
+      return esito('confidente', 'rosso', attuale < rangoPrimaDellEvento(r.rango)
+        ? `Evento ${etichetta} di ${nome} non ancora fatto: si fa dal rango ${rangoPrimaDellEvento(r.rango)}, ora è al rango ${attuale}`
+        : `Evento ${etichetta} di ${nome} non ancora fatto (Partita → Confidenti, o la voce del Diario che lo rappresenta)`);
     }
     // L13 (ondata 11, O11-1; risposta dell'utente del 2026-10-31 «Sì, in automatico» sui doni «se fidanzata»): la relazione romantica della
     // partita (`relazioniConGiorno`, nello stato) con il giorno d'inizio. Un `entro` senza giorno registrato non si può dire: grigio, bloccante

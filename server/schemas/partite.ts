@@ -10,6 +10,7 @@ import { bodyRegistraSessionePesca } from './pesca.js';
 import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti.js';
 import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
+import { eRangoDiPasso, eRangoIntermedio } from '../../shared/eventiIntermedi.js';
 import { ANELLI_MASSIMI_CICLO, ANELLI_MINIMI_CICLO } from '../../shared/limitiFusione.js';
 
 /** L13: la scelta d'esito di un effetto della voce alla spunta (`shared/esitiAttivita.ts`, `SceltaEsitoSpunta`). */
@@ -47,6 +48,8 @@ export const paramsPartita = z.object({ id: idParam });
 /** L12: l'UID di una voce del cestino personale (32 cifre esadecimali): `/api/partite/cestino/:uid`. */
 export const paramsCestinoPersonale = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/) }).strict();
 export const paramsPartitaChiave = z.object({ id: idParam, chiave: z.string().trim().min(1).max(40) });
+/** L'evento intermedio di un Confidente nella partita (`/confidenti/:chiave/eventi-intermedi/:rango`): il rango è un intero più mezzo (7.5). */
+export const paramsEventoIntermedio = paramsPartitaChiave.extend({ rango: z.coerce.number().refine(eRangoIntermedio, 'Il rango di un evento intermedio è un intero più mezzo (7.5).') });
 export const paramsPartitaPersona = z.object({ id: idParam, personaId: idParam });
 export const paramsPartitaPosseduta = z.object({ id: idParam, possedutaId: idParam });
 
@@ -85,7 +88,8 @@ export const bodyConfidente = z
     message: 'Indicare una sola sorgente di punti fra note della risposta, regalo, uscita, deltaPunti e punti.',
   });
 
-export const bodyRequisito = z.object({ rango: z.number().min(1).max(RANGO_MASSIMO_CONFIDENTE), indice: z.number().int().min(0).max(50), confermato: z.boolean() });
+// il rango è un intero o un evento intermedio (7.5); che sia uno del Confidente lo verifica `confermaRequisito` (400)
+export const bodyRequisito = z.object({ rango: z.number().min(1).max(RANGO_MASSIMO_CONFIDENTE).refine(eRangoDiPasso, 'Il rango è un intero, o un evento intermedio (7.5).'), indice: z.number().int().min(0).max(50), confermato: z.boolean() });
 
 export const bodyCompendio = z.object({
   registrata: z.boolean(),

@@ -45,7 +45,9 @@ import { HttpError, httpErrors } from '../utils/httpError.js';
 import { logger } from '../utils/logger.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
 import { dataConArticolo } from '../../shared/condizioniSpillo.js';
-import { chiaveSblocco, eInNote, type EffettoDiStatoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
+import { chiaveEventoConfidente, chiaveSblocco, eInNote, type EffettoDiStatoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
+import { leggiChiaveEventoIntermedio } from '../../shared/eventiIntermedi.js';
+import { eventoIntermedioFatto, passaEventoAllErede, richiediEventoIntermedio, scriviEventoDaVoce, togliEventoDaVoce } from './eventiIntermediService.js';
 import { piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import { dettaglioCopie } from './copieOggetti.js';
 import { scriviUscitaDaVoce, togliUscitaDaVoce, uscitaDellaVoce } from './consumiOggettiService.js';
@@ -116,6 +118,11 @@ export function verificaEffettoDiStato(e: EffettoDiStatoVoce): void {
     assicuraNonDelGruppo(e.persona);
   }
   if (e.tipo === 'puntiConfidente' && !prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(e.confidente)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${e.confidente}' non esiste.`);
+  if (e.tipo === 'eventoConfidente') {
+    if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(e.confidente)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${e.confidente}' non esiste.`);
+    // il rango deve essere uno degli eventi intermedi dei dialoghi del Confidente (400 `evento-intermedio-inesistente`)
+    richiediEventoIntermedio(e.confidente, e.rango);
+  }
   if (e.tipo === 'uscitaOggetto') {
     const o = prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').get(e.oggetto) as { nome: string } | undefined;
     if (!o) throw httpErrors.notFound('oggetto-non-trovato', `L'oggetto '${e.oggetto}' non è nel catalogo.`);
@@ -130,7 +137,8 @@ export const inPrestito = (catalogo: string): boolean => !!prepared(`SELECT 1 FR
 
 const chiaveDi = (e: EffettoDiStatoVoce): string => e.tipo === 'storia' ? e.evento : e.tipo === 'domanda' ? String(e.domanda) : e.tipo === 'cruciverba' ? e.data : e.tipo === 'articolo' ? e.articolo : e.tipo === 'invito' ? e.invito : e.tipo === 'persona' ? String(e.persona)
   : e.tipo === 'oggetto' ? e.oggetto : e.tipo === 'trofeo' ? e.trofeo : e.tipo === 'sblocco' ? chiaveSblocco(e.bersaglio, e.chiave)
-    : e.tipo === 'personaTolta' ? String(e.persona) : e.tipo === 'puntiConfidente' ? e.confidente : e.tipo === 'uscitaOggetto' ? e.oggetto : e.richiesta;
+    : e.tipo === 'personaTolta' ? String(e.persona) : e.tipo === 'puntiConfidente' ? e.confidente : e.tipo === 'uscitaOggetto' ? e.oggetto
+      : e.tipo === 'eventoConfidente' ? chiaveEventoConfidente(e) : e.richiesta;
 
 /** L13: l'oggetto ricevuto non è uno stato sì/no ma un registro che somma: la riga è della voce e dell'effetto, e se ne va con la loro spunta. */
 function scriviOggetto(p: number, voceUid: string, effettoUid: string, e: Extract<EffettoDiStatoVoce, { tipo: 'oggetto' }>): void {
@@ -144,6 +152,8 @@ function leggiPrima(p: number, e: EffettoDiStatoVoce): StatoPrima {
   if (e.tipo === 'personaTolta') return { gia: !inScorta(p, e.persona) };
   if (e.tipo === 'trofeo') return { gia: !!prepared('SELECT 1 FROM trofeo_partita WHERE partita_id = ? AND trofeo_chiave = ?').get(p, e.trofeo) };
   if (e.tipo === 'sblocco') return { gia: !!prepared('SELECT 1 FROM utente.sblocco_partita WHERE partita_id = ? AND bersaglio_tipo = ? AND bersaglio_chiave = ?').get(p, e.bersaglio, e.chiave) };
+  // l'evento intermedio: «già» = segnato nella partita (dal pannello o da un'altra voce): la spunta non lo duplica e togliendola non lo tocca
+  if (e.tipo === 'eventoConfidente') return { gia: eventoIntermedioFatto(p, e.confidente, e.rango) };
   // la Persona: «già» = registrata nel compendio; `stato` = 'riga' se c'era una riga di compendio non registrata (bonus, skill: si conserva), altrimenti null
   if (e.tipo === 'persona') {
     const r = prepared('SELECT registrata FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').get(p, e.persona) as { registrata: number } | undefined;
@@ -168,6 +178,12 @@ function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta
   else if (e.tipo === 'sblocco') {
     if (segna) prepared('INSERT OR IGNORE INTO utente.sblocco_partita (partita_id, bersaglio_tipo, bersaglio_chiave, voce_uid, creato_il) VALUES (?, ?, ?, ?, ?)').run(p, e.bersaglio, e.chiave, voceUid, new Date().toISOString());
     else prepared('DELETE FROM utente.sblocco_partita WHERE partita_id = ? AND bersaglio_tipo = ? AND bersaglio_chiave = ?').run(p, e.bersaglio, e.chiave);
+  }
+  else if (e.tipo === 'eventoConfidente') {
+    // la riga è della voce: nasce con lei e se ne va solo se è ancora sua (una del pannello o di un'altra voce resta)
+    if (!voceUid) throw new Error('L’evento intermedio dalla voce si segna e si toglie con la voce.');
+    if (segna) scriviEventoDaVoce(p, e.confidente, e.rango, voceUid);
+    else togliEventoDaVoce(p, e.confidente, e.rango, voceUid);
   }
   else if (e.tipo === 'oggetto') throw new Error('L’oggetto ricevuto non è uno stato sì/no: si scrive con scriviOggetto.');
   else if (e.tipo === 'puntiConfidente' || e.tipo === 'uscitaOggetto') throw new Error('Punti e uscite della voce sono righe che sommano: si scrivono con applicaPunti e applicaUscita.');
@@ -496,7 +512,15 @@ function effettoDaRiga(tipo: string, chiave: string): EffettoDiStatoVoce {
             // 2026-10-28: i punti e l'uscita si dicono dalla loro riga del registro (qui solo per il tipo e la chiave)
             : tipo === 'personaTolta' ? { tipo: 'personaTolta', persona: Number(chiave) } : tipo === 'puntiConfidente' ? { tipo: 'puntiConfidente', confidente: chiave, note: 1 }
               : tipo === 'uscitaOggetto' ? { tipo: 'uscitaOggetto', oggetto: chiave, quantita: 1, modo: 'restituito' }
-                : { tipo: 'richiesta', richiesta: chiave };
+                : tipo === 'eventoConfidente' ? eventoDaChiave(chiave)
+                  : { tipo: 'richiesta', richiesta: chiave };
+}
+
+/** L'effetto «eventoConfidente» dalla chiave della sua riga («takemi:7.5»). Una chiave illeggibile è un dato rotto: si dice, non si indovina. */
+function eventoDaChiave(chiave: string): EffettoDiStatoVoce {
+  const e = leggiChiaveEventoIntermedio(chiave);
+  if (!e) throw httpErrors.conflict('prima-illeggibile', 'Lo stato salvato dell’evento intermedio di questa voce non si legge: la voce non si può annullare né rileggere da qui.', { chiave });
+  return { tipo: 'eventoConfidente', confidente: e.confidente, rango: e.rango };
 }
 
 /**
@@ -597,6 +621,7 @@ const EVENTO_DELLO_STATO: Record<string, { tipo: string; campo: string } | undef
   domanda: { tipo: 'domanda-risposta', campo: 'domandaId' }, cruciverba: { tipo: 'cruciverba', campo: 'data' },
   articolo: { tipo: 'acquisto', campo: 'articolo' }, richiesta: { tipo: 'richiesta-completata', campo: 'richiesta' },
   trofeo: { tipo: 'trofeo', campo: 'trofeo' },
+  eventoConfidente: { tipo: 'confidente-evento', campo: 'chiave' },
 };
 /** Gli eventi della Persona che la voce scrive (legati per `persona_id`): la registrazione nel compendio, l'aggiunta alla scorta e l'obiettivo che chiude. */
 const EVENTI_DELLA_PERSONA: Record<string, readonly string[] | undefined> = {
@@ -687,6 +712,7 @@ function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], r
         const erede = prepared('SELECT voce_uid FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = ? AND chiave = ? AND NOT (voce_uid = ? AND effetto_uid = ?) ORDER BY applicato_il, voce_uid LIMIT 1').get(p, r.tipo, r.chiave, voceUid, r.effetto_uid) as { voce_uid: string } | undefined;
         // l'invito lo tiene la riga `invito_partita`: la voce che lo ha scritto passa il legame, perché lo possa togliere l'ultima
         if (erede && r.tipo === 'invito') prepared('UPDATE utente.invito_partita SET voce_uid = ? WHERE partita_id = ? AND invito_chiave = ? AND voce_uid = ?').run(erede.voce_uid, p, r.chiave, voceUid);
+        if (erede && r.tipo === 'eventoConfidente') passaEventoAllErede(p, r.chiave, voceUid, erede.voce_uid);
         if (erede && r.tipo === 'sblocco') prepared("UPDATE utente.sblocco_partita SET voce_uid = ? WHERE partita_id = ? AND bersaglio_tipo || ':' || bersaglio_chiave = ? AND voce_uid = ?").run(erede.voce_uid, p, r.chiave, voceUid);
         const evento = EVENTO_DELLO_STATO[r.tipo];
         if (erede && evento) prepared(`UPDATE utente.evento_partita SET voce_uid = ? WHERE partita_id = ? AND voce_uid = ? AND tipo = ? AND json_extract(dati_json, '$.${evento.campo}') = ?`)

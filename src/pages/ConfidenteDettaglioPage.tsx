@@ -45,6 +45,7 @@ import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti';
+import { eRangoDiPasso } from '../../shared/eventiIntermedi';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -83,6 +84,11 @@ export function ConfidenteDettaglioPage() {
   const regaloConsegnato = (g: RegaloConfidenteDto): boolean => g.catalogo && mio?.regaliFattiCatalogo !== undefined
     ? regaliCatalogoFatti.has(g.catalogo.chiave) : regaliFatti.has(g.nomeStorico ?? g.nome);
   const prossimo = mio ? mio.rango + 1 : null;
+  // l'evento intermedio fra il rango e il successivo (7.5), se c'è: da fare è il primo passo; fatto, il suo dialogo non è più «prossimo»
+  const eventoDaFare = mio?.eventoIntermedio && !mio.eventoIntermedio.fatto ? mio.eventoIntermedio : null;
+  const eventoFatto = mio?.eventoIntermedio?.fatto ? mio.eventoIntermedio.rango : null;
+  /** I dialoghi del prossimo passo: quelli con rango oltre quello della partita fino al successivo, senza l'evento intermedio già fatto. */
+  const dialogoDelPasso = (d: { rango: number | null }): boolean => prossimo !== null && d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo && d.rango !== eventoFatto;
   // Il recupero informativo deve restare disponibile anche se un vecchio JSON delle fonti è valido ma non è un elenco (L13, O6-2: le fonti sono
   // l'unico elenco rimasto nelle informazioni; giorni e fasce sono la disponibilità strutturata).
   const erroreInformativo = c && (!Array.isArray(c.fonti) || !c.fonti.every(x => typeof x === 'string'))
@@ -93,7 +99,8 @@ export function ConfidenteDettaglioPage() {
   // Una copia in useState resterebbe aperta dopo un collegamento al Confidente senza il parametro.
   const rangoChiesto = Number(params.get('requisiti'));
   // L12 (passo 8): nel rilascio (sola lettura) i requisiti, le informazioni e la disponibilità del Confidente non si correggono: nessun editor, neanche da indirizzo
-  const rangoDaModificare = !IN_RILASCIO && Number.isInteger(rangoChiesto) && rangoChiesto >= 1 && rangoChiesto <= RANGO_MASSIMO_CONFIDENTE ? rangoChiesto : null;
+  // un rango intero o un evento intermedio (7.5: «Correggi» dai suoi semafori)
+  const rangoDaModificare = !IN_RILASCIO && eRangoDiPasso(rangoChiesto) ? rangoChiesto : null;
   const setRangoDaModificare = (rango: number | null) => {
     const p = new URLSearchParams(params);
     if (rango === null) p.delete('requisiti'); else p.set('requisiti', String(rango));
@@ -230,14 +237,14 @@ export function ConfidenteDettaglioPage() {
               {c.noteGenerali && <p className="m-0 testo-13 text-text-secondary whitespace-pre-wrap">{c.noteGenerali}</p>}
           </section>
 
-          {prossimo !== null && prossimo <= RANGO_MASSIMO_CONFIDENTE && c.dialoghi.some((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo) && (
+          {prossimo !== null && prossimo <= RANGO_MASSIMO_CONFIDENTE && c.dialoghi.some(dialogoDelPasso) && (
             <section className="card flex flex-col gap-2 border-primary">
-              <TitoloSezione>Prossimo passo: rango {prossimo}</TitoloSezione>
+              <TitoloSezione>{eventoDaFare ? `Prossimo passo: evento ${eventoDaFare.etichetta}, poi rango ${prossimo}` : `Prossimo passo: rango ${prossimo}`}</TitoloSezione>
               {mio && mio.semafori.length > 0 && mio.semafori[0].rango <= prossimo && (
                 <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={IN_RILASCIO || nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />
               )}
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
-                {c.dialoghi.filter((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo).map((d) => (
+                {c.dialoghi.filter(dialogoDelPasso).map((d) => (
                   <DialogoRango key={d.id} d={d} aperto onToggle={() => undefined} />
                 ))}
               </ul>
