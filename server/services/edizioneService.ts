@@ -244,9 +244,9 @@ function confrontaConPrecedente(precedente: EdizioneTrovata | null, chiavi: Reco
   try { chiaviPrima = JSON.parse(fs.readFileSync(path.join(precedente.percorso, 'chiavi.json'), 'utf8')); } catch { /* sotto: avviso */ }
   const strutturaPartiteCambiata = !!manifestoPrima && manifestoPrima.algoritmoImpronta === ALGORITMO_IMPRONTA_SCHEMA && manifestoPrima.improntaSchemaPartite !== improntaPartite;
   if (strutturaPartiteCambiata) {
-    // dalla versione immediatamente precedente l'istanza di rilascio passa da sola (`passaggioVersione.ts`, solo strutture nuove); da ogni altra no
+    // dalla versione immediatamente precedente l'istanza di rilascio passa da sola (`passaggioVersione.ts`); da ogni altra no
     avvisi.push(manifestoPrima?.versioneSchemaPartite !== undefined && manifestoPrima.versioneSchemaPartite === versioneDaCuiSiPassa('partite')
-      ? `La struttura delle partite è cambiata dalla versione ${manifestoPrima.versioneSchemaPartite} dell'edizione precedente: all'avvio l'istanza di rilascio aggiunge da sola le strutture nuove al file delle partite, con una copia di sicurezza prima.`
+      ? `La struttura delle partite è cambiata dalla versione ${manifestoPrima.versioneSchemaPartite} dell'edizione precedente: all'avvio l'istanza di rilascio porta da sola il file delle partite alla struttura nuova (strutture aggiunte, tabelle ricostruite con le stesse righe), con una copia di sicurezza prima.`
       : 'La struttura delle partite è diversa da quella dell\'edizione precedente e non viene dalla versione immediatamente precedente: l\'istanza di rilascio non ha una strada automatica per convertirla (serve una conversione una tantum su copia, dopo il tuo sì).');
   }
   if (!manifestoPrima || manifestoPrima.algoritmoImpronta !== ALGORITMO_IMPRONTA_SCHEMA) avvisi.push(`L'edizione precedente (${precedente.cartella}) usa un altro algoritmo per l'impronta dello schema delle partite: il confronto della struttura non è possibile.`);

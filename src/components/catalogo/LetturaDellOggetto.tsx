@@ -9,6 +9,7 @@ import { NotaPuntiDote } from '../shared/NotaPuntiDote';
 import { Link } from 'react-router-dom';
 import { ComandiVideogioco } from '../guida/ComandiVideogioco';
 import { TestoNote } from '../shared/TestoNote';
+import { quandoDaLeDoti } from '../../../shared/conseguimentiLettura';
 
 type Lettura = NonNullable<OggettoDettaglioDto['lettura']>;
 type Voce = LibroDto | FilmDto | VideogiocoDto;
@@ -31,7 +32,8 @@ function Avanzamento<T extends Voce>({ voce, titolo, tipo, totale, passo, partit
       onCambia={(valore) => coda.accoda(voce, valore)} />
     {!!voce.effettiTesto.length && <ul className="m-0 pl-5 testo-13">{voce.effettiTesto.map((e, i) => <li key={i}><TestoNote testo={e} /></li>)}</ul>}
     {voce.dettagli && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary"><TestoNote testo={voce.dettagli} daParole="conteggi" /></p>}
-    {partitaId !== null ? <NotaPuntiDote cosa={tipo === 'videogioco' ? 'i round giocati' : tipo === 'cinema' ? 'le visioni' : 'le sessioni completate'} /> : <p className="m-0 testo-13 text-text-muted">Attiva una partita per registrare l’avanzamento.</p>}
+    {partitaId !== null ? <NotaPuntiDote cosa={tipo === 'videogioco' ? 'i round giocati' : tipo === 'cinema' ? 'le visioni' : 'le sessioni completate'}
+      dettaglio={`Le Doti arrivano ${tipo === 'libro' ? quandoDaLeDoti('libro') : tipo === 'videogioco' ? quandoDaLeDoti('videogioco') : quandoDaLeDoti('film', tipo)}.`} /> : <p className="m-0 testo-13 text-text-muted">Attiva una partita per registrare l’avanzamento.</p>}
   </>;
 }
 
@@ -60,6 +62,6 @@ export function LetturaDellOggetto({ lettura, partitaId, onSalvata }: { lettura:
     <ComandiVideogioco key={`${partitaId}:${lettura.voce.chiave}`} gioco={lettura.voce} partitaId={partitaId} onSalvata={(voce) => onSalvata({ ...lettura, voce })} />
     {!!lettura.voce.effettiTesto.length && <ul className="m-0 pl-5 testo-13">{lettura.voce.effettiTesto.map((e, i) => <li key={i}><TestoNote testo={e} /></li>)}</ul>}
     {lettura.voce.dettagli && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary"><TestoNote testo={lettura.voce.dettagli} daParole="conteggi" /></p>}
-    {partitaId !== null ? <NotaPuntiDote cosa="i round completati" /> : <p className="m-0 testo-13 text-text-muted">Attiva una partita per registrare sessioni e round.</p>}
+    {partitaId !== null ? <NotaPuntiDote cosa="i round completati" dettaglio={`Le Doti arrivano ${quandoDaLeDoti('videogioco')}.`} /> : <p className="m-0 testo-13 text-text-muted">Attiva una partita per registrare sessioni e round.</p>}
   </>;
 }

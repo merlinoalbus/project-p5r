@@ -9,7 +9,8 @@
 // Guida: nell'editor non si scrive, si sceglie.
 //
 // I progressi distinguono due cose. **Calcolati dalla partita**: gli eventi «entra in squadra» (letti da
-// `membro_squadra_partita.in_squadra`, tre stati come i semafori), il grado cliente dei negozi che ce l'hanno (dalla spesa segnata),
+// `membro_squadra_partita.in_squadra`, tre stati come i semafori), le aperture dei Dedali, gli eventi di calendario (il terzo semestre, dal
+// giorno della partita), il grado cliente dei negozi che ce l'hanno (dalla spesa segnata),
 // i contatori. **Da segnare**: gli eventi manuali residui, le attività che si contano per volte svolte (`tracciamento = 'svolta'`),
 // i punti dei negozi con programma manuale. Segnare a mano una cosa calcolata è rifiutato (400).
 // ============================================================
@@ -19,8 +20,8 @@ import { giocabili } from './squadraService.js';
 import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
 import { elementiDeiContatori, statoAlGiorno, statoDisponibilitaPartita } from './disponibilitaService.js';
-import { esitoAperturaDedalo, valutazione } from './condizioni/valutatore.js';
-import { impostaEventoStoria, ranghiPerEvento } from './semaforiService.js';
+import { esitoAperturaDedalo, esitoEventoDiCalendario, valutazione } from './condizioni/valutatore.js';
+import { impostaEventoStoria, ranghiPerEvento, rifiutaEventoDiCalendario } from './semaforiService.js';
 import { leggiProgrammaPunti } from './negoziService.js';
 import { verificaPartita } from './verificaPartita.js';
 import { ricevuteAttive, vociDegliEventi, vociDeiContatori, vociDeiTurni } from './vociDeiProgressi.js';
@@ -32,7 +33,7 @@ import { promemoriaLibriPerAttivita } from './modificatoriLibri.js';
 import { httpErrors } from '../utils/httpError.js';
 import { confidentiRomanzabili } from './relazioneRomanticaService.js';
 import { setDlcConPersone } from './setDlcService.js';
-import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, dedaloDellEvento, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataDellEvento, dataValida, dedaloDellEvento, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { ElenchiRegoleDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, RispostaValutaGruppiDto } from '../../shared/types.js';
 
 /** I negozi con il loro programma punti (null se non ne hanno). */
@@ -79,7 +80,7 @@ export function elenchiRegole(): ElenchiRegoleDto {
     attivita: attivitaConteggiabili().map((a) => ({ chiave: a.chiave, nome: a.nome })),
     // Con il programma punti: l'editor offre «punti negozio» solo ai programmi manuali e «grado cliente» solo a chi ha il rango.
     negozi: negoziConProgramma().map((n) => ({ chiave: n.chiave, nome: n.nome, programma: n.programma?.calcolo ?? null })),
-    eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null || dedaloDellEvento(e.chiave) !== null })),
+    eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null || dedaloDellEvento(e.chiave) !== null || dataDellEvento(e.chiave) !== null })),
     contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome })),
     // L6: luoghi, tutti i quartieri e gli inviti (questi ultimi si leggono soltanto)
     luoghi: prepared('SELECT l.chiave, l.nome, q.nome AS gruppo FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine')
@@ -129,6 +130,10 @@ export function progressiPartita(id: number): ProgressiPartitaDto {
         const a = esitoAperturaDedalo(e.chiave, st);
         return { chiave: e.chiave, nome: e.nome, origine: 'calcolato' as const, avvenuto: a.stato === 'verde' ? true : a.stato === 'rosso' ? false : null, apertura: a.condizione };
       }
+      // un evento di calendario (il terzo semestre) vale dal suo giorno: senza il giorno della partita non si sa
+      const calendario = esitoEventoDiCalendario(e.chiave, st);
+      if (calendario) return { chiave: e.chiave, nome: e.nome, origine: 'calcolato' as const, avvenuto: st.dataGioco ? calendario.stato === 'verde' : null, dal: calendario.dal,
+        ...(serveA.has(e.chiave) ? { serveA: serveA.get(e.chiave) } : {}) };
       const membro = membroDellEvento(e.chiave);
       if (!membro) return { chiave: e.chiave, nome: e.nome, origine: 'manuale' as const,
         avvenuto: eventiManuali.get(e.chiave) ?? false,
@@ -203,13 +208,14 @@ export function progressiDellaPartita(id: number): ProgressiPartitaDto {
   return progressiPartita(id);
 }
 
-/** Segna a mano un evento di storia; risponde con i progressi. Gli eventi calcolati (squadra, apertura dei Dedali) si rifiutano (400). */
+/** Segna a mano un evento di storia; risponde con i progressi. Gli eventi calcolati (squadra, apertura dei Dedali, calendario) si rifiutano (400). */
 export function segnaEventoStoria(id: number, evento: string, avvenuto: boolean): ProgressiPartitaDto {
   verificaPartita(id);
   if (!EVENTI_STORIA.some((e) => e.chiave === evento)) throw httpErrors.notFound('evento-non-trovato', 'Evento di storia non trovato.');
   // «Entra in squadra» si legge dalla squadra della partita: si segna lì, non qui.
   if (membroDellEvento(evento)) throw httpErrors.badRequest('evento-calcolato', 'Questo evento si calcola dalla squadra della partita (Partita → Denaro e squadra): non si segna a mano.');
   if (dedaloDellEvento(evento)) throw httpErrors.badRequest('evento-calcolato', 'L’apertura di un Dedalo dei Memento si calcola dai Palazzi conclusi nella partita: non si segna a mano.');
+  rifiutaEventoDiCalendario(evento);
   // lo stesso dato del «Condizione soddisfatta» dei Confidenti (`confermaRequisito`); evento e data di modifica della partita
   // cambiano insieme o per niente
   getDb().transaction(() => {

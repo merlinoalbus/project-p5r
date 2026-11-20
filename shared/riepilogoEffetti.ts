@@ -128,6 +128,8 @@ const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   puntiConfidenti: { titolo: 'Punti di rango' },
   restituiti: { titolo: 'Restituiti' },
   venduti: { titolo: 'Venduti' },
+  // l'oggetto usato esce e basta (il Laptop rotto che si ripara, i frullati bevuti, ciò che si cede in uno scambio): nessuno yen
+  usati: { titolo: 'Usati' },
   trofei: { titolo: 'Trofei' },
   pesca: { titolo: 'Pesca' },
   fortuna: { titolo: 'Fortuna di Chihaya' },
@@ -406,6 +408,7 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       case 'uscitaOggetto': {
         const nome = n.frase.oggetto?.(e.oggetto) ?? 'Oggetto del catalogo';
         if (e.modo === 'restituito') { riga('restituiti', nome, e.quantita > 1 ? `×${e.quantita}` : undefined); break; }
+        if (e.modo === 'usato') { riga('usati', nome, e.quantita > 1 ? `×${e.quantita}` : undefined); break; }
         // il ricavo solo se indicato: «×2 · ¥1.000», «¥500», o nessun dettaglio; la nota degli yen solo per chi ha il ricavo
         const dettaglio = [e.quantita > 1 ? `×${e.quantita}` : '', e.prezzo ? yen(e.prezzo) : ''].filter(Boolean).join(' · ');
         riga('venduti', nome, dettaglio || undefined);

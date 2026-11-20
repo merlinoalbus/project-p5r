@@ -8,8 +8,8 @@
 //   - `manifesto.json`   le versioni e l'impronta con cui l'istanza controlla di avere in mano proprio quella struttura;
 //   - `font/`            i caratteri.
 // La struttura di `partite.db` è quella di `partite-vuoto.db`, e a ogni avvio la si confronta col manifesto (versioni di `main` e di
-// `utente`, impronta dello schema `utente`), DOPO il passaggio additivo di `server/db/passaggioVersione.ts`: un `partite.db` alla
-// versione immediatamente precedente riceve le strutture nuove col testo di questo `partite-vuoto.db`, quindi ritrova l'impronta del
+// `utente`, impronta dello schema `utente`), DOPO il passaggio di `server/db/passaggioVersione.ts`: un `partite.db` alla versione
+// immediatamente precedente riceve le strutture nuove (e le tabelle ricostruite con le stesse righe) col testo di questo `partite-vuoto.db`, quindi ritrova l'impronta del
 // manifesto. Se non coincide l'avvio si ferma: una struttura diversa (un'altra versione, una tabella in più o in meno) non si «aggiusta»
 // in esercizio (progetto §5: conversione una tantum su copia, dopo il sì dell'utente).
 //
@@ -104,7 +104,7 @@ export function verificaSchemaUtente(db: AppDatabase, manifesto: ManifestoEdizio
     if (impronta !== manifesto.improntaSchemaPartite) problemi.push(`l'impronta dello schema di partite.db (${impronta.slice(0, 12)}…) non coincide con quella del manifesto (${manifesto.improntaSchemaPartite.slice(0, 12)}…)`);
   }
   if (problemi.length > 0) {
-    throw new ErroreEdizione(`la struttura delle partite non corrisponde all'edizione: ${problemi.join('; ')}. Oltre al passaggio additivo dalla versione immediatamente precedente non c'è conversione automatica: serve l'edizione giusta o una conversione una tantum su copia, decisa dall'utente.`);
+    throw new ErroreEdizione(`la struttura delle partite non corrisponde all'edizione: ${problemi.join('; ')}. Oltre al passaggio dalla versione immediatamente precedente non c'è conversione automatica: serve l'edizione giusta o una conversione una tantum su copia, decisa dall'utente.`);
   }
 }
 

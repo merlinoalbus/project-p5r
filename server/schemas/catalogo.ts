@@ -4,7 +4,7 @@
 
 import { z } from 'zod';
 import { condizioneSpillo as condizioneDiUnPin } from './mappe.js';
-import { categoriaArticolo, dataGioco } from './comuni.js';
+import { categoriaArticolo, dataGioco, parziale } from './comuni.js';
 import { foglieCondizione } from '../../shared/condizioniSpillo.js';
 import { TIPI_CATALOGO } from '../../shared/types.js';
 import { FASCE_ORARIO, GIORNI_SETTIMANA_CHIAVI } from '../../shared/orariNegozio.js';
@@ -144,15 +144,35 @@ const datiLibro = z.object({
   dettagli: testo(2000).nullable().optional(),
 });
 
-/** Le regole che valgono anche quando si corregge un solo campo: al cinema una visione basta, «ripetuto» ha senso solo lì. */
-const rifinisciFilm = (d: { dove?: string; sessioni?: number | null; effetti_json?: string }, ctx: z.RefinementCtx) => {
-  if (d.dove === 'cinema' && d.sessioni != null && d.sessioni !== 1) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['sessioni'], message: 'Un film al cinema si completa in una visione.' });
-  if (d.dove === 'dvd' && typeof d.effetti_json === 'string' && d.effetti_json.includes('"ripetuto":true')) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['effetti_json'], message: 'Le visioni successive valgono solo al cinema.' });
+/** Una regola di una riga del catalogo che non vale: il campo e il motivo. */
+export interface ProblemaRigaCatalogo { campo: string; messaggio: string }
+
+/** Se gli effetti (il testo JSON salvato o l'elenco) hanno una voce `ripetuto`. Un testo che non si legge non ne ha. */
+function haVociRipetute(effetti: unknown): boolean {
+  let voci = effetti;
+  if (typeof voci === 'string') { try { voci = JSON.parse(voci); } catch { return false; } }
+  return Array.isArray(voci) && voci.some((v) => typeof v === 'object' && v !== null && (v as { ripetuto?: unknown }).ripetuto === true);
+}
+
+/** Le regole di un film o DVD: al cinema una visione basta, «ripetuto» ha senso solo lì. Valgono sui campi mandati (schema) e sulla riga
+ *  che risulta da una correzione (riga salvata + campi mandati, `catalogoService`). */
+export const REGOLE_FILM = { campi: ['dove', 'sessioni', 'effetti_json'], verifica: (d: Record<string, unknown>): ProblemaRigaCatalogo[] => {
+  const problemi: ProblemaRigaCatalogo[] = [];
+  if (d.dove === 'cinema' && d.sessioni != null && d.sessioni !== 1) problemi.push({ campo: 'sessioni', messaggio: 'Un film al cinema si completa in una visione.' });
+  if (d.dove === 'dvd' && haVociRipetute(d.effetti_json)) problemi.push({ campo: 'effetti_json', messaggio: 'Le visioni successive valgono solo al cinema.' });
+  return problemi;
+} } as const;
+/** Le regole di un'attività: la paga in yen è dei lavori. Valgono come quelle dei film. */
+export const REGOLE_ATTIVITA = { campi: ['tipo', 'paga_yen', 'paga_massima'], verifica: (d: Record<string, unknown>): ProblemaRigaCatalogo[] =>
+  d.tipo !== undefined && d.tipo !== 'lavoro' && (d.paga_yen != null || d.paga_massima != null) ? [{ campo: 'paga_yen', messaggio: 'La paga vale solo per un lavoro.' }] : [],
+} as const;
+
+/** Le regole come rifinitura di uno schema (completo o parziale): ogni problema è un errore sul suo campo. */
+const rifinitura = (regole: { verifica: (d: Record<string, unknown>) => ProblemaRigaCatalogo[] }) => (d: Record<string, unknown>, ctx: z.RefinementCtx) => {
+  for (const p of regole.verifica(d)) ctx.addIssue({ code: 'custom', path: [p.campo], message: p.messaggio });
 };
-/** La paga in yen è dei lavori. */
-const rifinisciAttivita = (d: { tipo?: string; paga_yen?: number | null; paga_massima?: number | null }, ctx: z.RefinementCtx) => {
-  if (d.tipo !== undefined && d.tipo !== 'lavoro' && (d.paga_yen != null || d.paga_massima != null)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['paga_yen'], message: 'La paga vale solo per un lavoro.' });
-};
+const rifinisciFilm = rifinitura(REGOLE_FILM);
+const rifinisciAttivita = rifinitura(REGOLE_ATTIVITA);
 
 /** Campi di un film o DVD scrivibili dall'utente. */
 const datiFilmBase = z.object({
@@ -168,7 +188,7 @@ const datiFilmBase = z.object({
   dettagli: testo(2000).nullable().optional(),
 });
 const datiFilm = datiFilmBase.superRefine(rifinisciFilm);
-const datiFilmParziale = datiFilmBase.partial().superRefine(rifinisciFilm);
+const datiFilmParziale = parziale(datiFilmBase).superRefine(rifinisciFilm);
 
 /** La guida del quiz di un'attivita' (`shared/quizAttivita.ts`): strutturata, con i limiti condivisi
  *  col modulo; si salva normalizzata (righe vuote tolte), e un quiz che resta senza domanda ne' elementi vale «nessun quiz». */
@@ -210,7 +230,7 @@ const datiAttivitaBase = z.object({
     .transform((v) => (v === null ? null : JSON.stringify(normalizzaEsitiAttivita(v)))).optional(),
 });
 const datiAttivita =datiAttivitaBase.superRefine(rifinisciAttivita);
-const datiAttivitaParziale = datiAttivitaBase.partial().superRefine(rifinisciAttivita);
+const datiAttivitaParziale = parziale(datiAttivitaBase).superRefine(rifinisciAttivita);
 
 /** Campi di un luogo della città scrivibili dall'utente. */
 const datiLuogo = z.object({
@@ -263,8 +283,9 @@ const datiCruciverba = z.object({
 
 /** Lo schema dipende dal tipo nel percorso: un'unione lascerebbe passare un articolo come negozio, scartandone i campi. */
 export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, libro: datiLibro, film: datiFilm, attivita: datiAttivita, luogo: datiLuogo, domanda: datiDomanda, cruciverba: datiCruciverba } as const;
-/** Gli stessi, per la correzione di alcuni campi soltanto: film e attività portano la rifinitura sulla forma parziale. */
-export const SCHEMI_CATALOGO_PARZIALI = { negozio: datiNegozio.partial(), articolo: datiArticolo.partial(), libro: datiLibro.partial(), film: datiFilmParziale, attivita: datiAttivitaParziale, luogo: datiLuogo.partial(), domanda: datiDomanda.partial(), cruciverba: datiCruciverba.partial() } as const;
+/** Gli stessi, per la correzione di alcuni campi soltanto: senza valori predefiniti (`parziale`), così un campo assente resta com'era
+ *  invece di tornare al predefinito (`dove` «cinema», `tipo` «altro», `cosa_offre` vuoto…); film e attività portano la rifinitura sulla forma parziale. */
+export const SCHEMI_CATALOGO_PARZIALI = { negozio: parziale(datiNegozio), articolo: parziale(datiArticolo), libro: parziale(datiLibro), film: datiFilmParziale, attivita: datiAttivitaParziale, luogo: parziale(datiLuogo), domanda: parziale(datiDomanda), cruciverba: parziale(datiCruciverba) } as const;
 /** L3: la chiave del luogo nel percorso dell'editor del posto (`/catalogo/posto/:quartiere/:luogo`). */
 export const paramsPosto = z.object({ quartiere: z.string().min(1).max(80), luogo: z.string().min(1).max(160) });
 const campiGrezzi = z.record(z.string(), z.unknown());

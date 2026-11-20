@@ -58,7 +58,7 @@ export function BeneficiPesca({ benefici }: { benefici: BeneficioPescaDto[] }) {
 export function RiepilogoOsservazionePesca({ osservazione: o }: { osservazione: OsservazionePesca }) {
   return <div className="flex min-w-0 flex-col gap-1 testo-13">
     <span>Rango Perizia: {o.rangoPeriziaOsservato ?? 'non noto'}. Tentativi fatti: {o.tentativiConsumati ?? 'non noti'}.</span>
-    <span>Meteo: {o.meteo ?? 'non noto'}; allerta gelo: {osservato(o.allertaGelo)}. Terzo semestre in corso: {osservato(o.faseTerzoSemestre)}.</span>
+    <span>Meteo: {o.meteo ?? 'non noto'}; allerta gelo: {osservato(o.allertaGelo)}.</span>
     <span>Boilie sospetto posseduto: {osservato(o.escaSpecialePosseduta)}. Quota pagata: {osservato(o.quota.pagata)}.</span>
     <span>Catture: {o.catture === null ? 'non note' : o.catture.length === 0 ? 'nessuna' : o.catture.length}.</span>
     {o.catture !== null && !!o.catture.length && <ul className="m-0 pl-4">{o.catture.map(c => <li key={c.id}>{specie(c.specie)} · tentativo {c.tentativo ?? 'non noto'} · ordine {c.posizione ?? 'non noto'}</li>)}</ul>}

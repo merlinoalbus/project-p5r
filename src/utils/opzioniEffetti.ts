@@ -20,9 +20,9 @@ export function conCorrente(opzioni: OpzioneSelettore[], chiave: string, nome: s
   return !chiave || opzioni.some((o) => o.chiave === chiave) ? opzioni : [{ chiave, nome }, ...opzioni];
 }
 
-/** Gli eventi di storia che si segnano a mano (quelli «entra in squadra» si calcolano dalla squadra), con quello già scelto. */
+/** Gli eventi di storia che si segnano a mano (quelli «entra in squadra» si calcolano dalla squadra, quelli di calendario dal giorno), con quello già scelto. */
 export function opzioniStoria(corrente: string): OpzioneSelettore[] {
-  return conCorrente(EVENTI_STORIA.filter((e) => !('membro' in e)).map((e) => ({ chiave: e.chiave, nome: e.nome })), corrente, 'Evento non più nell’elenco');
+  return conCorrente(EVENTI_STORIA.filter((e) => !('membro' in e) && !('dal' in e)).map((e) => ({ chiave: e.chiave, nome: e.nome })), corrente, 'Evento non più nell’elenco');
 }
 
 /** Le domande con il testo, quelle del giorno della voce per prime. */

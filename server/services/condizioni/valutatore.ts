@@ -19,7 +19,7 @@ import { t } from '../traduzioniService.js';
 import { nomiCondizioniMemo, pinCitato } from './nomiCondizioni.js';
 import { condizioneAperturaDedalo, condizioneDelLuogo, condizioneEffettivaQuartiere, tuttiGliInviti, type RigaInvito } from './condizioneEffettiva.js';
 import {
-  ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataConArticolo, dataLeggibile, dedaloDellEvento, descriviRequisitoSpillo,
+  ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataConArticolo, dataDellEvento, dataLeggibile, dedaloDellEvento, descriviRequisitoSpillo,
   membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo
 } from '../../../shared/condizioniSpillo.js';
 import { guastaLAperto, nomeMeteo, piove } from '../../../shared/meteoPartita.js';
@@ -114,6 +114,20 @@ export function esitoAperturaDedalo(evento: string, st: StatoValutazione, nomi: 
   const a = dedalo ? esitoAperturaDelDedalo(dedalo, st, nomi) : null;
   if (!a || a.condizione === null) return { stato: 'grigio', dettaglio: `${nome}: il Dedalo non ha una condizione d’apertura`, condizione: null };
   return { stato: a.stato, condizione: a.condizione, dettaglio: `${nome}: ${a.stato === 'verde' ? 'sì' : a.stato === 'rosso' ? 'non ancora' : 'non si può dire'} (si apre ${a.condizione})` };
+}
+
+/**
+ * Un evento di calendario (`dataDellEvento`: il terzo semestre dal 10 gennaio) al giorno dello stato (`dataGioco`: il giorno della partita, o quello
+ * della visita di pesca): verde da quel giorno in poi nell'ordine del calendario di gioco, rosso prima e senza un giorno, come la condizione «data».
+ * Null se l'evento non è di calendario. `dal` è il giorno dell'evento.
+ */
+export function esitoEventoDiCalendario(evento: string, st: Pick<StatoValutazione, 'dataGioco'>): { stato: SemaforoRequisitoDto['stato']; dettaglio: string; dal: string } | null {
+  const dal = dataDellEvento(evento);
+  if (!dal) return null;
+  const nome = EVENTI_STORIA.find((e) => e.chiave === evento)?.nome ?? evento;
+  if (!st.dataGioco) return { stato: 'rosso', dal, dettaglio: `${nome}: vale ${dataConArticolo(dal, 'da')}, ma il giorno corrente della partita non è impostato (Partita → Oggi)` };
+  const ok = ordineGioco(st.dataGioco) >= ordineGioco(dal);
+  return { stato: ok ? 'verde' : 'rosso', dal, dettaglio: ok ? `${nome}: sì, ${dataConArticolo(dal, 'da')} (oggi ${dataLeggibile(st.dataGioco)})` : `${nome}: non ancora, vale ${dataConArticolo(dal, 'da')} (oggi è ${dataConArticolo(st.dataGioco)})` };
 }
 
 /**
@@ -342,6 +356,10 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     }
     case 'evento': {
       const nome = EVENTI_STORIA.find((e) => e.chiave === r.evento)?.nome ?? r.evento;
+      // un evento di calendario vale dal suo giorno: mai segnato a mano, da una voce o nelle visite, e quindi mai «da segnare» nemmeno in un
+      // requisito di rango; una riga vecchia di `evento_storia_partita` o del registro della pesca non lo cambia
+      const calendario = esitoEventoDiCalendario(r.evento, st);
+      if (calendario) return esito('evento', calendario.stato, calendario.dettaglio);
       if(EVENTI_PESCA.includes(r.evento as typeof EVENTI_PESCA[number])){
         const valore=st.fattiPesca?.get(r.evento)??'ignoto';
         return esito('evento',valore==='ignoto'?'grigio':valore==='avvenuto'?'verde':'rosso',`${nome}: ${valore==='ignoto'?'non attestato per questo momento':valore==='avvenuto'?'avvenuto secondo le fonti temporali':'non ancora avvenuto al limite osservato'}`);
@@ -488,7 +506,7 @@ export function valutazione(c: RequisitoSpillo, st: StatoValutazione, nomi: Nomi
 
 /**
  * Le condizioni di data reggono quel giorno? Senza partita: per scegliere, fra più ingressi o più regole d'atterraggio, quella del giorno.
- * Date, intervalli e finestre contano a ogni profondità; le altre foglie restano indeterminate. Non sostituisce l'accessibilità della mappa.
+ * Date, intervalli, finestre ed eventi di calendario contano a ogni profondità; le altre foglie restano indeterminate. Non sostituisce l'accessibilità della mappa.
  */
 export function copreIlGiorno(condizioni: readonly RequisitoSpillo[], giorno: string): boolean {
   const oggi = ordineGioco(giorno);
@@ -499,6 +517,8 @@ export function copreIlGiorno(condizioni: readonly RequisitoSpillo[], giorno: st
     if (c.tipo === 'data') return oggi >= ordineGioco(c.dal);
     if (c.tipo === 'intervallo') return oggi >= ordineGioco(c.dal) && oggi <= ordineGioco(c.al);
     if (c.tipo === 'finestra-palazzo') return nellaFinestraPalazzo(c.dungeon, giorno);
+    // un evento di calendario (il terzo semestre) è una data anche lui
+    if (c.tipo === 'evento') { const dal = dataDellEvento(c.evento); return dal ? oggi >= ordineGioco(dal) : null; }
     if (c.tipo === 'non') { const v = valuta(c.condizione); return typeof v === 'boolean' ? !v : v; }
     if (c.tipo !== 'gruppo') return null;
     const esiti = c.condizioni.map(valuta).filter((v) => v !== undefined);

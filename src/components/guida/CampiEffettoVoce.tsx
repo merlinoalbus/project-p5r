@@ -189,11 +189,13 @@ type Uscita = Extract<EffettoVoce, { tipo: 'uscitaOggetto' }>;
 
 /**
  * 2026-10-28 (richiesta dell'utente: «non c'è un vendi prodotto/restituisci prodotto per gestire vendita, restituzione»): come esce l'oggetto, quale,
- * quante copie e, per la vendita, il ricavo facoltativo. «Restituito» propone i prestiti (Biblioteca, DVD a noleggio); «Venduto» tutto il catalogo.
+ * quante copie e, per la vendita, il ricavo facoltativo. «Restituito» propone i prestiti (Biblioteca, DVD a noleggio); «Venduto» e «Usato» (il
+ * Laptop rotto che si ripara, i frullati bevuti, ciò che si cede in uno scambio: esce senza yen) tutto il catalogo. Il ricavo solo per «Venduto».
  * Le note compaiono solo quando dicono qualcosa che i campi non dicono (il prestito che torna in negozio, il ricavo che entra nel saldo).
  */
 export function CampiUscitaOggetto({ effetto: e, oggetti, onCambia }: { effetto: Uscita; oggetti: NonNullable<ElenchiVoce['effetti']['oggetti']>; onCambia: (e: Uscita) => void }) {
   const restituito = e.modo === 'restituito';
+  const venduto = e.modo === 'venduto';
   const elenco = restituito ? oggetti.filter((o) => o.prestito) : oggetti;
   const senza = (x: Uscita): Uscita => ({ tipo: 'uscitaOggetto', oggetto: x.oggetto, quantita: x.quantita, modo: x.modo });
   return (
@@ -202,16 +204,16 @@ export function CampiUscitaOggetto({ effetto: e, oggetti, onCambia }: { effetto:
         onCambia={(v) => {
           if (v === e.modo) return;
           const modo = v as ModoUscitaOggetto;
-          // tornando a «Restituito» il ricavo non ha più senso, e un oggetto che non si presta va scelto di nuovo
-          const resta = modo === 'venduto' || oggetti.some((o) => o.chiave === e.oggetto && o.prestito);
+          // il ricavo vale solo per «Venduto» (cambiando modo se ne va); tornando a «Restituito» un oggetto che non si presta va scelto di nuovo
+          const resta = modo !== 'restituito' || oggetti.some((o) => o.chiave === e.oggetto && o.prestito);
           onCambia({ tipo: 'uscitaOggetto', oggetto: resta ? e.oggetto : '', quantita: e.quantita, modo });
         }} />
       <div className="flex flex-wrap items-end gap-2">
-        <Selettore className="min-w-[12rem] flex-1" etichetta={restituito ? 'Prestito restituito' : 'Oggetto venduto'} valore={e.oggetto}
+        <Selettore className="min-w-[12rem] flex-1" etichetta={restituito ? 'Prestito restituito' : venduto ? 'Oggetto venduto' : 'Oggetto usato'} valore={e.oggetto}
           opzioni={conCorrente(opzioniOggettiDelCatalogo(elenco), e.oggetto, 'Oggetto non più nel catalogo')}
           onCambia={(v) => onCambia({ ...e, oggetto: v })} />
         <CampoQuantita valore={e.quantita} onCambia={(quantita) => onCambia({ ...e, quantita })} />
-        {!restituito && (
+        {venduto && (
           <label className="flex flex-col gap-1 testo-13">Ricavo in yen (facoltativo)
             <input className="form-input min-h-11 w-32 tabular-nums" type="number" inputMode="numeric" min={1} max={YEN_MASSIMI_EFFETTO} step={1} value={e.prezzo ?? ''}
               onChange={(ev) => { const n = Math.min(YEN_MASSIMI_EFFETTO, Math.max(0, Math.trunc(Number(ev.target.value) || 0))); onCambia(n >= 1 ? { ...senza(e), prezzo: n } : senza(e)); }} />
@@ -219,7 +221,7 @@ export function CampiUscitaOggetto({ effetto: e, oggetti, onCambia }: { effetto:
         )}
       </div>
       {restituito && <p className="m-0 testo-12 text-text-secondary text-pretty">Dal giorno della voce il prestito torna disponibile in negozio.</p>}
-      {!restituito && !!e.prezzo && <p className="m-0 testo-12 text-text-secondary text-pretty">Spuntando la voce il ricavo entra da solo nel saldo; togliendo la spunta esce.</p>}
+      {venduto && !!e.prezzo && <p className="m-0 testo-12 text-text-secondary text-pretty">Spuntando la voce il ricavo entra da solo nel saldo; togliendo la spunta esce.</p>}
     </div>
   );
 }

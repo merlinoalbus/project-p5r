@@ -8,7 +8,8 @@
 //   2. initDb({ soloLettura })   — apre gioco.db SENZA WAL, mai creato né rinominato, e attacca partite.db come `utente`;
 //   3. verificaSolaLettura()     — una scrittura di prova su gioco.db deve fallire con SQLITE_READONLY (terzo livello di difesa);
 //   4. portaAllaVersioneAttuale({ file: ['partite'] }) — un partite.db alla versione IMMEDIATAMENTE PRECEDENTE (l'avanzamento di chi
-//      gioca, che sopravvive al cambio di edizione) riceve le sole strutture nuove, col testo letto dal `partite-vuoto.db` dell'edizione e
+//      gioca, che sopravvive al cambio di edizione) riceve le strutture nuove (e le tabelle ricostruite con le stesse righe), col testo
+//      letto dal `partite-vuoto.db` dell'edizione e
 //      con la copia di sicurezza in BACKUP_DIR prima di scrivere (`server/db/passaggioVersione.ts`); gioco.db no: è l'edizione stessa,
 //      in sola lettura, e deve già essere alla versione del codice;
 //   5. verificaVersioni()        — i due file alla versione che questo codice legge (un'edizione di un'altra versione dell'app non si serve);

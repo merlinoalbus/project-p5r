@@ -326,7 +326,6 @@ export function RegistraVisitaPesca({ partitaId, collega, voce, onChiudi, onCamb
             <MeteoOsservatoPesca valore={osservazione.meteo} disabilitato={spento} onCambia={meteo => cambia({ ...osservazione, meteo })} />
             <SceltaOsservata etichetta="Allerta ondata di gelo" valore={osservazione.allertaGelo} disabilitato={spento} onCambia={allertaGelo => cambia({ ...osservazione, allertaGelo })} />
             <SceltaOsservata etichetta="Avevi il Boilie sospetto nella visita?" valore={osservazione.escaSpecialePosseduta} disabilitato={spento} onCambia={escaSpecialePosseduta => cambia({ ...osservazione, escaSpecialePosseduta })} />
-            <SceltaOsservata etichetta="Terzo semestre già in corso?" valore={osservazione.faseTerzoSemestre} disabilitato={spento} onCambia={faseTerzoSemestre => cambia({ ...osservazione, faseTerzoSemestre })} />
             <Selettore etichetta="Come è finita la visita" valore={osservazione.finale.tipo} disabilitato={spento}
               opzioni={[{ chiave: 'ignoto', nome: 'Non lo so' }, { chiave: 'uscita-dopo-riscossione', nome: 'Uscito dopo aver ritirato i premi' }, { chiave: 'uscita-senza-riscossione', nome: 'Uscito senza ritirare i premi' }]}
               onCambia={v => cambia(conFinale(osservazione, v as OsservazionePesca['finale']['tipo'], nuovoId))} />

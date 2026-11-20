@@ -111,19 +111,20 @@ export type EffettoDiStatoVoce =
   /** 2026-10-28 («non c'è un vendi prodotto/restituisci prodotto per gestire vendita, restituzione»): `quantita` copie dell'oggetto del catalogo
    *  escono dalle copie possedute (il registro unico delle uscite, `utente.consumo_oggetto_partita`), mai sotto zero. `modo` «restituito»: un
    *  prestito (il libro della Biblioteca, il DVD a noleggio) torna, e la regola «restituzione» del rifornimento lo rende di nuovo disponibile;
-   *  «venduto»: con `prezzo` (facoltativo, il ricavo di tutte le copie) gli yen entrano da soli nel saldo (decisione 18). */
+   *  «venduto»: con `prezzo` (facoltativo, il ricavo di tutte le copie) gli yen entrano da soli nel saldo (decisione 18); «usato»: l'oggetto
+   *  esce e basta (il Laptop rotto che si ripara, i frullati bevuti, ciò che si cede in uno scambio): nessuno yen, nessun prezzo, non torna in vendita. */
   | { tipo: 'uscitaOggetto'; oggetto: string; quantita: number; modo: ModoUscitaOggetto; prezzo?: number };
 export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'persona' || e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito' || e.tipo === 'oggetto' || e.tipo === 'trofeo' || e.tipo === 'sblocco'
   || e.tipo === 'personaTolta' || e.tipo === 'puntiConfidente' || e.tipo === 'uscitaOggetto';
 /**
  * Gli effetti di stato che non sono uno stato sì/no ma una riga che somma, della voce e dell'effetto (l'oggetto ricevuto, i punti a un Confidente,
- * l'oggetto restituito o venduto): ogni voce spuntata porta la sua, nessuna «c'era già», e togliendo la spunta se ne va solo quella.
+ * l'oggetto restituito, venduto o usato): ogni voce spuntata porta la sua, nessuna «c'era già», e togliendo la spunta se ne va solo quella.
  */
 export const eEffettoCheSomma = (e: { tipo: string }): boolean => e.tipo === 'oggetto' || e.tipo === 'puntiConfidente' || e.tipo === 'uscitaOggetto';
-/** Come esce un oggetto con l'effetto «uscitaOggetto»: restituito (un prestito) o venduto. */
-export type ModoUscitaOggetto = 'restituito' | 'venduto';
+/** Come esce un oggetto con l'effetto «uscitaOggetto»: restituito (un prestito), venduto o usato (esce senza yen e senza tornare in vendita). */
+export type ModoUscitaOggetto = 'restituito' | 'venduto' | 'usato';
 export const MODI_USCITA_OGGETTO: ReadonlyArray<{ chiave: ModoUscitaOggetto; nome: string }> = [
-  { chiave: 'restituito', nome: 'Restituito' }, { chiave: 'venduto', nome: 'Venduto' },
+  { chiave: 'restituito', nome: 'Restituito' }, { chiave: 'venduto', nome: 'Venduto' }, { chiave: 'usato', nome: 'Usato' },
 ];
 /** Le note di rango (♪, ♪♪, ♪♪♪) che l'effetto «puntiConfidente» dà a un Confidente, come una risposta nei dialoghi. */
 export type NotePuntiConfidente = 1 | 2 | 3;
@@ -275,7 +276,7 @@ function normalizzaEffettoBase(o: Record<string, unknown>): EffettoVoce | null {
   }
   if (o.tipo === 'uscitaOggetto') {
     const q = quantita(o.quantita);
-    if (!chiaveOk(o.oggetto, 199) || !q || (o.modo !== 'restituito' && o.modo !== 'venduto')) return null;
+    if (!chiaveOk(o.oggetto, 199) || !q || (o.modo !== 'restituito' && o.modo !== 'venduto' && o.modo !== 'usato')) return null;
     // una sola forma canonica: il prezzo esiste solo per la vendita, e solo se c'è (assente = venduto senza ricavo indicato)
     if (o.prezzo === undefined) return { tipo: 'uscitaOggetto', oggetto: o.oggetto.trim(), quantita: q, modo: o.modo };
     if (o.modo !== 'venduto' || !Number.isSafeInteger(o.prezzo) || (o.prezzo as number) < 1 || (o.prezzo as number) > YEN_MASSIMI_EFFETTO) return null;
@@ -585,6 +586,7 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, 
     case 'uscitaOggetto': {
       const o = n.oggetto?.(e.oggetto) ?? 'oggetto del catalogo';
       if (e.modo === 'restituito') return `Restituito: ${o}${copie(e.quantita)}`;
+      if (e.modo === 'usato') return `Usato: ${o}${copie(e.quantita)}`;
       // il ricavo nella frase solo prima della spunta: dopo, gli yen davvero entrati hanno la loro riga (il movimento) e non si ripetono
       return `Venduto: ${o}${copie(e.quantita)}${e.prezzo && !opz.applicato ? ` · ${yen(e.prezzo)}` : ''}`;
     }

@@ -7,8 +7,9 @@
 //      completo dei dati di gioco si importa da Impostazioni e sostituisce il file); senza nessuno dei due, FATALE
 //   1. initDb()        — apertura di gioco.db + partite.db, FATALE su errore
 //   2. creaPartiteDalModelloSeMancano() — un partite.db senza tabelle nasce da pacchetto/partite-vuoto.db, FATALE su errore
-//   3. portaAllaVersioneAttuale() — un file alla versione IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove (additivo, con copia di
-//      sicurezza in DATA_DIR/backups prima di scrivere, tutto in una transazione): così una versione rilasciata parte sui dati già in
+//   3. portaAllaVersioneAttuale() — un file alla versione IMMEDIATAMENTE PRECEDENTE riceve le strutture nuove (con copia di sicurezza in
+//      DATA_DIR/backups prima di scrivere, tutto in una transazione; per eccezione scritta dell'utente una tabella che cambia struttura si
+//      ricostruisce con le stesse righe, contate e confrontate per impronta): così una versione rilasciata parte sui dati già in
 //      uso; un file già alla versione attesa non si tocca, uno di un'altra versione nemmeno; FATALE se il passaggio non riesce
 //   4. verificaVersioni() — i due file devono essere alla versione che il codice legge, FATALE altrimenti (i dati non si convertono mai);
 //      poi il censimento delle tabelle delle partite (`avvisaCensimentoPartite`): un avviso nel log se una tabella o una colonna
@@ -66,8 +67,8 @@ try {
 }
 
 try {
-  // l'unica eccezione al «i dati non si convertono»: un file alla versione immediatamente precedente riceve le strutture nuove (additivo,
-  // per le partite con copia di sicurezza prima); ogni passaggio fatto è nel log, e senza niente da fare non scrive né logga
+  // l'unica eccezione al «i dati non si convertono»: un file alla versione immediatamente precedente riceve le strutture nuove (per le
+  // partite con copia di sicurezza prima; una tabella che cambia struttura si ricostruisce con le stesse righe); ogni passaggio fatto è nel log, e senza niente da fare non scrive né logga
   portaAllaVersioneAttuale(initDb());
 } catch (err) {
   console.error('[project-p5r] FATALE: passaggio alla versione attuale dei dati fallito (il file che non è riuscito resta com\'era):', err);

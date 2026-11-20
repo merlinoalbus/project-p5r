@@ -39,8 +39,8 @@ router.get('/', (_req, res) => {
 // ---- L3: il posto (luogo, punti vendita e offerte) in una finestra sola ----
 
 /**
- * Per una riga esistente valgono solo i campi mandati: lo schema parziale applica comunque i suoi valori predefiniti (`tipo` «altro»,
- * `cosa_offre` vuoto), che su una modifica cambierebbero in silenzio un campo non toccato.
+ * Per una riga esistente valgono solo i campi mandati. Lo schema parziale non ha valori predefiniti (`parziale`, schemas/comuni.ts);
+ * il filtro resta come seconda difesa: nessun campo che il corpo non porta arriva alla scrittura.
  */
 function soloMandati(tipo: TipoCatalogo, corpo: Record<string, unknown>, esistente: boolean): Record<string, unknown> {
   const dati = corpoPerTipo(tipo, corpo, esistente);

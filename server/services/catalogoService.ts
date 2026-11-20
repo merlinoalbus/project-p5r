@@ -38,6 +38,7 @@ import { verificaDomandaEsame } from './esamiCollegamento.js';
 import { normalizzaSconto } from '../../shared/scontiNegozi.js';
 import { tipoPuntoVenditaDelLuogo } from '../../shared/puntoVendita.js';
 import { allineaSegnoDelNegozio, allineaSegnoRegola, completaConLaRegola } from './regoleNegoziService.js';
+import { REGOLE_ATTIVITA, REGOLE_FILM, type ProblemaRigaCatalogo } from '../schemas/catalogo.js';
 import { verificaEliminazioneDiVendita, verificaModificaLuogo, verificaModificaPuntoVendita, verificaNuovoPuntoVendita, verificaPuntoVenditaNascosto } from './invariantiPuntoVendita.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
@@ -451,6 +452,26 @@ export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, grezzi: Rec
   return elemento;
 }
 
+/** Le regole delle righe (le stesse rifiniture degli schemi completi), per tipo. */
+const REGOLE_DELLA_RIGA: Partial<Record<TipoCatalogo, { campi: readonly string[]; verifica: (d: Record<string, unknown>) => ProblemaRigaCatalogo[] }>> = {
+  film: REGOLE_FILM, attivita: REGOLE_ATTIVITA,
+};
+
+/**
+ * Una correzione parziale manda solo alcuni campi: le regole dello schema completo (film al cinema in una visione, paga solo per un lavoro)
+ * si verificano sulla riga che ne risulta, salvata + campi mandati, con un 400 `validation-error` se non valgono. Si verificano quando la
+ * correzione tocca un campo che la regola legge: una riga salvata prima della regola non blocca la correzione di un campo estraneo.
+ */
+function verificaRegoleDellaRiga(tipo: TipoCatalogo, salvata: Riga, dati: Record<string, unknown>): void {
+  const regole = REGOLE_DELLA_RIGA[tipo];
+  if (!regole || !regole.campi.some((c) => c in dati)) return;
+  const problemi = regole.verifica({ ...salvata, ...dati });
+  if (problemi.length) {
+    throw httpErrors.badRequest('validation-error', `Dati del ${tipo} non validi: ${problemi.map((p) => `${p.campo} — ${p.messaggio}`).join('; ')}`,
+      { issues: problemi.map((p) => ({ code: 'custom', path: [p.campo], message: p.messaggio })) });
+  }
+}
+
 /** La modifica dentro la transazione di chi chiama (l'editor del posto). */
 export function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
@@ -460,6 +481,7 @@ export function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: str
   if (tipo === 'negozio') verificaModificaPuntoVendita(r, grezzi);
   if (tipo === 'luogo') verificaModificaLuogo(r, grezzi);
   const dati = normalizzaScrittura(tipo, grezzi, r);
+  verificaRegoleDellaRiga(tipo, r, dati);
   if (tipo === 'domanda') verificaDomandaEsame({ id: Number(r.id), data: String(r.data), tipo: String(r.tipo) }, { data: String(dati.data ?? r.data), tipo: String(dati.tipo ?? r.tipo) });
   if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), { ...r, ...dati }, r);
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), { ...r, ...dati }, r);

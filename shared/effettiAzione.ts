@@ -11,8 +11,9 @@
 // - `dote`: il gioco dà quella Dote delle note indicate (1–3, come le mostra il gioco): l'app la ricorda, l'utente la
 //   segna a mano (scelta dell'utente, 2026-09-30);
 // - `lettura`: un libro, un film o un videogioco arriva **almeno** a quel punto (`almeno`: sessioni
-//   o visioni; null = completato). Non torna mai indietro, e le Doti sono quelle dell'elemento, ricordate una volta
-//   sola, da qualunque parte lo si segni. Al cinema, che non ha un totale, null vale «una visione»:
+//   o visioni; null = completato). Non torna mai indietro, e le Doti sono quelle dell'elemento, ricordate con la sua
+//   regola (`conseguimentiLettura.ts`: un libro al completamento, DVD e videogiochi a ogni sessione, il cinema a ogni
+//   visione), da qualunque parte lo si segni. Al cinema, che non ha un totale, null vale «una visione»:
 //   ogni spunta che la dichiara conta una visione, contata insieme alle altre spunte (saltare la
 //   prima visita della guida non regala una visione mai fatta; togliere e rimettere la spunta non
 //   ne aggiunge un'altra);

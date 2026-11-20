@@ -14,7 +14,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 // quando un Palazzo è concluso lo decide `palazziService` (Tesoro e boss finale: mai la data)
 import { statoPalazzi } from './palazziService.js';
-import { EVENTI_STORIA, condizioneConTesto, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { EVENTI_STORIA, condizioneConTesto, dataConArticolo, dataDellEvento, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
 import { leggiFattiPesca } from './pescaLetture.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -66,7 +66,7 @@ export interface StatoPartitaSemafori {
   invitiRegistrati?: Set<string>;
   /** L13: gli sblocchi ricevuti nella partita da una voce spuntata (`utente.sblocco_partita`), come «richiesta:chiave» o «attivita:chiave». */
   sblocchiRicevuti?: Set<string>;
-  /** Gli eventi segnati a mano nella partita: i requisiti `evento` li leggono (le aperture dei Dedali no: si calcolano). */
+  /** Gli eventi segnati a mano nella partita: i requisiti `evento` li leggono (le aperture dei Dedali e gli eventi di calendario no: si calcolano). */
   eventi: Set<string>;
   /** Non letto (R6-01b: niente conferme a mano); la tabella `requisito_partita` non esiste. */
   conferme?: Set<string>;
@@ -249,8 +249,16 @@ function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoVa
     dettaglio: esito.motivo, manuale: false, confermato: false, bloccante: false };
 }
 
+/** Rifiuta (400 `evento-calcolato`) un evento di calendario (`dataDellEvento`, il terzo semestre): vale da solo dal suo giorno, e non si segna
+ *  a mano, col «Condizione soddisfatta» dei Confidenti né da una voce del Diario. */
+export function rifiutaEventoDiCalendario(evento: string): void {
+  const dal = dataDellEvento(evento);
+  if (dal) throw httpErrors.badRequest('evento-calcolato', `${EVENTI_STORIA.find((e) => e.chiave === evento)?.nome ?? evento}: si calcola dal calendario della partita, vale da solo ${dataConArticolo(dal, 'da')}. Non si segna a mano né da una voce del Diario.`);
+}
+
 /** Segna (o toglie) un evento di storia della partita: lo stesso dato dell'interruttore di Partita → Progressi. */
 export function impostaEventoStoria(partitaId: number, evento: string, avvenuto: boolean): void {
+  rifiutaEventoDiCalendario(evento);
   if(EVENTI_PESCA.includes(evento as typeof EVENTI_PESCA[number]))
     throw httpErrors.conflict('pesca-fatto-dedicato','Questo fatto usa fonti temporali nel registro della pesca, distinguendo ignoto e falso.');
   prepared('INSERT INTO evento_storia_partita (partita_id, evento_chiave, avvenuto, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, evento_chiave) DO UPDATE SET avvenuto = excluded.avvenuto, updated_at = excluded.updated_at')

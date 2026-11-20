@@ -140,9 +140,10 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   const rileggi = async () => { setStato(null); await dati.ricarica(); };
 
   const calcolati = p?.eventi.filter((e) => e.origine === 'calcolato') ?? [];
-  // dalla squadra (un Ladro in squadra) e, a parte, le aperture dei Dedali dei Memento (dai Palazzi conclusi)
-  const dallaSquadra = calcolati.filter((e) => e.apertura === undefined);
+  // dalla squadra (un Ladro in squadra) e, a parte, le aperture dei Dedali dei Memento (dai Palazzi conclusi) e gli eventi di calendario
+  const dallaSquadra = calcolati.filter((e) => e.membro !== undefined);
   const dedali = calcolati.filter((e) => e.apertura !== undefined);
+  const dalCalendario = calcolati.filter((e) => e.dal !== undefined);
   const manuali = p?.eventi.filter((e) => e.origine === 'manuale' && !EVENTI_PESCA.some((chiave) => chiave === e.chiave)) ?? [];
   const daSegnare = manuali.filter((e) => e.avvenuto !== true);
   const avvenutiManuali = manuali.filter((e) => e.avvenuto === true);
@@ -226,6 +227,24 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                       ))}
                     </ul>
                   </section>
+                  {dalCalendario.length > 0 && (
+                    <section className="card flex flex-col gap-2" aria-labelledby="progressi-calendario">
+                      <TitoloSezione variante="display" id="progressi-calendario" className="flex flex-wrap items-center gap-2">Dal calendario <Automatico /></TitoloSezione>
+                      <p className="m-0 testo-12 text-text-muted">Avvengono da soli nel loro giorno, secondo il giorno della partita in <Link to="/partita?scheda=oggi" className="link-in-riga text-primary-testo">Oggi</Link>.</p>
+                      <ul className="m-0 p-0 list-none flex flex-col gap-1">
+                        {dalCalendario.map((e) => (
+                          <li key={e.chiave} className="progressi-partita__riga">
+                            <Pallino stato={e.avvenuto} />
+                            <span className="min-w-0 flex-1">
+                              <span className="block">{e.nome}</span>
+                              {e.dal && <span className="block testo-12 text-text-secondary">Vale {dataGiocoConArticolo(e.dal, 'da')}</span>}
+                            </span>
+                            <span className={`shrink-0 testo-12 ${e.avvenuto ? 'text-success' : 'text-text-secondary'}`}>{e.avvenuto === true ? 'avvenuto' : e.avvenuto === false ? 'non ancora' : 'giorno non impostato'}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
                   {dedali.length > 0 && (
                     <section className="card flex flex-col gap-2" aria-labelledby="progressi-dedali">
                       <TitoloSezione variante="display" id="progressi-dedali" className="flex flex-wrap items-center gap-2">Dedali dei Memento <Automatico /></TitoloSezione>
