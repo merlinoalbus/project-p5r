@@ -53,15 +53,15 @@ const RANGHI = [{ chiave: '', nome: 'Nessuno' }, ...Array.from({ length: RANGO_M
   return { chiave: String(n), nome: massimo ? 'Rango MAX' : `Rango ${n}`, contenuto: <AssetImg nome={massimo ? 'ui/rango-max' : `ui/rango-${n}`} alt="" decorativa className="h-7 w-7 object-contain" fallback={<span className="font-display testo-16 leading-none">{massimo ? 'MAX' : n}</span>} /> };
 })];
 
-/** La cifra di un evento intermedio (7.5) con la grafica dei ranghi: la targa vuota del rango (`ui/rango-senza-testo`, la stessa delle cifre
- *  `ui/rango-N`) con l'etichetta sopra, bianca, corsiva e in grassetto come le cifre; senza l'immagine, l'etichetta su fondo nero. */
-function CifraEvento({ etichetta }: { etichetta: string }) {
+/** La cifra di un evento intermedio (7.5) con la grafica dei ranghi: le stesse cifre `ui/rango-N` degli altri pulsanti, quella del rango prima
+ *  dell'evento (7) e il 5, con il punto in mezzo (bianco con il bordo nero, come le cifre); senza le immagini, le cifre scritte. */
+function CifraEvento({ rango }: { rango: number }) {
+  const cifra = (n: number) => <AssetImg nome={`ui/rango-${n}`} alt="" decorativa className="h-7 w-7 object-contain" fallback={<span className="font-display testo-16 leading-none">{n}</span>} />;
   return (
-    <span className="relative inline-flex h-7 w-9 items-center justify-center" aria-hidden="true">
-      <AssetImg nome="ui/rango-senza-testo" alt="" decorativa className="absolute inset-0 h-full w-full object-contain"
-        fallback={<span className="absolute inset-0 rounded-sm bg-black" />} />
-      {/* 16 px: lo stesso peso delle cifre di `ui/rango-N` (misurate a 28 px), e «7.5» resta dentro la targa nera */}
-      <span className="relative font-display testo-16 font-black italic leading-none tracking-tighter text-white">{etichetta}</span>
+    <span className="inline-flex h-7 items-center" aria-hidden="true">
+      {cifra(rangoPrimaDellEvento(rango))}
+      <span className="relative z-10 -mx-[5px] mb-[5px] h-[7px] w-[7px] self-end rounded-full bg-white shadow-[0_0_0_2px_black]" />
+      {cifra(5)}
     </span>
   );
 }
@@ -214,7 +214,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apert
       const rangoEvento = rigaEvento && rigaEvento.effetto.tipo === 'eventoConfidente' ? rigaEvento.effetto.rango : null;
       // la fila: Nessuno, 1…9 e MAX come sempre, con gli eventi intermedi del Confidente al loro posto fra i due interi
       const opzioni = eventi.length === 0 ? RANGHI : RANGHI.flatMap((o) => [o, ...eventi.filter((x) => o.chiave !== '' && rangoPrimaDellEvento(x.rango) === Number(o.chiave))
-        .map((x) => ({ chiave: String(x.rango), nome: `Evento ${x.etichetta}`, contenuto: <CifraEvento etichetta={x.etichetta} /> }))]);
+        .map((x) => ({ chiave: String(x.rango), nome: `Evento ${x.etichetta}`, contenuto: <CifraEvento rango={x.rango} /> }))]);
       const scegli = (v: string) => {
         const n = v ? Number(v) : null;
         if (!rif) return;
