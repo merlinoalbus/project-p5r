@@ -60,7 +60,8 @@ function CifraEvento({ etichetta }: { etichetta: string }) {
     <span className="relative inline-flex h-7 w-9 items-center justify-center" aria-hidden="true">
       <AssetImg nome="ui/rango-senza-testo" alt="" decorativa className="absolute inset-0 h-full w-full object-contain"
         fallback={<span className="absolute inset-0 rounded-sm bg-black" />} />
-      <span className="relative font-display testo-12 font-black italic leading-none tracking-tight text-white">{etichetta}</span>
+      {/* 16 px: lo stesso peso delle cifre di `ui/rango-N` (misurate a 28 px), e «7.5» resta dentro la targa nera */}
+      <span className="relative font-display testo-16 font-black italic leading-none tracking-tighter text-white">{etichetta}</span>
     </span>
   );
 }
