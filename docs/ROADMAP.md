@@ -68,15 +68,16 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
   punti vendita e listini si modificano nella finestra «Il posto», con la regola comune dei distributori (pezzi, lunedì, meteo) in
   un punto solo e le eccezioni per riga. Gli orari dei punti vendita sono quelli del luogo, salvo un'eccezione del punto vendita (il negozio del
   Palazzo di Niijima, senza sede). Nel catalogo l'equipaggiamento della guida
-  (armi da mischia e a distanza, protezioni; fuori, per scelta, Teschio di Cristallo e R, e la Replica d'arma resta materiale), con le armi a distanza dei compagni e il Collare commemorativo all'Untouchable; gli
+  (armi da mischia e a distanza, protezioni; la Replica d'arma resta materiale), con le armi a distanza dei compagni e il Collare commemorativo all'Untouchable; gli
   Strumenti del cercatore ad Akihabara e i cinque oggetti del laghetto.
   Ancora aperti: i pin che restano sul luogo finché non si vede in gioco quale macchina indicano (Akihabara 272-275, Shinjuku
-  1564-1566, edificio della Shujin 1759); la Stecca jump, il Set di freccette e i Boilie restano come sono finché non si verificano in gioco.
+  1564-1566, edificio della Shujin 1759).
 - Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`). Un'offerta collegata prende nome,
   categoria e «per chi» dall'oggetto; i legami fra fonti e oggetti si applicano subito, senza proposte. Le decorazioni della stanza al
   Leblanc sono una categoria propria (gruppo «Decorazioni», provenienza dono di un Confidente o artiglio di Akihabara), scelte negli effetti
-  «oggetto ricevuto» delle voci e contate fra gli oggetti ottenuti della partita. Ancora aperto: l'elenco delle decorazioni nei dati, con i
-  loro legami alle voci e ai Confidenti.
+  «oggetto ricevuto» delle voci e contate fra gli oggetti ottenuti della partita. Nei dati ci sono tutte le 28 decorazioni (20 doni legati
+  al loro Confidente, 8 dell'artiglio), 22 con la loro voce del Diario; le 6 regalate in uscite che la guida non data restano solo nel
+  catalogo.
 - Attività, lavori (esiti di Ore no Beko, Triple Seven e Rafflesia), libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri; serate della cantante nel Calendario. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria
   «Applica» sia alla spunta della voce sia con il + del contatore in Partita → Progressi.
