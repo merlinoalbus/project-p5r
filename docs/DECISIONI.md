@@ -95,23 +95,28 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   database di gioco per scelta dell'utente, con attribuzione in `NOTICE`.
 
 ## 3. Persistenza, pacchetto e istanze
-- **Niente migrazioni: i due file si aprono alla versione attesa, con un solo passaggio additivo dalla precedente**. `gioco.db` e
+- **Niente migrazioni: i due file si aprono alla versione attesa, con un solo passaggio dalla precedente**. `gioco.db` e
   `partite.db` portano ciascuno la propria versione (`PRAGMA user_version`); il codice ne legge una per file (`VERSIONE_GIOCO` e
   `VERSIONE_PARTITE` in `server/db/versioneSchema.ts`) e un file di un'altra versione fa fermare l'avvio, con un messaggio che dice
   quale file e che cosa fare. L'unica eccezione è `server/db/passaggioVersione.ts`, chiamato solo dai due avvii: un file alla versione
   IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove, con il testo di creazione identico a quello dei file distribuiti
   (`pacchetto/`; nel rilascio, che non ha il pacchetto, il `partite-vuoto.db` dell'edizione). Additivo (non modifica, non toglie, non
-  converte: ciò che crea nasce vuoto), idempotente, in una transazione con la nuova versione. La preparazione lo applica ai due file, il
+  converte: ciò che crea nasce vuoto), idempotente, in una transazione con la nuova versione. **Eccezione scritta dell'utente (20/11)**:
+  il passaggio delle partite 75→76 ricostruisce `consumo_oggetto_partita`, il registro unico delle uscite, perché il suo CHECK accetti
+  anche il modo «usato»; prima controlla testo vecchio, colonne, indici, trigger, chiavi esterne e integrità, poi fa la copia di
+  sicurezza e in una transazione ricrea la tabella con il testo del modello, ricopia le righe colonna per colonna con il contatore della
+  chiave, e confronta numero di righe e impronta prima e dopo; se qualcosa non torna annulla e l'avvio si ferma. È la sola ricostruzione
+  ammessa; ogni altra resta vietata. La preparazione lo applica ai due file, il
   rilascio solo a `partite.db` (il suo `gioco.db` è l'edizione, in sola lettura, già alla versione del codice). Prima di toccare le partite
   se ne fa una copia di sicurezza nella cartella delle copie (`prima-del-passaggio-partite-<versione>-<momento>.db`, fuori dalla rotazione,
   da togliere a mano); se non riesce, o una struttura esiste già, l'avvio si ferma senza scrivere. Dopo il passaggio un'immagine della
   versione precedente non riparte sui file passati. «Importa», l'anteprima, il ripristino, «Prepara edizione» e gli script accettano solo
-  la versione attuale: **i backup di prima del passaggio (dati di gioco 390, partite 74) non si importano né si ripristinano più**. Ogni
+  la versione attuale: **i backup di prima del passaggio (dati di gioco 390, partite 75) non si importano né si ripristinano più**. Ogni
   cambio di struttura porta il suo passaggio nello stesso cambiamento che alza la costante, e toglie quello della versione prima.
   L'avanzamento (`partite.db`) si copia da solo all'avvio e ogni 6 ore in `data/backups` (le ultime 40); `gioco.db` si salva dal
   backup dell'istanza. Un'istanza nuova nasce dal pacchetto: `pacchetto/gioco.db` per i dati di gioco (senza immagini) e
   `pacchetto/partite-vuoto.db` per il file delle partite. Un cambio di struttura o di dati aggiorna nello stesso cambiamento le due
-  costanti, il passaggio additivo e i due file del pacchetto (`npm run pacchetto` rifà `gioco.db`; `partite-vuoto.db` si aggiorna a
+  costanti, il passaggio e i due file del pacchetto (`npm run pacchetto` rifà `gioco.db`; `partite-vuoto.db` si aggiorna a
   mano); un cambio di dati senza strutture nuove si applica a mano sui dati dell'istanza.
 - Dati di gioco in `gioco.db`, partite in `partite.db`, sulla stessa connessione (schema `utente`): sostituire il DB di gioco non
   tocca l'avanzamento.
@@ -137,7 +142,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - **Due istanze dallo stesso codice**: preparazione (scrittura dei contenuti, un solo proprietario) e rilascio (contenuti in sola lettura,
   partite per utente). La modalità è fissata nella build (punto d'avvio `server/rilascio.ts`, `VITE_MODALITA=rilascio`), mai in una
   variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non converte i dati, porta il solo `partite.db` dalla versione
-  immediatamente precedente col passaggio additivo e si ferma se dopo il passaggio l'edizione non coincide con il manifesto.
+  immediatamente precedente col passaggio (additivo, salvo l'eccezione del registro delle uscite) e si ferma se dopo il passaggio l'edizione non coincide con il manifesto.
 - **Provenienza dei dati nel rilascio (D10, 01/11)**: chi gioca non vede da dove viene un dato né le note per chi lo corregge (collegamenti
   alle fonti, «da fonte secondaria», «Da verificare» delle aree, incertezze delle fonti, provenienze degli esiti della negoziazione,
   affidabilità delle regole), né i comandi di chi prepara i contenuti. Le fonti (guida italiana di allgamestaff, meteo di wikiwiki.jp,
@@ -177,6 +182,9 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - **Righe del server entro 300 caratteri (L11-02, 01/11)**: il codice compattato si riformatta senza cambiare l'AST (prova: confronto
   dell'albero sintattico senza posizioni e delle parole dei commenti). Restano più lunghe solo le righe fatte da un letterale (SQL,
   messaggi, descrizioni dell'API, DDL di base); i test non si toccano.
+- **Correzione di alcuni campi soltanto (20/11)**: negli aggiornamenti parziali del catalogo un campo non mandato resta com'è, mai il
+  valore predefinito dello schema completo (`parziale()` in `server/schemas/comuni.ts`); i predefiniti valgono solo alla creazione. Un
+  `PUT` parziale su un DVD lo rimetteva «al cinema».
 - Il client ripete da solo solo le letture (GET, HEAD, OPTIONS); nessuna scrittura si ripete in automatico, salvo `maxRetries`
   esplicito dove il servizio è provato idempotente (31/10: un acquisto ripetuto dopo una risposta persa si registrava due volte).
 - Gli errori arrivano all'utente in italiano e senza codici tecnici (offline, server che non risponde, errore del server); il dettaglio
@@ -404,6 +412,15 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - **Avanzamento automatico**: spuntata l'ultima voce di giorno senza decisioni aperte, la partita passa alla sera; spuntata l'ultima di
   sera, al giorno dopo (con la richiesta del meteo). Con decisioni aperte avanza alla chiusura dell'ultima. Togliere una spunta non
   riporta indietro.
+- **Doti di DVD e videogiochi a ogni sessione (20/11)**: un DVD dà la sua Dote a ogni visione e un videogioco a ogni partita (guida,
+  «Ogni visione garantisce punti»), fino al totale delle sessioni; un libro la dà al completamento, un film al cinema a ogni visione (la
+  prima con le voci senza `ripetuto`, le altre con quelle `ripetuto`). La regola sta in `shared/conseguimentiLettura.ts`. Togliendo una
+  sessione si toglie l'ultima registrazione; le partite di prima non ricevono a posteriori la Dote di una sessione già fatta. Le voci del
+  Diario con una lettura di DVD o di videogioco non ripetono la Dote come effetto proprio. La partita fallita (bonus ridotto della guida)
+  non è modellata.
+- **Terzo semestre dal calendario (20/11)**: «Terzo semestre avviato» si calcola dal giorno della partita, dal 10 gennaio (guida,
+  settimana 37), come le aperture dei Dedali: non si segna a mano, né da una voce, né nella visita di pesca, che lo deduce dal proprio
+  giorno. Le righe già salvate (visite, eventi segnati) restano e non si leggono più.
 - Il meteo si segna per fascia nella partita e non blocca nulla.
 - Contenuti della partita: «Salvataggio di Persona 5 presente» e «Contenuti scaricabili posseduti» (i set di Persona del gioco) si segnano
   nella finestra «Modifica» della partita. Un dato solo per i contenuti scaricabili: lo leggono la Fusione e le condizioni delle voci.
@@ -434,7 +451,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   che ne dice il numero; il Diario e la pagina Partita mostrano la scheda per intero.
 - Gli effetti di una voce sono un solo elenco, tutti allo stesso livello, con un editor per tipo. Tipi di effetto anche per yen,
   oggetto ricevuto, trofeo, sblocco di una Richiesta o di un lavoro, Persona (solo Compendio o anche scorta), Persona tolta, punti del
-  Confidente in note, uscita di un oggetto (restituito o venduto).
+  Confidente in note, uscita di un oggetto (restituito, venduto o usato: l'usato esce senza yen e non torna in vendita, 20/11).
 - Un effetto di stato aggiunto o cambiato su una voce già spuntata vale subito in ogni partita con la spunta; per le spunte di prima
   con effetti mai applicati si propone un elenco voce per voce, applicato solo con l'approvazione.
 - Una voce collegata a un elemento che porta già una Dote non la raddoppia; le ricompense di una Richiesta completata le applica solo

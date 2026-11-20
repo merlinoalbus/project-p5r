@@ -33,6 +33,7 @@ import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { TestoNote } from '../components/shared/TestoNote';
 import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 import { filtroRicerca, paroleRicerca } from '../utils/testo';
+import { quandoDaLeDoti } from '../../shared/conseguimentiLettura';
 
 /** Un numero di riepilogo in una carta: il valore in grande e sotto l'etichetta col suo segno. */
 function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
@@ -128,7 +129,7 @@ export function VideogiochiPage() {
       {dati.dati && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Videogiochi"
-            sottotitolo={`Sessioni giocate e round completati sono distinti. Il completamento del titolo dà gli effetti dichiarati.${partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare sessioni e round.'}`} />
+            sottotitolo={`Sessioni giocate e round completati sono distinti. Gli effetti dichiarati arrivano ${quandoDaLeDoti('videogioco')}, fino all’ultimo.${partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare sessioni e round.'}`} />
 
           <div className="flex flex-wrap gap-2">
             <Numero valore={giochi.length} etichetta="Giochi" segno="iniziati" />

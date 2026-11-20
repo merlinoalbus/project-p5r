@@ -19,7 +19,9 @@ export interface RigaSessionePesca {
 }
 export interface RigaOsservazionePesca {id:string;sessione_id:string;versione:number;corrente:number;dati_json:string;precedente_id:string|null;creata_il:string}
 export interface RigaFontePesca {id:string;partita_id:number;sessione_id:string;tipo:'manuale'|'diario';voce_uid:string|null;effetto_uid:string|null;generazione:string|null;operazione_id:string;fonte_json:string;creata_il:string}
-export interface RigaFattoPesca {id:string;partita_id:number;evento_chiave:EventoPesca;valore:ValoreFattoPesca;momento_json:string|null;sessione_id:string|null;cattura_id:string|null;provenienza_id:string|null;fonte_json:string;nota:string;operazione_id:string;creata_il:string}
+/** `evento_chiave` è un `EventoPesca` o, nelle righe scritte prima che il terzo semestre fosse di calendario, «terzo-semestre-avviato»: quelle
+ *  righe restano e non si leggono (ogni lettura filtra per un `EventoPesca`). */
+export interface RigaFattoPesca {id:string;partita_id:number;evento_chiave:string;valore:ValoreFattoPesca;momento_json:string|null;sessione_id:string|null;cattura_id:string|null;provenienza_id:string|null;fonte_json:string;nota:string;operazione_id:string;creata_il:string}
 export const sessioniPesca=(p:number):RigaSessionePesca[]=>prepared('SELECT * FROM utente.pesca_sessione WHERE partita_id=? ORDER BY id').all(p) as RigaSessionePesca[];
 export const fontiPesca=(p:number):RigaFontePesca[]=>prepared('SELECT * FROM utente.pesca_provenienza WHERE partita_id=? ORDER BY id').all(p) as RigaFontePesca[];
 export const fattiPesca=(p:number):RigaFattoPesca[]=>prepared('SELECT * FROM utente.pesca_fatto_fonte WHERE partita_id=? ORDER BY id').all(p) as RigaFattoPesca[];

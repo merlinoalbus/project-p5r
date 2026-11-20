@@ -1,8 +1,12 @@
 import type { DefinizioneRegolaPesca, EsitoProfiloPescaDto, MomentoPesca, OsservazionePesca, PuntoValutazionePesca, ViaPescaDto } from './pesca.js';
-import type { RequisitoSpillo } from './condizioniSpillo.js';
+import { dataConArticolo, dataDellEvento, type RequisitoSpillo } from './condizioniSpillo.js';
 
-/** Le vie sono sufficienti, non un elenco di tutte le possibilità del gioco. */
+/** Le vie sono sufficienti, non un elenco di tutte le possibilità del gioco. Il terzo semestre della visita è l'evento di calendario
+ *  «Terzo semestre avviato», che `valuta` legge dal giorno della visita: il valore dichiarato nelle visite di prima (`faseTerzoSemestre`) non conta. */
 export function valutaProfiliPesca(regola:DefinizioneRegolaPesca|null,_momento:MomentoPesca,o:OsservazionePesca,guardianoPrecedente:boolean|null,punto:PuntoValutazionePesca,valuta:(r:RequisitoSpillo)=>'verde'|'rosso'|'grigio'):EsitoProfiloPescaDto[] {
+  const fase:RequisitoSpillo={tipo:'evento',evento:'terzo-semestre-avviato'};
+  const dalTerzoSemestre=dataDellEvento(fase.evento);
+  const terzoSemestre=valuta(fase);
   return (['guardiano','boss'] as const).map(specie=>{
     const necessita:string[]=[],incertezze:string[]=[],vie:ViaPescaDto[]=[];
     const consumati=punto.tipo==='prossimo-tentativo'?punto.consumati:o.tentativiConsumati;
@@ -10,20 +14,19 @@ export function valutaProfiliPesca(regola:DefinizioneRegolaPesca|null,_momento:M
     const precedenti=o.catture?.filter(c=>punto.tipo==='pianificazione'||(c.tentativo!==null&&c.tentativo<=punto.consumati&&(punto.posizione===null||c.posizione!==null&&c.posizione<punto.posizione)))??null;
     const giaCatturato=precedenti?.some(c=>c.specie===specie)??false;
     const ordineCatturaIgnoto=punto.tipo==='prossimo-tentativo'&&o.catture?.some(c=>c.specie===specie&&(c.tentativo===null||punto.posizione!==null&&c.posizione===null))===true;
-    if(o.faseTerzoSemestre===null)incertezze.push('Il terzo semestre al momento della visita non è attestato.');
+    if(terzoSemestre==='grigio')incertezze.push('Il terzo semestre al momento della visita non si può dire.');
     if(o.meteo===null)incertezze.push('Meteo della visita ignoto. L’allerta gelo da sola non prova pioggia o neve.');
     if(o.rangoPeriziaOsservato===null)incertezze.push('Rango Perizia osservato ignoto; la Dote odierna non viene usata per il passato.');
     if(o.escaSpecialePosseduta===false)necessita.push('Esca speciale non posseduta al momento osservato.');
     else if(o.escaSpecialePosseduta===null)incertezze.push('Possesso dell’esca speciale da verificare.');
     if(specie==='boss'){
-      if(o.faseTerzoSemestre===false)necessita.push('La via documentata del Boss riguarda il terzo semestre.');
+      if(terzoSemestre==='rosso')necessita.push(`La via documentata del Boss riguarda il terzo semestre, che comincia ${dalTerzoSemestre?dataConArticolo(dalTerzoSemestre):'più avanti'}: la visita viene prima.`);
       if(guardianoPrecedente===false)necessita.push('La cattura precedente del Guardiano non risulta avvenuta prima della visita.');
       else if(guardianoPrecedente===null)incertezze.push('La cattura del Guardiano prima della visita è ignota.');
     }
     let comparsa=false,cattura=false;
     if(!regola)incertezze.push('Regola della guida assente o illeggibile.');
     for(const v of regola?.vie.filter(v=>v.specie===specie)??[]){
-      const fase:RequisitoSpillo={tipo:'evento',evento:'terzo-semestre-avviato'};
       const guardian:RequisitoSpillo={tipo:'evento',evento:'guardiano-ichigaya-catturato'};
       const asciutto:RequisitoSpillo={tipo:'meteo',condizione:'non-piove'};
       const ambito=valuta(v.faseTerzoSemestre?fase:{tipo:'non',condizione:fase})==='verde'&&valuta({tipo:'fascia',fascia:v.fascia})==='verde'&&valuta(v.meteo==='pioggia-neve'?{tipo:'non',condizione:asciutto}:asciutto)==='verde';

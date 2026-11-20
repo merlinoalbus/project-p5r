@@ -12,7 +12,7 @@
 //   - lo stato è già vero nella partita (la stessa lettura della spunta, `statoGiaVero`): non c'è niente da proporre, solo il registro;
 //   - un articolo in alternativa con altri della voce (L13, decisione 4, `effettiInAlternativa`): lo sceglie solo la spunta (uno, o nessuno), e
 //     senza la sua riga non è stato scelto: non entra (una sua proposta aperta di prima si chiude);
-//   - un oggetto restituito o venduto («uscitaOggetto») che la partita non possiede in copie abbastanza (2026-10-29, segnalazione dell'utente:
+//   - un oggetto restituito, venduto o usato («uscitaOggetto») che la partita non possiede in copie abbastanza (2026-10-29, segnalazione dell'utente:
 //     «La leggenda dei pirati» presa in prestito prima che l'inventario si tracciasse, proposta e poi rifiutata da «Applica» con «non è fra le
 //     copie della partita: non esce niente»): non c'è nulla da togliere, quindi non entra; il registro lo dice («nulla-da-togliere», una
 //     decisione presa una volta sola come il «già vero») e una sua proposta aperta di prima si chiude con la stessa nota;
@@ -62,7 +62,7 @@ export interface CensimentoPartita {
   yenProposti: number;
   yenChiusi: number;
   yenInvariati: number;
-  /** Oggetti restituiti o venduti senza copie abbastanza nella partita: nulla da togliere, non entrano (e una loro proposta aperta si chiude). */
+  /** Oggetti restituiti, venduti o usati senza copie abbastanza nella partita: nulla da togliere, non entrano (e una loro proposta aperta si chiude). */
   nullaDaTogliere: number;
   /** Di quelle, le proposte aperte di prima chiuse in questo giro con la nota «nulla-da-togliere» (per il log). */
   chiuseNullaDaTogliere: number;
@@ -153,7 +153,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
               return;
             }
           }
-          // l'oggetto ricevuto, i punti al Confidente e l'oggetto restituito o venduto sommano, non sono uno stato sì/no: senza la loro riga mancano sempre
+          // l'oggetto ricevuto, i punti al Confidente e l'oggetto restituito, venduto o usato sommano, non sono uno stato sì/no: senza la loro riga mancano sempre
           if (!eEffettoCheSomma(e) && statoGiaVero(r.partita_id, e)) { registra(r, 'gia-presente'); c.giaPresenti += 1; return; }
           const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
           creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, {
@@ -218,7 +218,7 @@ function motivoDelPassato(p: number, e: EffettoDiStatoVoce): string {
           : e.tipo === 'sblocco' ? 'lo sblocco non risulta segnato'
             : e.tipo === 'personaTolta' ? 'la Persona risulta ancora nella scorta'
               : e.tipo === 'puntiConfidente' ? 'i punti al Confidente non risultano aggiunti'
-                : e.tipo === 'uscitaOggetto' ? `l’oggetto non risulta ${e.modo === 'venduto' ? 'venduto' : 'restituito'}`
+                : e.tipo === 'uscitaOggetto' ? `l’oggetto non risulta ${e.modo}`
             : e.tipo === 'invito' ? 'l’invito non risulta avvenuto'
               : e.tipo === 'richiesta' ? 'la Richiesta non risulta completata'
                 : e.tipo === 'domanda' ? 'la domanda non risulta risposta'

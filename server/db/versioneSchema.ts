@@ -7,13 +7,14 @@
 // ripristina: il codice leggerebbe e scriverebbe tabelle che non corrispondono al suo modello.
 //
 // L'unica eccezione, deliberata e in un solo punto (`passaggioVersione.ts`), riguarda i file dell'istanza all'avvio della
-// preparazione: uno alla versione IMMEDIATAMENTE PRECEDENTE riceve le sole strutture nuove (additivo; per le partite con copia di sicurezza prima) e
-// diventa quello atteso, perché una versione rilasciata deve partire sui dati già in uso. «Importa», anteprima, ripristino,
+// preparazione e del rilascio: uno alla versione IMMEDIATAMENTE PRECEDENTE riceve le strutture nuove (per le partite con copia di sicurezza
+// prima; per eccezione scritta dell'utente, una tabella che cambia struttura si ricostruisce con le stesse righe) e diventa quello atteso,
+// perché una versione rilasciata deve partire sui dati già in uso. «Importa», anteprima, ripristino,
 // edizione di rilascio e script non passano da lì e rifiutano un file di un'altra versione, la precedente compresa.
 //
 // Chi cambia la struttura o i dati di uno dei due file alza la costante corrispondente insieme al file che l'app distribuisce
-// (`pacchetto/gioco.db` per i dati di gioco, `pacchetto/partite-vuoto.db` per le partite) e, se ha aggiunto strutture, riscrive il
-// passaggio additivo di `passaggioVersione.ts` (toglie quello della versione prima).
+// (`pacchetto/gioco.db` per i dati di gioco, `pacchetto/partite-vuoto.db` per le partite) e, se ha cambiato strutture, riscrive il
+// passaggio di `passaggioVersione.ts` (toglie quello della versione prima).
 // ============================================================
 
 import type Database from 'better-sqlite3';
@@ -22,7 +23,7 @@ import { config } from '../config.js';
 /** La versione di `gioco.db` (schema `main`) che il codice legge. */
 export const VERSIONE_GIOCO = 391;
 /** La versione di `partite.db` (schema `utente`) che il codice legge. */
-export const VERSIONE_PARTITE = 75;
+export const VERSIONE_PARTITE = 76;
 
 /** Quale dei due file dell'istanza ha una versione diversa da quella attesa. */
 export type FileVersionato = 'gioco' | 'partite';

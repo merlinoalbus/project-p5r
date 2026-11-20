@@ -36,7 +36,8 @@
 //     Corretto lo stesso giorno («i punti rango andavano gestiti come note non come punti specifici»): l'effetto dà note (♪–♪♪♪) e i punti
 //     li calcola la regola delle risposte con gli ingressi dell'incontro (`applicaPunti`);
 //   - `uscitaOggetto`: una riga che somma, nel registro unico delle uscite (`consumo_oggetto_partita`), mai oltre le copie possedute;
-//     gli yen di una vendita li muove `motoreDiario.yenDellEffetto` (decisione 18), solo se l'uscita è stata scritta.
+//     gli yen di una vendita li muove `motoreDiario.yenDellEffetto` (decisione 18), solo se l'uscita è stata scritta. «Usato» (il Laptop
+//     rotto che si ripara, i frullati bevuti, ciò che si cede in uno scambio) esce come gli altri, senza yen e senza tornare in vendita.
 // ============================================================
 
 import { nowIso, prepared } from '../db/dbService.js';
@@ -52,7 +53,7 @@ import { applicaEventoDiario, puntiDellEffettoInVigore, togliPuntiDellEffetto } 
 import { confidente as confidenteDellaPartita, sogliaAPunti } from './partiteService.js';
 import { registraEvento } from './storicoService.js';
 import { impostaTrofeo } from './completamentoService.js';
-import { impostaEventoStoria } from './semaforiService.js';
+import { impostaEventoStoria, rifiutaEventoDiCalendario } from './semaforiService.js';
 import { impostaDomandaFatta } from './domandeService.js';
 import { impostaCruciverba } from './cruciverbaService.js';
 import { impostaStatoRichiesta } from './richiesteService.js';
@@ -83,6 +84,8 @@ type PrimaScorta = { gia: boolean; possedutaId?: number; livello?: number; skill
 /** L'oggetto citato esiste? Chiamata quando l'effetto si scrive nell'editor: una chiave sbagliata si rifiuta subito. */
 export function verificaEffettoDiStato(e: EffettoDiStatoVoce): void {
   if (e.tipo === 'storia') {
+    // un evento di calendario (il terzo semestre) vale da solo dal suo giorno: 400 `evento-calcolato`
+    rifiutaEventoDiCalendario(e.evento);
     if (EVENTI_PESCA.includes(e.evento as typeof EVENTI_PESCA[number])) throw httpErrors.conflict('pesca-fatto-dedicato', 'Questo fatto usa il registro della pesca: non si segna da una voce.');
     return;
   }
@@ -117,7 +120,7 @@ export function verificaEffettoDiStato(e: EffettoDiStatoVoce): void {
     const o = prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').get(e.oggetto) as { nome: string } | undefined;
     if (!o) throw httpErrors.notFound('oggetto-non-trovato', `L'oggetto '${e.oggetto}' non è nel catalogo.`);
     // si restituisce un prestito: un oggetto che un'offerta dà con la regola «restituzione» (il libro della Biblioteca, il DVD a noleggio)
-    if (e.modo === 'restituito' && !inPrestito(e.oggetto)) throw httpErrors.badRequest('oggetto-non-in-prestito', `«${o.nome}» non si prende in prestito (libro della Biblioteca, DVD a noleggio): scegli «Venduto».`);
+    if (e.modo === 'restituito' && !inPrestito(e.oggetto)) throw httpErrors.badRequest('oggetto-non-in-prestito', `«${o.nome}» non si prende in prestito (libro della Biblioteca, DVD a noleggio): scegli «Venduto» o «Usato».`);
   }
 }
 
@@ -348,7 +351,7 @@ function applicaPunti(p: number, voceUid: string, uid: string, e: EffettoPuntiCo
 }
 
 /**
- * Le copie dell'oggetto che l'effetto «oggetto restituito o venduto» può far uscire dalla partita `p`: quelle possedute (`dettaglioCopie`) più
+ * Le copie dell'oggetto che l'effetto «oggetto restituito, venduto o usato» può far uscire dalla partita `p`: quelle possedute (`dettaglioCopie`) più
  * quelle che la stessa riga dell'effetto aveva già fatto uscire. Una lettura sola per chi applica (`applicaUscita`) e per il censimento
  * dell'elenco del passato (`statiMancantiService`), che con meno copie di quelle indicate non propone l'uscita (non uscirebbe niente).
  */
@@ -358,7 +361,7 @@ export function copiePerUscita(p: number, voceUid: string, uid: string, e: Effet
 }
 
 /**
- * L'oggetto restituito o venduto: escono le copie dell'effetto, mai più di quelle che la partita possiede (comprate, ricevute, nei set, meno
+ * L'oggetto restituito, venduto o usato: escono le copie dell'effetto, mai più di quelle che la partita possiede (comprate, ricevute, nei set, meno
  * regalate, cedute e usate: `dettaglioCopie`, la stessa lettura della scelta dell'esito e di «Regala»), contando come sue quelle che la stessa
  * riga aveva già fatto uscire. Senza copie abbastanza: alla spunta non esce niente e l'avviso lo dice (la spunta non si ferma); su una voce già
  * spuntata (`senzaDisponibilita`: salvataggio della guida, elenco del passato) il rifiuto sale, e l'effetto resta da approvare con il motivo.
@@ -602,7 +605,7 @@ const EVENTI_DELLA_PERSONA: Record<string, readonly string[] | undefined> = {
 
 /**
  * Che cosa fa «togli la spunta» su una riga: l'UNICA regola dell'annullo (la spunta tolta, il cestino, l'effetto tolto o cambiato nella guida).
- * - `registro`: l'oggetto ricevuto, i punti al Confidente e l'oggetto restituito o venduto sono della voce e dell'effetto, non uno stato
+ * - `registro`: l'oggetto ricevuto, i punti al Confidente e l'oggetto restituito, venduto o usato sono della voce e dell'effetto, non uno stato
  *   condiviso: se ne va la loro riga (i punti escono dal registro cronologico e il Confidente si ricalcola, le copie uscite tornano);
  * - `erede`: un'altra riga (di un'altra voce spuntata o di un altro effetto della stessa) rivendica lo stesso stato: resta, e il «prima» (con
  *   gli eventi) passa a lei;

@@ -7,7 +7,9 @@ export const SFIDA_PESCA = 'sfida-pesca-guardiano-ichigaya' as const;
 export function eAttivitaPesca(chiave: string): boolean {
   return chiave === ATTIVITA_PESCA || chiave === SFIDA_PESCA;
 }
-export const EVENTI_PESCA = ['guardiano-ichigaya-catturato', 'boss-ichigaya-catturato', 'terzo-semestre-avviato'] as const;
+/** I fatti che vivono nel registro della pesca, con le loro fonti temporali. Il terzo semestre non è fra loro: è un evento di calendario
+ *  (`dataDellEvento` in `condizioniSpillo.ts`), che si deduce dal giorno; le righe già scritte per lui nel registro restano e non si leggono. */
+export const EVENTI_PESCA = ['guardiano-ichigaya-catturato', 'boss-ichigaya-catturato'] as const;
 export type EventoPesca = typeof EVENTI_PESCA[number];
 export type SpeciePesca = 'guardiano' | 'boss' | 'altro';
 /** I pesci della visita, con il loro nome: l'unico elenco, letto dai moduli, dai riepiloghi e dai contatori. */
@@ -25,6 +27,8 @@ export interface OsservazionePesca {
   tentativiConsumati: number | null;
   catture: CatturaPesca[] | null;
   escaSpecialePosseduta: boolean | null;
+  /** Il terzo semestre dichiarato nelle visite registrate prima che fosse un evento di calendario: resta nel formato perché quelle visite si
+   *  leggano come sono, ma non si chiede e non si legge più. Il terzo semestre di una visita si deduce dal suo giorno (`dataDellEvento`). */
   faseTerzoSemestre: boolean | null;
   meteo: MeteoPartita | null;
   allertaGelo: boolean | null;
@@ -143,5 +147,5 @@ export function incoerenzeOsservazionePesca(o: Pick<OsservazionePesca, 'rangoPer
   return e;
 }
 export function nomeEventoPesca(evento: EventoPesca): string {
-  return evento === 'guardiano-ichigaya-catturato' ? 'Guardiano di Ichigaya catturato' : evento === 'boss-ichigaya-catturato' ? 'Boss di Ichigaya catturato' : 'Terzo semestre avviato';
+  return evento === 'guardiano-ichigaya-catturato' ? 'Guardiano di Ichigaya catturato' : 'Boss di Ichigaya catturato';
 }

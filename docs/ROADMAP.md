@@ -29,7 +29,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
 - Confidenti con rango, punti in note, semafori dei requisiti con frase generata e nota, inviti, relazione romantica, regali con reazione,
   doni ricevuti; scheda del Confidente (`/confidenti/:chiave`), con le date fisse di un rango (Ryuji 7).
 - Doti sociali con note e soglie, promemoria «Applica», interruttore della Fortuna.
-- Denaro con i movimenti automatici delle voci e quelli a mano; oggetti ottenuti, copie, consumi e uscite.
+- Denaro con i movimenti automatici delle voci e quelli a mano; oggetti ottenuti, copie, consumi e uscite (restituito, venduto, usato).
 - Progressi, trofei, storico degli eventi con la provenienza, completamento (`/guida/completamento`).
 - Avanzamento automatico di fascia e giorno, meteo per fascia.
 
@@ -237,7 +237,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
   jsx-a11y): la correzione c'è solo nella 11, una versione maggiore che ESLint 10 e typescript-eslint non accettano ancora; da riprendere
   quando la accetteranno.
 - Edizione di rilascio con schema partite 70: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
-  copia e col sì dell'utente, fino alla 74; dalla 74 alla 75 lo porta da solo l'avvio del rilascio (passaggio additivo). Finché resta
+  copia e col sì dell'utente, fino alla 74; dalla 75 alla 76 lo porta da solo l'avvio del rilascio (passaggio con la ricostruzione del registro delle uscite). Finché resta
   l'edizione attuale il rilascio funziona.
 - Da L11-04, orfani reali sulla copia della produzione del 01/11 (letti, nessuna correzione fatta): 106 ricevute delle spunte e 13 proposte
   personali citano voci del Diario che non ci sono più (riferimenti già controllati prima), e con i riferimenti nuovi 24 + 27 righe del
@@ -271,6 +271,17 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
 - Resta il Sacchetto di carta di Iwai: la guida lo lega alla vendita della medaglia di Kamoshida del 4 maggio (sbirciando nel sacchetto) e
   alla restituzione del 6 maggio. Sono due voci del periodo validato già spuntate: «oggetto ricevuto» e «restituito» su quelle voci
   cambierebbero le partite, quindi decide l'utente.
+
+**Diario e catalogo dopo il controllo degli eventi (20/11)**
+- Censimento delle voci che nominano un oggetto del catalogo senza registrarlo (108 casi sulla copia della produzione del 20/11: oggetti
+  ceduti negli scambi con Sakai, frullati consumati, Tessere dei videogiochi, tesori dei Palazzi): voce per voce sulla guida, con
+  l'uscita «usato» dove serve.
+- Distributori di Shinjuku 2 e 3: la guida non dà il prezzo di Arginade e Acqua della rinascita; la partita ha 1.200 ¥ scalati al prezzo
+  del cortile. Serve il prezzo dall'utente.
+- La partita fallita di un videogioco (bonus ridotto della guida) non è modellata: il catalogo non ne ha l'importo.
+- Gli effetti storia sugli eventi calcolati «entra in squadra» e sulle aperture dei Dedali sono ancora accettati nelle voci.
+- Test diventato obsoleto con le Doti per sessione: `server/routes/percorso.test.ts` righe 147, 168, 180, 183 (il DVD completato dà due
+  registrazioni).
 
 **Grafica**
 - Caricare nell'istanza di preparazione le 4 illustrazioni delle attività nuove (`docs/grafica/asset-generati/2026-10-29/attivita/`:

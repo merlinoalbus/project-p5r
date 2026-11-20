@@ -260,6 +260,6 @@ export const NOME_FAMIGLIA_EFFETTO: Record<EffettoVoce['tipo'], string> = {
   storia: 'Evento di storia', domanda: 'Domanda risposta', cruciverba: 'Cruciverba', richiesta: 'Richiesta completata', articolo: 'Articolo comprato',
   invito: 'Invito avvenuto', persona: 'Persona registrata',
   yen: 'Yen', oggetto: 'Oggetto ricevuto', trofeo: 'Trofeo ottenuto', sblocco: 'Sblocco',
-  personaTolta: 'Persona tolta dalla scorta', puntiConfidente: 'Note di rango a un Confidente', uscitaOggetto: 'Oggetto restituito o venduto',
+  personaTolta: 'Persona tolta dalla scorta', puntiConfidente: 'Note di rango a un Confidente', uscitaOggetto: 'Oggetto restituito, venduto o usato',
   esame: 'Risultati di un esame',
 };

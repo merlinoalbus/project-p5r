@@ -25,6 +25,7 @@ import type { QuizAttivita } from '../../../../shared/quizAttivita';
 import { SceltaLuogo } from '../SceltaLuogo';
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA, tracciamentoPerTipo } from '../../../../shared/attivita';
 import type { VoceEffetto } from '../../../../shared/effettiCatalogo';
+import { quandoDaLeDoti } from '../../../../shared/conseguimentiLettura';
 import { jsonDi, numeroDi, testoDi, testoOnull, type PropsModulo } from './base';
 import { EditorEsiti } from '../EditorEsiti';
 import { normalizzaEsitiAttivita, type EsitiAttivita } from '../../../../shared/esitiAttivita';
@@ -204,7 +205,8 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
         <Blocco largo>
           <EditorEffetti ripiegate voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} disabilitato={disabilitato || !!dati._effettiDaRisolvere} {...nomi}
             conRipetuto={testoDi(dati.tracciamento) === 'svolta'}
-            aiuto={testoDi(dati.tracciamento) === 'svolta' ? 'A ogni turno: il primo vale per le voci senza la spunta, dal secondo per quelle con «vale dalla seconda volta in poi».' : undefined}
+            aiuto={testoDi(dati.tracciamento) === 'svolta' ? 'A ogni turno: il primo vale per le voci senza la spunta, dal secondo per quelle con «vale dalla seconda volta in poi».'
+              : videogioco || tipo === 'videogioco' ? `Un videogioco dà questi effetti ${quandoDaLeDoti('videogioco')}, fino all’ultimo.` : undefined}
             aiutoEsteso={testoDi(dati.tracciamento) === 'svolta' ? { titolo: 'Come si applicano', testo: 'Spuntando la voce della giornata si applicano con «Applica» sulla voce; col contatore in Partita → Progressi l\'app te li ricorda e li segni tu nella scheda Doti. Un lavoro che dà sempre la stessa Dote ha le due voci uguali.' } : undefined} />
         </Blocco>
         {/* L13: gli esiti scelti alla spunta, solo per un'attività autonoma contata per volte (Confidente e pesca hanno la loro progressione) */}

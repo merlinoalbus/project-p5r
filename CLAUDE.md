@@ -32,10 +32,10 @@ Dove documento e codice dissentono, vale il codice.
 - **Boot del backend** (`server/index.ts`): `assicuraPacchettoIniziale` (se `gioco.db` manca, lo copia da `pacchetto/gioco.db`,
   senza immagini) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `creaPartiteDalModelloSeMancano` (un
   `partite.db` senza tabelle nasce da `pacchetto/partite-vuoto.db`) → `portaAllaVersioneAttuale` (un file alla versione immediatamente
-  precedente riceve le sole strutture nuove; copia di sicurezza delle partite prima) → `verificaVersioni` (i due file devono essere alle versioni
+  precedente riceve le sole strutture nuove, o la sola ricostruzione ammessa per eccezione scritta; copia di sicurezza delle partite prima) → `verificaVersioni` (i due file devono essere alle versioni
   `VERSIONE_GIOCO` e `VERSIONE_PARTITE` di `server/db/versioneSchema.ts`, altrimenti l'avvio si ferma) → censimento delle partite
   (avviso nel log) → `regoleAllAvvio` → effetti di stato mai applicati (proposte nell'elenco da approvare) → `listen` → copia di `partite.db` in `data/backups` (subito e ogni 6 ore). I dati non
-  si convertono mai; l'unica eccezione è quel passaggio additivo dalla versione precedente, un solo punto (vedi `docs/DECISIONI.md`).
+  si convertono mai; l'unica eccezione è quel passaggio dalla versione precedente, un solo punto (vedi `docs/DECISIONI.md`).
   Il rilascio (`server/rilascio.ts`) ha un avvio suo (`docs/ARCHITETTURA.md` §7 bis): applica lo stesso passaggio al solo `partite.db`,
   con i testi del `partite-vuoto.db` dell'edizione, prima di `verificaVersioni` e del controllo del manifesto.
 - Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/`.

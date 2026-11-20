@@ -5,7 +5,8 @@
 // La scheda dice dove si vede (la pellicola per il cinema, il disco per il DVD), quando è in
 // programmazione (le condizioni, non una frase), che cosa dà la prima visione e — al cinema —
 // quanto rende rivederlo (gli effetti dichiarati «dalla seconda volta in poi»). Un DVD si
-// completa in più sessioni; al cinema una visione basta e le rivisioni si contano senza tetto.
+// completa in più sessioni e dà la sua Dote a ogni sessione (`shared/conseguimentiLettura.ts`);
+// al cinema una visione basta e le rivisioni si contano senza tetto.
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -41,6 +42,7 @@ import { STATI_LETTURA, formattaYen, haDote, passaStato, type StatoLettura } fro
 import type { FilmDto, FilmDvdDto } from '../types';
 import { TestoNote } from '../components/shared/TestoNote';
 import { filtroRicerca } from '../utils/testo';
+import { quandoDaLeDoti } from '../../shared/conseguimentiLettura';
 
 type SupportoFiltro = 'tutti' | 'cinema' | 'dvd';
 const SUPPORTI: ReadonlyArray<{ chiave: SupportoFiltro; nome: string }> = [{ chiave: 'tutti', nome: 'Cinema e DVD' }, { chiave: 'cinema', nome: 'Solo cinema' }, { chiave: 'dvd', nome: 'Solo DVD' }];
@@ -171,7 +173,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
       </> }}
       avvisi={partitaId && <>
         <NotaPuntiDote cosa="quali titoli hai visto e quante volte"
-          dettaglio="Al cinema prima visione e successive possono valere diverso: l’avviso dice quanto." />
+          dettaglio={`Un DVD dà la sua Dote ${quandoDaLeDoti('film', 'dvd')}, fino al completamento; al cinema prima visione e successive possono valere diverso: l’avviso dice quanto.`} />
         {/* Ondata 5 (lotto F-bis): «Anima da cineasta» letto, come promemoria (la guida non dice di quanto aumentano i punti) */}
         <PromemoriaLibri promemoria={d.promemoria} className="prosa-misurata" />
       </>}

@@ -57,7 +57,8 @@ const effetto = z.discriminatedUnion('tipo', [
   // 2026-10-28: le note (1–3), o i punti fissi di un effetto scritto prima della correzione; una forma sola, mai le due insieme
   z.object({ tipo: z.literal('puntiConfidente'), confidente: chiave, note: z.union([z.literal(1),z.literal(2),z.literal(3)]).optional(), punti: z.number().int().min(1).max(99).optional() }).strict()
     .refine(v => (v.note === undefined) !== (v.punti === undefined)),
-  z.object({ tipo: z.literal('uscitaOggetto'), oggetto: chiave, quantita: z.number().int().min(1).max(999), modo: z.enum(['restituito','venduto']), prezzo: z.number().int().min(1).max(9_999_999).optional() }).strict(),
+  z.object({ tipo: z.literal('uscitaOggetto'), oggetto: chiave, quantita: z.number().int().min(1).max(999), modo: z.enum(['restituito','venduto','usato']), prezzo: z.number().int().min(1).max(9_999_999).optional() }).strict()
+    .refine(v => v.prezzo === undefined || v.modo === 'venduto'),
   z.object({ tipo: z.literal('acquisto'), articolo: chiave, variante: z.enum(CHIAVI_DOTI).nullable(), fortuna: z.boolean().nullable().optional(), sostituisceDoti: z.array(uid).max(20).refine(v => new Set(v).size === v.length) }).strict(),
   schemaEffettoGestoPesca,
   z.object({ tipo: z.literal('fortuna'), dote: z.enum(CHIAVI_DOTI) }).strict(),

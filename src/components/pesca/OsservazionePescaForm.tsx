@@ -38,7 +38,7 @@ export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = fals
       <MeteoOsservatoPesca valore={o.meteo} disabilitato={disabilitato} onCambia={meteo => cambia({ meteo })} />
       <SceltaOsservata etichetta="Allerta ondata di gelo" valore={o.allertaGelo} disabilitato={disabilitato} onCambia={allertaGelo => cambia({ allertaGelo })} />
       <SceltaOsservata etichetta="Boilie sospetto posseduto nella visita" valore={o.escaSpecialePosseduta} disabilitato={disabilitato} onCambia={escaSpecialePosseduta => cambia({ escaSpecialePosseduta })} />
-      <SceltaOsservata etichetta="Terzo semestre già in corso nella visita" valore={o.faseTerzoSemestre} disabilitato={disabilitato} onCambia={faseTerzoSemestre => cambia({ faseTerzoSemestre })} />
+      {/* il terzo semestre non si chiede: si deduce dal giorno della visita (evento di calendario) */}
     </div>
     <p className="m-0 testo-12 text-text-secondary">Lascia vuoto quello che non ricordi. Avere o usare un’esca non segna un acquisto, e il rango di oggi non dice quello di una visita passata.</p>
     <Selettore etichetta="Catture" valore={o.catture === null ? 'ignoti' : 'osservati'} disabilitato={disabilitato}

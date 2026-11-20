@@ -16,7 +16,8 @@ export function profiliPesca(_p:number,regola:DefinizioneRegolaPesca|null,m:Mome
   st.dataGioco=m.giorno;st.fasciaGioco=m.fascia;
   st.meteoOra=o.meteo===null?null:{meteo:o.meteo,origine:'partita'};
   st.doti=o.rangoPeriziaOsservato===null?new Map():new Map([['perizia',o.rangoPeriziaOsservato]]);
-  st.fattiPesca=new Map([['terzo-semestre-avviato',o.faseTerzoSemestre===null?'ignoto':o.faseTerzoSemestre?'avvenuto':'non-avvenuto'],['guardiano-ichigaya-catturato',guardianoPrecedente===null?'ignoto':guardianoPrecedente?'avvenuto':'non-avvenuto']]);
+  // il terzo semestre è di calendario: il valutatore lo legge da `dataGioco`, il giorno della visita (mai dal valore dichiarato di prima)
+  st.fattiPesca=new Map([['guardiano-ichigaya-catturato',guardianoPrecedente===null?'ignoto':guardianoPrecedente?'avvenuto':'non-avvenuto']]);
   st.contestoPesca={...o,tentativiConsumati:punto.tipo==='prossimo-tentativo'?punto.consumati:o.tentativiConsumati};
   const nomi=nomiCondizioniMemo();
   return valutaProfiliPesca(regola,m,o,guardianoPrecedente,punto,r=>r.tipo==='dote'&&o.rangoPeriziaOsservato===null?'grigio':valutaCondizione(condizioneConTesto(r,nomi),0,st,{nomi}).stato);

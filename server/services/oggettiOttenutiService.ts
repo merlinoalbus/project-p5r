@@ -25,6 +25,7 @@ import { esitiDellAttivita } from './esitiAttivitaService.js';
 import type { OggettiOttenutiDto, OggettoConsumatoDto, OggettoOttenutoDto } from '../../shared/types.js';
 import { doniConfidentiOttenuti } from './doniConfidenti.js';
 import { consumiDellaPartita } from './consumiOggettiService.js';
+import { MODI_USCITA_OGGETTO } from '../../shared/effettiVoce.js';
 import { dettaglioCopie } from './copieOggetti.js';
 
 /** Gli oggetti ottenuti nella partita: le righe per origine (in ordine di giorno, poi le Richieste) e i totali per oggetto. */
@@ -68,11 +69,11 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
   }
   // Ondata 5 (lotto F-bis): le copie usate, con la loro origine; un oggetto usato che la partita non ha ricevuto (comprato: il concime, gli
   // incensi, i materiali) compare comunque nei totali. Un Isolamento si annulla da qui (l'uso di un turno si toglie togliendo il turno)
-  // 2026-10-28: le copie restituite o vendute da una voce del Diario, con il testo della voce; si annullano togliendo la spunta
+  // 2026-10-28: le copie restituite, vendute o usate da una voce del Diario, con il testo della voce; si annullano togliendo la spunta
   const voceDi = (uid: string | null): string | null => (uid ? (prepared('SELECT azione FROM main.voce_giornata WHERE uid = ?').pluck().get(uid) as string | undefined) ?? null : null);
   const origineConsumo = (c: ReturnType<typeof consumiDellaPartita>[number]): string => {
     if (c.fonte === 'isolamento') return 'Isolamento nella Stanza di Velluto';
-    if (c.fonte === 'voce') { const v = voceDi(c.voceUid); const modo = c.modo === 'venduto' ? 'Venduto' : 'Restituito'; return v ? `${modo} · ${v.length > 80 ? `${v.slice(0, 79).trimEnd()}…` : v}` : modo; }
+    if (c.fonte === 'voce') { const v = voceDi(c.voceUid); const modo = MODI_USCITA_OGGETTO.find((m) => m.chiave === c.modo)?.nome ?? 'Uscito'; return v ? `${modo} · ${v.length > 80 ? `${v.slice(0, 79).trimEnd()}…` : v}` : modo; }
     return `${nomeAttivita(c.attivita!)} · ${nomeEsito(c.attivita!, c.esito!)}`;
   };
   const consumi: OggettoConsumatoDto[] = consumiDellaPartita(partitaId).map((c) => ({ id: c.id, catalogoChiave: c.catalogo, quantita: c.quantita, annullabile: c.fonte === 'isolamento',

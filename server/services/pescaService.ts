@@ -161,8 +161,8 @@ function prepara(p:number,azione:AzioneOperazionePesca,r:InputOperazionePesca,be
   };
 }
 function verificaFattiOsservazione(p:number,momento:NuovaSessionePesca['momento'],o:OsservazionePesca,escludi?:string):void {
+  // il terzo semestre non è un fatto della visita: si deduce dal suo giorno (evento di calendario), e `faseTerzoSemestre` non si legge
   for(const c of o.catture??[])if(c.specie!=='altro')verificaFatto(p,c.specie==='guardiano'?'guardiano-ichigaya-catturato':'boss-ichigaya-catturato',{operazioneId:'',valore:'avvenuto',momento,nota:''},escludi);
-  if(o.faseTerzoSemestre!==null)verificaFatto(p,'terzo-semestre-avviato',{operazioneId:'',valore:o.faseTerzoSemestre?'avvenuto':'non-avvenuto',momento,nota:''},escludi);
 }
 function verificaIdentitaCatture(o:OsservazionePesca,sessioneId:string|null):void {
   for(const c of o.catture??[]){
@@ -199,10 +199,8 @@ function ricostruisciFattiSessione(s:RigaSessionePesca,o:OsservazionePesca):void
         .run(firmaPesca({fonte:f.id,cattura:c.id}).slice(0,32),s.partita_id,evento,canonicoPesca(momentoSessione(s)),s.id,c.id,f.id,f.fonte_json,
           'Cattura osservata nella sessione.',f.operazione_id,nowIso());
     }
-    if(o.faseTerzoSemestre!==null)
-      prepared('INSERT INTO utente.pesca_fatto_fonte(id,partita_id,evento_chiave,valore,momento_json,sessione_id,cattura_id,provenienza_id,fonte_json,nota,operazione_id,creata_il) VALUES(?,?,?,?,?,?,NULL,?,?,?,?,?)')
-        .run(firmaPesca({fonte:f.id,evento:'terzo-semestre'}).slice(0,32),s.partita_id,'terzo-semestre-avviato',o.faseTerzoSemestre?'avvenuto':'non-avvenuto',
-          canonicoPesca(momentoSessione(s)),s.id,f.id,f.fonte_json,'Fase osservata durante la visita.',f.operazione_id,nowIso());
+    // niente fatto del terzo semestre: è un evento di calendario. Le righe che le visite di prima avevano scritto per lui se ne vanno con la
+    // DELETE qui sopra quando la visita si ricostruisce; finché restano non si leggono (`EVENTI_PESCA` non lo contiene)
   }
 }
 function registraSessione(p:number,r:NuovaSessionePesca,contesto?:ContestoDiarioPesca):{sessioneId:string;provenienzaId:string;osservazioneId:string;esito:RicevutaOperazionePescaDto['esito']} {

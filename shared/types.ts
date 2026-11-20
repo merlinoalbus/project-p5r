@@ -2504,7 +2504,7 @@ export interface FilmDto {
   /** L13 (O7-4): Dote, note e «rivederlo» li dicono solo gli `effetti` (la prima visione e le voci `ripetuto`). */
   prezzo: number | null;
   dettagli: string | null;
-  /** Gli effetti dichiarati: la prima visione e, con `ripetuto`, quelle successive. */
+  /** Gli effetti dichiarati: al cinema la prima visione e, con `ripetuto`, quelle successive; in DVD ogni sessione (`shared/conseguimentiLettura.ts`). */
   effetti: VoceEffettoDto[];
   effettiTesto: string[];
   verificato: boolean;
@@ -2771,8 +2771,8 @@ export interface OggettoOttenutoDto {
 export interface OggettoConsumatoDto {
   catalogoChiave: string;
   quantita: number;
-  /** «Concimare la pianta · Con i Bionutrienti» per un turno, «Isolamento» per un incenso bruciato; 2026-10-28: «Restituito · <voce>» o
-   *  «Venduto · <voce>» per l'uscita da una voce del Diario (si annulla togliendo la spunta). */
+  /** «Concimare la pianta · Con i Bionutrienti» per un turno, «Isolamento» per un incenso bruciato; 2026-10-28: «Restituito · <voce>»,
+   *  «Venduto · <voce>» o «Usato · <voce>» per l'uscita da una voce del Diario (si annulla togliendo la spunta). */
   origine: string;
   /** La riga del registro dei consumi; assente nelle risposte precedenti. */
   id?: number;
@@ -3818,7 +3818,8 @@ export interface ElenchiRegoleDto {
   attivita: Array<{ chiave: string; nome: string }>;
   /** Con il programma punti: «punti negozio» va solo ai programmi manuali, «grado cliente» solo a chi ha il rango. */
   negozi: Array<{ chiave: string; nome: string; programma: 'manuale' | 'rango-cliente' | null }>;
-  /** `calcolato`: l'evento si legge dalla squadra della partita o, per un'apertura di un Dedalo dei Memento, dai Palazzi conclusi, e non si segna a mano. */
+  /** `calcolato`: l'evento si legge dalla squadra della partita, per un'apertura di un Dedalo dei Memento dai Palazzi conclusi, per un evento di
+   *  calendario dal giorno della partita, e non si segna a mano. */
   eventi: Array<{ chiave: string; nome: string; calcolato: boolean }>;
   contatori: Array<{ chiave: string; nome: string }>;
   /** L6: i luoghi (condizione `luogo`), col quartiere come gruppo. */
@@ -3868,6 +3869,8 @@ export interface ProgressiPartitaDto {
   /** `serveA`: i ranghi dei Confidenti che l'evento sblocca, dai requisiti (es. «Sojiro Sakura, rango 3»). */
   eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string; serveA?: string[];
     apertura?: string | null;
+    /** Un evento di calendario (il terzo semestre): il giorno «MM-GG» da cui vale da solo; `avvenuto` è null senza il giorno della partita. */
+    dal?: string;
     /** Le voci del Diario la cui spunta ha segnato l'evento (R10-22/3): giorno e testo, per la riga «Già nel Diario: voce del 09/04 · …». */
     daVoci?: VoceDiProvenienzaDto[] }>;
   /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza ♪♪»). */

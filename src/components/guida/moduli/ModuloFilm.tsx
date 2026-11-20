@@ -14,6 +14,7 @@ import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
 import { AvvisoNomiPerEffetti } from './AvvisoNomiPerEffetti';
+import { quandoDaLeDoti } from '../../../../shared/conseguimentiLettura';
 
 const OPZIONI_DOVE = [{ chiave: 'cinema', nome: 'Al cinema', categoria: 'film' }, { chiave: 'dvd', nome: 'In DVD', categoria: 'dvd' }];
 
@@ -42,7 +43,8 @@ export function ModuloFilm({ dati, imposta, disabilitato }: PropsModulo) {
         <Campo nome="dettagli" etichetta="Dettagli" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
       </Griglia>
       <EditorEffetti ripiegate voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} conRipetuto={cinema} disabilitato={disabilitato} {...nomi}
-        aiuto={cinema ? 'Al cinema basta una visione: la Dote è della prima; con «vale dalla seconda volta in poi» quanto rende rivederlo.' : undefined} />
+        aiuto={cinema ? 'Al cinema basta una visione: la Dote è della prima; con «vale dalla seconda volta in poi» quanto rende rivederlo.'
+          : `Un DVD dà questi effetti ${quandoDaLeDoti('film', 'dvd')}, fino alle visioni che lo completano.`} />
     </div>
   );
 }

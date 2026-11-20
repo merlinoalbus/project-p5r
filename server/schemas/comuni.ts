@@ -45,3 +45,53 @@ export const dote = z.enum(CHIAVI_DOTI);
 
 /** Una categoria di articolo. */
 export const categoriaArticolo = z.enum(CATEGORIE_ARTICOLO);
+
+/** Il tipo di un campo senza il suo valore predefinito (`.default()` o `.prefault()`, anche ripetuti). */
+type SenzaPredefinito<T> = T extends z.ZodDefault<infer I extends z.core.SomeType> | z.ZodPrefault<infer I extends z.core.SomeType> ? SenzaPredefinito<I> : T;
+
+/** Un campo senza il suo valore predefinito: tolto anche sotto `.optional()` / `.nullable()` e in testa a una trasformazione
+ *  (`.default(x).transform(f)`). Dentro un valore composto (un oggetto, un elenco) i predefiniti restano: lì completano il valore che
+ *  si manda intero, non toccano altri campi della riga. La descrizione OpenAPI del campo, se c'era, resta. */
+function senzaPredefinito(schema: z.core.$ZodType): z.core.$ZodType {
+  const def = schema._zod.def;
+  let nuovo: z.core.$ZodType;
+  switch (def.type) {
+    case 'default':
+    case 'prefault':
+      nuovo = senzaPredefinito((def as z.core.$ZodDefaultDef | z.core.$ZodPrefaultDef).innerType);
+      break;
+    case 'optional': {
+      const interno = (def as z.core.$ZodOptionalDef).innerType;
+      const pulito = senzaPredefinito(interno);
+      nuovo = pulito === interno ? schema : z.optional(pulito);
+      break;
+    }
+    case 'nullable': {
+      const interno = (def as z.core.$ZodNullableDef).innerType;
+      const pulito = senzaPredefinito(interno);
+      nuovo = pulito === interno ? schema : z.nullable(pulito);
+      break;
+    }
+    case 'pipe': {
+      const { in: ingresso, out: uscita } = def as z.core.$ZodPipeDef;
+      const pulito = senzaPredefinito(ingresso);
+      nuovo = pulito === ingresso ? schema : z.pipe(pulito, uscita);
+      break;
+    }
+    default:
+      nuovo = schema;
+  }
+  const descrizione = nuovo === schema ? undefined : z.globalRegistry.get(schema);
+  return descrizione ? (nuovo as z.ZodType).meta(descrizione) : nuovo;
+}
+
+/**
+ * Lo schema per correggere alcuni campi soltanto di una riga: ogni campo facoltativo e senza il suo valore predefinito.
+ * In zod 4 `.partial()` lascia attivi i `.default()`: un campo assente nel corpo prenderebbe il predefinito e sovrascriverebbe il dato
+ * salvato (un `PUT` delle sole condizioni di un DVD lo riportava al cinema). I predefiniti valgono solo nello schema completo, cioè
+ * alla creazione. Le rifiniture (`superRefine`) si aggiungono dopo, sulla forma parziale.
+ */
+export function parziale<S extends z.core.$ZodShape, C extends z.core.$ZodObjectConfig>(schema: z.ZodObject<S, C>) {
+  const forma = Object.fromEntries(Object.entries(schema.shape).map(([campo, s]) => [campo, senzaPredefinito(s)]));
+  return schema.extend(forma).partial() as unknown as z.ZodObject<{ -readonly [k in keyof S]: z.ZodOptional<Extract<SenzaPredefinito<S[k]>, z.core.SomeType>> }, C>;
+}

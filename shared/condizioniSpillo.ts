@@ -56,11 +56,15 @@ export const CONTATORI = [
 ] as const;
 export type ContatoreChiave = (typeof CONTATORI)[number]['chiave'];
 /** Gli eventi di storia. Quelli con `membro` sono «entra in squadra»: **si calcolano** dalla squadra della
- *  partita (`membro_squadra_partita.in_squadra`) e non si segnano a mano; niente date canoniche. */
+ *  partita (`membro_squadra_partita.in_squadra`) e non si segnano a mano; niente date canoniche. Quelli con `dal` sono di
+ *  calendario: **si calcolano** dal giorno della partita (o della visita di pesca), veri da quel giorno «MM-GG» in poi
+ *  nell'ordine del calendario di gioco, e non si segnano a mano, né da una voce del Diario, né nelle visite. */
 export const EVENTI_STORIA = [
   { chiave: 'guardiano-ichigaya-catturato', nome: 'Guardiano di Ichigaya catturato' },
   { chiave: 'boss-ichigaya-catturato', nome: 'Boss di Ichigaya catturato' },
-  { chiave: 'terzo-semestre-avviato', nome: 'Terzo semestre avviato' },
+  // la guida, soluzione della settimana 37: il 10 gennaio «comincia ufficialmente “il primo giorno del terzo semestre”» (scelta dell'utente:
+  // vale da solo da quel giorno, per la pesca e per le Richieste che lo chiedono)
+  { chiave: 'terzo-semestre-avviato', nome: 'Terzo semestre avviato', dal: '01-10' },
   { chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita' },
   { chiave: 'laptop-riparato', nome: 'Laptop del Leblanc riparato' },
   { chiave: 'niijima-banco-soci-accessibile', nome: 'Banco di Niijima raggiunto e utilizzabile (la cassa nella lobby dei soci, che cambia anche la Tessera puntate alte)' },
@@ -105,6 +109,11 @@ export function membroDellEvento(chiave: string): string | null {
 export function dedaloDellEvento(chiave: string): string | null {
   const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
   return e && 'dedalo' in e ? e.dedalo : null;
+}
+/** Il giorno «MM-GG» del calendario di gioco da cui l'evento è avvenuto da solo, o null se l'evento non è di calendario. */
+export function dataDellEvento(chiave: string): string | null {
+  const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
+  return e && 'dal' in e ? e.dal : null;
 }
 
 /** Una condizione: uno stato della partita e il valore richiesto. Le date sono «MM-GG» del calendario di gioco. */

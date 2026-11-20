@@ -41,6 +41,7 @@ import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiSer
 import { riconciliaBeneficiTurno, turnoConProposte } from './propostePartitaService.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { testoDoteInPunti } from '../../shared/note.js';
+import { conseguimentiDellAvanzamento, conseguimentoSuccessivo, quandoDaLeDoti, regolaConseguimento } from '../../shared/conseguimentiLettura.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
 import { fasciaDellaPartita, prezzoDellArticolo } from './prezziArticoli.js';
 import { segnaTrofeoDelTurno, togliTrofeoDelTurno } from './trofeiDegliEsitiService.js';
@@ -432,28 +433,25 @@ function noteDelConseguimento(riga: RigaLibro | RigaFilm | RigaAttivita, success
 /** Che cosa dà le note di una lettura: un libro (quarto scalino) o un film (con «Anima da cineasta» letto, uno scalino in più). */
 const origineLettura = (partitaId: number, tipo: TipoLettura) => ({ libro: tipo === 'libro', cinema: tipo === 'film' && haAnimaDaCineasta(partitaId) });
 
-function applicaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: string, riga: RigaLibro | RigaFilm | RigaAttivita, successiva: boolean, adesso: string, st: StatoDisponibilita): void {
+/** Registra il conseguimento numero `numero` (dal primo, 1) di una lettura: le sue righe hanno `ordine` = `numero`, come i turni delle
+ *  attività. Un conseguimento che non dà niente (nessuna voce, o le condizioni della voce non valgono in quel momento) non lascia righe, e
+ *  così togliere quello dopo non tocca il suo. */
+function applicaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: string, riga: RigaLibro | RigaFilm | RigaAttivita, numero: number, successiva: boolean, adesso: string, st: StatoDisponibilita): void {
+  // una riga rimasta con lo stesso numero (dati di prima) lascia il posto a quella di adesso: un conseguimento ha un solo insieme di righe
+  prepared('DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? AND ordine = ?').run(partitaId, tipo, chiave, numero);
   const doti = noteDelConseguimento(riga, successiva, st);
   if (doti.length === 0) return;
-  const ordine = ((prepared('SELECT MAX(ordine) AS m FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').get(partitaId, tipo, chiave) as { m: number | null }).m ?? 0) + 1;
   const origine = origineLettura(partitaId, tipo);
   for (const n of doti) {
     const punti = puntiDote(partitaId, n.dote, n.note, origine);
     prepared('INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(partitaId, tipo, chiave, ordine, n.dote, punti, n.note, adesso);
+      .run(partitaId, tipo, chiave, numero, n.dote, punti, n.note, adesso);
   }
 }
 
-/** Toglie dal registro l'**ultimo** conseguimento: al cinema la prima visione vale più delle altre. Le Doti restano come sono. */
-function annullaUltimoEffettoLettura(partitaId: number, tipo: TipoLettura, chiave: string): void {
-  const ultimo = prepared('SELECT ordine FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? ORDER BY ordine DESC LIMIT 1').get(partitaId, tipo, chiave) as { ordine: number } | undefined;
-  if (!ultimo) return;
-  prepared('DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? AND ordine = ?').run(partitaId, tipo, chiave, ultimo.ordine);
-}
-
-/** Toglie dal registro tutto quello che un elemento dava: si usa quando si disfa un completamento. Le Doti restano come sono. */
-function annullaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: string): void {
-  prepared('DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').run(partitaId, tipo, chiave);
+/** Toglie dal registro i conseguimenti oltre i primi `restano` (zero = tutti): quelli che l'avanzamento non vale più. Le Doti restano come sono. */
+function annullaEffettiLetturaOltre(partitaId: number, tipo: TipoLettura, chiave: string, restano: number): void {
+  prepared('DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? AND ordine > ?').run(partitaId, tipo, chiave, restano);
 }
 
 /** I punti che il registro dei conseguimenti attribuisce a un elemento, Dote per Dote. */
@@ -493,7 +491,10 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const adesso = nowIso();
   const totale = tipo === 'libro' ? totaleLibro(riga as RigaLibro) : Math.max((riga as RigaFilm | RigaAttivita).sessioni ?? 1, 1);
   const richiesto = 'avanzamento' in modifica ? modifica.avanzamento : modifica.fatto ? totale : 0;
-  const senzaMassimo = tipo === 'film' && (riga as RigaFilm).dove === 'cinema';
+  const dove = tipo === 'film' ? (riga as RigaFilm).dove : null;
+  // quante volte la lettura dà le sue Doti (libro al completamento, DVD e videogioco a ogni sessione, cinema a ogni visione)
+  const regola = regolaConseguimento(tipo, dove);
+  const senzaMassimo = tipo === 'film' && dove === 'cinema';
   if (!Number.isInteger(richiesto) || richiesto < 0 || (!senzaMassimo && richiesto > totale)) {
     throw httpErrors.badRequest('avanzamento-non-valido', senzaMassimo ? "L'avanzamento deve essere un intero non negativo." : `L'avanzamento deve essere un intero fra 0 e ${totale}.`);
   }
@@ -507,8 +508,8 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   }
   const registroPrima = puntiRegistrati(partitaId, tipo, chiave);
   getDb().transaction(() => {
-    // Quante visioni/sessioni c'erano **prima** di questa scrittura: al cinema serve a sapere
-    // quante se ne aggiungono o se ne tolgono, perché ognuna è un conseguimento a sé.
+    // Quante visioni/sessioni c'erano **prima** di questa scrittura: serve a sapere quanti conseguimenti si aggiungono o si tolgono
+    // (al cinema ogni visione, in DVD e nei videogiochi ogni sessione fino al totale, nei libri il completamento).
     const confermatoPrima = tipo === 'film'
       ? ((prepared('SELECT avanzamento FROM progresso_film_partita WHERE partita_id = ? AND film_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0)
       : 0;
@@ -535,27 +536,26 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     const registrato = richiesto >= totale;
     if (registrato && !era) {
       const doti = noteDelConseguimento(riga, false, st);
-      // le note e i punti che il conseguimento registra subito sotto (`applicaEffettiLettura`, stessa regola e stessa origine)
+      // le note e i punti che il conseguimento registra subito sotto (`applicaEffettiLettura`, stessa regola e stessa origine); per DVD e
+      // videogiochi sono quelli di ogni sessione, e la frase lo dice («Dote a ogni sessione»)
       const origine = origineLettura(partitaId, tipo);
-      const dote = doti.length ? ` · Dote: ${doti.map((d) => testoDoteInPunti({ nome: nomeDote(d.dote), note: d.note, delta: puntiDote(partitaId, d.dote, d.note, origine) })).join(', ')}` : '';
+      const quando = regola === 'ogni-sessione' ? ` ${quandoDaLeDoti(tipo, dove)}` : '';
+      const dote = doti.length ? ` · Dote${quando}: ${doti.map((d) => testoDoteInPunti({ nome: nomeDote(d.dote), note: d.note, delta: puntiDote(partitaId, d.dote, d.note, origine) })).join(', ')}` : '';
       const titolo = nomeCorrente;
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
-      const dove = tipo === 'libro' ? provenienzaDelLibro(chiave) : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : nomeSedeAttivita((riga as RigaAttivita).sede_chiave);
-      registraEvento(partitaId, 'lettura', `${etichetta}: ${titolo}`, `${dove}${dote}.`, { tipo, chiave });
+      const doveEvento = tipo === 'libro' ? provenienzaDelLibro(chiave) : tipo === 'film' ? (dove === 'cinema' ? 'Cinema' : 'DVD') : nomeSedeAttivita((riga as RigaAttivita).sede_chiave);
+      registraEvento(partitaId, 'lettura', `${etichetta}: ${titolo}`, `${doveEvento}${dote}.`, { tipo, chiave });
     }
-    // ---- Il conseguimento dà le sue Doti: un libro finito, un film visto, un gioco completato ----
-    // Si registrano (da segnare a mano nelle Doti, che qui non si toccano). Un film al cinema si
-    // rivede, e ogni visione conta: la prima con le sue note, quelle dopo con le voci «ripetuto».
-    // Libri, DVD e videogiochi si conseguono una volta sola.
-    if (tipo !== 'film' || (riga as RigaFilm).dove !== 'cinema') {
-      if (registrato && !era) applicaEffettiLettura(partitaId, tipo, chiave, riga, false, adesso, st);
-      else if (!registrato && era) annullaEffettiLettura(partitaId, tipo, chiave);
-    } else {
-      // Al cinema il progresso non ha tetto: conta quante visioni si aggiungono o si tolgono.
-      const prima = confermatoPrima;
-      for (let i = prima; i < richiesto; i++) applicaEffettiLettura(partitaId, tipo, chiave, riga, i > 0, adesso, st);
-      for (let i = prima; i > richiesto; i--) annullaUltimoEffettoLettura(partitaId, tipo, chiave);
-    }
+    // ---- Le Doti dei conseguimenti (`shared/conseguimentiLettura.ts`, la regola unica) ----
+    // Si registrano (da segnare a mano nelle Doti, che qui non si toccano), una riga per conseguimento (`ordine` = il suo numero): un libro
+    // al completamento; un DVD e un videogioco a ogni sessione (round) fino al totale, con le voci senza «ripetuto»; un film al cinema a ogni
+    // visione, la prima con le sue note e quelle dopo con le voci «ripetuto». Si contano i conseguimenti di prima e di adesso: quelli in più
+    // si registrano, quelli che l'avanzamento non vale più si tolgono. Le sessioni registrate prima di questa regola senza una riga (un DVD
+    // a metà) restano senza: il registro non inventa il passato, e i numeri tolti o aggiunti sono solo quelli di questa modifica.
+    const conseguitiPrima = conseguimentiDellAvanzamento(regola, avanzamentoPrima, totale);
+    const conseguitiDopo = conseguimentiDellAvanzamento(regola, richiesto, totale);
+    annullaEffettiLetturaOltre(partitaId, tipo, chiave, conseguitiDopo);
+    for (let n = conseguitiPrima + 1; n <= conseguitiDopo; n++) applicaEffettiLettura(partitaId, tipo, chiave, riga, n, conseguimentoSuccessivo(regola, n), adesso, st);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   const stato = letturePartita(partitaId);
