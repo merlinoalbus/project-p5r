@@ -798,6 +798,21 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** L10-05: l'ultima registrazione del Confidente che «Annulla ultimo» toglie, letta dallo storico della partita (`evento_partita`); null se
    *  non ce n'è una annullabile. Resta dopo un ricaricamento della pagina. */
   ultimoAnnullabile?: UltimoAnnullabileConfidenteDto | null;
+  /** L'evento intermedio fra il rango attuale e il successivo (7 → evento 7.5 → 8), se la guida ne ha uno (`shared/eventiIntermedi.ts`); null
+   *  altrimenti. `fatto`: segnato nella partita, dal pannello (`origine` 'pagina') o dalla spunta di una voce del Diario (`origine` 'diario', con
+   *  la sua `voceUid`). Il rango resta intero: l'evento fatto non lo cambia. Il server lo manda sempre (null = nessun evento); facoltativo nel tipo
+   *  perché chi costruisce un Confidente senza (prove, risposte di prima) valga «nessun evento intermedio». */
+  eventoIntermedio?: EventoIntermedioPartitaDto | null;
+}
+
+/** Un evento intermedio di un Confidente nella partita (vedi `ConfidentePartitaDto.eventoIntermedio`). */
+export interface EventoIntermedioPartitaDto {
+  rango: number;
+  /** «7.5» */
+  etichetta: string;
+  fatto: boolean;
+  origine: 'pagina' | 'diario' | null;
+  voceUid: string | null;
 }
 
 /**
@@ -1742,6 +1757,9 @@ export interface ElenchiEffettiVoceDto {
   trofei?: Array<{ chiave: string; nome: string; tipo: string }>;
   /** L13 (ondata 7, O7-2): gli esami dell'effetto «esame» (i risultati, con il piazzamento scelto alla spunta), con la data dei risultati. */
   esami?: Array<{ chiave: string; nome: string; dataRisultati: string | null }>;
+  /** Gli eventi intermedi dei Confidenti (un dialogo della guida con rango 7.5, 8.5…), per l'effetto «eventoConfidente»: Confidente, rango ed
+   *  etichetta del dialogo. */
+  eventiIntermedi?: Array<{ confidente: string; rango: number; etichetta: string }>;
 }
 
 /** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,
@@ -3832,6 +3850,9 @@ export interface ElenchiRegoleDto {
   romanzabili?: Array<{ chiave: string; nome: string }>;
   /** I set di contenuti scaricabili (chiave = id del set come testo), per la condizione «Contenuto scaricabile posseduto». */
   setDlc?: Array<{ chiave: string; nome: string }>;
+  /** Gli eventi intermedi dei Confidenti (un dialogo della guida con rango 7.5, 8.5…), per la condizione «Confidente»: oltre ai ranghi interi
+   *  si sceglie l'evento di quel Confidente («evento 7.5 fatto»). */
+  eventiIntermedi?: Array<{ confidente: string; rango: number }>;
 }
 
 /** Un pin con uno stato (raccolto, aperto, parlato, incontrato, azionato…, o «ottenuto» dalla voce della guida) per la condizione

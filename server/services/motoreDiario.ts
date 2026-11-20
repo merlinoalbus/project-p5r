@@ -3,7 +3,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
-import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, fraseEffettoConNomi, motivoOggettiGiaNelTurno, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce, type ApplicazioneStatoPartitaDto, type EffettoDiStatoVoce } from '../../shared/effettiVoce.js';
+import { chiaveEventoConfidente, chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, fraseEffettoConNomi, motivoOggettiGiaNelTurno, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce, type ApplicazioneStatoPartitaDto, type EffettoDiStatoVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
 import {
   MOTIVO_VOCE_ELIMINATA, conCodaRipristinabile, conMotivoDiRestituzione, conYenDellaVoce, conYenInOrdine, effettiConYenGiaNelSaldo,
@@ -91,7 +91,8 @@ const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:
   :e.tipo==='lettura'?e.chiave:e.tipo==='storia'?e.evento:e.tipo==='domanda'?String(e.domanda):e.tipo==='cruciverba'?e.data
   :e.tipo==='richiesta'?e.richiesta:e.tipo==='articolo'?e.articolo:e.tipo==='invito'?e.invito:e.tipo==='persona'?String(e.persona)
   :e.tipo==='yen'?'yen':e.tipo==='oggetto'?e.oggetto:e.tipo==='trofeo'?e.trofeo:e.tipo==='sblocco'?chiaveSblocco(e.bersaglio,e.chiave)
-    :e.tipo==='personaTolta'?String(e.persona):e.tipo==='puntiConfidente'?e.confidente:e.tipo==='uscitaOggetto'?e.oggetto:e.tipo==='esame'?e.esame:e.attivita;
+    :e.tipo==='personaTolta'?String(e.persona):e.tipo==='puntiConfidente'?e.confidente:e.tipo==='uscitaOggetto'?e.oggetto:e.tipo==='esame'?e.esame
+      :e.tipo==='eventoConfidente'?chiaveEventoConfidente(e):e.attivita;
 /**
  * L13: il beneficio in yen di un effetto «yen» nel vecchio registro delle proposte (la ricevuta lo dichiara, la proposta «Applica» lo porta nel
  * saldo). Dalla decisione 18 si usa SOLO per una causa che ha ancora yen proposti in sospeso (`yenPropostiInSospeso`): così la proposta applicata

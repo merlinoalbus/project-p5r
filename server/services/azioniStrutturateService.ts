@@ -26,6 +26,8 @@ import { contenutoArticoli, mappaIncompatibili } from './alternativeAcquistiServ
 import { simboliNote } from '../../shared/note.js';
 import { normalizzaPrezzoPerFascia, prezzoNellaFascia, type FasciaPrezzo, type PrezzoPerFascia } from '../../shared/catalogo.js';
 import { sqlPrezzoPerFascia } from './prezziArticoli.js';
+import { tuttiGliEventiIntermedi } from './eventiIntermediService.js';
+import { etichettaEventoIntermedio } from '../../shared/eventiIntermedi.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, SemaforoRequisitoDto, StatoAzioneDto } from '../../shared/types.js';
 
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
@@ -356,5 +358,7 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
     trofei: prepared('SELECT chiave, nome, tipo FROM trofeo ORDER BY ordine').all() as NonNullable<ElenchiEffettiVoceDto['trofei']>,
     // L13 (ondata 7, O7-2): gli esami dell'effetto «esame»
     esami: prepared('SELECT chiave, nome, data_risultati AS dataRisultati FROM esame ORDER BY ordine').all() as NonNullable<ElenchiEffettiVoceDto['esami']>,
+    // gli eventi intermedi dei Confidenti (7.5…), dai dialoghi della guida, per l'effetto «eventoConfidente»
+    eventiIntermedi: [...tuttiGliEventiIntermedi()].flatMap(([confidente, ranghi]) => ranghi.map((rango) => ({ confidente, rango, etichetta: etichettaEventoIntermedio(rango) }))),
   };
 }

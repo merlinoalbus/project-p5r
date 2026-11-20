@@ -458,7 +458,7 @@ function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:st
   const diStato = tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta'
     || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona' || tipoEffetto === 'oggetto' || tipoEffetto === 'trofeo'
     || tipoEffetto === 'sblocco'
-    || tipoEffetto === 'personaTolta' || tipoEffetto === 'puntiConfidente' || tipoEffetto === 'uscitaOggetto';
+    || tipoEffetto === 'personaTolta' || tipoEffetto === 'puntiConfidente' || tipoEffetto === 'uscitaOggetto' || tipoEffetto === 'eventoConfidente';
   if (diStato && !opz.passato) return false;
   if (!diStato && opz.passato) throw new Error('Solo un effetto di stato entra nell’elenco del passato.');
   if (diStato) return propostaPassato(partita,voce,effetto,e.dati_json,opz.passato!);

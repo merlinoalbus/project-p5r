@@ -4,7 +4,8 @@
 //
 // È la `FinestraModifica` comune: corpo che scorre, piè fisso, conferma prima di chiudere con modifiche non salvate. Si apre un rango alla
 // volta, ma le bozze stanno a livello di finestra: cambiare rango non le perde e «Salva» scrive in una transazione tutti i ranghi modificati
-// (`PUT /api/compendio/confidenti/:chiave/requisiti`). Un rango diverso dalla guida porta il segno «Modificato».
+// (`PUT /api/compendio/confidenti/:chiave/requisiti`). Un rango diverso dalla guida porta il segno «Modificato». Dopo il suo intero c'è ogni
+// evento intermedio del Confidente («Evento 7.5»): i requisiti dell'evento, senza copia della guida («Modificato» se ne ha).
 // ============================================================
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -19,6 +20,7 @@ import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { FrecciaApertura, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { eRangoIntermedio, testoPassoConfidente, titoloPassoConfidente } from '../../../shared/eventiIntermedi';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -89,7 +91,7 @@ function EditorRequisitiReale({ confidente, rangoIniziale, onChiudi, onSalvato }
     try {
       dati.imposta(await salvaRequisitiConfidente(confidente.chiave, modificati.map((r) => ({ rango: r.rango, requisiti: righeDaSalvare(r, bozze[r.rango]) }))));
       setBozze({});
-      notifica('success', `${modificati.length === 1 ? `Requisiti del rango ${modificati[0].rango} salvati` : `Requisiti di ${modificati.length} ranghi salvati`}: valgono per tutte le partite.`);
+      notifica('success', `${modificati.length === 1 ? `Requisiti ${eRangoIntermedio(modificati[0].rango) ? 'dell’' : 'del '}${testoPassoConfidente(modificati[0].rango)} salvati` : `Requisiti di ${modificati.length} ranghi salvati`}: valgono per tutte le partite.`);
       await onSalvato();
       onChiudi();
     } catch (e) { setErrore(e instanceof Error ? e.message : 'Aggiornamento dei requisiti non riuscito.'); }
@@ -98,7 +100,7 @@ function EditorRequisitiReale({ confidente, rangoIniziale, onChiudi, onSalvato }
 
   return (
     <FinestraModifica titolo={`Requisiti di ${confidente.nome}`} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && !troppe} occupato={occupato} sporca={sporca}
-      caricamento={dati.inPrimoCaricamento} errore={errore ?? (troppe ? `Il rango ${troppe.rango} ha più di ${MASSIMO_CONDIZIONI} condizioni: togline qualcuna.` : null)}>
+      caricamento={dati.inPrimoCaricamento} errore={errore ?? (troppe ? `${eRangoIntermedio(troppe.rango) ? 'L’' : 'Il '}${testoPassoConfidente(troppe.rango)} ha più di ${MASSIMO_CONDIZIONI} condizioni: togline qualcuna.` : null)}>
       {dati.errore
         ? <p role="alert" className="m-0 testo-13">{dati.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></p>
         : <div className="flex flex-col gap-2 min-w-0">{ranghi.map((r) => {
@@ -109,7 +111,7 @@ function EditorRequisitiReale({ confidente, rangoIniziale, onChiudi, onSalvato }
               <h3 className="m-0 font-normal testo-14">
                 <button type="button" className="touch flex w-full flex-wrap items-center gap-2 p-3 text-left" aria-disabled={occupato || undefined} aria-expanded={aperto} aria-controls={aperto ? idRiga : undefined}
                   onClick={() => { if (!occupato) setRangoAperto(aperto ? null : r.rango); }}>
-                  <strong>Rango {r.rango}<FrecciaApertura aperto={aperto} /></strong>
+                  <strong>{titoloPassoConfidente(r.rango)}<FrecciaApertura aperto={aperto} /></strong>
                   <span className="min-w-0 testo-13 text-text-secondary">{r.requisiti.map((c) => c.descrizione).join(' · ') || 'Nessuna condizione'}</span>
                   {modificata(r) ? <span className="chip">Non salvato</span> : r.modificato && <span className="chip">Modificato</span>}
                 </button>

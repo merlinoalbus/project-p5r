@@ -27,6 +27,8 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { valutaCondizione, type StatoValutazione } from './condizioni/valutatore.js';
 import type { RequisitoRango, SemaforiRangoDto, SemaforoRequisitoDto } from '../../shared/types.js';
+import { eventiFattiDelloStato, eventiIntermediFatti, richiediEventoIntermedio } from './eventiIntermediService.js';
+import { chiaveEventoIntermedio, eRangoIntermedio, rangoIntermedioDopo } from '../../shared/eventiIntermedi.js';
 
 export interface RigaRequisito { confidente_chiave: string; rango: number; indice: number; tipo: RequisitoRango['tipo']; dati_json: string; testo: string }
 
@@ -66,6 +68,9 @@ export interface StatoPartitaSemafori {
   invitiRegistrati?: Set<string>;
   /** L13: gli sblocchi ricevuti nella partita da una voce spuntata (`utente.sblocco_partita`), come «richiesta:chiave» o «attivita:chiave». */
   sblocchiRicevuti?: Set<string>;
+  /** Gli eventi intermedi dei Confidenti fatti nella partita (`utente.evento_intermedio_partita`), come «takemi:7.5»: la condizione `confidente` con
+   *  un rango x.5 li legge e i semafori non ripetono i requisiti di un evento già fatto. Assente = si leggono dalla partita, se c'è. */
+  eventiIntermediFatti?: ReadonlySet<string>;
   /** Gli eventi segnati a mano nella partita: i requisiti `evento` li leggono (le aperture dei Dedali e gli eventi di calendario no: si calcolano). */
   eventi: Set<string>;
   /** Non letto (R6-01b: niente conferme a mano); la tabella `requisito_partita` non esiste. */
@@ -137,11 +142,11 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
   return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze,
     richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco,
-    meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca,
+    meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca, eventiIntermediFatti: new Set(eventiIntermediFatti(partitaId).keys()),
     relazioniRomantiche: relazioniConGiorno(partitaId), contenutiPartita: contenutiDellaPartita(partitaId) };
 }
 
-/** I tipi di condizione che leggono SOLO ranghi dei Confidenti, Doti, giorno e fascia di gioco e relazioni romantiche (più i contenitori
+/** I tipi di condizione che leggono SOLO ranghi dei Confidenti (con i loro eventi intermedi fatti), Doti, giorno e fascia di gioco e relazioni romantiche (più i contenitori
  *  `gruppo` e `non`, che valutano quel che hanno dentro): per questi lo stato essenziale dà lo stesso esito dello stato completo. */
 export const TIPI_DELLO_STATO_ESSENZIALE: ReadonlySet<RequisitoSpillo['tipo']> = new Set<RequisitoSpillo['tipo']>(
   ['da-subito', 'data', 'intervallo', 'dote', 'confidente', 'relazione-romantica', 'relazioni-romantiche', 'gruppo', 'non']);
@@ -161,6 +166,8 @@ export function statoPartitaEssenziale(partitaId: number, ranghiConfidenti: Map<
   const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
   return { partitaId, doti, ranghiConfidenti, dataGioco: partita?.data_gioco ?? null, fasciaGioco: partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null,
     relazioniRomantiche: relazioniConGiorno(partitaId),
+    // la condizione `confidente` (nello stato essenziale) con un evento intermedio legge gli eventi fatti
+    eventiIntermediFatti: new Set(eventiIntermediFatti(partitaId).keys()),
     arcaniInScorta: new Set(), personeConAbilita: new Set(), palazziConclusi: new Map(), richiesteCompletate: new Set(), membriSquadra: new Set(), membriFuoriSquadra: new Set(),
     meteoOra: null, eventi: new Set() };
 }
@@ -217,13 +224,21 @@ export const requisitoBloccante = (r: SemaforoRequisitoDto): boolean => r.blocca
 /** Semafori dei ranghi superiori a `rangoAttuale` per un Confidente. */
 export function semaforiConfidente(chiave: string, rangoAttuale: number, st: StatoValutazione): SemaforiRangoDto[] {
   const righe = prepared('SELECT * FROM confidente_requisito WHERE confidente_chiave = ? AND rango > ? ORDER BY rango, indice').all(chiave, rangoAttuale) as RigaRequisito[];
+  // i requisiti di un evento intermedio (7.5) già fatto nella partita non sono più un passo da fare: non si mostrano (un rango intero sì, sempre)
+  const fatti = eventiFattiDelloStato(st);
   const perRango = new Map<number, RigaRequisito[]>();
-  for (const r of righe) { const l = perRango.get(r.rango) ?? []; l.push(r); perRango.set(r.rango, l); }
+  for (const r of righe) {
+    if (eRangoIntermedio(r.rango) && fatti.has(chiaveEventoIntermedio(chiave, r.rango))) continue;
+    const l = perRango.get(r.rango) ?? []; l.push(r); perRango.set(r.rango, l);
+  }
   const disponibilita = semaforoDisponibilita(chiave, rangoAttuale, st);
+  // il prossimo incontro: l'evento intermedio fra il rango e il successivo se ha requisiti e non è fatto (allora il suo gruppo c'è), altrimenti rango + 1
+  const prossimoIncontro = perRango.has(rangoIntermedioDopo(rangoAttuale)) ? rangoIntermedioDopo(rangoAttuale) : rangoAttuale + 1;
   return [...perRango.entries()].map(([rango, lista]) => {
     const requisiti = lista.map((r) => valuta(r, st));
-    // la disponibilità d'adesso riguarda il prossimo incontro (rango + 1, non il primo rango che ha requisiti): in coda, e non blocca mai (R9-01)
-    if (rango === rangoAttuale + 1 && disponibilita) requisiti.push(disponibilita);
+    // la disponibilità d'adesso riguarda il prossimo incontro (rango + 1, o l'evento intermedio da fare; non il primo rango che ha requisiti): in coda,
+    // e non blocca mai (R9-01)
+    if (rango === prossimoIncontro && disponibilita) requisiti.push(disponibilita);
     return { rango, requisiti, pronto: requisiti.filter(requisitoBloccante).every((q) => q.stato === 'verde') };
   });
 }
@@ -240,6 +255,8 @@ function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoVa
   const esito = verdettoDelConfidente(chiave, {
     data: st.dataGioco, fascia: st.fasciaGioco ?? 'giorno', festivo: eGiornoFestivo(st.dataGioco),
     piove: st.meteoOra ? piove(st.meteoOra.meteo) : null, rango: rangoAttuale,
+    // l'evento intermedio da fare (7.5) porta la sua pioggia, se i suoi requisiti ne parlano (`passoDellaPioggia`); senza partita non si sa
+    eventoIntermedioFatto: st.eventiIntermediFatti || st.partitaId !== undefined ? eventiFattiDelloStato(st).has(chiaveEventoIntermedio(chiave, rangoIntermedioDopo(rangoAttuale))) : null,
     giorniDallUltimoRango: st.partitaId === undefined ? null : giorniDalGiorno(giornoDellUltimoRango(st.partitaId, chiave, rangoAttuale), st.dataGioco),
     // L13 (O10-2): la relazione romantica della partita, dal punto unico, per l'incontro successivo (senza partita non la sappiamo)
     relazioneRomantica: relazioneAlRango(st.partitaId === undefined ? null : relazioneRomantica(st.partitaId, chiave), rangoAttuale + 1),
@@ -269,6 +286,8 @@ export function impostaEventoStoria(partitaId: number, evento: string, avvenuto:
  *  stessa cosa. Gli altri tipi non si confermano a mano (R6-01b: niente conferme manuali; li dice lo stato della partita). */
 export function confermaRequisito(partitaId: number, chiave: string, rango: number, indice: number, confermato: boolean): void {
   verificaPartita(partitaId);
+  // un rango non intero solo per un evento intermedio del Confidente (400 `evento-intermedio-inesistente`)
+  richiediEventoIntermedio(chiave, rango);
   const riga = prepared('SELECT tipo, dati_json FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').get(chiave, rango, indice) as { tipo: string; dati_json: string } | undefined;
   if (!riga) throw httpErrors.notFound('requisito-non-trovato', 'Requisito non trovato.');
   if (riga.tipo === 'avviso') throw httpErrors.badRequest('requisito-non-confermabile', 'È un\'avvertenza da controllare nel gioco: non blocca il rango e non si conferma.');

@@ -4,6 +4,7 @@ import { bodyAnteprimaSessionePesca } from './pesca.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA } from '../../shared/pesca.js';
 import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto.js';
 import { MASSIMO_CONDIZIONI_EFFETTO } from '../../shared/effettiVoce.js';
+import { eRangoIntermedio } from '../../shared/eventiIntermedi.js';
 import { condizioneSpillo } from './catalogo.js';
 
 const uid = z.string().regex(/^[0-9a-f]{32}$/,'Identità non valida.');
@@ -56,6 +57,8 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('sblocco'),bersaglio:z.enum(['richiesta','attivita']),chiave,condizioni:condizioniEffetto}).strict(),
   // 2026-10-28: Persona tolta dalla scorta, punti a un Confidente, oggetto restituito, venduto o usato (il prezzo solo per la vendita: lo verifica anche `normalizzaEffettoVoce`)
   z.object({tipo:z.literal('personaTolta'),persona:z.number().int().positive()}).strict(),
+  // l'evento intermedio di un Confidente (7.5): un rango x.5; che il Confidente l'abbia nei dialoghi lo verifica il servizio (400)
+  z.object({tipo:z.literal('eventoConfidente'),confidente:chiave,rango:z.number().refine(eRangoIntermedio,'Il rango di un evento intermedio è un intero più mezzo (7.5).')}).strict(),
   // 2026-10-28 («i punti rango andavano gestiti come note»): le note (1–3); i punti fissi solo per rimandare com'è un effetto scritto prima
   // della correzione. Una forma sola per effetto (note oppure punti, mai insieme), come `normalizzaEffettoVoce`
   z.object({tipo:z.literal('puntiConfidente'),confidente:chiave,note:z.union([z.literal(1),z.literal(2),z.literal(3)]).optional(),punti:z.number().int().min(1).max(99).optional()}).strict()

@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { z } from 'zod';
 import { CHIAVI_DOTI } from '../../shared/doti';
 import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti';
+import { eRangoIntermedio } from '../../shared/eventiIntermedi';
 import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita';
 import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto';
 import type { RichiestaRegistraAcquisto, RichiestaAnnullaProvenienza, RichiestaRimozioneLegacy, RicevutaOperazioneAcquistoDto } from '../../shared/acquisti';
@@ -54,6 +55,8 @@ const effetto = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('trofeo'), trofeo: chiave }).strict(),
   z.object({ tipo: z.literal('sblocco'), bersaglio: z.enum(['richiesta','attivita']), chiave }).strict(),
   z.object({ tipo: z.literal('personaTolta'), persona: z.number().int().positive() }).strict(),
+  // l'evento intermedio di un Confidente (7.5)
+  z.object({ tipo: z.literal('eventoConfidente'), confidente: chiave, rango: z.number().refine(eRangoIntermedio) }).strict(),
   // 2026-10-28: le note (1–3), o i punti fissi di un effetto scritto prima della correzione; una forma sola, mai le due insieme
   z.object({ tipo: z.literal('puntiConfidente'), confidente: chiave, note: z.union([z.literal(1),z.literal(2),z.literal(3)]).optional(), punti: z.number().int().min(1).max(99).optional() }).strict()
     .refine(v => (v.note === undefined) !== (v.punti === undefined)),

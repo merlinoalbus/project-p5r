@@ -27,6 +27,7 @@ import { esameCorrente, piazzamentoCorrente } from './piazzamentoEsamiService.js
 import { confidentiRomanzabili, relazioniDellaPartita, richiediRomanzabile, scriviRelazioneRomantica } from './relazioneRomanticaService.js';
 import { proponiStatiMancanti } from './statiMancantiService.js';
 import { ultimiAnnullabili } from './ultimoAnnullabileConfidente.js';
+import { eventoIntermedioDelConfidente, eventiIntermediFatti } from './eventiIntermediService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, ConsegnaRegaloDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
@@ -380,6 +381,8 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
   const relazioni = relazioniDellaPartita(partitaId);
   // L10-05: l'ultima registrazione che «Annulla ultimo» toglie, dallo storico della partita (una lettura sola per tutte le righe)
   const annullabili = ultimiAnnullabili(partitaId, righe.map((c) => ({ chiave: c.chiave, rango: c.rango, punti: c.punti })));
+  // gli eventi intermedi fatti nella partita (7.5), una lettura sola: l'evento fra il rango attuale e il successivo, se il Confidente ne ha uno
+  const eventiFatti = eventiIntermediFatti(partitaId);
   return righe.map((c) => {
     const semafori = semaforiConfidente(c.chiave, c.rango, stato);
     return {
@@ -396,6 +399,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),
       ultimoAnnullabile: annullabili.get(c.chiave) ?? null,
+      eventoIntermedio: c.rango >= 1 && c.rango < RANGO_MASSIMO_CONFIDENTE ? eventoIntermedioDelConfidente(c.chiave, c.rango, eventiFatti) : null,
     };
   });
 }

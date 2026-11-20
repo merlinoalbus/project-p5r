@@ -4,6 +4,7 @@
 
 import type { SemaforiRangoDto, SemaforoRequisitoDto } from '../../types';
 import { IconaAzione } from '../shared/IconaAzione';
+import { eRangoIntermedio, testoPassoConfidente, titoloPassoConfidente } from '../../../shared/eventiIntermedi';
 
 interface Props {
   semafori: SemaforiRangoDto;
@@ -25,10 +26,11 @@ const nomeStato = (r: SemaforoRequisitoDto): string => (r.stato === 'grigio' && 
 export function SemaforiRango({ semafori, onConferma, onCorreggi, occupato, compatto }: Props) {
   const bloccanti = semafori.requisiti.filter((r) => r.bloccante !== false);
   return (
-    <div className={`flex flex-col ${compatto ? 'gap-1' : 'gap-1.5'}`} role="group" aria-label={`Requisiti per il rango ${semafori.rango}`}>
+    <div className={`flex flex-col ${compatto ? 'gap-1' : 'gap-1.5'}`} role="group" aria-label={`Requisiti per ${eRangoIntermedio(semafori.rango) ? 'l’' : 'il '}${testoPassoConfidente(semafori.rango)}`}>
       <div className="flex items-center gap-2">
-        {/* il conto è sui requisiti che bloccano: le avvertenze da controllare nel gioco stanno sotto, ma non contano */}
-        <span className={`testo-12 font-semibold uppercase tracking-[.06em] ${semafori.pronto ? 'text-success' : 'text-text-muted'}`}>Rango {semafori.rango} · {semafori.pronto ? 'requisiti soddisfatti' : `${bloccanti.filter((r) => r.stato === 'verde').length} di ${bloccanti.length} requisiti`}</span>
+        {/* il conto è sui requisiti che bloccano: le avvertenze da controllare nel gioco stanno sotto, ma non contano; un evento intermedio (7.5)
+            si dice «Evento 7.5» */}
+        <span className={`testo-12 font-semibold uppercase tracking-[.06em] ${semafori.pronto ? 'text-success' : 'text-text-muted'}`}>{titoloPassoConfidente(semafori.rango)} · {semafori.pronto ? 'requisiti soddisfatti' : `${bloccanti.filter((r) => r.stato === 'verde').length} di ${bloccanti.length} requisiti`}</span>
       </div>
       <ul className="m-0 p-0 list-none flex flex-col gap-1">
         {semafori.requisiti.map((r) => (

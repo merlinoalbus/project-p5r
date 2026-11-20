@@ -23,7 +23,7 @@ import { config } from '../config.js';
 /** La versione di `gioco.db` (schema `main`) che il codice legge. */
 export const VERSIONE_GIOCO = 391;
 /** La versione di `partite.db` (schema `utente`) che il codice legge. */
-export const VERSIONE_PARTITE = 76;
+export const VERSIONE_PARTITE = 77;
 
 /** Quale dei due file dell'istanza ha una versione diversa da quella attesa. */
 export type FileVersionato = 'gioco' | 'partite';

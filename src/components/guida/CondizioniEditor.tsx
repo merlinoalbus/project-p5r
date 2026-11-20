@@ -101,15 +101,26 @@ function valoriIniziali(campi: CampoCondizione[], e: Elenchi): ValoriCondizione 
   return v;
 }
 
-/** Un numero che si muove con più e meno: niente da digitare. */
-function Contatore({ etichetta, valore, min, max, passo = 1, onCambia, disabilitato }: { etichetta: string; valore: number; min: number; max: number; passo?: number; onCambia: (v: number) => void; disabilitato?: boolean }) {
+/** Un numero che si muove con più e meno: niente da digitare. Con `passi` si muove solo fra quei valori (i ranghi interi e gli eventi intermedi
+ *  del Confidente scelto: 7 → 7.5 → 8). */
+function Contatore({ etichetta, valore, min, max, passo = 1, passi, onCambia, disabilitato }: { etichetta: string; valore: number; min: number; max: number; passo?: number; passi?: readonly number[]; onCambia: (v: number) => void; disabilitato?: boolean }) {
+  const prima = passi ? [...passi].reverse().find((p) => p < valore) : valore - passo >= min ? Math.max(min, valore - passo) : undefined;
+  const dopo = passi ? passi.find((p) => p > valore) : valore + passo <= max ? Math.min(max, valore + passo) : undefined;
   return (
     <span className="condizione-numero" role="group" aria-label={etichetta}>
-      <button type="button" className="touch" aria-label={`${etichetta}: meno`} disabled={disabilitato || valore - passo < min} onClick={() => onCambia(Math.max(min, valore - passo))}><IconaAzione chiave="meno" dimensione={16} /></button>
+      <button type="button" className="touch" aria-label={`${etichetta}: meno`} disabled={disabilitato || prima === undefined} onClick={() => { if (prima !== undefined) onCambia(prima); }}><IconaAzione chiave="meno" dimensione={16} /></button>
       <span className="condizione-numero__valore" aria-live="polite">{valore}</span>
-      <button type="button" className="touch" aria-label={`${etichetta}: più`} disabled={disabilitato || valore + passo > max} onClick={() => onCambia(Math.min(max, valore + passo))}><IconaAzione chiave="piu" dimensione={16} /></button>
+      <button type="button" className="touch" aria-label={`${etichetta}: più`} disabled={disabilitato || dopo === undefined} onClick={() => { if (dopo !== undefined) onCambia(dopo); }}><IconaAzione chiave="piu" dimensione={16} /></button>
     </span>
   );
+}
+
+/** I valori della condizione «Confidente»: i ranghi interi e, ognuno dopo il suo intero, gli eventi intermedi del Confidente scelto. Null (il
+ *  contatore di sempre, a passi di 1) senza eventi e con un rango intero; con un evento rimasto da un altro Confidente, i soli interi. */
+function passiDelConfidente(confidente: unknown, valore: unknown, e: Elenchi): number[] | null {
+  const eventi = typeof confidente === 'string' ? (e.extra.eventiIntermedi ?? []).filter((x) => x.confidente === confidente).map((x) => x.rango) : [];
+  if (!eventi.length && !(typeof valore === 'number' && !Number.isInteger(valore))) return null;
+  return [...Array.from({ length: RANGO_MASSIMO_CONFIDENTE }, (_, i) => i + 1), ...eventi].sort((a, b) => a - b);
 }
 
 /**
@@ -136,7 +147,11 @@ function Campo({ campo, valori, onCambia, elenchi, disabilitato }: { campo: Camp
       );
     }
     case 'rango5': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={5} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
-    case 'rango10': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={RANGO_MASSIMO_CONFIDENTE} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    // il rango di un Confidente: con un evento intermedio (7.5) del Confidente scelto il contatore passa anche da lì («evento 7.5 fatto»)
+    case 'rango10': {
+      const passi = passiDelConfidente(valori.confidente, v, elenchi);
+      return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={RANGO_MASSIMO_CONFIDENTE} {...(passi ? { passi } : {})} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    }
     case 'volte': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'relazioni': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 0} min={0} max={9} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'almeno': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={9999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;

@@ -596,21 +596,21 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/confidenti/:chiave/requisiti': {
     sommario: 'I requisiti di un Confidente, rango per rango',
-    descrizione: 'Per l\'editor della pagina del Confidente: sempre i ranghi da 1 a 10, anche quelli senza requisiti. Ogni requisito è una condizione del vocabolario unico, con la sua frase e la descrizione generata in italiano; `modificato` dice se il rango differisce dalla copia della guida. Dato di gioco: vale per tutte le partite.',
+    descrizione: 'Per l\'editor della pagina del Confidente: sempre i ranghi da 1 a 10, anche quelli senza requisiti, e dopo il loro intero gli eventi intermedi del Confidente (un dialogo della guida con rango 7.5, 8.5…: i requisiti dell\'evento; senza copia della guida, `modificato` se ne ha). Ogni requisito è una condizione del vocabolario unico, con la sua frase e la descrizione generata in italiano; `modificato` dice se il rango differisce dalla copia della guida. Dato di gioco: vale per tutte le partite.',
     risposta: '`RequisitiConfidenteDto`',
     errori: [[404, 'confidente-non-trovato']],
   },
   'PUT /api/compendio/confidenti/:chiave/requisiti': {
     sommario: 'Sostituisce i requisiti di più ranghi di un Confidente, in una transazione',
-    descrizione: 'Corpo `{ ranghi: [{ rango, requisiti: [{ condizione, nota? }] }] }`: il salvataggio unico dell\'editor. I ranghi indicati prendono le condizioni date (vuoto per nessun requisito), gli altri restano come sono; o tutti o nessuno. La frase si genera dalla condizione, `nota` è il testo proprio del requisito. 400 se un rango compare due volte.',
+    descrizione: 'Corpo `{ ranghi: [{ rango, requisiti: [{ condizione, nota? }] }] }`: il salvataggio unico dell\'editor. I ranghi indicati prendono le condizioni date (vuoto per nessun requisito), gli altri restano come sono; o tutti o nessuno. La frase si genera dalla condizione, `nota` è il testo proprio del requisito. 400 se un rango compare due volte; un rango non intero vale solo per un evento intermedio del Confidente (400 `evento-intermedio-inesistente`).',
     risposta: '`RequisitiConfidenteDto` aggiornato',
-    errori: [[400, 'rango-doppio'], [404, 'confidente-non-trovato']],
+    errori: [[400, 'rango-doppio'], [404, 'confidente-non-trovato'], [400, 'evento-intermedio-inesistente']],
   },
   'PUT /api/compendio/confidenti/:chiave/requisiti/:rango': {
     sommario: 'Sostituisce i requisiti di un rango di un Confidente',
-    descrizione: 'Corpo `{ requisiti: [{ condizione, testo? }] }` (al più 10): le condizioni del vocabolario unico al posto di quelle di adesso, vuoto per nessun requisito. `testo` è la nota propria del requisito, facoltativa; la frase si genera dalla condizione (un avviso tiene il proprio testo). Le conferme a mano delle partite sugli indici che spariscono se ne vanno con loro. Dato di gioco: vale per tutte le partite. Per correggere solo un requisito che cita una Richiesta c\'è la rotta con l\'indice.',
+    descrizione: 'Corpo `{ requisiti: [{ condizione, testo? }] }` (al più 10): le condizioni del vocabolario unico al posto di quelle di adesso, vuoto per nessun requisito. `testo` è la nota propria del requisito, facoltativa; la frase si genera dalla condizione (un avviso tiene il proprio testo). Le conferme a mano delle partite sugli indici che spariscono se ne vanno con loro. Dato di gioco: vale per tutte le partite. Per correggere solo un requisito che cita una Richiesta c\'è la rotta con l\'indice. `:rango` è un intero o un evento intermedio del Confidente (7.5; altrimenti 400).',
     risposta: '`RequisitiConfidenteDto` aggiornato',
-    errori: [[404, 'confidente-non-trovato']],
+    errori: [[404, 'confidente-non-trovato'], [400, 'evento-intermedio-inesistente']],
   },
   'PUT /api/compendio/confidenti/:chiave/requisiti/:rango/:indice': {
     sommario: 'Corregge un requisito di un Confidente che cita una Richiesta',

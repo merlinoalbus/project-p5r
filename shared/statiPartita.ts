@@ -17,6 +17,7 @@ import { DOTI_SOCIALI, eDote } from './doti.js';
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo } from './condizioniSpillo.js';
 import { uidValido } from './spilli.js';
 import { RANGO_MASSIMO_CONFIDENTE } from './puntiConfidenti.js';
+import { eRangoIntermedio } from './eventiIntermedi.js';
 
 /** Come si sceglie un valore: da quale elenco, o che numero. */
 export type TipoCampo =
@@ -204,7 +205,11 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'finestra-palazzo': return PALAZZI_CONDIZIONE.some((p) => p.chiave === s(v.dungeon)) ? { tipo: 'finestra-palazzo', dungeon: s(v.dungeon) } : null;
     case 'palazzo': return s(v.dungeon) ? { tipo: 'palazzo', dungeon: s(v.dungeon) } : null;
     case 'dote': return eDote(v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;
-    case 'confidente': return s(v.confidente) && n(v.rango) >= 1 && n(v.rango) <= RANGO_MASSIMO_CONFIDENTE ? { tipo: 'confidente', confidente: s(v.confidente), rango: n(v.rango) } : null;
+    // un rango intero, o un evento intermedio (7.5 = «evento 7.5 fatto»)
+    case 'confidente': {
+      const rango = typeof v.rango === 'number' && eRangoIntermedio(v.rango) ? v.rango : n(v.rango);
+      return s(v.confidente) && rango >= 1 && rango <= RANGO_MASSIMO_CONFIDENTE ? { tipo: 'confidente', confidente: s(v.confidente), rango } : null;
+    }
     case 'relazione-romantica': {
       const entro = scelta.operatore === 'con-entro' || scelta.operatore === 'al-piu-entro' ? s(v.entro) : undefined;
       if (entro !== undefined && !dataValida(entro)) return null;

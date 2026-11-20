@@ -412,6 +412,26 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
     }
     case 'uscitaOggetto':
       return <CampiUscitaOggetto effetto={e} oggetti={effetti.oggetti ?? []} onCambia={onCambia} />;
+    // l'evento intermedio di un Confidente (7.5): solo i Confidenti che ne hanno uno nei dialoghi, poi il loro evento (uno solo: già scelto)
+    case 'eventoConfidente': {
+      const eventi = effetti.eventiIntermedi ?? [];
+      const delConfidente = eventi.filter((x) => x.confidente === e.confidente);
+      const conEventi = azione.confidenti.filter((c) => eventi.some((x) => x.confidente === c.chiave));
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-end gap-2">
+            <Selettore className="min-w-[12rem] flex-1" etichetta="Confidente" valore={e.confidente} opzioni={conCorrente(conEventi, e.confidente, 'Confidente senza eventi intermedi')}
+              onCambia={(v) => { const primo = eventi.find((x) => x.confidente === v); onCambia({ tipo: 'eventoConfidente', confidente: v, rango: primo?.rango ?? 0 }); }} />
+            {delConfidente.length > 1 && (
+              <Selettore className="min-w-[8rem]" etichetta="Evento" valore={String(e.rango)} ricerca="mai"
+                opzioni={delConfidente.map((x) => ({ chiave: String(x.rango), nome: `Evento ${x.etichetta}` }))}
+                onCambia={(v) => onCambia({ tipo: 'eventoConfidente', confidente: e.confidente, rango: Number(v) })} />
+            )}
+          </div>
+          <p className="m-0 testo-12 text-text-secondary text-pretty">Spuntando la voce l’evento risulta fatto nella partita (il rango non cambia); togliendo la spunta torna da fare, se l’aveva segnato questa voce.</p>
+        </div>
+      );
+    }
     // L13 (ondata 7, O7-2): i risultati di un esame, scelto dall'elenco (con il giorno dei risultati); il piazzamento si sceglie alla spunta
     case 'esame':
       return <Selettore etichetta="Esame" valore={e.esame} ricerca="mai"

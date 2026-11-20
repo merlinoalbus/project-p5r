@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: versione 391 dei dati di gioco e 75 delle partite (`server/db/versioneSchema.ts`).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: versione 391 dei dati di gioco e 77 delle partite (`server/db/versioneSchema.ts`).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -27,7 +27,12 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
   contenuti scaricabili posseduti (li leggono la Fusione e lo Scaffale con lo scatolone del Leblanc).
 - Scorta e compendio personale, Persona della partita, statistiche stimate e registrate.
 - Confidenti con rango, punti in note, semafori dei requisiti con frase generata e nota, inviti, relazione romantica, regali con reazione,
-  doni ricevuti; scheda del Confidente (`/confidenti/:chiave`), con le date fisse di un rango (Ryuji 7).
+  doni ricevuti; scheda del Confidente (`/confidenti/:chiave`), con le date fisse di un rango (Ryuji 7). Eventi intermedi (7.5, 8.5, 6.5)
+  come passo del Confidente: «Evento 7.5 fatto» dal pannello o dalla spunta della voce del Diario, con le sue risposte e i suoi requisiti, letto
+  dalla condizione «Confidente» (la Richiesta che l'evento sblocca) e dalla pioggia del prossimo passo.
+- Da fare sui dati di gioco (sessione principale, dopo il rilascio, via API): le condizioni delle Richieste dei Mementos sbloccate da un evento
+  intermedio («Confidente x.5»), la pioggia di Takemi sul 7.5 al posto del gruppo sul rango 8, gli effetti «Evento intermedio» sulle voci del
+  Diario che rappresentano gli eventi.
 - Doti sociali con note e soglie, promemoria «Applica», interruttore della Fortuna.
 - Denaro con i movimenti automatici delle voci e quelli a mano; oggetti ottenuti, copie, consumi e uscite (restituito, venduto, usato).
 - Progressi, trofei, storico degli eventi con la provenienza, completamento (`/guida/completamento`).
@@ -237,8 +242,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: v
   jsx-a11y): la correzione c'è solo nella 11, una versione maggiore che ESLint 10 e typescript-eslint non accettano ancora; da riprendere
   quando la accetteranno.
 - Edizione di rilascio con schema partite 70: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
-  copia e col sì dell'utente, fino alla 74; dalla 75 alla 76 lo porta da solo l'avvio del rilascio (passaggio con la ricostruzione del registro delle uscite). Finché resta
-  l'edizione attuale il rilascio funziona.
+  copia e col sì dell'utente, fino alla 76; dalla 76 alla 77 lo porta da solo l'avvio del rilascio (la tabella degli eventi intermedi
+  dei Confidenti). Finché resta l'edizione attuale il rilascio funziona.
 - Da L11-04, orfani reali sulla copia della produzione del 01/11 (letti, nessuna correzione fatta): 106 ricevute delle spunte e 13 proposte
   personali citano voci del Diario che non ci sono più (riferimenti già controllati prima), e con i riferimenti nuovi 24 + 27 righe del
   censimento degli stati e 6 movimenti automatici di yen. Sono fotografie di voci eliminate: l'anteprima dell'«Importa» ora le elenca.

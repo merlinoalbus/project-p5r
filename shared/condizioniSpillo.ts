@@ -23,6 +23,7 @@ import { statoDelTipo, uidValido } from './spilli.js';
 import { congiunzione } from './testo.js';
 import { eDote, nomeDote } from './doti.js';
 import { RANGO_MASSIMO_CONFIDENTE } from './puntiConfidenti.js';
+import { eRangoIntermedio, etichettaEventoIntermedio } from './eventiIntermedi.js';
 
 /** I Palazzi che una condizione può citare. `iweleth` resta per leggere e validare le condizioni già scritte (`finestra-palazzo`, l'apertura del dedalo), ma
  *  dal lotto L8 è un dedalo dei Memento: l'editor non lo propone più come «Palazzo concluso» (nessun effetto di Palazzo dipende da lui, R8-19b). */
@@ -392,7 +393,9 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'finestra-palazzo': return `durante la finestra del ${nomePalazzo(r.dungeon, nomi)}`;
     case 'palazzo': return `dopo il ${nomePalazzo(r.dungeon, nomi)}`;
     case 'dote': return `${nomeDote(r.dote)} Rango ${r.rango}`;
-    case 'confidente': return `Rango Confidente ${nomi.confidenti?.[r.confidente] ?? r.confidente} ${r.rango}`;
+    case 'confidente': return eRangoIntermedio(r.rango)
+      ? `${nomi.confidenti?.[r.confidente] ?? r.confidente}: evento ${etichettaEventoIntermedio(r.rango)} fatto`
+      : `Rango Confidente ${nomi.confidenti?.[r.confidente] ?? r.confidente} ${r.rango}`;
     // L13 (O11-1): «relazione romantica con Ann, iniziata entro il 24 dicembre»
     case 'relazione-romantica': return `relazione romantica con ${nomi.confidenti?.[r.confidente] ?? r.confidente}${r.entro ? `, iniziata entro ${dataConArticolo(r.entro)}` : ''}`;
     // L13 (O11-1): «nessuna relazione romantica», «al più una relazione romantica (entro il 24 dicembre)»
@@ -496,7 +499,8 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'finestra-palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon && PALAZZI_CONDIZIONE.some((p) => p.chiave === dungeon) ? { tipo: 'finestra-palazzo', dungeon } : null; }
     case 'palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon ? { tipo: 'palazzo', dungeon } : null; }
     case 'dote': { const dote = testoPulito(o.dote, 20); const rango = intero(o.rango, 1, 5); return dote && eDote(dote) && rango ? { tipo: 'dote', dote, rango } : null; }
-    case 'confidente': { const confidente = chiavePulita(o.confidente, 60); const rango = intero(o.rango, 1, RANGO_MASSIMO_CONFIDENTE); return confidente && rango ? { tipo: 'confidente', confidente, rango } : null; }
+    // un rango intero da 1 al massimo, o un evento intermedio (7.5: «evento fatto»; che il Confidente l'abbia lo dice il valutatore)
+    case 'confidente': { const confidente = chiavePulita(o.confidente, 60); const rango = intero(o.rango, 1, RANGO_MASSIMO_CONFIDENTE) ?? (typeof o.rango === 'number' && eRangoIntermedio(o.rango) ? o.rango : null); return confidente && rango ? { tipo: 'confidente', confidente, rango } : null; }
     // L13 (O11-1): `entro` assente o una data valida (un valore presente ma non valido rende la condizione non valida)
     case 'relazione-romantica': {
       const confidente = chiavePulita(o.confidente, 60);

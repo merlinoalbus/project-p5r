@@ -166,7 +166,7 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   // ---- Confidenti ----
   'GET /api/partite/:id/confidenti': {
     sommario: 'I Confidenti della partita',
-    descrizione: 'Tutti i Confidenti nell\'ordine del gioco con lo stato nella partita: sblocco, rango, punti verso il rango successivo e mancanti, regali consegnati (`regaliFatti`, `regaliFattiCatalogo` e, dall\'ondata 5, `consegne`: ogni consegna con `id`, oggetto, nome storico, `modo` consegna o cartolina e momento di gioco), se riceve regali (`regalabile`), se c\'è in scorta una Persona dello stesso arcano, semafori dei requisiti dei ranghi successivi e, se il prossimo rango è bloccato, i motivi.',
+    descrizione: 'Tutti i Confidenti nell\'ordine del gioco con lo stato nella partita: sblocco, rango, punti verso il rango successivo e mancanti, regali consegnati (`regaliFatti`, `regaliFattiCatalogo` e, dall\'ondata 5, `consegne`: ogni consegna con `id`, oggetto, nome storico, `modo` consegna o cartolina e momento di gioco), se riceve regali (`regalabile`), se c\'è in scorta una Persona dello stesso arcano, semafori dei requisiti dei ranghi successivi (anche di un evento intermedio come il 7.5, finché non è fatto) e, se il prossimo rango è bloccato, i motivi; `eventoIntermedio`: l\'evento fra il rango attuale e il successivo, se la guida ne ha uno, con lo stato nella partita (fatto, origine, voce).',
     risposta: 'Elenco di `ConfidentePartitaDto`',
     errori: [PARTITA],
   },
@@ -195,11 +195,24 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     risposta: '`InvitoDto` con lo stato aggiornato nella partita',
     errori: [PARTITA, [404, 'invito-non-trovato']],
   },
+  'PUT /api/partite/:id/confidenti/:chiave/eventi-intermedi/:rango': {
+    sommario: '«Evento 7.5 fatto»: segna l\'evento intermedio di un Confidente',
+    descrizione: 'L\'evento intermedio è un dialogo della guida con un rango non intero (7.5, 8.5, 6.5: `:rango`). Lo segna fatto nella partita dal pannello del Confidente (`utente.evento_intermedio_partita`, origine `pagina`); il rango del Confidente resta intero e non cambia. Si segna dal rango da cui si fa (il 7.5 dal rango 7: altrimenti 409 `evento-intermedio-presto`); un rango che non è un evento intermedio del Confidente è 400 `evento-intermedio-inesistente`. Già fatto (dal pannello o dalla spunta di una voce del Diario): nessun cambiamento. Scrive nello storico (`confidente-evento`). Lo leggono la condizione `confidente` con un rango x.5, i semafori (i requisiti di un evento fatto non si mostrano più) e la pioggia del prossimo passo.',
+    risposta: '`ConfidentePartitaDto` aggiornato (`eventoIntermedio`)',
+    senzaCorpo: true,
+    errori: [PARTITA, [404, 'confidente-non-trovato'], [400, 'evento-intermedio-inesistente'], [409, 'evento-intermedio-presto']],
+  },
+  'DELETE /api/partite/:id/confidenti/:chiave/eventi-intermedi/:rango': {
+    sommario: 'Toglie «Evento 7.5 fatto» segnato dal pannello',
+    descrizione: 'Toglie l\'evento intermedio fatto segnato dal pannello del Confidente, con il suo evento dello storico. Uno segnato dalla spunta di una voce del Diario si toglie togliendo quella spunta: 409 `evento-intermedio-dal-diario` (con `voceUid` nei dettagli). Non fatto: nessun cambiamento.',
+    risposta: '`ConfidentePartitaDto` aggiornato (`eventoIntermedio`)',
+    errori: [PARTITA, [404, 'confidente-non-trovato'], [400, 'evento-intermedio-inesistente'], [409, 'evento-intermedio-dal-diario']],
+  },
   'PUT /api/partite/:id/confidenti/:chiave/requisiti': {
     sommario: 'Conferma a mano un requisito di rango di un Confidente',
-    descrizione: 'Conferma (o revoca) un requisito che l\'app non sa verificare, indicato da rango e indice. Un requisito di tipo evento non ha una conferma sua: segna l\'evento di storia della partita, lo stesso di Partita → Progressi. Le avvertenze da controllare nel gioco non si confermano (400). Non scrive nello storico.',
+    descrizione: 'Conferma (o revoca) un requisito che l\'app non sa verificare, indicato da rango e indice (il rango è un intero, o un evento intermedio del Confidente come 7.5: altrimenti 400 `evento-intermedio-inesistente`). Un requisito di tipo evento non ha una conferma sua: segna l\'evento di storia della partita, lo stesso di Partita → Progressi. Le avvertenze da controllare nel gioco non si confermano (400). Non scrive nello storico.',
     risposta: '`ConfidentePartitaDto` con i semafori ricalcolati',
-    errori: [PARTITA, [404, 'requisito-non-trovato'], [400, 'requisito-non-confermabile'], [404, 'evento-non-trovato'], [404, 'confidente-non-trovato']],
+    errori: [PARTITA, [404, 'requisito-non-trovato'], [400, 'requisito-non-confermabile'], [404, 'evento-non-trovato'], [404, 'confidente-non-trovato'], [400, 'evento-intermedio-inesistente']],
   },
   'PUT /api/partite/:id/confidenti/:chiave/regali': {
     sommario: 'Segna un regalo consegnato a un Confidente (riga per nome)',

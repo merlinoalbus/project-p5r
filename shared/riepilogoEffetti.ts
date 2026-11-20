@@ -17,6 +17,7 @@
 
 import { EVENTI_STORIA, dataConArticolo, dataLeggibile, type NomiCondizioni } from './condizioniSpillo.js';
 import { MOLTIPLICATORE_INVITO, testoMoltiplicatore } from './puntiConfidenti.js';
+import { etichettaEventoIntermedio } from './eventiIntermedi.js';
 import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
 import { contoArticoli, eInNote, formatoYen, fraseCondizioniEffetto, gruppiAlternativi, REGOLA_ALTERNATIVE, testoNotePuntiConfidente, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
@@ -126,6 +127,8 @@ const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   // 2026-10-28: i tre effetti nuovi; il titolo dice già che cosa succede, la riga solo il nome (e le copie o i punti)
   scortaTolte: { titolo: 'Tolte dalla scorta' },
   puntiConfidenti: { titolo: 'Punti di rango' },
+  // l'evento intermedio di un Confidente (7.5): la riga dice il Confidente e l'evento, il rango non cambia
+  eventiConfidenti: { titolo: 'Eventi dei Confidenti' },
   restituiti: { titolo: 'Restituiti' },
   venduti: { titolo: 'Venduti' },
   // l'oggetto usato esce e basta (il Laptop rotto che si ripara, i frullati bevuti, ciò che si cede in uno scambio): nessuno yen
@@ -405,6 +408,7 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       case 'personaTolta': riga('scortaTolte', n.frase.persona(e.persona) ?? 'Persona'); break;
       // 2026-10-28 («i punti rango andavano gestiti come note»): le note con i punti base («♪♪ · 10 punti»); la forma di prima con i suoi punti
       case 'puntiConfidente': riga('puntiConfidenti', n.frase.confidente?.(e.confidente) ?? 'Confidente', eInNote(e) ? testoNotePuntiConfidente(e.note) : testoPunti(e.punti, { segno: true })); break;
+      case 'eventoConfidente': riga('eventiConfidenti', n.frase.confidente?.(e.confidente) ?? 'Confidente', `evento ${etichettaEventoIntermedio(e.rango)} fatto`); break;
       case 'uscitaOggetto': {
         const nome = n.frase.oggetto?.(e.oggetto) ?? 'Oggetto del catalogo';
         if (e.modo === 'restituito') { riga('restituiti', nome, e.quantita > 1 ? `×${e.quantita}` : undefined); break; }

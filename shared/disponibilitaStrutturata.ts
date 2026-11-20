@@ -15,6 +15,7 @@
 
 import { giornoDellaSettimana } from './date.js';
 import { dataConArticolo, ordineGioco, type RequisitoSpillo } from './condizioniSpillo.js';
+import { eRangoIntermedio, etichettaEventoIntermedio } from './eventiIntermedi.js';
 
 export type ModoDisponibilita = 'settimanale' | 'su-messaggio' | 'stanza-velluto' | 'trama';
 export const MODI_DISPONIBILITA: readonly ModoDisponibilita[] = ['settimanale', 'su-messaggio', 'stanza-velluto', 'trama'];
@@ -79,6 +80,12 @@ export interface ContestoDisponibilita {
   /** Vero se fra i requisiti del rango successivo c'è «non deve piovere», o un «almeno una» con la pioggia i cui altri rami sono falsi nella partita
    *  (lo calcola `nonConLaPioggia` di disponibilitaStrutturataService); null o assente = non lo sappiamo, non si controlla. */
   nonConLaPioggia?: boolean | null;
+  /** Il passo i cui requisiti dicono la pioggia, se non è il rango successivo: l'evento intermedio (7.5) non ancora fatto, quando i suoi requisiti
+   *  parlano della pioggia (`passoDellaPioggia` di disponibilitaStrutturataService). Assente = il rango successivo, come sempre. Solo per il motivo. */
+  passoPioggia?: number;
+  /** Se l'evento intermedio fra il rango e il successivo (7.5) è già fatto nella partita: lo legge il server per sapere quale pioggia vale
+   *  (`passoDellaPioggia`). Assente o null = non lo sappiamo: vale la pioggia del rango successivo, come sempre. */
+  eventoIntermedioFatto?: boolean | null;
   /** L13 (O10-2): la relazione romantica con il Confidente nella partita (`confidente_partita.relazione_romantica`): vero = valgono le fasce
    *  dell'eccezione `con-relazione`, falso = quelle senza; null o assente (il Diario senza partita) = non lo sappiamo: una fascia che vale in
    *  un caso solo dà «sconosciuto». Senza l'eccezione non conta. */
@@ -208,7 +215,8 @@ export function valutaDisponibilita(s: DisponibilitaStrutturata, c: ContestoDisp
   } else if (!vale(senzaRelazione)) return { stato: 'non-disponibile', causa: 'fascia', motivo: `È disponibile ${senzaRelazione.join(' e ')}, non di ${fascia}.` };
   // la pioggia: dai requisiti del rango successivo (fonte unica), che chi chiama riassume in `nonConLaPioggia`
   if (c.nonConLaPioggia === true) {
-    if (c.piove === true) return { stato: 'non-disponibile', causa: 'pioggia', motivo: `L'incontro del rango ${prossimo} non si fa con la pioggia.` };
+    if (c.piove === true) return { stato: 'non-disponibile', causa: 'pioggia', motivo: c.passoPioggia !== undefined && eRangoIntermedio(c.passoPioggia)
+      ? `L'evento ${etichettaEventoIntermedio(c.passoPioggia)} non si fa con la pioggia.` : `L'incontro del rango ${prossimo} non si fa con la pioggia.` };
     if (c.piove === null || c.piove === undefined) return { stato: 'sconosciuto', motivo: 'Manca il meteo: con la pioggia non è disponibile.' };
   }
   for (const e of s.eccezioni) {
