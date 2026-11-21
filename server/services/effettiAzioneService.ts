@@ -25,7 +25,7 @@ import { z } from 'zod';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import { testoOrigineEsito, type SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
-import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
+import { esitiDellAttivita, statoAlMomento, type SceltaRisolta } from './esitiAttivitaService.js';
 import { NESSUNA_NOTA, simboliNote, testoDoteInPunti } from '../../shared/note.js';
 import { fraseRelazione, nomeEsitoDelTurno } from '../../shared/descriviEffettiSpunta.js';
 import { annullaRelazioneDallaSpunta, RANGO_DELLA_SCELTA_ROMANTICA, scriviRelazioneRomantica } from './relazioneRomanticaService.js';
@@ -133,7 +133,13 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       const obiettivo = visione ? visioniDalleSpunte(partitaId, e.chiave) + 1 : e.almeno ?? stato.totale ?? Math.max(1, stato.avanzamento);
       // «almeno»: una lettura non torna mai indietro (chi ha già visto un film tre volte non ne perde due);
       // che cosa ha dato lo dice il registro dei conseguimenti, non la differenza delle Doti (che la lettura non tocca)
-      const dateDallaLettura = obiettivo > stato.avanzamento ? impostaLettura(partitaId, e.categoria, e.chiave, { avanzamento: obiettivo }).daSegnare ?? [] : [];
+      // la disponibilità si valuta al giorno e alla fascia della voce (`statoAlMomento`, come gli esiti e gli acquisti): una voce della sera
+      // con un videogioco «solo di sera» si spunta anche se la partita è al giorno
+      const fasciaVoce: 'giorno' | 'sera' | null = a.momento?.fascia === 'giorno' || a.momento?.fascia === 'sera' ? a.momento.fascia : null;
+      const momento: { data: string; fascia: 'giorno' | 'sera' } | null = a.momento && fasciaVoce ? { data: a.momento.data, fascia: fasciaVoce } : null;
+      const dateDallaLettura = obiettivo > stato.avanzamento
+        ? impostaLettura(partitaId, e.categoria, e.chiave, { avanzamento: obiettivo }, momento ? statoAlMomento(partitaId, momento) : undefined).daSegnare ?? []
+        : [];
       letture.push({ categoria: e.categoria, chiave: e.chiave, nome: stato.nome, prima: stato.avanzamento, dopo: Math.max(obiettivo, stato.avanzamento), ...(dateDallaLettura.length ? { doti: dateDallaLettura } : {}), ...(visione ? { visione: true } : {}) });
     } else if (e.tipo === 'esame') {
       // L13 (ondata 7, O7-2): il piazzamento si sceglie alla spunta (ogni strada che arriva qui senza la scelta si ferma); la spunta lo segna con

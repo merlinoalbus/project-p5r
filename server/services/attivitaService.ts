@@ -481,7 +481,10 @@ function daSegnareFra(prima: Map<string, { punti: number; note: number }>, dopo:
  * disponibile nella partita non si può avanzare (409): la guida dice «non ancora», e segnare una
  * lettura che il gioco non permette falserebbe i progressi.
  */
-export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: string, modifica: { fatto: boolean } | { avanzamento: number }): LibroDto | FilmDto | VideogiocoDto {
+export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: string, modifica: { fatto: boolean } | { avanzamento: number },
+  /** Lo stato in cui valutare la disponibilità: la spunta di una voce passa quello al momento della voce (giorno e fascia: un videogioco «solo
+   *  di sera» si gioca con la voce della sera anche se la partita è al giorno); senza, lo stato attuale della partita. */
+  statoAlMomentoDellaVoce?: StatoDisponibilita): LibroDto | FilmDto | VideogiocoDto {
   verificaPartita(partitaId);
   const riga = (tipo === 'libro' ? prepared('SELECT * FROM libro WHERE chiave = ? AND nascosto = 0').get(chiave)
     : tipo === 'film' ? prepared('SELECT * FROM film WHERE chiave = ? AND nascosto = 0').get(chiave)
@@ -499,7 +502,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   if (!Number.isInteger(richiesto) || richiesto < 0 || (!senzaMassimo && richiesto > totale)) {
     throw httpErrors.badRequest('avanzamento-non-valido', senzaMassimo ? "L'avanzamento deve essere un intero non negativo." : `L'avanzamento deve essere un intero fra 0 e ${totale}.`);
   }
-  const st = statoDisponibilitaPartita(partitaId);
+  const st = statoAlMomentoDellaVoce ?? statoDisponibilitaPartita(partitaId);
   const precedente = avanzamentoLettura(partitaId, tipo, chiave).avanzamento;
   if (tipo === 'videogioco' && (riga as RigaAttivita).confidente_chiave && richiesto > precedente) throw httpErrors.conflict('attivita-fonte-confidente', 'Questa attività rimanda al Confidente: non si avanza per sessioni.');
   if(tipo==='videogioco'&&(riga as RigaAttivita).pesca_regola_chiave&&richiesto>precedente)throw httpErrors.conflict('attivita-fonte-pesca','Questa attività usa il registro della pesca; nessun avanzamento generico viene aggiunto.');
